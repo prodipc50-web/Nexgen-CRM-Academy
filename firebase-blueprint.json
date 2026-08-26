@@ -1,0 +1,48 @@
+{
+  "entities": {
+    "AcademyDatabaseState": {
+      "title": "Academy Main Database State",
+      "description": "Global synced state containing staff, leads, students, batches, courses, payments, expenses, seminars, website CMS, and institute settings",
+      "type": "object",
+      "properties": {
+        "staffList": { "type": "array", "description": "Staff and user accounts" },
+        "courses": { "type": "array", "description": "Academy course catalogue" },
+        "batches": { "type": "array", "description": "Batch schedules and rooms" },
+        "leads": { "type": "array", "description": "Customer inquiry leads" },
+        "followUps": { "type": "array", "description": "Lead follow-up logs" },
+        "students": { "type": "array", "description": "Student directory" },
+        "admissions": { "type": "array", "description": "Student admissions and fees" },
+        "payments": { "type": "array", "description": "Payment transactions" },
+        "attendance": { "type": "array", "description": "Batch attendance logs" },
+        "schedules": { "type": "array", "description": "Class schedules" },
+        "exams": { "type": "array", "description": "Examinations and schedules" },
+        "examResults": { "type": "array", "description": "Exam marks and results" },
+        "expenses": { "type": "array", "description": "Office expenses" },
+        "assets": { "type": "array", "description": "Physical lab and office assets" },
+        "auditLogs": { "type": "array", "description": "System security audit trail" },
+        "placements": { "type": "array", "description": "Student job placement records" },
+        "assignments": { "type": "array", "description": "Class assignments" },
+        "assignmentSubmissions": { "type": "array", "description": "Student homework submissions" },
+        "seminars": { "type": "array", "description": "Seminars and workshops" },
+        "certificates": { "type": "array", "description": "Issued certificates" },
+        "academySettings": { "type": "object", "description": "Institute profile and configuration" },
+        "websiteCmsConfig": { "type": "object", "description": "Public website theme and CMS content" },
+        "websiteReviews": { "type": "array", "description": "Student testimonials" },
+        "websiteGallery": { "type": "array", "description": "Academy photo gallery" },
+        "websiteFaqs": { "type": "array", "description": "Frequently asked questions" },
+        "websiteBlogs": { "type": "array", "description": "Blog and news posts" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      }
+    }
+  },
+  "firestore": {
+    "/academy_data/{docId}": {
+      "schema": "AcademyDatabaseState",
+      "description": "Master synchronized state and historical backups for Nexgen Computer Academy"
+    },
+    "/test/{testId}": {
+      "schema": "AcademyDatabaseState",
+      "description": "Connection test and health-check documents"
+    }
+  }
+}

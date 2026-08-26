@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+:root {
+  --erp-primary: #4f46e5;
+  --erp-primary-hover: #4338ca;
+  --erp-primary-light: #eef2ff;
+  --erp-secondary: #f59e0b;
+  --website-primary: #4f46e5;
+  --website-primary-hover: #4338ca;
+  --website-secondary: #f59e0b;
+  --font-erp: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-website-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-website-body: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.font-erp {
+  font-family: var(--font-erp);
+}
+
+.font-website-heading {
+  font-family: var(--font-website-heading);
+}
+
+.font-website-body {
+  font-family: var(--font-website-body);
+}
+
+.theme-erp-bg {
+  background-color: var(--erp-primary);
+}
+
+.theme-erp-text {
+  color: var(--erp-primary);
+}
+
+.theme-erp-border {
+  border-color: var(--erp-primary);
+}
+
+.theme-website-bg {
+  background-color: var(--website-primary);
+}
+
+.theme-website-text {
+  color: var(--website-primary);
+}
+
+.theme-website-border {
+  border-color: var(--website-primary);
+}
+
+@media print {
+  /* Default A4 Portrait Page Setup */
+  @page {
+    size: A4 portrait;
+    margin: 8mm 6mm;
+  }
+
+  /* Explicit Landscape Page for Certificates */
+  @page landscape-sheet {
+    size: A4 landscape;
+    margin: 6mm;
+  }
+
+  .print-landscape-page {
+    page: landscape-sheet !important;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: #000 !important;
+    font-size: 12px;
+  }
+  
+  /* Hide non-printable elements when printing */
+  nav, aside, header, .print\:hidden, [class*="print:hidden"] {
+    display: none !important;
+  }
+
+  /* Reset modal overlays so only the printable document shows cleanly */
+  .fixed.inset-0 {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* Force exact background colors, gradients, and borders to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Single-page A4 strict containment */
+  .print-page-a4 {
+    width: 100% !important;
+    max-width: 196mm !important;
+    margin: 0 auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-shadow: none !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  .print-page-a4-landscape {
+    width: 100% !important;
+    max-width: 285mm !important;
+    margin: 0 auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-shadow: none !important;
+  }
+
+  /* Never break cards or tables across pages */
+  .page-break-avoid,
+  #id-card-printable,
+  #admit-card-printable,
+  #money-receipt-printable,
+  #admission-form-printable,
+  #certificate-printable {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+  }
+}
+
