@@ -479,12 +479,21 @@ export const CoursesView: React.FC = () => {
 
                     <div className="flex items-center space-x-1.5">
                       <button
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course } }))}
+                        className="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-colors flex items-center space-x-1 border border-indigo-200/60"
+                        title="লাইভ ল্যান্ডিং পেজ প্রিভিউ দেখুন (Live Preview)"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Preview</span>
+                      </button>
+
+                      <button
                         onClick={() => setCustomizerCourse(course)}
                         className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition-colors flex items-center space-x-1 border border-emerald-200/60"
                         title="ল্যান্ডিং পেজ কনটেন্ট, অফার ফি ও WhatsApp/Messenger বাটন কাস্টমাইজ করুন"
                       >
                         <Layout className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Landing Page</span>
+                        <span>Edit Landing</span>
                       </button>
 
                       <button
@@ -494,15 +503,6 @@ export const CoursesView: React.FC = () => {
                       >
                         <Target className="w-3.5 h-3.5 text-purple-600" />
                         <span>Ad Link</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleOpenDetails(course)}
-                        className="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-colors flex items-center space-x-1"
-                        title="View Details"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Details</span>
                       </button>
 
                       <button

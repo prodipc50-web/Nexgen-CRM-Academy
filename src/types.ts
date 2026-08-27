@@ -426,6 +426,44 @@ export interface CourseLandingReview {
   avatarUrl?: string;
 }
 
+export interface CourseLandingPainPoint {
+  id?: string;
+  problem: string;
+  solution: string;
+}
+
+export interface CourseLandingCurriculumModule {
+  id: string;
+  moduleNumber?: number;
+  moduleName: string;
+  subtitle?: string;
+  description?: string;
+  estimatedClasses?: string | number;
+  topics: string[];
+  tools?: string[];
+  practicalProject?: string;
+}
+
+export interface CourseLandingFeatureCard {
+  id?: string;
+  iconName?: string; // 'laptop' | 'award' | 'zap' | 'briefcase' | 'users' | 'shield' | 'clock' | 'file-text'
+  title: string;
+  description: string;
+}
+
+export interface CourseLandingTargetAudienceItem {
+  id?: string;
+  group: string;
+  benefit: string;
+}
+
+export interface CourseLandingGalleryImage {
+  id?: string;
+  url: string;
+  title: string;
+  category?: string;
+}
+
 export interface CourseLandingPageConfig {
   // Template Selection
   templateType?: LandingPageTemplateType; // 'online_course' | 'offline_course' | 'free_demo_class' | 'workshop_masterclass' | 'premium_course' | 'special_campaign_offer'
@@ -438,6 +476,7 @@ export interface CourseLandingPageConfig {
   subheadline?: string;
   heroBadge?: string;
   customBannerUrl?: string;
+  heroImages?: string[]; // Multiple banner carousel / gallery images
   videoPromoUrl?: string; // YouTube / Loom embed or direct video
   ctaMode?: 'both' | 'whatsapp_only' | 'messenger_only' | 'admission_only' | 'whatsapp_and_admission' | 'messenger_and_admission' | 'call_now' | 'demo_registration';
   ctaButtonText?: string;
@@ -450,10 +489,26 @@ export interface CourseLandingPageConfig {
   availableSeats?: number;
   customDiscountBadge?: string;
 
+  // Pain Points vs Modern Office Reality (Problem - Solution)
+  painPointsHeadline?: string;
+  painPointsSubheadline?: string;
+  painPointsList?: CourseLandingPainPoint[];
+
   // Benefits & Key Features
+  whyChooseHeadline?: string;
   whyChoosePoints?: { title: string; desc: string; icon?: string; sortOrder?: number }[];
+  featureCards?: CourseLandingFeatureCard[];
   learningOutcomes?: string[];
   prerequisitesNotice?: string;
+
+  // Editable Rich Curriculum Modules (With AI, Excel, Word, Typing, PowerPoint, Google Workspace)
+  curriculumHeadline?: string;
+  curriculumSubheadline?: string;
+  editableModules?: CourseLandingCurriculumModule[];
+
+  // Target Audience & Who Is This For
+  audienceHeadline?: string;
+  audienceList?: CourseLandingTargetAudienceItem[];
 
   // 4-Level Deep Modules
   advancedModules?: AdvancedCourseModule[];
@@ -465,12 +520,18 @@ export interface CourseLandingPageConfig {
   customReviews?: CourseLandingReview[];
   assignedReviewIds?: string[];
   assignedGalleryPhotoIds?: string[];
+  galleryImages?: CourseLandingGalleryImage[];
 
   // Pricing & Installments
   showPricingSection?: boolean;
   installmentDetails?: string;
   scholarshipNotice?: string;
   paymentInstructions?: string;
+
+  // Institute Contact & Location
+  campusAddress?: string;
+  campusPhone?: string;
+  campusHours?: string;
 
   // Lead Form Configuration (Field Toggles)
   leadFormFields?: {
@@ -487,10 +548,53 @@ export interface CourseLandingPageConfig {
   };
 
   // FAQs
+  faqsHeadline?: string;
   faqs?: CourseLandingFaq[];
+
+  // Certificate Showcase
+  certificateConfig?: {
+    showCertificate?: boolean;
+    headline?: string;
+    subheadline?: string;
+    certificateImageUrl?: string;
+    sampleStudentName?: string;
+    certificateTypeBadge?: string;
+    features?: string[];
+    verificationNote?: string;
+  };
+
+  // Quick Snapshot Bar
+  quickSnapshot?: {
+    showSnapshot?: boolean;
+    duration?: string;
+    totalSessions?: string;
+    batchSize?: string;
+    format?: string;
+    projectsCount?: string;
+    supportType?: string;
+  };
+
+  // Post-Course Lifetime Support & Guarantee
+  lifetimeSupportConfig?: {
+    showSection?: boolean;
+    headline?: string;
+    subheadline?: string;
+    features?: { title: string; desc: string; iconName?: string }[];
+  };
+
+  // Social Proof Admission Alert Ticker
+  socialProofTickerConfig?: {
+    enabled?: boolean;
+    intervalSeconds?: number;
+    customItems?: { name: string; location: string; timeAgo: string; actionText?: string }[];
+  };
+
+  // Free Counseling / Demo toggle in lead form
+  enableCounselingToggle?: boolean;
 
   // Guarantee & Bonus
   guaranteeText?: string;
+  bonusHeadline?: string;
   bonusItems?: string[];
 
   // Styling & Theme

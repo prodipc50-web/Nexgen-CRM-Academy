@@ -44,6 +44,7 @@ import {
   getWhatsAppDirectUrl,
   getMessengerDirectUrl
 } from '../../utils/whatsappHelper';
+import { copyToClipboardSafe } from '../../utils/clipboardHelper';
 
 interface CourseLandingPageViewProps {
   course: Course;
@@ -185,11 +186,16 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
     );
   };
 
-  const handleShareClick = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedUrl(true);
-      setTimeout(() => setCopiedUrl(false), 2500);
+  const handleShareClick = async () => {
+    try {
+      const url = typeof window !== 'undefined' ? window.location.href : '';
+      const success = await copyToClipboardSafe(url);
+      if (success) {
+        setCopiedUrl(true);
+        setTimeout(() => setCopiedUrl(false), 2500);
+      }
+    } catch (e) {
+      console.warn('Share copy error:', e);
     }
   };
 
@@ -393,43 +399,73 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
                 </div>
 
                 {/* DYNAMIC CTA BUTTONS ACCORDING TO CTA MODE */}
-                <div className="pt-1 space-y-2.5">
-                  {/* Mode 1: Default (Both Online Admission + WhatsApp) */}
+                <div className="pt-1 space-y-3">
+                  {/* Mode 1: Default (Online Admission + Highlighted Chat Options) */}
                   {effectiveCtaMode === 'both' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-3">
                       <button
                         onClick={handleEnrollClick}
-                        className="w-full py-3.5 bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/40 transition-all flex items-center justify-center space-x-2 group active:scale-95"
+                        className="w-full py-3.5 bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-700 text-white font-black text-sm sm:text-base rounded-xl shadow-lg shadow-indigo-600/40 transition-all flex items-center justify-center space-x-2 group active:scale-95"
                       >
-                        <span>অনলাইনে ভর্তি আবেদন</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <span>অনলাইনে এখনই ভর্তি আবেদন করুন</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </button>
 
-                      <a
-                        href={whatsAppDirectUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={handleWhatsAppClick}
-                        className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center space-x-2 active:scale-95"
-                      >
-                        <MessageCircle className="w-4 h-4 fill-white" />
-                        <span>WhatsApp-এ সরাসরি কথা বলুন</span>
-                      </a>
+                      {/* Highlighted Direct Chat Box */}
+                      <div className="p-3 bg-slate-900/90 border border-slate-700/90 rounded-xl space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            সরাসরি কথা বলতে চাইলে মেসেজ করুন:
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                            Instant Reply
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <a
+                            href={whatsAppDirectUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={handleWhatsAppClick}
+                            className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-md shadow-emerald-600/30 transition-all flex items-center justify-center space-x-2 active:scale-95"
+                          >
+                            <MessageCircle className="w-4 h-4 fill-white" />
+                            <span>WhatsApp মেসেজ</span>
+                          </a>
+
+                          <a
+                            href={messengerDirectUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={handleMessengerClick}
+                            className="py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-md shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 active:scale-95"
+                          >
+                            <Smartphone className="w-4 h-4" />
+                            <span>Facebook মেসেজ</span>
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {/* Mode 2: WhatsApp Only Ad Mode */}
                   {effectiveCtaMode === 'whatsapp_only' && (
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
+                      <div className="text-center">
+                        <span className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-full border border-emerald-500/30 mb-2 animate-pulse">
+                          💬 সরাসরি কথা বলতে WhatsApp-এ মেসেজ দিন
+                        </span>
+                      </div>
                       <a
                         href={whatsAppDirectUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={handleWhatsAppClick}
-                        className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-base rounded-2xl shadow-xl shadow-emerald-600/40 transition-all flex items-center justify-center space-x-3 active:scale-95 animate-bounce-subtle"
+                        className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-base rounded-2xl shadow-xl shadow-emerald-600/40 transition-all flex items-center justify-center space-x-3 active:scale-95"
                       >
                         <MessageCircle className="w-6 h-6 fill-white" />
-                        <span>WhatsApp-এ সরাসরি চ্যাট করুন ও অফার নিন</span>
+                        <span>WhatsApp-এ সরাসরি কথা বলুন ও অফার নিন</span>
                       </a>
                       <p className="text-[11px] text-center text-slate-400">
                         ক্লিক করলেই সরাসরি আমাদের অফিসিয়াল WhatsApp নাম্বারে চ্যাট ওপেন হবে
@@ -439,7 +475,12 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
 
                   {/* Mode 3: Messenger Only Ad Mode */}
                   {effectiveCtaMode === 'messenger_only' && (
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
+                      <div className="text-center">
+                        <span className="inline-block px-3 py-1 bg-blue-500/20 text-blue-300 text-xs font-bold rounded-full border border-blue-500/30 mb-2 animate-pulse">
+                          💬 সরাসরি কথা বলতে Facebook Messenger-এ মেসেজ দিন
+                        </span>
+                      </div>
                       <a
                         href={messengerDirectUrl}
                         target="_blank"
@@ -458,28 +499,35 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
 
                   {/* Mode 4: WhatsApp + Messenger Both Chats */}
                   {effectiveCtaMode === 'whatsapp_and_admission' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <a
-                        href={whatsAppDirectUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={handleWhatsAppClick}
-                        className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center space-x-2 active:scale-95"
-                      >
-                        <MessageCircle className="w-4 h-4 fill-white" />
-                        <span>WhatsApp চ্যাট</span>
-                      </a>
+                    <div className="space-y-2.5">
+                      <div className="p-2.5 bg-slate-900/90 border border-slate-700/80 rounded-xl text-center">
+                        <p className="text-xs font-bold text-amber-300">
+                          💬 সরাসরি কথা বলতে WhatsApp বা Facebook Messenger-এ মেসেজ করুন:
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <a
+                          href={whatsAppDirectUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={handleWhatsAppClick}
+                          className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center space-x-2 active:scale-95"
+                        >
+                          <MessageCircle className="w-4 h-4 fill-white" />
+                          <span>WhatsApp মেসেজ</span>
+                        </a>
 
-                      <a
-                        href={messengerDirectUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={handleMessengerClick}
-                        className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 active:scale-95"
-                      >
-                        <Smartphone className="w-4 h-4" />
-                        <span>Messenger চ্যাট</span>
-                      </a>
+                        <a
+                          href={messengerDirectUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={handleMessengerClick}
+                          className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 active:scale-95"
+                        >
+                          <Smartphone className="w-4 h-4" />
+                          <span>Facebook মেসেজ</span>
+                        </a>
+                      </div>
                     </div>
                   )}
 
@@ -804,24 +852,26 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
       </section>
 
       {/* Bottom Sticky Mobile CTA Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-3 sm:hidden flex items-center justify-between gap-2 shadow-2xl">
-        <div>
-          <p className="text-[10px] text-slate-400">অফার ফি:</p>
-          <p className="text-base font-black text-white leading-none">
-            ৳{offerFee.toLocaleString()}
-          </p>
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-3 py-2 sm:hidden shadow-2xl space-y-1.5">
+        <div className="flex items-center justify-between text-[10px] text-slate-300 font-bold px-1">
+          <span className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            সরাসরি কথা বলুন:
+          </span>
+          <span className="text-amber-300 font-black">ফি: ৳{offerFee.toLocaleString()}</span>
         </div>
-        <div className="flex items-center space-x-2">
+
+        <div className="grid grid-cols-3 gap-1.5">
           {/* Mobile WhatsApp Button */}
           <a
             href={whatsAppDirectUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleWhatsAppClick}
-            className="p-2.5 bg-emerald-600 text-white rounded-xl active:scale-95 shadow-md"
-            title="WhatsApp চ্যাট"
+            className="py-2 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] font-bold"
           >
-            <MessageCircle className="w-4 h-4 fill-white" />
+            <MessageCircle className="w-3.5 h-3.5 fill-white" />
+            <span>WhatsApp</span>
           </a>
 
           {/* Mobile Messenger Button */}
@@ -830,20 +880,19 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleMessengerClick}
-            className="p-2.5 bg-blue-600 text-white rounded-xl active:scale-95 shadow-md"
-            title="Messenger চ্যাট"
+            className="py-2 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] font-bold"
           >
-            <Smartphone className="w-4 h-4" />
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Messenger</span>
           </a>
 
-          {effectiveCtaMode !== 'whatsapp_only' && effectiveCtaMode !== 'messenger_only' && (
-            <button
-              onClick={handleEnrollClick}
-              className="px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-xs rounded-xl shadow-lg active:scale-95"
-            >
-              ভর্তি আবেদন
-            </button>
-          )}
+          {/* Mobile Admission Button */}
+          <button
+            onClick={handleEnrollClick}
+            className="py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-[11px] rounded-xl shadow-lg active:scale-95 flex items-center justify-center space-x-1"
+          >
+            <span>ভর্তি আবেদন</span>
+          </button>
         </div>
       </div>
 

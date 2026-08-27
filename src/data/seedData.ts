@@ -280,6 +280,243 @@ export const INITIAL_COURSES: Course[] = [
     ],
     curriculumHighlights: ['Advanced Excel & Financial Modeling', 'AI-assisted Document & Report Generation', 'Typing Speed & Bangla Bijoy/Avro', 'Office Networking & Hardware Basics'],
     syllabusHighlights: ['Computer Fundamentals', 'MS Word Pro', 'Excel Dashboards', 'PowerPoint & AI Automation'],
+    landingConfig: {
+      headline: 'Computer Office Application with AI (2026 Updated Module)',
+      subheadline: 'শুধু MS Word, Excel, PowerPoint জানলেই কি এখন Job-Ready হওয়া যায়? ২০২৩-২০২৬ এ অফিস এনভায়রনমেন্ট বদলে গেছে। ডেটা অ্যানালাইসিস, ড্যাশবোর্ড ও ChatGPT/AI প্রম্পটিং দিয়ে নিজেকে রিয়েল অফিস রেডি করুন।',
+      heroBadge: '🔥 ২০২৬ জব-রেডি আপডেটেড মডিউল • ১০০% প্র্যাকটিক্যাল ল্যাব',
+      customBannerUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80',
+      customDiscountBadge: '৫০% স্পেশাল মেগা স্কলারশিপ',
+      ctaMode: 'both',
+      customWhatsAppNumber: '01798444444',
+      customWhatsAppMessage: 'Hello Nexgen Academy! আমি Computer Office Application with AI কোর্সে ভর্তি হতে চাই ও অফার জানতে চাই।',
+      customMessengerUrl: 'https://m.me/nexgenacademy',
+      showBatchCountdown: true,
+      nextBatchStartDate: '১৫ মে, ২০২৬',
+      availableSeats: 8,
+      guaranteeText: '১০০% প্র্যাকটিক্যাল ল্যাব ট্রেনিং, ওয়ান-টু-ওয়ান গাইডেন্স ও সরকারি ভেরিফায়েবল সার্টিফিকেট নিশ্চয়তা',
+      
+      // Problem vs Reality
+      painPointsHeadline: 'একসময় Computer Office Application মানে ছিল শুধু Word, Excel, PowerPoint—কিন্তু ২০২৬-এর অফিস বদলে গেছে!',
+      painPointsSubheadline: 'আজকের চাকরির বাজারে সাধারণ টাইপিং যথেষ্ট নয়, প্র্যাকটিক্যাল অটোমেশন ও AI স্কিল ছাড়া প্রতিযোগিতা অনেক কঠিন।',
+      painPointsList: [
+        {
+          problem: 'পুরোনো ধাঁচে ঘণ্টার পর ঘণ্টা কপি-পেস্ট ও ম্যানুয়াল টাইপিং করতে হয়',
+          solution: 'ChatGPT ও Copilot দিয়ে কয়েক সেকেন্ডে নির্ভুল প্রফেশনাল ইমেইল, ড্রাফট ও রিপোর্ট তৈরি'
+        },
+        {
+          problem: 'অফিসে বড় ডেটাসেট আসলে হিসাব করতে হিমশিম খাওয়া ও ফর্মুলা ভুলে যাওয়া',
+          solution: 'Excel VLOOKUP, XLOOKUP, Pivot Table ও অটোমেটেড ফর্মুলা দিয়ে যেকোনো হিসাব মুহূর্তেই সম্পন্ন'
+        },
+        {
+          problem: 'সাধারণ সাদামাটা স্লাইড দেখে ক্লায়েন্ট বা বসের বিরক্তি প্রকাশ',
+          solution: 'PowerPoint ও AI টুলস দিয়ে দৃষ্টিনন্দন কর্পোরেট প্রেজেন্টেশন ও অ্যানিমেশন ডিজাইন'
+        },
+        {
+          problem: 'ফাইলিং ও ডকুমেন্টস হারিয়ে যাওয়া এবং টিমের সাথে কাজ না মেলা',
+          solution: 'Google Docs, Sheets, Drive ও ক্লাউড কোলাবোরেশনে স্মার্ট টিমওয়ার্ক'
+        }
+      ],
+
+      // Why Choose
+      whyChooseHeadline: 'আমাদের কোর্সের বিশেষত্ব যা আপনাকে অন্যদের চেয়ে এগিয়ে রাখবে',
+      featureCards: [
+        {
+          iconName: 'laptop',
+          title: '১০০% হ্যান্ডস-অন ল্যাব প্র্যাকটিস',
+          description: 'ক্লাসরুমেই প্রতিটি শিক্ষার্থীর জন্য আলাদা পার্সোনাল কম্পিউটার ও রিয়েল-লাইফ অ্যাসাইনমেন্ট।'
+        },
+        {
+          iconName: 'zap',
+          title: 'AI ইন্টিগ্রেশন ও স্মার্ট প্রম্পটিং',
+          description: 'অফিসের কাজ ৫ গুণ দ্রুত করতে ChatGPT, Gemini ও Microsoft Copilot-এর বাস্তব ব্যবহার।'
+        },
+        {
+          iconName: 'award',
+          title: 'ভেরিফায়েবল সরকারি ও আইটি সার্টিফিকেট',
+          description: 'কোর্স শেষে অনলাইন কিউআর কোড ভেরিফিকেশন সহ প্রফেশনাল সার্টিফিকেট প্রদান।'
+        },
+        {
+          iconName: 'briefcase',
+          title: 'জব-রেডি রিয়েল অফিস প্রজেক্ট',
+          description: 'অফিসিয়াল চিঠি, ক্যাশবুক, ইনভয়েস, স্যালারি শিট ও পে-রোল ম্যানেজমেন্ট প্রজেক্ট।'
+        },
+        {
+          iconName: 'shield',
+          title: 'লাইফটাইম মেন্টর ও ল্যাব সাপোর্ট',
+          description: 'কোর্স শেষ হলেও যেকোনো সময়ে ল্যাব ব্যবহার ও মেন্টরদের কাছ থেকে ফ্রি সলিউশন সুবিধা।'
+        },
+        {
+          iconName: 'users',
+          title: 'ক্যারিয়ার ও সিভি মেকিং গাইডলাইন',
+          description: 'স্ট্যান্ডার্ড সিভি ও ইন্টারভিউ প্রিপারেশন এবং করপোরেট কমিউনিকেশন টিপস।'
+        }
+      ],
+
+      // Editable Modules
+      curriculumHeadline: 'আমাদের ২০২৬ আপডেটেড সম্পূর্ণ কোর্স কারিকুলাম',
+      curriculumSubheadline: 'বেসিক কম্পিউটার থেকে শুরু করে প্রফেশনাল ডেটা অ্যানালাইসিস ও AI অফিস অটোমেশন—সবকিছু একটি কমপ্লিট কোর্সে',
+      editableModules: [
+        {
+          id: 'emod-1',
+          moduleNumber: 1,
+          moduleName: 'Computer Fundamentals & Fast Typing Mastery',
+          subtitle: 'কম্পিউটার পরিচালনা ও দ্রুতগতির বাংলা-ইংরেজি টাইপিং',
+          description: 'কম্পিউটার হার্ডওয়্যার পরিচিতি, উইন্ডোজ অপারেটিং সিস্টেম, ফাইল-ফোল্ডার ম্যানেজমেন্ট ও শর্টকাট কি।',
+          topics: [
+            'উইন্ডোজ ফাইল সিস্টেম ও সিকিউরিটি ব্যাকআপ',
+            'ইংরেজি টাচ টাইপিং (লক্ষ্য: ৩০-৪০ WPM)',
+            'বাংলা ইউনিকোড ও অভ্র / বিজয় টাইপিং কৌশল',
+            'ইন্টারনেট ব্রাউজিং, সাইবার সিকিউরিটি ও ক্লাউড ড্রাইভ'
+          ],
+          tools: ['Windows 11', 'Bijoy Bayanno', 'Avro Keyboard', 'Google Drive'],
+          estimatedClasses: '৬টি ক্লাস'
+        },
+        {
+          id: 'emod-2',
+          moduleNumber: 2,
+          moduleName: 'Advanced MS Word & Smart Official Document Drafting',
+          subtitle: 'প্রফেশনাল ডকুমেন্ট, অফিশিয়াল চিঠি ও নোটিশ ডিজাইন',
+          description: 'করপোরেট চিঠি, লিগ্যাল ডকুমেন্টস, ইনভয়েস, ক্যাটালগ ও AI দিয়ে দ্রুত ড্রাফটিং তৈরির টেকনিক।',
+          topics: [
+            'করপোরেট লেটারহেড, অ্যাপ্লিকেশন ও মেমো ফরম্যাটিং',
+            'টেবিল ডিজাইন, হেডার/ফুটার ও ওয়াটারমার্ক',
+            'মেইল মার্জ (Mail Merge) দিয়ে এক ক্লিকে শত শত চিঠি প্রেরণ',
+            'ChatGPT দিয়ে অফিশিয়াল ড্রাফট, নোটিশ ও প্রপোজাল রাইটিং'
+          ],
+          tools: ['MS Word', 'ChatGPT Prompts', 'Grammar AI Tools'],
+          estimatedClasses: '১০টি ক্লাস'
+        },
+        {
+          id: 'emod-3',
+          moduleNumber: 3,
+          moduleName: 'Microsoft Excel, Financial Formulas & Interactive Dashboards',
+          subtitle: 'ডেটা অ্যানালাইসিস, হিসাব-নিকাশ ও ড্যাশবোর্ড মাস্টারি',
+          description: 'অফিসের যাবতীয় হিসাব, স্যালারি শিট, ইনভেন্টরি ও এক্সেলের অত্যাধুনিক ফর্মুলার হাতে-কলমে প্র্যাকটিস।',
+          topics: [
+            'বেসিক টু অ্যাডভান্সড ফর্মুলা (SUMIFS, COUNTIFS, IF, AND, OR)',
+            'লুকআপ ফাংশন (VLOOKUP, HLOOKUP, XLOOKUP, INDEX-MATCH)',
+            'Pivot Table, Pivot Chart ও স্লাইসার দিয়ে ডাইনামিক ডেটা ফিল্টারিং',
+            'অটোমেটেড স্যালারি শিট, ইনভয়েস জেনারেটর ও ক্যাশবুক তৈরি',
+            'Excel-এ AI ফর্মুলা জেনারেটর প্রম্পটিং টেকনিক'
+          ],
+          tools: ['MS Excel', 'Formula AI', 'Pivot Dashboards'],
+          estimatedClasses: '১২টি ক্লাস'
+        },
+        {
+          id: 'emod-4',
+          moduleNumber: 4,
+          moduleName: 'MS PowerPoint & AI-Powered Dynamic Presentations',
+          subtitle: 'দৃষ্টিনন্দন প্রেজেন্টেশন ও স্লাইড ডেক ডিজাইন',
+          description: 'করপোরেট মিটিং, পিচ ডেক ও বিজনেস প্রেজেন্টেশন আকর্ষণীয়ভাবে তৈরির পূর্ণাঙ্গ গাইডলাইন।',
+          topics: [
+            'স্লাইড লেআউট, কালার থিওরি ও ইনফোগ্রাফিক ডিজাইন',
+            'মর্ফ (Morph) ট্রানজিশন ও আধুনিক অ্যানিমেশন ইফেক্টস',
+            'AI দিয়ে কনটেন্ট ও প্রেজেন্টেশন জেনারেশন (Gamma, Copilot)',
+            'পাবলিক স্পিকিং ও প্রফেশনাল স্লাইড প্রেজেন্টেশন টিপস'
+          ],
+          tools: ['PowerPoint', 'Gamma App', 'Canva Pro Tools'],
+          estimatedClasses: '৬টি ক্লাস'
+        },
+        {
+          id: 'emod-5',
+          moduleNumber: 5,
+          moduleName: 'Google Workspace, Cloud Collaboration & Career Workshop',
+          subtitle: 'ক্লাউড অফিস ও ক্যারিয়ার প্লেসমেন্ট প্রিপারেশন',
+          description: 'যেকোনো স্থান থেকে অনলাইনে টিমওয়ার্ক ও সফলভাবে চাকরি নিশ্চিতকরণের প্রস্তুতি।',
+          topics: [
+            'Google Docs, Google Sheets ও Google Forms রিয়েল-টাইম কোলাবোরেশন',
+            'পেশাদার ইমেইল শিষ্টাচার (Email Etiquette) ও ক্যালেন্ডার শিডিউলিং',
+            'AI-অপ্টিমাইজড প্রফেশনাল এটিএস (ATS) ফ্রেন্ডলি সিভি তৈরি',
+            'মক ইন্টারভিউ ও ফাইনাল প্র্যাকটিক্যাল অ্যাসেসমেন্ট'
+          ],
+          tools: ['Google Suite', 'LinkedIn', 'Resume AI'],
+          estimatedClasses: '২টি ক্লাস'
+        }
+      ],
+
+      // Audience List
+      audienceHeadline: 'এই কোর্সটি কাদের জন্য বিশেষভাবে তৈরি?',
+      audienceList: [
+        {
+          group: '👨‍🎓 শিক্ষার্থী ও ফ্রেশার (SSC / HSC / অনার্স)',
+          benefit: 'চাকরির বাজারে প্রবেশের আগেই নিজেকে স্কিলড ও কম্পিউটার এক্সপার্ট হিসেবে প্রস্তুত করতে।'
+        },
+        {
+          group: '💼 চাকরিপ্রত্যাশী ও তরুণ-তরুণী',
+          benefit: 'প্র্যাকটিক্যাল স্কিল ও ভেরিফায়েবল সার্টিফিকেটের মাধ্যমে ভালো জবের ইন্টারভিউতে এগিয়ে থাকতে।'
+        },
+        {
+          group: '👔 কর্মরত চাকুরিজীবী ও এক্সিকিউটিভ',
+          benefit: 'অফিসের প্রতিদিনের কাজের গতি বাড়াতে, ভুল কমাতে ও পদোন্নতির জন্য AI টুলস আয়ত্ত করতে।'
+        },
+        {
+          group: '👩‍💼 গৃহিণী ও ফ্রিল্যান্সিং করতে আগ্রহী যে কেউ',
+          benefit: 'ডাটা এন্ট্রি, ভার্চুয়াল অ্যাসিস্ট্যান্ট ও ক্লাউড অফিস ম্যানেজমেন্ট শিখে ঘরে বসে ক্যারিয়ার গড়তে।'
+        }
+      ],
+
+      // Campus Info
+      campusAddress: '১৪/বি, গার্ডেন রোড, কাজী নজরুল ইসলাম সরণি, ফার্মগেট, ঢাকা-১২১৫',
+      campusPhone: '০১৭৯৮-৪৪৪৪৪৪',
+      campusHours: 'সকাল ৯:০০ টা থেকে রাত ৮:০০ টা (প্রতিদিন খোলা)',
+
+      // Bonuses
+      bonusHeadline: '🎁 এই ব্যাচে ভর্তি হলে সম্পূর্ণ ফ্রি পাচ্ছেন:',
+      bonusItems: [
+        'ChatGPT & AI Office Productivity প্রম্পট গাইড বুক (PDF ফ্রি)',
+        '৫০+ রেডিমেড করপোরেট এক্সেল ও ওয়ার্ড টেমপ্লেট লাইব্রেরি',
+        'ফুল স্পিড টাইপিং সফটওয়্যার ফুল লাইসেন্স',
+        'প্রফেশনাল সিভি মেকিং ফরম্যাট ও ইন্টারভিউ প্রশ্ন ব্যাংক',
+        'লাইফটাইম ক্লাস রিসোর্স ও ভিডিও ব্যাকআপ সাপোর্ট'
+      ],
+
+      // FAQs
+      faqsHeadline: 'সচরাচর জিজ্ঞাসিত কিছু গুরুত্বপূর্ণ প্রশ্ন ও উত্তর (FAQs)',
+      faqs: [
+        {
+          question: 'এই কোর্সে ভর্তি হতে কি কোনো পূর্ব অভিজ্ঞতার প্রয়োজন আছে?',
+          answer: 'না, কোনো পূর্ব অভিজ্ঞতার প্রয়োজন নেই। একদম শুরু থেকে কম্পিউটার অন-অফ, টাইপিং থেকে শুরু করে অ্যাডভান্সড এক্সেল ও AI প্রম্পটিং পর্যন্ত শূন্য থেকেই হাতে-কলমে শেখানো হবে।'
+        },
+        {
+          question: 'ল্যাবে কি প্রতিটি শিক্ষার্থীর জন্য আলাদা কম্পিউটার থাকবে?',
+          answer: 'হ্যাঁ, আমাদের ফার্মগেট ক্যাম্পাসে হাই-স্পিড ইন্টারনেট ও শীতাতপ নিয়ন্ত্রিত আধুনিক ল্যাবে প্রতিটি শিক্ষার্থীর জন্য ডেডিকেটেড পার্সোনাল পিসি বরাদ্দ থাকে।'
+        },
+        {
+          question: 'ক্লাস মিস গেলে কি ব্যাকআপ সাপোর্ট বা রেকর্ডিং পাওয়া যাবে?',
+          answer: 'হ্যাঁ, ক্লাস মিস গেলে আমাদের রয়েছে ডেডিকেটেড মেন্টর সাপোর্ট ও স্টুডেন্ট পোর্টাল ব্যাকআপ ক্লাস নোটস।'
+        },
+        {
+          question: 'কোর্স শেষে কি সার্টিফিকেট দেওয়া হবে?',
+          answer: 'হ্যাঁ, কোর্স সমাপ্তির পর সফল শিক্ষার্থীদের সরকারি ও বেসরকারি প্রতিষ্ঠানে গ্রহণযোগ্য ভেরিফায়েবল সার্টিফিকেট প্রদান করা হবে।'
+        },
+        {
+          question: 'ভর্তি ফি কি কিস্তিতে (Installment) পরিশোধ করা যাবে?',
+          answer: 'হ্যাঁ, প্রাথমিক মাত্র ৳২,৫০০ দিয়ে সিট বুকিং করে বাকি কোর্স ফি সহজ ২টি কিস্তিতে পরিশোধের সুযোগ রয়েছে।'
+        }
+      ],
+
+      // Reviews
+      customReviews: [
+        {
+          name: 'তানভীর আহমেদ',
+          roleOrBatch: 'অফিস এক্সিকিউটিভ • ব্যাচ-১২',
+          rating: 5,
+          text: 'একদম প্র্যাকটিক্যাল ল্যাব ট্রেনিং। বিশেষ করে এক্সেল ও ChatGPT দিয়ে অফিস অটোমেশন শেখার পর আমার অফিসের কাজের স্পিড দ্বিগুণ হয়ে গেছে!'
+        },
+        {
+          name: 'সাদিয়া আক্তার',
+          roleOrBatch: 'বিবিএ শিক্ষার্থী • ব্যাচ-১৫',
+          rating: 5,
+          text: 'আমার টাইপিং স্পিড ১৫ WPM থেকে এখন ৪৮ WPM এ পৌঁছেছে। মেন্টরদের আন্তরিকতা ও ধৈর্য সত্যিই প্রশংসনীয়।'
+        },
+        {
+          name: 'মোঃ জাহিদ হাসান',
+          roleOrBatch: 'অ্যাকাউন্টিং অফিসার • ব্যাচ-০৮',
+          rating: 5,
+          text: 'VLOOKUP, XLOOKUP এবং Pivot Table দিয়ে এখন যেকোনো ব্যালান্স শিট ও স্যালারি শিট এক নিমিষে বানিয়ে ফেলতে পারি।'
+        }
+      ]
+    },
     createdAt: '2026-01-05T10:00:00.000Z'
   },
   {

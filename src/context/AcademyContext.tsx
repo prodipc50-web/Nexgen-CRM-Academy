@@ -466,9 +466,34 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return saved ? JSON.parse(saved) : INITIAL_COURSE_CATEGORIES;
   });
 
+  const mergeCoursesWithDefaults = (coursesList: Course[]): Course[] => {
+    return coursesList.map(c => {
+      const seed = INITIAL_COURSES.find(sc => sc.id === c.id || sc.code === c.code);
+      if (!seed) return c;
+      return {
+        ...seed,
+        ...c,
+        landingConfig: {
+          ...(seed.landingConfig || {}),
+          ...(c.landingConfig || {})
+        }
+      };
+    });
+  };
+
   const [courses, setCourses] = useState<Course[]>(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_courses`);
-    return saved ? JSON.parse(saved) : INITIAL_COURSES;
+    if (saved) {
+      try {
+        const parsed: Course[] = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return mergeCoursesWithDefaults(parsed);
+        }
+      } catch (e) {
+        console.error('Failed to parse courses from storage', e);
+      }
+    }
+    return INITIAL_COURSES;
   });
 
   const [batches, setBatches] = useState<Batch[]>(() => {
@@ -936,7 +961,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
             if (Array.isArray(data.staffList) && data.staffList.length > 0) setStaffList(data.staffList);
             if (Array.isArray(data.categories) && data.categories.length > 0) setCategories(data.categories);
-            if (Array.isArray(data.courses) && data.courses.length > 0) setCourses(data.courses);
+            if (Array.isArray(data.courses) && data.courses.length > 0) setCourses(mergeCoursesWithDefaults(data.courses));
             if (Array.isArray(data.batches)) setBatches(data.batches);
             if (Array.isArray(data.rooms)) setRooms(data.rooms);
             if (Array.isArray(data.campaigns)) setCampaigns(data.campaigns);

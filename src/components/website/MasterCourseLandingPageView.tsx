@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
-import { Course, TrainerProfile, StudentCourseReview, ClassroomGalleryPhoto } from '../../types';
+import {
+  Course,
+  TrainerProfile,
+  StudentCourseReview,
+  ClassroomGalleryPhoto,
+  CourseLandingCurriculumModule,
+  CourseLandingPainPoint,
+  CourseLandingFeatureCard,
+  CourseLandingTargetAudienceItem,
+  CourseLandingFaq,
+  CourseLandingReview,
+  CourseLandingGalleryImage
+} from '../../types';
 import {
   BookOpen,
   CheckCircle2,
@@ -37,7 +49,10 @@ import {
   MapPin,
   Lock,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Target,
+  Shield,
+  Check
 } from 'lucide-react';
 import { OnlineAdmissionModal } from './OnlineAdmissionModal';
 import { CourseLandingPageEditorModal } from '../courses/CourseLandingPageEditorModal';
@@ -52,23 +67,185 @@ import {
 } from '../../utils/whatsappHelper';
 import { evaluateFormSubmission } from '../../utils/fraudProtectionEngine';
 import { requestNewOtp, verifyOtpSubmission } from '../../utils/otpVerificationEngine';
+import { copyToClipboardSafe } from '../../utils/clipboardHelper';
 
 interface MasterCourseLandingPageViewProps {
   course: Course;
   onBackToFullWebsite?: () => void;
 }
 
+const DEFAULT_PAIN_POINTS: CourseLandingPainPoint[] = [
+  {
+    problem: 'পুরোনো ধাঁচে ঘণ্টার পর ঘণ্টা কপি-পেস্ট ও ম্যানুয়াল টাইপিং করতে হয়',
+    solution: 'ChatGPT ও Copilot দিয়ে কয়েক সেকেন্ডে নির্ভুল প্রফেশনাল ইমেইল, ড্রাফট ও রিপোর্ট তৈরি'
+  },
+  {
+    problem: 'অফিসে বড় ডেটাসেট আসলে হিসাব করতে হিমশিম খাওয়া ও ফর্মুলা ভুলে যাওয়া',
+    solution: 'Excel VLOOKUP, XLOOKUP, Pivot Table ও অটোমেটেড ফর্মুলা দিয়ে যেকোনো হিসাব মুহূর্তেই সম্পন্ন'
+  },
+  {
+    problem: 'সাধারণ সাদামাটা স্লাইড দেখে ক্লায়েন্ট বা বসের বিরক্তি প্রকাশ',
+    solution: 'PowerPoint ও AI টুলস দিয়ে দৃষ্টিনন্দন কর্পোরেট প্রেজেন্টেশন ও অ্যানিমেশন ডিজাইন'
+  },
+  {
+    problem: 'ফাইলিং ও ডকুমেন্টস হারিয়ে যাওয়া এবং টিমের সাথে কাজ না মেলা',
+    solution: 'Google Docs, Sheets, Drive ও ক্লাউড কোলাবোরেশনে স্মার্ট টিমওয়ার্ক'
+  }
+];
+
+const DEFAULT_FEATURE_CARDS: CourseLandingFeatureCard[] = [
+  {
+    iconName: 'laptop',
+    title: '১০০% হ্যান্ডস-অন ল্যাব প্র্যাকটিস',
+    description: 'ক্লাসরুমেই প্রতিটি শিক্ষার্থীর জন্য আলাদা পার্সোনাল কম্পিউটার ও রিয়েল-লাইফ অ্যাসাইনমেন্ট।'
+  },
+  {
+    iconName: 'zap',
+    title: 'AI ইন্টিগ্রেশন ও স্মার্ট প্রম্পটিং',
+    description: 'অফিসের কাজ ৫ গুণ দ্রুত করতে ChatGPT, Gemini ও Microsoft Copilot-এর বাস্তব ব্যবহার।'
+  },
+  {
+    iconName: 'award',
+    title: 'ভেরিফায়েবল সরকারি ও আইটি সার্টিফিকেট',
+    description: 'কোর্স শেষে অনলাইন কিউআর কোড ভেরিফিকেশন সহ প্রফেশনাল সার্টিফিকেট প্রদান।'
+  },
+  {
+    iconName: 'briefcase',
+    title: 'জব-রেডি রিয়েল অফিস প্রজেক্ট',
+    description: 'অফিসিয়াল চিঠি, ক্যাশবুক, ইনভয়েস, স্যালারি শিট ও পে-রোল ম্যানেজমেন্ট প্রজেক্ট।'
+  },
+  {
+    iconName: 'shield',
+    title: 'লাইফটাইম মেন্টর ও ল্যাব সাপোর্ট',
+    description: 'কোর্স শেষ হলেও যেকোনো সময়ে ল্যাব ব্যবহার ও মেন্টরদের কাছ থেকে ফ্রি সলিউশন সুবিধা।'
+  },
+  {
+    iconName: 'users',
+    title: 'ক্যারিয়ার ও সিভি মেকিং গাইডলাইন',
+    description: 'স্ট্যান্ডার্ড সিভি ও ইন্টারভিউ প্রিপারেশন এবং করপোরেট কমিউনিকেশন টিপস।'
+  }
+];
+
+const DEFAULT_AUDIENCE: CourseLandingTargetAudienceItem[] = [
+  {
+    group: '👨‍🎓 শিক্ষার্থী ও ফ্রেশার (SSC / HSC / অনার্স)',
+    benefit: 'চাকরির বাজারে প্রবেশের আগেই নিজেকে স্কিলড ও কম্পিউটার এক্সপার্ট হিসেবে প্রস্তুত করতে।'
+  },
+  {
+    group: '💼 চাকরিপ্রত্যাশী ও তরুণ-তরুণী',
+    benefit: 'প্র্যাকটিক্যাল স্কিল ও ভেরিফায়েবল সার্টিফিকেটের মাধ্যমে ভালো জবের ইন্টারভিউতে এগিয়ে থাকতে।'
+  },
+  {
+    group: '👔 কর্মরত চাকুরিজীবী ও এক্সিকিউটিভ',
+    benefit: 'অফিসের প্রতিদিনের কাজের গতি বাড়াতে, ভুল কমাতে ও পদোন্নতির জন্য AI টুলস আয়ত্ত করতে।'
+  },
+  {
+    group: '👩‍💼 গৃহিণী ও ফ্রিল্যান্সিং করতে আগ্রহী যে কেউ',
+    benefit: 'ডাটা এন্ট্রি, ভার্চুয়াল অ্যাসিস্ট্যান্ট ও ক্লাউড অফিস ম্যানেজমেন্ট শিখে ঘরে বসে ক্যারিয়ার গড়তে।'
+  }
+];
+
+const DEFAULT_LAB_PHOTOS: CourseLandingGalleryImage[] = [
+  { id: 'def-p1', url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80', title: 'আধুনিক কম্পিউটার ল্যাব ও ডেডিকেটেড পিসি', category: 'কম্পিউটার ল্যাব' },
+  { id: 'def-p2', url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80', title: 'প্র্যাকটিক্যাল অফিস ও এক্সেল ওয়ার্কশপ', category: 'হ্যান্ডস-অন ক্লাস' },
+  { id: 'def-p3', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80', title: 'টিম কোলাবোরেশন ও প্রজেক্ট প্রেজেন্টেশন', category: 'গ্রুপ স্টাডি' },
+  { id: 'def-p4', url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80', title: 'সিনিয়র মেন্টরদের ওয়ান-টু-ওয়ান গাইডেন্স', category: 'মেন্টরিং সেশন' },
+  { id: 'def-p5', url: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80', title: 'গ্র্যাজুয়েশন ও সার্টিফিকেট প্রদান অনুষ্ঠান', category: 'কনভোকেশন' },
+  { id: 'def-p6', url: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&auto=format&fit=crop&q=80', title: 'শীতাতপ নিয়ন্ত্রিত স্মার্ট ক্লাসরুম', category: 'ক্যাম্পাস পরিবেশ' }
+];
+
+const DEFAULT_REVIEWS: CourseLandingReview[] = [
+  {
+    name: 'তানভীর আহমেদ',
+    roleOrBatch: 'অফিস এক্সিকিউটিভ • ব্যাচ-১২',
+    rating: 5,
+    text: 'একদম প্র্যাকটিক্যাল ল্যাব ট্রেনিং। বিশেষ করে এক্সেল ও ChatGPT দিয়ে অফিস অটোমেশন শেখার পর আমার অফিসের কাজের স্পিড দ্বিগুণ হয়ে গেছে!'
+  },
+  {
+    name: 'সাদিয়া আক্তার',
+    roleOrBatch: 'বিবিএ শিক্ষার্থী • ব্যাচ-১৫',
+    rating: 5,
+    text: 'আমার টাইピング স্পিড ১৫ WPM থেকে এখন ৪৮ WPM এ পৌঁছেছে। মেন্টরদের আন্তরিকতা ও ধৈর্য সত্যিই প্রশংসনীয়।'
+  },
+  {
+    name: 'মোঃ জাহিদ হাসান',
+    roleOrBatch: 'অ্যাকাউন্টিং অফিসার • ব্যাচ-০৮',
+    rating: 5,
+    text: 'VLOOKUP, XLOOKUP এবং Pivot Table দিয়ে এখন যেকোনো ব্যালান্স শিট ও স্যালারি শিট এক নিমিষে বানিয়ে ফেলতে পারি।'
+  }
+];
+
+const DEFAULT_FAQS: CourseLandingFaq[] = [
+  {
+    question: 'এই কোর্সে ভর্তি হতে কি কোনো পূর্ব অভিজ্ঞতার প্রয়োজন আছে?',
+    answer: 'না, কোনো পূর্ব অভিজ্ঞতার প্রয়োজন নেই। একদম শুরু থেকে কম্পিউটার অন-অফ, টাইপিং থেকে শুরু করে অ্যাডভান্সড এক্সেল ও AI প্রম্পটিং পর্যন্ত শূন্য থেকেই হাতে-কলমে শেখানো হবে।'
+  },
+  {
+    question: 'ল্যাবে কি প্রতিটি শিক্ষার্থীর জন্য আলাদা কম্পিউটার থাকবে?',
+    answer: 'হ্যাঁ, আমাদের ফার্মগেট ক্যাম্পাসে হাই-স্পিড ইন্টারনেট ও শীতাতপ নিয়ন্ত্রিত আধুনিক ল্যাবে প্রতিটি শিক্ষার্থীর জন্য ডেডিকেটেড পার্সোনাল পিসি বরাদ্দ থাকে।'
+  },
+  {
+    question: 'ক্লাস মিস গেলে কি ব্যাকআপ সাপোর্ট বা রেকর্ডিং পাওয়া যাবে?',
+    answer: 'হ্যাঁ, ক্লাস মিস গেলে আমাদের রয়েছে ডেডিকেটেড মেন্টর সাপোর্ট ও স্টুডেন্ট পোর্টাল ব্যাকআপ ক্লাস নোটস।'
+  },
+  {
+    question: 'কোর্স শেষে কি সার্টিফিকেট দেওয়া হবে?',
+    answer: 'হ্যাঁ, কোর্স সমাপ্তির পর সফল শিক্ষার্থীদের সরকারি ও বেসরকারি প্রতিষ্ঠানে গ্রহণযোগ্য ভেরিফায়েবল সার্টিফিকেট প্রদান করা হবে।'
+  },
+  {
+    question: 'ভর্তি ফি কি কিস্তিতে (Installment) পরিশোধ করা যাবে?',
+    answer: 'হ্যাঁ, প্রাথমিক মাত্র ৳২,৫০০ দিয়ে সিট বুকিং করে বাকি কোর্স ফি সহজ ২টি কিস্তিতে পরিশোধের সুযোগ রয়েছে।'
+  }
+];
+
+const DEFAULT_BONUSES: string[] = [
+  'ChatGPT & AI Office Productivity প্রম্পট গাইড বুক (PDF ফ্রি)',
+  '৫০+ রেডিমেড করপোরেট এক্সেল ও ওয়ার্ড টেমপ্লেট লাইব্রেরি',
+  'ফুল স্পিড টাইピング সফটওয়্যার ফুল লাইসেন্স',
+  'প্রফেশনাল সিভি মেকিং ফরম্যাট ও ইন্টারভিউ প্রশ্ন ব্যাংক',
+  'লাইফটাইম ক্লাস রিসোর্স ও ভিডিও ব্যাকআপ সাপোর্ট'
+];
+
+const DEFAULT_TRAINERS: TrainerProfile[] = [
+  {
+    id: 'tr-def-1',
+    name: 'প্রদীপ চৌধুরী',
+    designation: 'লিড ট্রেইনার ও আইটি স্পেশালিস্ট',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+    experienceYears: 8,
+    shortBio: '৮+ বছরের করপোরেট ও প্র্যাকটিক্যাল অফিস ম্যানেজমেন্ট ট্রেনিং অভিজ্ঞতা। শত শত শিক্ষার্থীকে সফল ক্যারিয়ার গড়তে মেন্টরিং করেছেন।',
+    skills: ['MS Word Pro', 'Excel Dashboards', 'PowerPoint AI', 'Office Automation'],
+    isActive: true
+  },
+  {
+    id: 'tr-def-2',
+    name: 'মাহফুজুর রহমান',
+    designation: 'অ্যাডভান্সড এক্সেল ও ডেটা স্পেশালিস্ট',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+    experienceYears: 6,
+    shortBio: 'মাল্টিন্যাশনাল কোম্পানিতে ডেটা অ্যানালাইসিস ও AI প্রম্পট ইঞ্জিনিয়ারিং মেন্টর হিসেবে সফলভাবে দায়িত্ব পালন করছেন।',
+    skills: ['XLOOKUP & Pivot', 'Financial Modeling', 'ChatGPT Prompts', 'Google Workspace'],
+    isActive: true
+  }
+];
+
 export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewProps> = ({
-  course,
+  course: propCourse,
   onBackToFullWebsite
 }) => {
-  const { websiteCmsConfig, staffList, addLead } = useAcademy();
+  const { courses, websiteCmsConfig, staffList, addLead } = useAcademy();
+  const course = courses.find(c => c.id === propCourse.id || c.code === propCourse.code) || propCourse;
+
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [openModuleIndex, setOpenModuleIndex] = useState<number | null>(0);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [selectedLightboxImage, setSelectedLightboxImage] = useState<{ url: string; title?: string; category?: string } | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   // Fast Lead Inline Form States
+  const [leadFormMode, setLeadFormMode] = useState<'admission' | 'counseling'>('admission');
   const [formRenderTime] = useState<number>(Date.now());
   const [honeypot, setHoneypot] = useState('');
   const [leadName, setLeadName] = useState('');
@@ -78,6 +255,10 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   const [leadSuccess, setLeadSuccess] = useState(false);
   const [leadError, setLeadError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Social Proof Admission Alert Ticker State
+  const [isTickerVisible, setIsTickerVisible] = useState(true);
+  const [currentTickerIndex, setCurrentTickerIndex] = useState(0);
 
   // OTP Verification States
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
@@ -91,6 +272,49 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   const pixelId = websiteCmsConfig?.marketing?.metaPixelId;
   const fraudConfig = websiteCmsConfig?.fraudProtection;
   const otpConfig = websiteCmsConfig?.otpConfig;
+
+  // Social Proof Ticker Items
+  const socialTickerItems =
+    landingConfig.socialProofTickerConfig?.customItems &&
+    landingConfig.socialProofTickerConfig.customItems.length > 0
+      ? landingConfig.socialProofTickerConfig.customItems
+      : [
+          {
+            name: 'মোঃ তানভীর হাসান',
+            location: 'মিরপুর-১০, ঢাকা',
+            timeAgo: '৩ মিনিট আগে',
+            actionText: 'অফিস অ্যাপ্লিকেশন স্কলারশিপ ব্যাচে সিট বুক করেছেন'
+          },
+          {
+            name: 'নুসরাত জাহান',
+            location: 'ধানমন্ডি, ঢাকা',
+            timeAgo: '১২ মিনিট আগে',
+            actionText: 'ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার কাউন্সিলিং বুক করেছেন'
+          },
+          {
+            name: 'আরিফুল ইসলাম',
+            location: 'ফার্মগেট ক্যাম্পাস',
+            timeAgo: '২৪ মিনিট আগে',
+            actionText: 'অ্যাডমিশন কনফার্ম করেছেন'
+          },
+          {
+            name: 'সাবরিনা সুলতানা',
+            location: 'উত্তরা, ঢাকা',
+            timeAgo: '৪৫ মিনিট আগে',
+            actionText: 'স্পেশাল স্কলারশিপ অফার গ্রহণ করেছেন'
+          }
+        ];
+
+  const isTickerEnabled = landingConfig.socialProofTickerConfig?.enabled ?? true;
+
+  // Rotate social proof ticker
+  useEffect(() => {
+    if (!isTickerEnabled || socialTickerItems.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentTickerIndex(prev => (prev + 1) % socialTickerItems.length);
+    }, (landingConfig.socialProofTickerConfig?.intervalSeconds || 6) * 1000);
+    return () => clearInterval(interval);
+  }, [isTickerEnabled, socialTickerItems.length, landingConfig.socialProofTickerConfig?.intervalSeconds]);
 
   // Track ViewContent on mount
   useEffect(() => {
@@ -112,16 +336,19 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   const allTrainers: TrainerProfile[] = websiteCmsConfig?.trainersList || [];
   const assignedTrainers = allTrainers.filter(t => t.coursesAssigned?.includes(course.id) && t.isActive);
   const fallbackTrainers = allTrainers.filter(t => t.isActive).slice(0, 2);
-  const displayTrainers = assignedTrainers.length > 0 ? assignedTrainers : fallbackTrainers;
+  const displayTrainers = assignedTrainers.length > 0 ? assignedTrainers : (fallbackTrainers.length > 0 ? fallbackTrainers : DEFAULT_TRAINERS);
 
-  // Associated Reviews
-  const allReviews: StudentCourseReview[] = websiteCmsConfig?.studentCourseReviews || [];
-  const assignedReviews = allReviews.filter(r => r.courseId === course.id && r.isActive);
-  const displayReviews = assignedReviews.length > 0 ? assignedReviews : allReviews.filter(r => r.isActive).slice(0, 3);
+  // Associated Reviews: Priority 1 - customReviews from landingConfig, Priority 2 - CMS assigned reviews, Priority 3 - DEFAULT_REVIEWS
+  const customReviews: CourseLandingReview[] = (landingConfig.customReviews && landingConfig.customReviews.length > 0) ? landingConfig.customReviews : [];
+  const cmsReviews: StudentCourseReview[] = websiteCmsConfig?.studentCourseReviews || [];
+  const assignedCmsReviews = cmsReviews.filter(r => r.courseId === course.id && r.isActive);
+  const fallbackCmsReviews = cmsReviews.filter(r => r.isActive).slice(0, 3);
+  const displayCmsReviews = assignedCmsReviews.length > 0 ? assignedCmsReviews : fallbackCmsReviews;
 
-  // Associated Lab Gallery Photos
-  const allPhotos: ClassroomGalleryPhoto[] = websiteCmsConfig?.classroomGalleryPhotos || [];
-  const displayPhotos = allPhotos.filter(p => p.isActive).slice(0, 6);
+  // Associated Lab Gallery Photos: Priority 1 - galleryImages from landingConfig, Priority 2 - CMS photos, Priority 3 - DEFAULT_LAB_PHOTOS
+  const customGallery: CourseLandingGalleryImage[] = (landingConfig.galleryImages && landingConfig.galleryImages.length > 0) ? landingConfig.galleryImages : [];
+  const cmsPhotos: ClassroomGalleryPhoto[] = websiteCmsConfig?.classroomGalleryPhotos || [];
+  const displayCmsPhotos = cmsPhotos.filter(p => p.isActive).slice(0, 6);
 
   // Computed Discount
   const discountPercent =
@@ -144,6 +371,41 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     websiteCmsConfig?.socialLinks?.facebookPageUrl ||
     'https://m.me/nexgenacademy';
   const messengerUrl = getMessengerDirectUrl(rawMessenger);
+
+  // Dynamic Content Sources from landingConfig with robust fallbacks
+  const painPoints: CourseLandingPainPoint[] = (landingConfig.painPointsList && landingConfig.painPointsList.length > 0) ? landingConfig.painPointsList : DEFAULT_PAIN_POINTS;
+  const featureCards: CourseLandingFeatureCard[] = (landingConfig.featureCards && landingConfig.featureCards.length > 0) ? landingConfig.featureCards : DEFAULT_FEATURE_CARDS;
+  const audienceList: CourseLandingTargetAudienceItem[] = (landingConfig.audienceList && landingConfig.audienceList.length > 0) ? landingConfig.audienceList : DEFAULT_AUDIENCE;
+  const editableModules: CourseLandingCurriculumModule[] =
+    landingConfig.editableModules && landingConfig.editableModules.length > 0
+      ? landingConfig.editableModules
+      : course.modules?.map((m, idx) => ({
+          id: m.id || `mod-${idx}`,
+          moduleNumber: m.moduleNumber || idx + 1,
+          moduleName: m.moduleName,
+          subtitle: '',
+          description: m.moduleDescription,
+          estimatedClasses: m.estimatedClasses ? `${m.estimatedClasses} সেশন` : '৪ সেশন',
+          topics: m.topics || []
+        })) || [];
+  const faqs: CourseLandingFaq[] = (landingConfig.faqs && landingConfig.faqs.length > 0) ? landingConfig.faqs : DEFAULT_FAQS;
+  const bonusItems: string[] = (landingConfig.bonusItems && landingConfig.bonusItems.length > 0) ? landingConfig.bonusItems : DEFAULT_BONUSES;
+  const ctaMode = landingConfig.ctaMode || 'both';
+
+  // Campus Address & Phone
+  const campusAddress =
+    landingConfig.campusAddress ||
+    websiteCmsConfig?.officeAddress ||
+    '১৪/বি, গার্ডেন রোড, কাজী নজরুল ইসলাম এভিনিউ (ফার্মগেট ওভারব্রিজ সংলগ্ন), ঢাকা-১২১৫';
+  const campusPhone =
+    landingConfig.campusPhone ||
+    websiteCmsConfig?.multiplePhones?.find(p => p.isHotline)?.number ||
+    websiteCmsConfig?.whatsappSupportNumber ||
+    '01798-444444';
+  const campusHours =
+    landingConfig.campusHours ||
+    websiteCmsConfig?.officeHours ||
+    'সকাল ৯:০০ টা - রাত ৮:০০ টা (প্রতিদিন খোলা)';
 
   const handleWhatsAppClick = () => {
     trackMetaPixelEvent(
@@ -168,11 +430,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     );
   };
 
-  const handleShareClick = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedUrl(true);
-      setTimeout(() => setCopiedUrl(false), 2500);
+  const handleShareClick = async () => {
+    try {
+      const url = typeof window !== 'undefined' ? window.location.href : '';
+      const success = await copyToClipboardSafe(url);
+      if (success) {
+        setCopiedUrl(true);
+        setTimeout(() => setCopiedUrl(false), 2500);
+      }
+    } catch (e) {
+      console.warn('Share copy error:', e);
     }
   };
 
@@ -181,12 +448,21 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     const utms = getCapturedUtmParams();
     const today = new Date().toISOString().split('T')[0];
 
+    const isCounselingMode = leadFormMode === 'counseling';
+    const commentsText = isCounselingMode
+      ? `[ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার কাউন্সিলিং রিকোয়েস্ট] Schedule: ${leadSchedule}. Discount/Batch: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`
+      : `Fast Inquiry on Course Landing Page. Schedule: ${leadSchedule}. Discount Code: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`;
+
     addLead({
       name: leadName.trim(),
       phone: leadPhone.trim(),
       email: leadEmail.trim() || undefined,
       interestedCourseId: course.id,
-      leadSource: utms.utmSource ? `Ad: ${utms.utmSource}` : 'Course Landing Fast Form',
+      leadSource: utms.utmSource
+        ? `Ad: ${utms.utmSource} (${isCounselingMode ? 'Counseling' : 'Direct'})`
+        : isCounselingMode
+        ? 'Course Landing Free Counseling'
+        : 'Course Landing Fast Form',
       campaignId: utms.utmCampaign,
       utmSource: utms.utmSource,
       utmMedium: utms.utmMedium,
@@ -202,14 +478,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       visitDate: today,
       firstContactDate: today,
       status: 'New',
-      comments: `Fast Inquiry on Course Landing Page. Schedule: ${leadSchedule}. Discount Code: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`
+      comments: commentsText
     });
 
     trackMetaPixelEvent(
-      'Lead',
+      isCounselingMode ? 'Contact' : 'Lead',
       {
         content_name: course.name,
-        value: course.offerFee || 0,
+        form_mode: leadFormMode,
+        value: isCounselingMode ? 0 : (course.offerFee || 0),
         currency: 'BDT'
       },
       pixelId
@@ -235,12 +512,12 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     });
 
     if (evaluation.isBlocked) {
-      setLeadError('Your submission could not be processed due to high security risk. Please call helpline directly.');
+      setLeadError('Your submission could not be processed due to security reasons. Please contact our helpline directly.');
       setIsSubmitting(false);
       return;
     }
 
-    // 2. Check if OTP is Required (e.g. Mode ON or High Risk trigger)
+    // 2. Check if OTP is Required
     const shouldVerifyOtp =
       otpConfig?.mode === 'ON' ||
       (otpConfig?.mode === 'HIGH_RISK_ONLY' && evaluation.requiresOtpOrCaptcha);
@@ -281,9 +558,33 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     processLeadRegistration();
   };
 
+  // Helper function to render an icon by string name
+  const renderFeatureIcon = (iconName?: string) => {
+    switch (iconName) {
+      case 'laptop':
+        return <Laptop className="w-5 h-5 text-indigo-400" />;
+      case 'zap':
+        return <Zap className="w-5 h-5 text-amber-400" />;
+      case 'award':
+        return <Award className="w-5 h-5 text-emerald-400" />;
+      case 'briefcase':
+        return <Briefcase className="w-5 h-5 text-purple-400" />;
+      case 'shield':
+        return <ShieldCheck className="w-5 h-5 text-blue-400" />;
+      case 'users':
+        return <Users className="w-5 h-5 text-rose-400" />;
+      case 'clock':
+        return <Clock className="w-5 h-5 text-teal-400" />;
+      case 'file-text':
+        return <FileText className="w-5 h-5 text-cyan-400" />;
+      default:
+        return <Sparkles className="w-5 h-5 text-indigo-400" />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white pb-24 sm:pb-20">
-      {/* Top Floating Admin Toolbar */}
+      {/* Top Floating Admin / Navigation Toolbar */}
       <div className="bg-slate-900 border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between text-xs sticky top-0 z-40 backdrop-blur-md">
         <div className="flex items-center space-x-3">
           {onBackToFullWebsite && (
@@ -291,20 +592,20 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               onClick={onBackToFullWebsite}
               className="flex items-center space-x-1.5 text-slate-300 hover:text-white font-bold transition-colors"
             >
-              <span>← Main Academy Website</span>
+              <span>← মূল ওয়েবসাইট (Main Website)</span>
             </button>
           )}
           <span className="hidden sm:inline-block text-slate-500">•</span>
           <span className="hidden sm:inline-flex items-center space-x-1 text-indigo-400 font-bold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Master Landing Page & CRM Synchronization Active</span>
+            <span>লাইভ ল্যান্ডিং পেজ (Dynamic CMS Enabled)</span>
           </span>
         </div>
 
         <div className="flex items-center space-x-2">
           <button
             onClick={handleShareClick}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg flex items-center space-x-1"
+            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg flex items-center space-x-1 transition-colors"
             title="Copy Ad Landing Link"
           >
             <Share2 className="w-3.5 h-3.5" />
@@ -312,22 +613,22 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           </button>
           <button
             onClick={() => setIsEditorOpen(true)}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold flex items-center space-x-1.5 shadow-sm"
+            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold flex items-center space-x-1.5 shadow-sm transition-all active:scale-95"
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>Edit Page Content</span>
+            <span>এডিট ল্যান্ডিং পেজ (Edit CMS)</span>
           </button>
         </div>
       </div>
 
       {/* SECTION 1: HERO & MAIN CTA */}
-      <header className="relative pt-8 pb-16 px-4 sm:px-6 max-w-7xl mx-auto overflow-hidden">
+      <header className="relative pt-8 pb-14 px-4 sm:px-6 max-w-7xl mx-auto overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Left Column: Headline, Subheadline, Guarantee & Badges */}
           <div className="lg:col-span-7 space-y-5 text-left">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-black uppercase tracking-wider">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-black tracking-wide">
               <Flame className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse" />
               <span>{landingConfig.heroBadge || '🚀 স্পেশাল স্কলারশিপ ব্যাচ অ্যাডমিশন শুরু'}</span>
             </div>
@@ -370,7 +671,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   </span>
                 )}
                 <span className="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-black">
-                  {discountPercent}% স্কলারশিপ ছাড়
+                  {landingConfig.customDiscountBadge || `${discountPercent}% স্কলারশিপ ছাড়`}
                 </span>
               </div>
 
@@ -381,47 +682,153 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 </div>
               )}
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                <button
-                  onClick={() => setIsAdmissionOpen(true)}
-                  className="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-black text-sm shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all"
-                >
-                  <GraduationCap className="w-5 h-5" />
-                  <span>এখনই অনলাইনে ভর্তি হন</span>
-                </button>
+              {/* Primary Action Buttons based on ctaMode */}
+              <div className="space-y-3 pt-1">
+                {(ctaMode === 'both' || ctaMode === 'admission_only' || ctaMode === 'whatsapp_and_admission') && (
+                  <button
+                    onClick={() => setIsAdmissionOpen(true)}
+                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-black text-sm sm:text-base shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+                  >
+                    <GraduationCap className="w-5 h-5" />
+                    <span>অনলাইনে এখনই ভর্তি আবেদন করুন</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
 
-                <a
-                  href={whatsAppUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={handleWhatsAppClick}
-                  className="py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  <span>WhatsApp এ কথা বলুন</span>
-                </a>
+                {/* Highlighted Direct Chat Box for Social Contact */}
+                {ctaMode !== 'admission_only' && (
+                  <div className="p-3 bg-slate-950/90 border border-slate-700/80 rounded-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        সরাসরি কথা বলতে চাইলে মেসেজ করুন:
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                        Instant Reply
+                      </span>
+                    </div>
+
+                    <div className={`grid gap-2 ${ctaMode === 'whatsapp_only' || ctaMode === 'messenger_only' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                      {(ctaMode === 'both' || ctaMode === 'whatsapp_only' || ctaMode === 'whatsapp_and_admission') && (
+                        <a
+                          href={whatsAppUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={handleWhatsAppClick}
+                          className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+                        >
+                          <MessageCircle className="w-4 h-4 fill-white" />
+                          <span>WhatsApp এ সরাসরি মেসেজ করুন</span>
+                        </a>
+                      )}
+
+                      {(ctaMode === 'both' || ctaMode === 'messenger_only' || ctaMode === 'whatsapp_and_admission') && (
+                        <a
+                          href={messengerUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={handleMessengerClick}
+                          className="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+                        >
+                          <Smartphone className="w-4 h-4" />
+                          <span>Facebook মেসেঞ্জারে মেসেজ দিন</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Trust Guarantee Note */}
+              {landingConfig.guaranteeText && (
+                <div className="flex items-center space-x-2 text-xs text-slate-400 pt-1">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{landingConfig.guaranteeText}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Column: Fast Registration Card + Fraud Honeypot */}
-          <div className="lg:col-span-5">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 text-left">
-              <div className="flex items-center space-x-2 text-indigo-400">
-                <Sparkles className="w-5 h-5" />
-                <h3 className="font-black text-base text-white">ফ্রি ক্যারিয়ার কাউন্সেলিং ও সিট বুকিং</h3>
+          {/* Right Column: Fast Registration Card / Banner Picture */}
+          <div className="lg:col-span-5 space-y-4">
+            {/* Banner Cover Image */}
+            <div className="rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative group aspect-16/10">
+              <img
+                src={landingConfig.customBannerUrl || course.thumbnailUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80'}
+                alt={landingConfig.headline || course.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end justify-between p-4">
+                <span className="text-xs font-bold text-white bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-700">
+                  🏢 আধুনিক কম্পিউটার ল্যাব ও এসি ক্লাসরুম
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsEditorOpen(true)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity px-2.5 py-1 bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg backdrop-blur-md flex items-center space-x-1.5 shadow-md cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>ছবি পরিবর্তন</span>
+                </button>
               </div>
-              <p className="text-xs text-slate-400">
-                আপনার নাম ও মোবাইল নাম্বার দিন, আমাদের সিনিয়র মেন্টর সরাসরি কল দিয়ে স্কলারশিপ কোড কনফার্ম করবেন।
-              </p>
+            </div>
+
+            {/* Fast Registration Card with Dual Admission / Counseling Tabs */}
+            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-3.5 text-left">
+              {/* Dual Tab Mode Toggle */}
+              <div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setLeadFormMode('admission')}
+                  className={`flex-1 py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                    leadFormMode === 'admission'
+                      ? 'bg-indigo-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>সরাসরি সিট বুকিং</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLeadFormMode('counseling')}
+                  className={`flex-1 py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                    leadFormMode === 'counseling'
+                      ? 'bg-emerald-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>ফ্রি ল্যাব কাউন্সিলিং</span>
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2 text-indigo-400">
+                  <Sparkles className="w-4 h-4" />
+                  <h3 className="font-black text-sm sm:text-base text-white">
+                    {leadFormMode === 'admission'
+                      ? 'অনলাইন ফাস্ট সিট বুকিং ফরম'
+                      : 'ফ্রি ২০ মিনিটের ক্যারিয়ার ও ল্যাব ভিজিট কাউন্সিলিং'}
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  {leadFormMode === 'admission'
+                    ? 'আপনার নাম ও মোবাইল নাম্বার দিন, আমাদের টিম কল দিয়ে স্কলারশিপ অফার কনফার্ম করবে।'
+                    : 'ফার্মগেট ক্যাম্পাসে সরাসরি এসে ল্যাব ঘুরে দেখুন এবং এক্সপার্ট মেন্টরের সাথে ক্যারিয়ার পরামর্শ নিন (সম্পূর্ণ ফ্রি)।'}
+                </p>
+              </div>
 
               {leadSuccess ? (
                 <div className="p-6 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl text-center space-y-2">
                   <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-                  <h4 className="font-black text-white text-sm">ধন্যবাদ! আপনার রিকোয়েস্ট গ্রহণ করা হয়েছে।</h4>
+                  <h4 className="font-black text-white text-sm">
+                    {leadFormMode === 'counseling'
+                      ? 'ধন্যবাদ! আপনার ফ্রি কাউন্সিলিং রিকোয়েস্ট গ্রহণ করা হয়েছে।'
+                      : 'ধন্যবাদ! আপনার অ্যাডমিশন রিকোয়েস্ট গ্রহণ করা হয়েছে।'}
+                  </h4>
                   <p className="text-xs text-slate-300">
-                    আমাদের ক্যারিয়ার কাউন্সেলর টিম দ্রুত আপনার সাথে যোগাযোগ করবে।
+                    আমাদের সিনিয়র কাউন্সেলর টিম দ্রুত আপনার দেওয়া নাম্বারে কল দিয়ে সময় ও ব্যাচ কনফার্ম করবে।
                   </p>
                 </div>
               ) : (
@@ -505,19 +912,28 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all mt-2 disabled:opacity-50"
+                    className={`w-full py-3 text-white rounded-xl font-black text-xs shadow-lg flex items-center justify-center space-x-2 transition-all mt-2 disabled:opacity-50 cursor-pointer ${
+                      leadFormMode === 'counseling'
+                        ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'
+                        : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/30'
+                    }`}
                   >
                     {isSubmitting ? (
                       <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : leadFormMode === 'counseling' ? (
+                      <>
+                        <span>ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার সেশন বুক করুন</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
                     ) : (
                       <>
-                        <span>ফ্রি কাউন্সেলিং বুক করুন</span>
+                        <span>অনলাইনে স্কলারশিপ সিট বুক করুন</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
                   <p className="text-[10px] text-slate-500 text-center">
-                    🔒 সম্পূর্ণ গোপনীয় ও সুরক্ষিত। স্প্যামমুক্ত গ্যারান্টি।
+                    🔒 সম্পূর্ণ গোপনীয় ও সুরক্ষিত। স্প্যামমুক্ত নিশ্চয়তা।
                   </p>
                 </form>
               )}
@@ -526,90 +942,262 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         </div>
       </header>
 
-      {/* SECTION 2: CURRICULUM MODULES BUILDER */}
-      <section className="py-12 px-4 sm:px-6 max-w-5xl mx-auto">
+      {/* SECTION 2: PROBLEM VS REALITY (PAIN POINTS & MODERN WORKPLACE) */}
+      {painPoints.length > 0 && (
+        <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60">
+          <div className="text-center space-y-2 mb-8">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs sm:text-sm font-bold">
+              <Flame className="w-4 h-4 text-rose-500" />
+              <span>চ্যালেঞ্জ ও আধুনিক সমাধান</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+              {landingConfig.painPointsHeadline || 'পুরোনো পদ্ধতি বনাম ২০২৬-এর স্মার্ট অফিস স্কিল'}
+            </h2>
+            {landingConfig.painPointsSubheadline && (
+              <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+                {landingConfig.painPointsSubheadline}
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            {painPoints.map((pt, idx) => (
+              <div
+                key={idx}
+                className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4 hover:border-slate-700 transition-all text-left shadow-md"
+              >
+                {/* Problem */}
+                <div className="flex items-start space-x-3 text-rose-300">
+                  <div className="w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5 text-sm font-black">
+                    ✕
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-rose-400 uppercase tracking-wider block">
+                      পুরোনো সমস্যা:
+                    </span>
+                    <p className="text-sm font-semibold text-slate-200 mt-1 leading-relaxed">
+                      {pt.problem}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-800" />
+
+                {/* Solution */}
+                <div className="flex items-start space-x-3 text-emerald-300">
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-sm font-black">
+                    ✓
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-emerald-400 uppercase tracking-wider block">
+                      আমাদের ২০২৬ AI সল্যুশন:
+                    </span>
+                    <p className="text-sm font-bold text-white mt-1 leading-relaxed">
+                      {pt.solution}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* SECTION 3: KEY FEATURES & WHY CHOOSE US */}
+      {featureCards.length > 0 && (
+        <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60">
+          <div className="text-center space-y-2 mb-8">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold">
+              <Sparkles className="w-4 h-4" />
+              <span>কোর্সের বিশেষ সুবিধা সমূহ</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+              {landingConfig.whyChooseHeadline || 'কেন আমাদের এই কোর্সটি আপনার ক্যারিয়ার বদলে দেবে?'}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 text-left">
+            {featureCards.map((card, idx) => (
+              <div
+                key={idx}
+                className="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 rounded-3xl p-5 sm:p-6 space-y-3 transition-all group shadow-md"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 group-hover:bg-indigo-600/20 border border-slate-700 group-hover:border-indigo-500/40 flex items-center justify-center transition-colors">
+                  {renderFeatureIcon(card.iconName)}
+                </div>
+                <h4 className="font-black text-white text-base sm:text-lg">{card.title}</h4>
+                <p className="text-sm text-slate-300 leading-relaxed">{card.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* SECTION 4: EDITABLE RICH CURRICULUM MODULES */}
+      <section className="py-14 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800/60 text-left">
         <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold">
             <BookOpen className="w-4 h-4" />
             <span>সিলেবাস ও প্রজেক্ট কারিকুলাম</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white">
-            হাতে-কলমে যা যা শেখানো হবে (১০০% প্র্যাকটিক্যাল ল্যাব)
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+            {landingConfig.curriculumHeadline || 'হাতে-কলমে যা যা শেখানো হবে (১০০% প্র্যাকটিক্যাল ল্যাব)'}
           </h2>
-          <p className="text-xs text-slate-400 max-w-xl mx-auto">
-            বেসিক থেকে ইন্ডাস্ট্রি লেভেল প্রজেক্ট পর্যন্ত সম্পূর্ণ স্টেপ-বাই-স্টেপ গাইডলাইন
+          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
+            {landingConfig.curriculumSubheadline || 'বেসিক থেকে ইন্ডাস্ট্রি লেভেল প্রজেক্ট পর্যন্ত সম্পূর্ণ স্টেপ-বাই-স্টেপ গাইডলাইন'}
           </p>
         </div>
 
-        <div className="space-y-3">
-          {course.modules && course.modules.length > 0 ? (
-            course.modules.map((mod, idx) => {
-              const isOpen = openModuleIndex === idx;
-              return (
-                <div
-                  key={mod.id || idx}
-                  className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden transition-all"
+        <div className="space-y-3.5">
+          {editableModules.map((mod, idx) => {
+            const isOpen = openModuleIndex === idx;
+            return (
+              <div
+                key={mod.id || idx}
+                className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden transition-all hover:border-slate-700"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenModuleIndex(isOpen ? null : idx)}
+                  className="w-full p-4.5 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
                 >
-                  <button
-                    onClick={() => setOpenModuleIndex(isOpen ? null : idx)}
-                    className="w-full p-4.5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3.5">
-                      <span className="w-7 h-7 rounded-xl bg-indigo-500/20 text-indigo-300 font-black text-xs flex items-center justify-center shrink-0">
-                        {idx + 1}
-                      </span>
-                      <div>
-                        <h4 className="font-bold text-white text-sm">{mod.moduleName}</h4>
-                        <p className="text-xs text-slate-400">{mod.estimatedClasses ? `${mod.estimatedClasses} Classes` : '৪টি প্র্যাকটিক্যাল সেশন'}</p>
-                      </div>
-                    </div>
-                    {isOpen ? (
-                      <ChevronUp className="w-5 h-5 text-indigo-400" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-slate-500" />
-                    )}
-                  </button>
-
-                  {isOpen && (
-                    <div className="p-4 pt-1 border-t border-slate-800/80 bg-slate-950/40 space-y-2">
-                      {mod.moduleDescription && (
-                        <p className="text-xs text-slate-300 leading-relaxed">{mod.moduleDescription}</p>
+                  <div className="flex items-center space-x-3.5">
+                    <span className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 font-black text-sm flex items-center justify-center shrink-0">
+                      {mod.moduleNumber || idx + 1}
+                    </span>
+                    <div>
+                      <h4 className="font-bold text-white text-sm sm:text-base">{mod.moduleName}</h4>
+                      {mod.subtitle && (
+                        <p className="text-xs sm:text-sm text-indigo-300 font-medium">{mod.subtitle}</p>
                       )}
-                      {mod.topics && mod.topics.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                      <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                        {mod.estimatedClasses ? `${mod.estimatedClasses}` : '৪টি প্র্যাকটিক্যাল সেশন'}
+                      </p>
+                    </div>
+                  </div>
+                  {isOpen ? (
+                    <ChevronUp className="w-5 h-5 text-indigo-400" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-slate-500" />
+                  )}
+                </button>
+
+                {isOpen && (
+                  <div className="p-5 pt-1 border-t border-slate-800/80 bg-slate-950/60 space-y-3.5">
+                    {mod.description && (
+                      <p className="text-sm text-slate-200 leading-relaxed">{mod.description}</p>
+                    )}
+
+                    {mod.topics && mod.topics.length > 0 && (
+                      <div className="space-y-2 pt-1">
+                        <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">
+                          টপিকসমূহ:
+                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           {mod.topics.map((t, tidx) => (
                             <div
                               key={tidx}
-                              className="flex items-center space-x-2 text-xs text-slate-300 bg-slate-900/60 p-2 rounded-xl"
+                              className="flex items-center space-x-2 text-sm text-slate-200 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800/80"
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                              <span>{t}</span>
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                              <span className="font-medium">{t}</span>
                             </div>
                           ))}
                         </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          ) : (
-            <div className="p-8 text-center bg-slate-900/40 rounded-2xl border border-slate-800">
-              <p className="text-xs text-slate-400">এই কোর্সের সিলেবাস অ্যাডমিন প্যানেল থেকে কনফিগার করুন।</p>
-            </div>
-          )}
+                      </div>
+                    )}
+
+                    {mod.practicalProject && (
+                      <div className="p-3.5 bg-indigo-950/60 border border-indigo-500/30 rounded-xl text-sm flex items-center space-x-2.5 text-indigo-200">
+                        <Briefcase className="w-4 h-4 text-indigo-400 shrink-0" />
+                        <span>
+                          <strong className="font-bold text-white">রিয়েল প্রজেক্ট:</strong> {mod.practicalProject}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* SECTION 3: TRAINERS & FACULTY */}
-      <section className="py-12 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60">
+      {/* SECTION 5: TARGET AUDIENCE (WHO IS THIS COURSE FOR) */}
+      {audienceList.length > 0 && (
+        <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+          <div className="text-center space-y-2 mb-8">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs sm:text-sm font-bold">
+              <Target className="w-4 h-4" />
+              <span>কার জন্য এই কোর্সটি</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+              {landingConfig.audienceHeadline || 'এই কোর্সটি কাদের জন্য ১০০% উপযুক্ত?'}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {audienceList.map((item, idx) => (
+              <div
+                key={idx}
+                className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-3 flex flex-col justify-between hover:border-purple-500/40 transition-all shadow-md"
+              >
+                <div>
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 font-black text-sm flex items-center justify-center mb-3">
+                    {idx + 1}
+                  </div>
+                  <h4 className="font-bold text-white text-base leading-snug">{item.group}</h4>
+                  <p className="text-sm text-slate-300 mt-2 leading-relaxed">{item.benefit}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* SECTION 6: FREE BONUSES & PERKS */}
+      {bonusItems.length > 0 && (
+        <section className="py-14 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800/60 text-left">
+          <div className="bg-gradient-to-br from-indigo-950/80 via-slate-900 to-purple-950/60 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+            <div className="text-center space-y-2">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-black border border-amber-500/30">
+                <Gift className="w-4 h-4 text-amber-400" />
+                <span>স্পেশাল ফ্রি বোনাস প্যাকেজ</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+                {landingConfig.bonusHeadline || 'কোর্সে ভর্তির সাথে সাথে যা যা ফ্রি পাবেন'}
+              </h3>
+              <p className="text-sm text-slate-300">
+                এই ব্যাচে ভর্তি হওয়া শিক্ষার্থীদের জন্য সম্পূর্ণ ফ্রিতে লাইফটাইম অ্যাক্সেস সহ প্রদান করা হবে
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {bonusItems.map((bonus, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 bg-slate-900/90 border border-indigo-500/20 rounded-2xl flex items-center space-x-3.5 shadow-sm"
+                >
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-black">
+                    <Check className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm font-bold text-white leading-snug">{bonus}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* SECTION 7: TRAINERS & FACULTY */}
+      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
         <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold">
             <Users className="w-4 h-4" />
             <span>ইন্ডাস্ট্রি এক্সপার্ট ট্রেইনার</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white">আপনার মেন্টর ও ফ্যাকাল্টি প্যানেল</h2>
-          <p className="text-xs text-slate-400 max-w-xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">আপনার মেন্টর ও ফ্যাকাল্টি প্যানেল</h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
             বাস্তব সফটওয়্যার ফার্ম ও টপ-রেটেড ফ্রিল্যান্সিংয়ে দীর্ঘদিনের অভিজ্ঞ মেন্টরদের সরাসরি গাইডেন্স
           </p>
         </div>
@@ -618,26 +1206,26 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           {displayTrainers.map(trainer => (
             <div
               key={trainer.id}
-              className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5"
+              className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5 shadow-lg"
             >
               <img
                 src={trainer.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'}
                 alt={trainer.name}
-                className="w-20 h-20 rounded-2xl object-cover ring-2 ring-indigo-500/30 shrink-0"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-indigo-500/30 shrink-0"
               />
               <div className="space-y-1.5 flex-1">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-black text-white text-base">{trainer.name}</h4>
-                  <span className="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full">
+                  <h4 className="font-black text-white text-base sm:text-lg">{trainer.name}</h4>
+                  <span className="text-xs font-bold bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
                     {trainer.experienceYears} Years Exp
                   </span>
                 </div>
-                <p className="text-xs text-indigo-400 font-bold">{trainer.designation}</p>
-                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{trainer.shortBio}</p>
+                <p className="text-sm text-indigo-400 font-bold">{trainer.designation}</p>
+                <p className="text-sm text-slate-300 leading-relaxed">{trainer.shortBio}</p>
                 {trainer.skills && (
-                  <div className="flex flex-wrap gap-1 pt-1">
+                  <div className="flex flex-wrap gap-1.5 pt-1">
                     {trainer.skills.slice(0, 4).map((s, sidx) => (
-                      <span key={sidx} className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">
+                      <span key={sidx} className="text-xs bg-slate-800 border border-slate-700 text-slate-200 px-2.5 py-0.5 rounded-lg font-medium">
                         {s}
                       </span>
                     ))}
@@ -649,105 +1237,315 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         </div>
       </section>
 
-      {/* SECTION 4: STUDENT REVIEWS & TESTIMONIALS */}
-      <section className="py-12 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60">
+      {/* SECTION 8: STUDENT REVIEWS & TESTIMONIALS */}
+      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
         <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-bold">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs sm:text-sm font-bold">
             <Star className="w-4 h-4 fill-amber-400" />
             <span>শিক্ষার্থীদের মতামত ও সাফল্য</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white">আমাদের গ্র্যাজুয়েটরা যা বলছেন</h2>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">আমাদের গ্র্যাজুয়েটরা যা বলছেন</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {displayReviews.map(rev => (
-            <div
-              key={rev.id}
-              className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src={rev.studentPhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
-                      alt={rev.studentName}
-                      className="w-10 h-10 rounded-xl object-cover ring-1 ring-amber-400/30"
-                    />
-                    <div>
-                      <h4 className="font-bold text-white text-xs">{rev.studentName}</h4>
-                      <p className="text-[10px] text-slate-400">{rev.profession || 'Student'}</p>
+          {/* Custom Reviews from landingConfig if available */}
+          {customReviews.length > 0
+            ? customReviews.map((rev, idx) => (
+                <div
+                  key={idx}
+                  className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-700 transition-all"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 font-black flex items-center justify-center text-base">
+                          {rev.name.charAt(0)}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-white text-sm">{rev.name}</h4>
+                          <p className="text-xs text-slate-400">{rev.roleOrBatch}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-0.5 text-amber-400">
+                        <Star className="w-4 h-4 fill-amber-400" />
+                        <span className="text-xs font-bold">{rev.rating || 5}.0</span>
+                      </div>
                     </div>
+
+                    <p className="text-sm text-slate-200 leading-relaxed italic">"{rev.text}"</p>
                   </div>
-                  <div className="flex items-center space-x-0.5 text-amber-400">
-                    <Star className="w-3 h-3 fill-amber-400" />
-                    <span className="text-xs font-bold">{rev.rating}.0</span>
+
+                  <div className="text-xs text-slate-400 pt-2 border-t border-slate-800/80 font-medium">
+                    ✓ ভেরিফায়েড শিক্ষার্থী রিভিউ
                   </div>
                 </div>
+              ))
+            : displayCmsReviews.length > 0
+            ? displayCmsReviews.map(rev => (
+                <div
+                  key={rev.id}
+                  className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-700 transition-all"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={rev.studentPhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
+                          alt={rev.studentName}
+                          className="w-11 h-11 rounded-xl object-cover ring-1 ring-amber-400/40"
+                        />
+                        <div>
+                          <h4 className="font-bold text-white text-sm">{rev.studentName}</h4>
+                          <p className="text-xs text-slate-400">{rev.profession || 'Student'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-0.5 text-amber-400">
+                        <Star className="w-4 h-4 fill-amber-400" />
+                        <span className="text-xs font-bold">{rev.rating}.0</span>
+                      </div>
+                    </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed italic">"{rev.reviewText}"</p>
-              </div>
+                    <p className="text-sm text-slate-200 leading-relaxed italic">"{rev.reviewText}"</p>
+                  </div>
 
-              <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80">
-                {rev.batchNumber} • {rev.location}
+                  <div className="text-xs text-slate-400 pt-2 border-t border-slate-800/80 font-medium">
+                    {rev.batchNumber} • {rev.location}
+                  </div>
+                </div>
+              ))
+            : DEFAULT_REVIEWS.map((rev, idx) => (
+                <div
+                  key={idx}
+                  className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-700 transition-all"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 font-black flex items-center justify-center text-base">
+                          {rev.name.charAt(0)}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-white text-sm">{rev.name}</h4>
+                          <p className="text-xs text-slate-400">{rev.roleOrBatch}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-0.5 text-amber-400">
+                        <Star className="w-4 h-4 fill-amber-400" />
+                        <span className="text-xs font-bold">{rev.rating || 5}.0</span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-slate-200 leading-relaxed italic">"{rev.text}"</p>
+                  </div>
+
+                  <div className="text-xs text-slate-400 pt-2 border-t border-slate-800/80 font-medium">
+                    ✓ ভেরিফায়েড শিক্ষার্থী রিভিউ
+                  </div>
+                </div>
+              ))}
+        </div>
+      </section>
+
+      {/* SECTION 9: CLASSROOM & LAB GALLERY */}
+      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+        <div className="text-center space-y-2 mb-8">
+          <div className="flex items-center justify-center gap-2">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-sm font-bold">
+              <Laptop className="w-4 h-4" />
+              <span>ল্যাব ও ক্যাম্পাস এনভায়রনমেন্ট</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsEditorOpen(true)}
+              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-colors cursor-pointer"
+            >
+              <Edit3 className="w-3 h-3" />
+              <span>ছবি পরিবর্তন / আপলোড</span>
+            </button>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">প্র্যাকটিক্যাল ল্যাব সেশনের কিছু মুহূর্ত</h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            ফার্মগেট ক্যাম্পাসের শীতাতপ নিয়ন্ত্রিত আধুনিক মাল্টিমিডিয়া ল্যাব ও প্রতিটি শিক্ষার্থীর জন্য আলাদা ডেডিকেটেড কম্পিউটার
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {(customGallery.length > 0
+            ? customGallery
+            : displayCmsPhotos.length > 0
+            ? displayCmsPhotos.map(p => ({ id: p.id, url: p.imageUrl, title: p.title, category: p.category }))
+            : DEFAULT_LAB_PHOTOS
+          ).map((photo, idx) => (
+            <div
+              key={photo.id || idx}
+              onClick={() => setSelectedLightboxImage({ url: photo.url, title: photo.title, category: photo.category })}
+              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 aspect-4/3 cursor-pointer shadow-lg hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all duration-300"
+            >
+              <img
+                src={photo.url}
+                alt={photo.title || 'Lab Photo'}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent opacity-80 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
+                <div className="flex items-end justify-between gap-2">
+                  <div>
+                    <h4 className="text-sm sm:text-base font-black text-white leading-snug drop-shadow-sm">{photo.title}</h4>
+                    {photo.category && (
+                      <span className="inline-block mt-1 text-xs font-semibold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md">
+                        {photo.category}
+                      </span>
+                    )}
+                  </div>
+                  <span className="p-2 rounded-xl bg-white/10 backdrop-blur-md text-white group-hover:bg-emerald-600 transition-colors shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                  </span>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* SECTION 5: CLASSROOM & LAB GALLERY */}
-      <section className="py-12 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60">
-        <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold">
-            <Laptop className="w-4 h-4" />
-            <span>ল্যাব ও ক্যাম্পাস এনভায়রনমেন্ট</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white">প্র্যাকটিক্যাল ল্যাব সেশনের কিছু মুহূর্ত</h2>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-          {displayPhotos.map(photo => (
-            <div
-              key={photo.id}
-              className="group relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 aspect-4/3"
-            >
-              <img
-                src={photo.imageUrl}
-                alt={photo.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
-                <span className="text-xs font-bold text-white">{photo.title}</span>
-                <span className="text-[10px] text-slate-300">{photo.category}</span>
-              </div>
+      {/* SECTION 10: FAQS ACCORDION */}
+      {faqs.length > 0 && (
+        <section className="py-14 px-4 sm:px-6 max-w-4xl mx-auto border-t border-slate-800/60 text-left">
+          <div className="text-center space-y-2 mb-8">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold">
+              <HelpCircle className="w-4 h-4" />
+              <span>সাধারণ প্রশ্ন ও উত্তর</span>
             </div>
-          ))}
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+              {landingConfig.faqsHeadline || 'সচরাচর জিজ্ঞাসিত প্রশ্ন (FAQs)'}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400">
+              কোর্স সম্পর্কিত আপনার যেকোনো প্রশ্নের উত্তর নিচে জেনে নিন
+            </p>
+          </div>
+
+          <div className="space-y-3.5">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div
+                  key={idx}
+                  className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition-colors"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
+                  >
+                    <span className="font-bold text-sm sm:text-base text-white pr-3 leading-snug">
+                      {idx + 1}. {faq.question}
+                    </span>
+                    {isOpen ? (
+                      <ChevronUp className="w-5 h-5 text-indigo-400 shrink-0" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-slate-500 shrink-0" />
+                    )}
+                  </button>
+                  {isOpen && (
+                    <div className="p-4 sm:p-5 pt-1 border-t border-slate-800 text-sm text-slate-200 leading-relaxed bg-slate-950/60">
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* SECTION 11: CAMPUS LOCATION & DIRECT CONTACT FOOTER */}
+      <section className="py-12 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800/60 text-left">
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="space-y-3">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold">
+              <Building className="w-4 h-4" />
+              <span>ক্যাম্পাস ভিজিট ও অফলাইন ভর্তি</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-black text-white">সরাসরি ক্যাম্পাসে এসে কথা বলুন</h3>
+            <div className="space-y-2 text-xs text-slate-300 pt-1">
+              <p className="flex items-start space-x-2">
+                <MapPin className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                <span>{campusAddress}</span>
+              </p>
+              <p className="flex items-center space-x-2">
+                <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>হটলাইন: <strong className="text-white font-bold">{campusPhone}</strong></span>
+              </p>
+              <p className="flex items-center space-x-2">
+                <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>সময়সূচী: {campusHours}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 flex flex-col justify-center">
+            <button
+              type="button"
+              onClick={() => setIsAdmissionOpen(true)}
+              className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+            >
+              <GraduationCap className="w-5 h-5" />
+              <span>অনলাইনে সিট বুকিং সম্পন্ন করুন</span>
+            </button>
+
+            <a
+              href={whatsAppUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={handleWhatsAppClick}
+              className="w-full py-3 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+            >
+              <MessageCircle className="w-4 h-4 fill-white" />
+              <span>হোয়াটসঅ্যাপে তাৎক্ষণিক কথা বলুন ({cleanWhatsAppNumber(rawPhone)})</span>
+            </a>
+          </div>
         </div>
       </section>
 
       {/* STICKY BOTTOM MOBILE ACTION BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800/80 p-3 sm:hidden backdrop-blur-md flex items-center justify-between gap-2">
-        <div className="pl-1">
-          <div className="text-xs text-slate-400 font-bold">কোর্স ফি</div>
-          <div className="text-base font-black text-white">৳{(course.offerFee || 6500).toLocaleString()}</div>
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800/80 px-3 py-2 sm:hidden backdrop-blur-md shadow-2xl space-y-1.5">
+        <div className="flex items-center justify-between text-[10px] text-slate-300 font-bold px-1">
+          <span className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            সরাসরি কথা বলুন:
+          </span>
+          <span className="text-amber-300 font-black">ফি: ৳{(course.offerFee || 6500).toLocaleString()}</span>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="grid grid-cols-3 gap-1.5">
+          {/* Mobile WhatsApp */}
           <a
             href={whatsAppUrl}
             target="_blank"
             rel="noreferrer"
             onClick={handleWhatsAppClick}
-            className="p-3 rounded-xl bg-emerald-600 text-white shadow-md"
+            className="py-2 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] font-bold"
           >
-            <MessageCircle className="w-5 h-5" />
+            <MessageCircle className="w-3.5 h-3.5 fill-white" />
+            <span>WhatsApp</span>
           </a>
+
+          {/* Mobile Messenger */}
+          <a
+            href={messengerUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={handleMessengerClick}
+            className="py-2 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] font-bold"
+          >
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Messenger</span>
+          </a>
+
+          {/* Mobile Admission */}
           <button
             onClick={() => setIsAdmissionOpen(true)}
-            className="px-5 py-3 rounded-xl bg-indigo-600 text-white font-black text-xs shadow-md flex items-center space-x-1.5"
+            className="py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-[11px] rounded-xl shadow-lg active:scale-95 flex items-center justify-center space-x-1 cursor-pointer"
           >
-            <span>ভর্তি কনফার্ম করুন</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>ভর্তি আবেদন</span>
           </button>
         </div>
       </div>
@@ -817,6 +1615,45 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Lab Gallery Photo Lightbox Modal */}
+      {selectedLightboxImage && (
+        <div
+          onClick={() => setSelectedLightboxImage(null)}
+          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="relative max-w-4xl w-full bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-3 p-3 sm:p-4"
+          >
+            {/* Top Bar */}
+            <div className="flex items-center justify-between px-2 pt-1">
+              <div>
+                <h4 className="text-base font-black text-white">{selectedLightboxImage.title || 'ক্যাম্পাস ও ল্যাব ফটো'}</h4>
+                {selectedLightboxImage.category && (
+                  <span className="text-xs text-emerald-400 font-semibold">{selectedLightboxImage.category}</span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedLightboxImage(null)}
+                className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* High-res Image */}
+            <div className="relative rounded-2xl overflow-hidden bg-black max-h-[70vh] flex items-center justify-center">
+              <img
+                src={selectedLightboxImage.url}
+                alt={selectedLightboxImage.title || 'Lab Photo Zoom'}
+                className="w-full h-auto max-h-[70vh] object-contain rounded-2xl"
+              />
+            </div>
           </div>
         </div>
       )}
