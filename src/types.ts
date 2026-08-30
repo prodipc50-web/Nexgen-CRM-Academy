@@ -62,13 +62,22 @@ export interface AcademySettings {
 
 export type LeadStatus =
   | 'New'
+  | 'Pending Verification'
+  | 'OTP Verified'
+  | 'Qualified'
   | 'Contacted'
   | 'Interested'
   | 'Demo Scheduled'
   | 'Demo Attended'
   | 'Follow-up'
   | 'Admission Pending'
+  | 'Confirmed'
+  | 'Paid'
+  | 'Enrolled'
   | 'Admitted'
+  | 'Duplicate'
+  | 'Suspicious'
+  | 'Rejected'
   | 'Not Interested'
   | 'Lost';
 
@@ -139,6 +148,7 @@ export interface Lead {
   id: string;
   leadCode: string; // e.g. NCA-LD-1042
   name: string;
+  studentName?: string; // Unified alias
   phone: string;
   altPhone?: string;
   email?: string;
@@ -147,15 +157,23 @@ export interface Lead {
   educationLevel: string;
   institution?: string;
   interestedCourseId: string;
+  courseName?: string;
   interestedBatchId?: string;
   preferredTime?: string;
+  preferredSchedule?: string;
+  preferredLearningMode?: 'Offline' | 'Online Live' | 'Hybrid';
+  learningMode?: 'Offline' | 'Online Live' | 'Hybrid';
   leadSource: string;
+  source?: string;
+  landingPage?: string;
+  landingPageUrl?: string;
   campaignId?: string;
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
   utmContent?: string;
   utmTerm?: string;
+  fbclid?: string;
   deviceType?: 'Mobile' | 'Desktop' | 'Tablet';
   locationCity?: string;
   counselorId: string;
@@ -164,9 +182,17 @@ export interface Lead {
   firstContactDate: string;
   comments?: string;
   requirements?: string;
+  message?: string;
   budget?: number;
-  preferredLearningMode?: 'Offline' | 'Online Live' | 'Hybrid';
   status: LeadStatus;
+  otpStatus?: 'Not Required' | 'Pending' | 'Verified' | 'Failed' | 'Expired';
+  fraudRiskScore?: number; // 0 - 100
+  fraudRiskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  fraudFlags?: string[];
+  isDuplicate?: boolean;
+  duplicateOfLeadId?: string;
+  duplicateSubmissionCount?: number;
+  lastDuplicateAt?: string;
   lostReason?: string;
   nextFollowUpDate?: string;
   nextFollowUpNotes?: string;
@@ -371,6 +397,43 @@ export interface LandingSectionConfig {
   customSubtitle?: string;
 }
 
+// Lead Form Field Config & Settings (Configurable from CRM)
+export interface LeadFormFieldSetting {
+  id: string;
+  fieldKey:
+    | 'studentName'
+    | 'phone'
+    | 'email'
+    | 'address'
+    | 'education'
+    | 'institution'
+    | 'profession'
+    | 'courseId'
+    | 'preferredSchedule'
+    | 'learningMode'
+    | 'message';
+  label: string;
+  placeholder: string;
+  enabled: boolean;
+  required: boolean;
+  sortOrder: number;
+}
+
+export interface LeadFormConfig {
+  isEnabled: boolean;
+  formTitle: string;
+  formSubtitle: string;
+  submitButtonText: string;
+  successMessage: string;
+  defaultLearningMode?: 'Offline' | 'Online Live' | 'Hybrid';
+  fields: LeadFormFieldSetting[];
+  enableCaptcha: boolean;
+  captchaMode: 'OFF' | 'ON' | 'HIGH_RISK_ONLY';
+  enableOtp: boolean;
+  otpMode: 'OFF' | 'ON' | 'HIGH_RISK_ONLY';
+  duplicateAction: 'UPDATE_EXISTING' | 'CREATE_FOLLOWUP' | 'FLAG_AS_DUPLICATE';
+}
+
 // Fraud & Bot Protection Config
 export interface FraudProtectionConfig {
   enableRateLimiting: boolean;
@@ -408,6 +471,17 @@ export interface OfflineMarketingConfig {
 export interface OnlineMarketingConfig {
   targetCountry: string; // "Bangladesh"
   supportedCities: string[]; // ['Dhaka', 'Chattogram', 'Sylhet', 'Rajshahi', 'Khulna', 'Barishal', 'Rangpur', 'Mymensingh', 'Cumilla', 'Gazipur', 'Narayanganj']
+}
+
+export interface CoursePreferredScheduleOption {
+  id: string;
+  label: string; // e.g. "শুক্রবার ও শনিবার (সকাল ১০:০০ - ১২:০০)"
+  days?: string; // e.g. "Friday & Saturday"
+  timeSlot?: string; // e.g. "10:00 AM - 12:00 PM"
+  mode?: 'Offline' | 'Online Live' | 'Hybrid' | 'Both';
+  availableSeats?: number;
+  isActive?: boolean;
+  sortOrder?: number;
 }
 
 export interface CourseLandingFaq {
@@ -534,6 +608,8 @@ export interface CourseLandingPageConfig {
   campusHours?: string;
 
   // Lead Form Configuration (Field Toggles)
+  preferredSchedulesTitle?: string;
+  preferredSchedules?: CoursePreferredScheduleOption[];
   leadFormFields?: {
     showFullName: boolean;
     showPhone: boolean;
@@ -607,6 +683,10 @@ export interface CourseLandingPageConfig {
   seoOgDescription?: string;
   seoOgImage?: string;
   canonicalUrl?: string;
+  slug?: string;
+  focusKeyword?: string;
+  secondaryKeywords?: string[];
+  noIndex?: boolean;
 
   // Status & Version
   publishStatus?: 'Draft' | 'Published' | 'Archived';
@@ -614,10 +694,26 @@ export interface CourseLandingPageConfig {
   lastPublishedAt?: string;
 }
 
+export interface CourseSEOConfig {
+  seoTitle?: string;
+  metaDescription?: string;
+  slug?: string;
+  focusKeyword?: string;
+  secondaryKeywords?: string[];
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  noIndex?: boolean;
+  breadcrumbs?: { name: string; url: string }[];
+  schemaType?: string;
+}
+
 export interface Course {
   id: string;
   code: string; // e.g. NCA-CRS-01
   name: string;
+  slug?: string;
   shortName?: string;
   category: string;
   description: string;
@@ -632,6 +728,7 @@ export interface Course {
   deliveryMode?: 'Offline' | 'Online Live' | 'Hybrid';
   livePlatform?: string;
   recordingAccess?: string;
+  seo?: CourseSEOConfig;
 
   // Duration
   durationValue?: number;
@@ -1283,21 +1380,94 @@ export interface NotificationLog {
 
 export interface MarketingAnalyticsConfig {
   metaPixelId?: string; // e.g. '123456789012345'
-  metaPixelEnabled: boolean;
+  metaPixelEnabled?: boolean;
+  metaCapiEnabled?: boolean; // Meta Conversions API (Server-Side)
+  metaCapiAccessToken?: string; // System user access token for CAPI
+  metaCapiTestEventCode?: string; // e.g. 'TEST12345' for Events Manager test window
   googleAnalyticsId?: string; // e.g. 'G-XXXXXXXXXX'
-  googleAnalyticsEnabled: boolean;
+  googleAnalyticsEnabled?: boolean;
   googleTagManagerId?: string; // e.g. 'GTM-XXXXXX'
-  googleTagManagerEnabled: boolean;
-  conversionApiToken?: string; // Server-side or Meta CAPI token
+  googleTagManagerEnabled?: boolean;
+  conversionApiToken?: string; // Legacy fallback
   tiktokPixelId?: string;
-  enableAutoUtmCapture: boolean;
-  enableExitIntentPopup: boolean;
+  enableAutoUtmCapture?: boolean;
+  enableEventDeduplication?: boolean; // Browser & CAPI deduplication via event_id
+  enableExitIntentPopup?: boolean;
   exitIntentTitle?: string;
   exitIntentSubtitle?: string;
   exitIntentDiscountCode?: string;
-  enableFloatingWhatsApp: boolean;
+  enableFloatingWhatsApp?: boolean;
   floatingWhatsAppNumber?: string;
   floatingWhatsAppWelcomeText?: string;
+  // Google Ads Tracking Readiness
+  googleAdsConversionId?: string; // e.g. 'AW-123456789'
+  googleAdsConversionLabel?: string; // e.g. 'abc-xyz'
+  googleAdsEnabled?: boolean;
+}
+
+export interface GoogleBusinessProfileConfig {
+  profileName?: string;
+  mapsUrl?: string;
+  reviewUrl?: string; // Official Google Review CTA link
+  businessCategory?: string; // e.g. 'Computer Training School'
+  source: 'CENTRAL_SETTINGS' | 'MANUAL_OVERRIDE';
+  manualAddress?: string;
+  manualPhone?: string;
+  manualEmail?: string;
+  manualOpeningHours?: string;
+  latitude?: number | string;
+  longitude?: number | string;
+  mapEmbedUrl?: string;
+  serviceAreas?: string[];
+  verificationStatus?: 'VERIFIED_EXTERNALLY' | 'PENDING_MANUAL_VERIFICATION';
+  verifiedRating?: number;
+  verifiedReviewCount?: number;
+}
+
+export interface CourseSlugRedirect {
+  id: string;
+  fromSlug?: string;
+  toSlug?: string;
+  oldSlug?: string;
+  newSlug?: string;
+  statusCode?: 301 | 302;
+  createdAt: string;
+  isActive: boolean;
+}
+
+export interface GlobalSeoConfig {
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  canonicalBaseUrl: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImageUrl: string;
+  twitterHandle?: string;
+  geoRegion?: string; // "BD-13" (Dhaka)
+  geoPlacename?: string; // "Farmgate, Dhaka"
+  geoPosition?: string; // "23.7527;90.3887"
+  googleSiteVerification?: string;
+  bingSiteVerification?: string;
+  sitemapEnabled?: boolean;
+  robotsTxtEnabled?: boolean;
+  robotsTxtCustomContent?: string;
+  enableLocalBusinessSchema?: boolean;
+  enableCourseSchema?: boolean;
+  enableFaqSchema?: boolean;
+  enableBreadcrumbSchema?: boolean;
+  targetKeywordThemes?: string[];
+  serviceAreas?: string[];
+  faqItems?: { question: string; answer: string }[];
+  
+  // Phase 5: Google Business Profile & Local Discovery
+  googleBusinessProfile?: GoogleBusinessProfileConfig;
+  
+  // Phase 5: Course 301/404 Redirect Map
+  courseRedirects?: CourseSlugRedirect[];
+  
+  // Phase 5: Google Review Link
+  googleReviewUrl?: string;
 }
 
 export interface WebsiteCmsConfig {
@@ -1327,8 +1497,14 @@ export interface WebsiteCmsConfig {
   }[];
   onlineAdmissionActive: boolean;
 
+  // SEO & Local SEO Configuration
+  seo?: GlobalSeoConfig;
+
   // Student Portal Configuration
   studentPortal?: StudentPortalConfig;
+
+  // Universal Lead Form Configuration (Configurable from CRM)
+  leadFormConfig?: LeadFormConfig;
 
   // Marketing & Ad Tracking Engine (Meta Pixel, GA4, GTM, CAPI, UTMs)
   marketing?: MarketingAnalyticsConfig;

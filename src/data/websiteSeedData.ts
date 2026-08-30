@@ -160,9 +160,9 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
     { label: 'Online Admission Cell', email: 'admission@nexgenacademy.edu.bd' },
     { label: 'Corporate & Job Placement', email: 'careers@nexgenacademy.edu.bd' }
   ],
-  officeAddress: 'Level 4 & 5, Al-Razi Complex, 166/1 Shahid Syed Nazrul Islam Sarani, Farmgate, Dhaka-1215, Bangladesh',
-  campusDirections: 'Opposite to Ananda Cinema Hall, 2 minutes walking distance from Farmgate Metro Station (Exit 2).',
-  officeHours: 'Saturday to Friday: 9:00 AM – 8:30 PM (7 Days Open)',
+  officeAddress: '14/B, Garden Road, Kazipara, Farmgate, Dhaka–1215, Bangladesh',
+  campusDirections: 'Behind Bashundhara City Market, 2 minutes walking distance from Farmgate Metro Station.',
+  officeHours: 'Saturday to Friday: 9:00 AM – 8:00 PM (7 Days Open)',
   googleMapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.848881261358!2d90.3887!3d23.7527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ1JzA5LjciTiA5MMKwMjMnMTkuMyJF!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd',
 
   // Legacy fallbacks
@@ -212,6 +212,78 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
     ]
   },
 
+  // SEO & Local SEO Engine (Rankings, Local Schema, SERP Previews, Sitemaps)
+  seo: {
+    metaTitle: 'Nexgen Computer Academy - Best Computer Training Center in Farmgate, Dhaka',
+    metaDescription: 'Govt recognized top IT training institute in Farmgate, Dhaka. Practical Computer Office Application, Advanced Excel, Web Dev, Graphic Design, Digital Marketing & AI courses with 100% lab practice & job placement.',
+    keywords: [
+      'Computer Course in Farmgate',
+      'Computer Training Center in Farmgate',
+      'Computer Course in Dhaka',
+      'Computer Office Application Course',
+      'Advanced Excel Course in Farmgate',
+      'Best IT Training Institute in Farmgate',
+      'Computer Training in Farmgate',
+      'Graphic Design Course Farmgate',
+      'Web Development Course Farmgate',
+      'AI Computer Course Dhaka',
+      'Practical Computer Training Dhaka',
+      'Govt Certified Computer Course Farmgate'
+    ],
+    canonicalBaseUrl: 'https://nexgenacademy.edu.bd',
+    ogTitle: 'Nexgen Computer Academy | #1 Practical IT Training Center in Farmgate, Dhaka',
+    ogDescription: 'Master Office Application, Excel, MERN Web Dev, UI/UX Design & Digital Marketing with 1-on-1 practical lab guidance & verifiable certificates.',
+    ogImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&auto=format&fit=crop&q=80',
+    twitterHandle: '@nexgenacademybd',
+    geoRegion: 'BD-13',
+    geoPlacename: 'Farmgate, Dhaka, Bangladesh',
+    geoPosition: '23.7527;90.3887',
+    googleSiteVerification: 'google-site-verification-nexgen2026',
+    bingSiteVerification: 'bing-site-verification-nexgen2026',
+    sitemapEnabled: true,
+    robotsTxtEnabled: true,
+    enableLocalBusinessSchema: true,
+    enableCourseSchema: true,
+    enableFaqSchema: true,
+    enableBreadcrumbSchema: true,
+    targetKeywordThemes: [
+      'Computer Course in Farmgate',
+      'Computer Training Center in Farmgate',
+      'Computer Course in Dhaka',
+      'Computer Office Application Course',
+      'Advanced Excel Course in Farmgate',
+      'Computer Training in Farmgate',
+      'AI Computer Course',
+      'Practical Computer Training'
+    ],
+    serviceAreas: [
+      'Farmgate',
+      'Panthapath',
+      'Tejgaon',
+      'Dhanmondi',
+      'Bijoy Sarani',
+      'Indira Road',
+      'Green Road',
+      'Kawran Bazar',
+      'Dhaka Division',
+      'All Bangladesh (Online)'
+    ],
+    faqItems: [
+      {
+        question: 'Why choose Nexgen Computer Academy in Farmgate for IT courses?',
+        answer: 'Nexgen Computer Academy offers 100% lab-centric practical training with dedicated high-spec PC per student, industry-expert mentors, government verifiable certificates, lifetime lab access, and job placement assistance in Dhaka.'
+      },
+      {
+        question: 'Where is Nexgen Computer Academy located?',
+        answer: 'Nexgen Computer Academy is located at Level 4 & 5, Al-Razi Complex, 166/1 Shahid Syed Nazrul Islam Sarani, Farmgate, Dhaka-1215 (Opposite Ananda Cinema Hall, 2 min from Farmgate Metro Station Exit 2).'
+      },
+      {
+        question: 'Do you offer both Offline Classroom and Online Live courses?',
+        answer: 'Yes! Students from Farmgate, Tejgaon, Dhanmondi, and Dhaka can join our AC practical lab batches, while students from across Bangladesh can join our interactive Live Online batches with class recording access.'
+      }
+    ]
+  },
+
   // Marketing & Ad Tracking Engine (Meta Pixel, GA4, UTMs)
   marketing: {
     metaPixelId: '3044343639090431',
@@ -243,6 +315,122 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
     highRiskThreshold: 60,
     suspiciousThreshold: 30,
     autoBlockHighRisk: false
+  },
+
+  // Universal Lead Form Configuration (Configurable from CRM)
+  leadFormConfig: {
+    isEnabled: true,
+    formTitle: 'কোর্স ভর্তি ও স্কলারশিপ আবেদন ফরম',
+    formSubtitle: 'আপনার প্রয়োজনীয় তথ্য দিয়ে আবেদন করুন। আমাদের অভিজ্ঞ ক্যারিয়ার কাউন্সেলর আপনাকে সঠিক দিকনির্দেশনা প্রদান করবেন।',
+    submitButtonText: 'আবেদন নিশ্চিত করুন',
+    successMessage: 'আপনার তথ্য সফলভাবে গ্রহণ করা হয়েছে। আমাদের টিম শিগগিরই আপনার সাথে যোগাযোগ করবে।',
+    defaultLearningMode: 'Offline',
+    enableCaptcha: false,
+    captchaMode: 'HIGH_RISK_ONLY',
+    enableOtp: false,
+    otpMode: 'OFF',
+    duplicateAction: 'CREATE_FOLLOWUP',
+    fields: [
+      {
+        id: 'f-name',
+        fieldKey: 'studentName',
+        label: 'আপনার নাম (Student Full Name)',
+        placeholder: 'যেমন: মো: সাইফুল ইসলাম',
+        enabled: true,
+        required: true,
+        sortOrder: 1
+      },
+      {
+        id: 'f-phone',
+        fieldKey: 'phone',
+        label: 'মোবাইল নম্বর (Active WhatsApp / Phone)',
+        placeholder: '017XXXXXXXX',
+        enabled: true,
+        required: true,
+        sortOrder: 2
+      },
+      {
+        id: 'f-course',
+        fieldKey: 'courseId',
+        label: 'পছন্দের কোর্স (Selected Course)',
+        placeholder: 'কোর্স নির্বাচন করুন',
+        enabled: true,
+        required: true,
+        sortOrder: 3
+      },
+      {
+        id: 'f-schedule',
+        fieldKey: 'preferredSchedule',
+        label: 'সুবিধাজনক সময় (Preferred Schedule / Batch Time)',
+        placeholder: 'যেমন: শুক্রবার ও শনিবার (সকাল ১০:০০ - ১২:০০)',
+        enabled: true,
+        required: true,
+        sortOrder: 4
+      },
+      {
+        id: 'f-mode',
+        fieldKey: 'learningMode',
+        label: 'শেখার মাধ্যম (Learning Mode)',
+        placeholder: 'অফলাইন ল্যাব / অনলাইন লাইভ',
+        enabled: true,
+        required: false,
+        sortOrder: 5
+      },
+      {
+        id: 'f-email',
+        fieldKey: 'email',
+        label: 'ইমেইল অ্যাড্রেস (Email Address)',
+        placeholder: 'example@gmail.com',
+        enabled: true,
+        required: false,
+        sortOrder: 6
+      },
+      {
+        id: 'f-education',
+        fieldKey: 'education',
+        label: 'সর্বশেষ শিক্ষাগত যোগ্যতা (Education)',
+        placeholder: 'যেমন: HSC / Diploma / B.Sc / Masters',
+        enabled: true,
+        required: false,
+        sortOrder: 7
+      },
+      {
+        id: 'f-institution',
+        fieldKey: 'institution',
+        label: 'প্রতিষ্ঠান / কলেজ / বিশ্ববিদ্যালয় (Institution)',
+        placeholder: 'যেমন: ঢাকা কলেজ / পলিটেকনিক',
+        enabled: true,
+        required: false,
+        sortOrder: 8
+      },
+      {
+        id: 'f-profession',
+        fieldKey: 'profession',
+        label: 'বর্তমান পেশা (Profession / Occupation)',
+        placeholder: 'যেমন: Student / Job Holder / Freelancer',
+        enabled: true,
+        required: false,
+        sortOrder: 9
+      },
+      {
+        id: 'f-address',
+        fieldKey: 'address',
+        label: 'বর্তমান ঠিকানা / এলাকা (Address / City)',
+        placeholder: 'যেমন: ফার্মগেট, ঢাকা',
+        enabled: true,
+        required: false,
+        sortOrder: 10
+      },
+      {
+        id: 'f-message',
+        fieldKey: 'message',
+        label: 'আপনার কোনো প্রশ্ন বা মন্তব্য থাকলে লিখুন (Message / Note)',
+        placeholder: 'কোর্স সম্পর্কে আপনার কোনো প্রশ্ন থাকলে লিখুন...',
+        enabled: true,
+        required: false,
+        sortOrder: 11
+      }
+    ]
   },
 
   // OTP Verification System

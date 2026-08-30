@@ -201,6 +201,55 @@ interface AcademyContextType {
   addLead: (lead: Omit<Lead, 'id' | 'leadCode' | 'createdAt' | 'updatedAt'>) => Lead;
   updateLead: (id: string, updates: Partial<Lead>) => void;
   deleteLead: (id: string) => void;
+  submitPublicLead: (payload: {
+    fullName?: string;
+    studentName?: string;
+    name?: string;
+    phone: string;
+    email?: string;
+    address?: string;
+    education?: string;
+    educationLevel?: string;
+    institution?: string;
+    profession?: string;
+    occupation?: string;
+    courseId?: string;
+    interestedCourseId?: string;
+    courseName?: string;
+    preferredSchedule?: string;
+    preferredTime?: string;
+    learningMode?: string;
+    preferredLearningMode?: string;
+    message?: string;
+    comments?: string;
+    source?: string;
+    leadSource?: string;
+    landingPageUrl?: string;
+    landingPage?: string;
+    utmSource?: string;
+    utmMedium?: string;
+    utmCampaign?: string;
+    utmContent?: string;
+    utmTerm?: string;
+    fbclid?: string;
+    honeypotVal?: string;
+    renderTimestampMs?: number;
+    captchaAnswer?: string;
+    captchaExpected?: string;
+    otpVerified?: boolean;
+  }) => Promise<{
+    success: boolean;
+    lead?: Lead;
+    requiresOtp?: boolean;
+    requiresCaptcha?: boolean;
+    riskScore?: number;
+    riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    fraudFlags?: string[];
+    isDuplicate?: boolean;
+    eventId?: string;
+    message: string;
+    error?: string;
+  }>;
 
   addFollowUp: (followUp: Omit<FollowUp, 'id' | 'createdAt'>) => void;
 
@@ -487,7 +536,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         const parsed: Course[] = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return mergeCoursesWithDefaults(parsed);
+          return parsed;
         }
       } catch (e) {
         console.error('Failed to parse courses from storage', e);
@@ -645,6 +694,31 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           socialLinks: { ...INITIAL_WEBSITE_CMS_CONFIG.socialLinks, ...(parsed.socialLinks || {}) },
           aboutUs: { ...INITIAL_WEBSITE_CMS_CONFIG.aboutUs, ...(parsed.aboutUs || {}) },
           policies: { ...INITIAL_WEBSITE_CMS_CONFIG.policies, ...(parsed.policies || {}) },
+          seo: {
+            ...INITIAL_WEBSITE_CMS_CONFIG.seo,
+            ...(parsed.seo || {}),
+            keywords: Array.isArray(parsed.seo?.keywords) && parsed.seo.keywords.length > 0
+              ? parsed.seo.keywords
+              : (INITIAL_WEBSITE_CMS_CONFIG.seo?.keywords || []),
+            serviceAreas: Array.isArray(parsed.seo?.serviceAreas) && parsed.seo.serviceAreas.length > 0
+              ? parsed.seo.serviceAreas
+              : (INITIAL_WEBSITE_CMS_CONFIG.seo?.serviceAreas || []),
+            targetKeywordThemes: Array.isArray(parsed.seo?.targetKeywordThemes) && parsed.seo.targetKeywordThemes.length > 0
+              ? parsed.seo.targetKeywordThemes
+              : (INITIAL_WEBSITE_CMS_CONFIG.seo?.targetKeywordThemes || []),
+            faqItems: Array.isArray(parsed.seo?.faqItems) && parsed.seo.faqItems.length > 0
+              ? parsed.seo.faqItems
+              : (INITIAL_WEBSITE_CMS_CONFIG.seo?.faqItems || [])
+          },
+          leadFormConfig: {
+            ...INITIAL_WEBSITE_CMS_CONFIG.leadFormConfig,
+            ...(parsed.leadFormConfig || {}),
+            fields: Array.isArray(parsed.leadFormConfig?.fields) && parsed.leadFormConfig.fields.length > 0
+              ? parsed.leadFormConfig.fields
+              : (INITIAL_WEBSITE_CMS_CONFIG.leadFormConfig?.fields || [])
+          },
+          fraudProtection: { ...INITIAL_WEBSITE_CMS_CONFIG.fraudProtection, ...(parsed.fraudProtection || {}) },
+          otpConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.otpConfig, ...(parsed.otpConfig || {}) },
           multiplePhones: Array.isArray(parsed.multiplePhones) && parsed.multiplePhones.length > 0 ? parsed.multiplePhones : INITIAL_WEBSITE_CMS_CONFIG.multiplePhones,
           multipleEmails: Array.isArray(parsed.multipleEmails) && parsed.multipleEmails.length > 0 ? parsed.multipleEmails : INITIAL_WEBSITE_CMS_CONFIG.multipleEmails
         };
@@ -961,7 +1035,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
             if (Array.isArray(data.staffList) && data.staffList.length > 0) setStaffList(data.staffList);
             if (Array.isArray(data.categories) && data.categories.length > 0) setCategories(data.categories);
-            if (Array.isArray(data.courses) && data.courses.length > 0) setCourses(mergeCoursesWithDefaults(data.courses));
+            if (Array.isArray(data.courses) && data.courses.length > 0) setCourses(data.courses);
             if (Array.isArray(data.batches)) setBatches(data.batches);
             if (Array.isArray(data.rooms)) setRooms(data.rooms);
             if (Array.isArray(data.campaigns)) setCampaigns(data.campaigns);
@@ -1093,14 +1167,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const timer = setTimeout(() => {
       syncToCloudNow();
-    }, 2500);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [
     staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
-    seminars
+    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs
   ]);
 
   // Save to localStorage when state changes
@@ -1408,6 +1482,198 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     ]);
     setLeads(prev => prev.filter(l => l.id !== id));
     logAudit('Lead Moved to Trash', 'CRM', id, `Moved lead "${target.name}" to trash`);
+  };
+
+  // Submit Lead from Public Website / Landing Page with Server Fraud Check & OTP
+  const submitPublicLead = async (payload: {
+    fullName?: string;
+    studentName?: string;
+    name?: string;
+    phone: string;
+    email?: string;
+    address?: string;
+    education?: string;
+    educationLevel?: string;
+    institution?: string;
+    profession?: string;
+    occupation?: string;
+    courseId?: string;
+    interestedCourseId?: string;
+    courseName?: string;
+    preferredSchedule?: string;
+    preferredTime?: string;
+    learningMode?: string;
+    preferredLearningMode?: string;
+    message?: string;
+    comments?: string;
+    source?: string;
+    leadSource?: string;
+    landingPageUrl?: string;
+    landingPage?: string;
+    utmSource?: string;
+    utmMedium?: string;
+    utmCampaign?: string;
+    utmContent?: string;
+    utmTerm?: string;
+    fbclid?: string;
+    honeypotVal?: string;
+    renderTimestampMs?: number;
+    captchaAnswer?: string;
+    captchaExpected?: string;
+    otpVerified?: boolean;
+  }) => {
+    try {
+      const response = await fetch('/api/leads/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...payload,
+          fraudConfig: websiteCmsConfig.fraudProtection,
+          otpMode: websiteCmsConfig.leadFormConfig?.otpMode || websiteCmsConfig.otpConfig?.mode || 'OFF'
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          requiresCaptcha: data.requiresCaptcha,
+          riskScore: data.riskScore,
+          fraudFlags: data.fraudFlags,
+          message: data.error || 'আবেদন জমা দিতে সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।'
+        };
+      }
+
+      if (data.requiresOtp) {
+        return {
+          success: false,
+          requiresOtp: true,
+          riskScore: data.riskScore,
+          riskLevel: data.riskLevel,
+          fraudFlags: data.fraudFlags,
+          message: data.message || 'OTP verification is required.'
+        };
+      }
+
+      if (data.success && data.lead) {
+        const newLeadRecord: Lead = data.lead;
+
+        // Check if matching phone number already exists in CRM
+        const cleanPhone = newLeadRecord.phone.replace(/[\s\-\+\(\)]/g, '').trim();
+        const existingLead = leads.find(l => l.phone.replace(/[\s\-\+\(\)]/g, '').trim() === cleanPhone);
+
+        const duplicateAction = websiteCmsConfig.leadFormConfig?.duplicateAction || 'CREATE_FOLLOWUP';
+
+        if (existingLead && duplicateAction === 'CREATE_FOLLOWUP') {
+          // Add a follow-up to the existing lead rather than creating a fragmented second record
+          const followUpId = `flw-${Date.now()}`;
+          const newFollowUp: FollowUp = {
+            id: followUpId,
+            leadId: existingLead.id,
+            date: new Date().toISOString().split('T')[0],
+            staffName: 'Website Lead Form',
+            contactMethod: 'Phone',
+            result: 'Interested',
+            conversationSummary: `Re-applied from website/landing page for course "${newLeadRecord.courseName || newLeadRecord.interestedCourseId}". Note: ${newLeadRecord.message || 'No additional note'}`,
+            notes: `Source: ${newLeadRecord.leadSource || 'Website'}, Schedule: ${newLeadRecord.preferredSchedule || 'N/A'}`,
+            nextAction: 'Counselor Call Back',
+            status: 'Pending',
+            createdAt: new Date().toISOString()
+          };
+
+          setFollowUps(prev => [newFollowUp, ...prev]);
+
+          // Update existing lead record with latest touchpoint and duplicate submission count
+          updateLead(existingLead.id, {
+            duplicateSubmissionCount: (existingLead.duplicateSubmissionCount || 1) + 1,
+            lastDuplicateAt: new Date().toISOString(),
+            preferredSchedule: newLeadRecord.preferredSchedule || existingLead.preferredSchedule,
+            comments: newLeadRecord.comments ? `${existingLead.comments || ''}\n[Re-applied]: ${newLeadRecord.comments}` : existingLead.comments
+          });
+
+          logAudit('Duplicate Lead Handled', 'CRM', existingLead.id, `Lead "${existingLead.name}" re-submitted form for ${newLeadRecord.courseName || 'course'}. Created automated follow-up.`);
+
+          return {
+            success: true,
+            lead: existingLead,
+            isDuplicate: true,
+            eventId: data.eventId,
+            riskScore: data.riskScore,
+            riskLevel: data.riskLevel,
+            fraudFlags: data.fraudFlags,
+            message: websiteCmsConfig.leadFormConfig?.successMessage || data.message
+          };
+        } else {
+          // Insert new verified lead
+          setLeads(prev => [newLeadRecord, ...prev]);
+          logAudit(
+            newLeadRecord.status === 'OTP Verified' ? 'Lead Verified & Created' : 'Lead Created (Web)',
+            'CRM',
+            newLeadRecord.id,
+            `Public lead "${newLeadRecord.name}" (${newLeadRecord.phone}) enrolled for ${newLeadRecord.courseName || newLeadRecord.interestedCourseId}. Risk: ${data.riskLevel || 'LOW'}`
+          );
+
+          return {
+            success: true,
+            lead: newLeadRecord,
+            isDuplicate: data.isDuplicate || false,
+            eventId: data.eventId,
+            riskScore: data.riskScore,
+            riskLevel: data.riskLevel,
+            fraudFlags: data.fraudFlags,
+            message: websiteCmsConfig.leadFormConfig?.successMessage || data.message
+          };
+        }
+      }
+
+      return {
+        success: false,
+        message: data.message || 'Something went wrong.'
+      };
+    } catch (err: any) {
+      console.error('submitPublicLead client error:', err);
+      // Fallback: If network failed or offline, save locally to ensure no lead loss
+      const fallbackId = `ld-${Date.now()}`;
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const fallbackLead: Lead = {
+        id: fallbackId,
+        leadCode: `NCA-LD-${randomSuffix}`,
+        name: payload.name || payload.studentName || payload.fullName || 'Student',
+        studentName: payload.studentName || payload.name || payload.fullName,
+        phone: payload.phone,
+        email: payload.email,
+        address: payload.address,
+        occupation: (payload.profession || payload.occupation || 'Student') as any,
+        educationLevel: payload.education || payload.educationLevel || 'HSC',
+        institution: payload.institution,
+        interestedCourseId: payload.courseId || payload.interestedCourseId || 'crs-01',
+        courseName: payload.courseName,
+        preferredSchedule: payload.preferredSchedule || payload.preferredTime,
+        preferredLearningMode: (payload.learningMode || payload.preferredLearningMode || 'Offline') as any,
+        leadSource: payload.source || payload.leadSource || 'Website Form (Offline Fallback)',
+        landingPageUrl: payload.landingPageUrl || payload.landingPage,
+        utmSource: payload.utmSource,
+        utmMedium: payload.utmMedium,
+        utmCampaign: payload.utmCampaign,
+        counselorId: 'st-01',
+        visitDate: new Date().toISOString().split('T')[0],
+        firstContactDate: new Date().toISOString().split('T')[0],
+        message: payload.message || payload.comments,
+        status: 'New',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      setLeads(prev => [fallbackLead, ...prev]);
+      logAudit('Lead Created (Local Fallback)', 'CRM', fallbackId, `Saved lead locally: ${fallbackLead.name} (${fallbackLead.phone})`);
+
+      return {
+        success: true,
+        lead: fallbackLead,
+        message: websiteCmsConfig.leadFormConfig?.successMessage || 'আপনার তথ্য সফলভাবে গ্রহণ করা হয়েছে।'
+      };
+    }
   };
 
   const addFollowUp = (followUpData: Omit<FollowUp, 'id' | 'createdAt'>) => {
@@ -3554,6 +3820,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addLead,
         updateLead,
         deleteLead,
+        submitPublicLead,
         addFollowUp,
         createAdmission,
         addPayment,

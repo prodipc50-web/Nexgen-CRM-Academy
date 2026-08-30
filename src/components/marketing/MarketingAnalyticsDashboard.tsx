@@ -58,10 +58,14 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
     setTimeout(() => setNotificationMsg(null), 3500);
   };
 
-  // Local config state for Pixel, GA4, GTM, and CRO Popups
+  // Local config state for Pixel, GA4, GTM, CAPI, and CRO Popups
   const [config, setConfig] = useState<MarketingAnalyticsConfig>({
     metaPixelId: websiteCmsConfig?.marketing?.metaPixelId || '',
     metaPixelEnabled: websiteCmsConfig?.marketing?.metaPixelEnabled ?? true,
+    metaCapiEnabled: websiteCmsConfig?.marketing?.metaCapiEnabled ?? true,
+    metaCapiAccessToken: websiteCmsConfig?.marketing?.metaCapiAccessToken || '',
+    metaCapiTestEventCode: websiteCmsConfig?.marketing?.metaCapiTestEventCode || '',
+    enableEventDeduplication: websiteCmsConfig?.marketing?.enableEventDeduplication ?? true,
     googleAnalyticsId: websiteCmsConfig?.marketing?.googleAnalyticsId || '',
     googleAnalyticsEnabled: websiteCmsConfig?.marketing?.googleAnalyticsEnabled ?? true,
     googleTagManagerId: websiteCmsConfig?.marketing?.googleTagManagerId || '',
@@ -297,7 +301,7 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
         {/* LEFT COLUMN: PIXEL & TRACKING CONFIGURATION (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* Card 1: Meta Pixel Setup */}
+          {/* Card 1: Meta Pixel & Conversions API (CAPI) Setup */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
               <div className="flex items-center space-x-2.5">
@@ -305,8 +309,8 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
                   f
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800">Meta Pixel (Facebook & Instagram Ads)</h3>
-                  <p className="text-[11px] text-slate-500">Injects official Facebook Pixel script for retargeting & ROAS optimization</p>
+                  <h3 className="text-sm font-bold text-slate-800">Meta Pixel & Conversions API (CAPI)</h3>
+                  <p className="text-[11px] text-slate-500">Browser + Server dual-channel tracking with exact Event-ID deduplication</p>
                 </div>
               </div>
 
@@ -332,12 +336,12 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
                     value={config.metaPixelId}
                     onChange={e => setConfig({ ...config, metaPixelId: e.target.value.trim() })}
                     placeholder="e.g. 789124503211482"
-                    className="w-full pl-3.5 pr-24 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none"
+                    className="w-full pl-3.5 pr-28 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none"
                   />
                   <div className="absolute right-2 top-1.5 flex items-center space-x-1">
                     <button
-                      onClick={() => testFirePixel('PageView')}
-                      className="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-[10px] font-bold transition-all"
+                      onClick={() => testFirePixel('Lead')}
+                      className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-[10px] font-bold transition-all"
                       title="Simulate Event"
                     >
                       Test Fire
@@ -349,11 +353,74 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
                 </p>
               </div>
 
+              {/* Meta Conversions API (Server-Side) */}
+              <div className="p-3.5 bg-blue-50/50 rounded-lg border border-blue-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800">Meta Conversions API (Server CAPI)</h4>
+                      <p className="text-[10px] text-slate-500">Bypasses ad-blockers and iOS 14+ tracking restrictions via direct server API</p>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={config.metaCapiEnabled}
+                    onChange={e => setConfig({ ...config, metaCapiEnabled: e.target.checked })}
+                    className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                  />
+                </div>
+
+                {config.metaCapiEnabled && (
+                  <div className="space-y-2.5 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        CAPI System User Access Token (Graph API)
+                      </label>
+                      <input
+                        type="password"
+                        value={config.metaCapiAccessToken || ''}
+                        onChange={e => setConfig({ ...config, metaCapiAccessToken: e.target.value.trim() })}
+                        placeholder="EAABw..."
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded text-xs font-mono text-slate-800 outline-none focus:border-blue-600"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Test Event Code (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={config.metaCapiTestEventCode || ''}
+                          onChange={e => setConfig({ ...config, metaCapiTestEventCode: e.target.value.trim() })}
+                          placeholder="e.g. TEST12345"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded text-xs font-mono text-slate-800 outline-none uppercase"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2 pt-4">
+                        <input
+                          type="checkbox"
+                          id="chk-dedup"
+                          checked={config.enableEventDeduplication ?? true}
+                          onChange={e => setConfig({ ...config, enableEventDeduplication: e.target.checked })}
+                          className="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"
+                        />
+                        <label htmlFor="chk-dedup" className="text-xs font-bold text-slate-700 cursor-pointer">
+                          Auto Deduplication (event_id)
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Standard Meta Events Auto-Tracked */}
               <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200/80">
                 <p className="text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
                   <span>Auto-Tracked Conversion Events:</span>
-                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Active</span>
+                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Browser + CAPI Active</span>
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600">
                   <div className="flex items-center space-x-1.5">
@@ -366,7 +433,7 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
                   </div>
                   <div className="flex items-center space-x-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                    <span><strong>Lead</strong> (Seminar Register)</span>
+                    <span><strong>Lead</strong> (Admission / Seminar)</span>
                   </div>
                   <div className="flex items-center space-x-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
@@ -378,7 +445,7 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
                   </div>
                   <div className="flex items-center space-x-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                    <span><strong>Contact</strong> (WhatsApp Click)</span>
+                    <span><strong>Contact</strong> (WhatsApp / Chat)</span>
                   </div>
                 </div>
               </div>

@@ -11,7 +11,8 @@ import {
   CourseLandingTargetAudienceItem,
   CourseLandingFaq,
   CourseLandingReview,
-  CourseLandingGalleryImage
+  CourseLandingGalleryImage,
+  CoursePreferredScheduleOption
 } from '../../types';
 import {
   BookOpen,
@@ -68,6 +69,7 @@ import {
 import { evaluateFormSubmission } from '../../utils/fraudProtectionEngine';
 import { requestNewOtp, verifyOtpSubmission } from '../../utils/otpVerificationEngine';
 import { copyToClipboardSafe } from '../../utils/clipboardHelper';
+import { getCourseSeoMetadata, applySeoMetadata } from '../../utils/seoHelper';
 
 interface MasterCourseLandingPageViewProps {
   course: Course;
@@ -233,8 +235,17 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   course: propCourse,
   onBackToFullWebsite
 }) => {
-  const { courses, websiteCmsConfig, staffList, addLead } = useAcademy();
+  const { courses, websiteCmsConfig, staffList, addLead, academySettings } = useAcademy();
   const course = courses.find(c => c.id === propCourse.id || c.code === propCourse.code) || propCourse;
+
+  // Dynamic Course SEO Metadata & JSON-LD Schemas (Course, BreadcrumbList, FAQPage)
+  useEffect(() => {
+    const assignedTrainers = staffList.filter(s =>
+      course.trainerIds?.includes(s.id) || s.id === course.trainerId
+    );
+    const seoMeta = getCourseSeoMetadata(course, academySettings, websiteCmsConfig, assignedTrainers);
+    applySeoMetadata(seoMeta);
+  }, [course, academySettings, websiteCmsConfig, staffList]);
 
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -272,6 +283,17 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   const pixelId = websiteCmsConfig?.marketing?.metaPixelId;
   const fraudConfig = websiteCmsConfig?.fraudProtection;
   const otpConfig = websiteCmsConfig?.otpConfig;
+
+  // Available Schedules (from CRM landingConfig or smart defaults)
+  const availableSchedules: CoursePreferredScheduleOption[] =
+    landingConfig.preferredSchedules && landingConfig.preferredSchedules.length > 0
+      ? landingConfig.preferredSchedules
+      : [
+          { id: 'sch-1', label: 'উইকেন্ড (শুক্র-শনিবার সকাল ১০:০০ - ১২:০০)', days: 'Fri & Sat', timeSlot: '10:00 AM - 12:00 PM', mode: 'Offline', availableSeats: 5 },
+          { id: 'sch-2', label: 'উইকেন্ড (শুক্র-শনিবার বিকাল ৩:০০ - ৫:০০)', days: 'Fri & Sat', timeSlot: '3:00 PM - 5:00 PM', mode: 'Offline', availableSeats: 7 },
+          { id: 'sch-3', label: 'সান্ধ্যকালীন ব্যাচ (রবি, মঙ্গল ও বৃহস্পতি সন্ধ্যা ৬:৩০ - ৮:৩০)', days: 'Sun, Tue & Thu', timeSlot: '6:30 PM - 8:30 PM', mode: 'Both', availableSeats: 6 },
+          { id: 'sch-4', label: 'অনলাইন লাইভ নাইট ব্যাচ (রাত ৯:০০ - ১০:৩০)', days: 'Sat, Mon & Wed', timeSlot: '9:00 PM - 10:30 PM', mode: 'Online Live', availableSeats: 12 }
+        ];
 
   // Social Proof Ticker Items
   const socialTickerItems =
@@ -751,21 +773,39 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
           {/* Right Column: Fast Registration Card / Banner Picture */}
           <div className="lg:col-span-5 space-y-4">
-            {/* Banner Cover Image */}
-            <div className="rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative group aspect-16/10">
+            {/* Banner Cover Image / Video Preview Card */}
+            <div className="rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative group aspect-16/10 bg-slate-900">
               <img
                 src={landingConfig.customBannerUrl || course.thumbnailUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80'}
                 alt={landingConfig.headline || course.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end justify-between p-4">
+
+              {/* Play Video Trigger Overlay */}
+              <div
+                onClick={() => setIsVideoModalOpen(true)}
+                className="absolute inset-0 bg-slate-950/40 hover:bg-slate-950/20 backdrop-blur-[2px] transition-all flex flex-col items-center justify-center cursor-pointer group"
+              >
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-indigo-600/90 text-white flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:bg-indigo-500 transition-all border-4 border-white/20">
+                  <Play className="w-7 h-7 sm:w-9 sm:h-9 fill-white ml-1 text-white" />
+                </div>
+                <span className="mt-3 px-3.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-xs font-bold text-white border border-slate-700/80 shadow-lg flex items-center space-x-1.5">
+                  <Video className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>ল্যাব ও কোর্স ট্রেলার ভিডিও দেখুন</span>
+                </span>
+              </div>
+
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex items-end justify-between p-4 pointer-events-none">
                 <span className="text-xs font-bold text-white bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-700">
                   🏢 আধুনিক কম্পিউটার ল্যাব ও এসি ক্লাসরুম
                 </span>
                 <button
                   type="button"
-                  onClick={() => setIsEditorOpen(true)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity px-2.5 py-1 bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg backdrop-blur-md flex items-center space-x-1.5 shadow-md cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditorOpen(true);
+                  }}
+                  className="pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity px-2.5 py-1 bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg backdrop-blur-md flex items-center space-x-1.5 shadow-md cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>ছবি পরিবর্তন</span>
@@ -832,7 +872,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleFastLeadSubmit} className="space-y-3">
+                <form id="fast-lead-form-box" onSubmit={handleFastLeadSubmit} className="space-y-3">
                   {/* Invisible Honeypot */}
                   <input
                     type="text"
@@ -902,9 +942,11 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                         onChange={e => setLeadSchedule(e.target.value)}
                         className="w-full px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-xs text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-semibold"
                       >
-                        <option value="Weekend (Fri-Sat)">উইকেন্ড (শুক্র-শনিবার)</option>
-                        <option value="Weekday Evening">সান্ধ্যকালীন ব্যাচ</option>
-                        <option value="Morning Batch">সকালকালীন ব্যাচ</option>
+                        {availableSchedules.map(sch => (
+                          <option key={sch.id} value={sch.label}>
+                            {sch.label} {sch.availableSeats ? `(${sch.availableSeats} সিট বাকি)` : ''}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -941,6 +983,59 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           </div>
         </div>
       </header>
+
+      {/* SECTION 1.5: QUICK SNAPSHOT INFO BAR */}
+      <section className="bg-slate-900/90 border-y border-slate-800/80 py-5 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
+          <div className="flex items-center space-x-3 p-3 sm:p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-left">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">কোর্স মেয়াদ ও সেশন</span>
+              <p className="text-xs sm:text-sm font-black text-white">
+                {landingConfig.quickSnapshot?.duration || `${course.durationMonths || 3} মাস`} / {landingConfig.quickSnapshot?.totalSessions || '২৪টি প্র্যাকটিক্যাল ল্যাব'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 p-3 sm:p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-left">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+              <Laptop className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">ল্যাব ও কম্পিউটার</span>
+              <p className="text-xs sm:text-sm font-black text-white">
+                {landingConfig.quickSnapshot?.batchSize || '১ শিক্ষার্থী = ১ ডেডিকেটেড পিসি'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 p-3 sm:p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-left">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+              <Briefcase className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">লাইভ প্রজেক্ট</span>
+              <p className="text-xs sm:text-sm font-black text-white">
+                {landingConfig.quickSnapshot?.projectsCount || '১০+ রিয়েল কর্পোরেট ফাইল'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 p-3 sm:p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-left">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">সাপোর্ট ও ব্যাকআপ</span>
+              <p className="text-xs sm:text-sm font-black text-white">
+                {landingConfig.quickSnapshot?.supportType || 'লাইফটাইম ল্যাব ও গ্রুপ সাপোর্ট'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* SECTION 2: PROBLEM VS REALITY (PAIN POINTS & MODERN WORKPLACE) */}
       {painPoints.length > 0 && (
@@ -1122,6 +1217,76 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           })}
         </div>
       </section>
+
+      {/* SECTION 4.5: PREFERRED SCHEDULES & BATCH TIMINGS */}
+      {availableSchedules.length > 0 && (
+        <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+          <div className="text-center space-y-2 mb-8">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-sm font-bold">
+              <Calendar className="w-4 h-4" />
+              <span>সুবিধাজনক ক্লাসের সময়সূচী</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+              {landingConfig.preferredSchedulesTitle || 'পছন্দের ব্যাচ ও ক্লাসের শিডিউল নির্বাচন করুন'}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+              আপনার পড়াশোনা বা চাকুরির পাশাপাশি সুবিধাজনক স্লটে ক্লাস করতে পছন্দের দিন ও সময় বেছে নিন
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {availableSchedules.map((sch, idx) => {
+              const isSelected = leadSchedule === sch.label;
+              return (
+                <div
+                  key={sch.id || idx}
+                  onClick={() => {
+                    setLeadSchedule(sch.label);
+                    document.getElementById('fast-lead-form-box')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={`bg-slate-900/90 rounded-3xl p-5 border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 hover:border-emerald-500/50 shadow-lg ${
+                    isSelected ? 'border-emerald-500 bg-emerald-950/20 ring-2 ring-emerald-500/30' : 'border-slate-800'
+                  }`}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 text-[11px] font-black rounded-lg border border-emerald-500/30">
+                        {sch.days || 'Flexible'}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400 font-mono">
+                        {sch.mode || 'Offline'}
+                      </span>
+                    </div>
+
+                    <h4 className="font-bold text-white text-base leading-snug">{sch.label}</h4>
+
+                    {sch.timeSlot && (
+                      <p className="text-xs text-slate-300 flex items-center space-x-1.5 font-mono">
+                        <Clock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{sch.timeSlot}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                    <span className="text-amber-400 font-bold">
+                      🔥 {sch.availableSeats || 8} Seats Remaining
+                    </span>
+                    <button
+                      type="button"
+                      className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                        isSelected ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      }`}
+                    >
+                      {isSelected ? 'Selected ✓' : 'Select'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* SECTION 5: TARGET AUDIENCE (WHO IS THIS COURSE FOR) */}
       {audienceList.length > 0 && (
@@ -1343,6 +1508,135 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   </div>
                 </div>
               ))}
+        </div>
+      </section>
+
+      {/* SECTION 8.5: CERTIFICATE SHOWCASE & VERIFICATION */}
+      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+        <div className="text-center space-y-2 mb-8">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold">
+            <Award className="w-4 h-4 text-amber-400" />
+            <span>প্রফেশনাল ভেরিফায়েড সার্টিফিকেট</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+            {landingConfig.certificateConfig?.headline || 'কোর্স শেষে ভেরিফায়েবল প্রফেশনাল সার্টিফিকেট'}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            {landingConfig.certificateConfig?.subheadline || 'প্রতিটি সার্টিফিকেটে রয়েছে ইউনিক কিউআর কোড (QR Code) যা স্ক্যান করে দেশ-বিদেশের যেকোনো প্রতিষ্ঠান থেকে অনলাইন ভেরিফাই করা যাবে।'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8">
+          {/* Left Certificate Mockup Preview */}
+          <div className="lg:col-span-6 relative group">
+            <div className="rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-2xl bg-slate-950 p-2 sm:p-3 relative">
+              <div className="border border-amber-500/20 rounded-xl p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/40 text-center space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="flex items-center space-x-2">
+                    <Award className="w-6 h-6 text-amber-400" />
+                    <span className="font-black text-xs uppercase tracking-widest text-amber-400">Academy Certificate</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 bg-amber-500/10 text-amber-300 rounded border border-amber-500/20 font-bold">
+                    ISO & Govt Reg. Compliant
+                  </span>
+                </div>
+
+                <div className="space-y-1 py-2">
+                  <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">This is proudly presented to</p>
+                  <h3 className="text-xl sm:text-2xl font-black text-white text-indigo-300">
+                    {landingConfig.certificateConfig?.sampleStudentName || 'মোঃ তানভীর হাসান'}
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    for successfully completing hands-on practical training in
+                  </p>
+                  <h4 className="text-sm sm:text-base font-black text-amber-300">
+                    {course.name}
+                  </h4>
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-[10px] text-slate-400">
+                  <div className="text-left">
+                    <span className="block font-mono text-slate-300">ID: NXC-2026-{course.id?.slice(0, 5) || '9823'}</span>
+                    <span>Issued with Distinction</span>
+                  </div>
+                  <div className="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-emerald-400 font-bold flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>QR Verified</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Certificate Feature Bullet Points */}
+          <div className="lg:col-span-6 space-y-4">
+            <div className="space-y-3">
+              {(landingConfig.certificateConfig?.features || [
+                'কোর্স শেষ করার পর লিখিত ও ল্যাব প্র্যাকটিক্যাল পরীক্ষার মাধ্যমে অ্যাসেসমেন্ট',
+                'আন্তর্জাতিক মানের স্ট্যান্ডার্ড ও কিউআর কোড স্ক্যান করে অনলাইন ইনস্ট্যান্ট ভেরিফিকেশন',
+                'সিভি (CV/Resume) এবং লিঙ্কডইন (LinkedIn) প্রোফাইলে ডিরেক্ট যোগ করার সুবিধা',
+                'দেশীয় কর্পোরেট অফিস এবং রিমোট/ফ্রিল্যান্স মার্কেটপ্লেসে সম্পূর্ণ গ্রহণযোগ্য',
+                'লাইফটাইম ডিজিটাল ভেরিফিকেশন লিংক ও প্রিন্টযোগ্য হাই-রেজুলেশন হার্ডকপি'
+              ]).map((feat, fIdx) => (
+                <div key={fIdx} className="flex items-start space-x-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span className="text-xs sm:text-sm text-slate-200 font-semibold leading-relaxed">{feat}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center space-x-2 text-xs text-amber-300 font-bold">
+              <ShieldCheck className="w-4 h-4 shrink-0" />
+              <span>{landingConfig.certificateConfig?.verificationNote || 'আমাদের সার্টিফিকেট দেশের শীর্ষস্থানীয় শতাধিক প্রতিষ্ঠানে মূল্যায়নযোগ্য।'}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 8.6: POST-COURSE LIFETIME SUPPORT & JOB GUIDELINE */}
+      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+        <div className="text-center space-y-2 mb-8">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs sm:text-sm font-bold">
+            <Shield className="w-4 h-4 text-indigo-400" />
+            <span>লাইফটাইম মেন্টরশিপ ও ক্যারিয়ার সাপোর্ট</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+            {landingConfig.lifetimeSupportConfig?.headline || 'কোর্স শেষ হওয়ার পরেও কি আপনি একা? একদমই না!'}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            {landingConfig.lifetimeSupportConfig?.subheadline || 'আমাদের সাথে একবার যুক্ত হলে আপনি পাচ্ছেন লাইফটাইম ক্যারিয়ার এবং টেকনিক্যাল ব্যাকআপ সুবিধা।'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+          {(landingConfig.lifetimeSupportConfig?.features || [
+            {
+              title: 'ডেডিকেটেড প্রাইভেট সাপোর্ট গ্রুপ',
+              desc: 'কোর্স চলাকালীন ও পরে যেকোনো প্রজেক্টের জটিলতায় গ্রুপে পোস্ট করলেই মেন্টরদের কাছ থেকে দ্রুত সলিউশন পাবেন।',
+              iconName: 'users'
+            },
+            {
+              title: 'রিভিশন ও এক্সট্রা ল্যাব প্র্যাকটিস',
+              desc: 'কোনো ক্লাস মিস হলে বা কোনো টপিক বুঝতে সমস্যা হলে ফ্রি রিভিশন সেশন ও এক্সট্রা ল্যাব সাপোর্ট সুবিধা।',
+              iconName: 'laptop'
+            },
+            {
+              title: 'সিভি মেকিং ও ইন্টারভিউ গাইডলাইন',
+              desc: 'প্রফেশনাল সিভি তৈরি, পোর্টফোলিও বিল্ডিং এবং কর্পোরেট ইন্টারভিউ মোক সেশনের মাধ্যমে জব-রেডি প্রস্তুতি।',
+              iconName: 'briefcase'
+            }
+          ]).map((supportItem, sIdx) => (
+            <div
+              key={sIdx}
+              className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-3 hover:border-indigo-500/40 transition-all shadow-lg"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                {renderFeatureIcon(supportItem.iconName)}
+              </div>
+              <h3 className="text-base font-black text-white">{supportItem.title}</h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{supportItem.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -1653,6 +1947,103 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 alt={selectedLightboxImage.title || 'Lab Photo Zoom'}
                 className="w-full h-auto max-h-[70vh] object-contain rounded-2xl"
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Preview Modal */}
+      {isVideoModalOpen && (
+        <div
+          onClick={() => setIsVideoModalOpen(false)}
+          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="relative max-w-3xl w-full bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-3 p-4"
+          >
+            <div className="flex items-center justify-between px-2">
+              <div className="flex items-center space-x-2">
+                <Video className="w-5 h-5 text-indigo-400" />
+                <h4 className="text-base font-black text-white">{course.name} - ল্যাব ও ক্লাস ওভারভিউ</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsVideoModalOpen(false)}
+                className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center relative">
+              {landingConfig.videoPromoUrl ? (
+                <iframe
+                  src={
+                    landingConfig.videoPromoUrl.includes('youtube.com') || landingConfig.videoPromoUrl.includes('youtu.be')
+                      ? landingConfig.videoPromoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')
+                      : landingConfig.videoPromoUrl
+                  }
+                  title="Course Video Preview"
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="p-6 text-center space-y-3">
+                  <div className="w-16 h-16 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto">
+                    <Play className="w-8 h-8 ml-1" />
+                  </div>
+                  <h5 className="font-bold text-white text-base">ক্লাস ট্রেলার ও ল্যাব ভিডিও</h5>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                    অ্যাডমিন প্যানেলের এডিটর থেকে সরাসরি আপনার ইউটিউব বা ভিডিও লিংক যুক্ত করতে পারেন।
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsVideoModalOpen(false);
+                      setIsEditorOpen(true);
+                    }}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    ভিডিও লিংক বসান (Edit Video Link)
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Social Proof Admission Alert Ticker */}
+      {isTickerEnabled && isTickerVisible && socialTickerItems.length > 0 && (
+        <div className="fixed bottom-20 sm:bottom-6 left-4 z-40 max-w-xs sm:max-w-sm animate-in slide-in-from-bottom-5 duration-300">
+          <div className="p-3 bg-slate-900/95 border border-indigo-500/40 rounded-2xl shadow-2xl backdrop-blur-md flex items-center space-x-3 text-left relative group">
+            <button
+              type="button"
+              onClick={() => setIsTickerVisible(false)}
+              className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-colors"
+            >
+              <X className="w-3 h-3" />
+            </button>
+
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 text-white font-black flex items-center justify-center shrink-0 shadow-md">
+              {socialTickerItems[currentTickerIndex]?.name?.charAt(0) || '✓'}
+            </div>
+
+            <div className="space-y-0.5 pr-2 overflow-hidden">
+              <div className="flex items-center space-x-1.5">
+                <span className="text-xs font-black text-white truncate">
+                  {socialTickerItems[currentTickerIndex]?.name}
+                </span>
+                <span className="text-[10px] text-slate-400">• {socialTickerItems[currentTickerIndex]?.timeAgo}</span>
+              </div>
+              <p className="text-[11px] text-emerald-400 font-semibold leading-tight line-clamp-1">
+                {socialTickerItems[currentTickerIndex]?.actionText || 'স্কলারশিপ ব্যাচে সিট বুক করেছেন'}
+              </p>
+              <span className="text-[10px] text-slate-400 block truncate">
+                📍 {socialTickerItems[currentTickerIndex]?.location}
+              </span>
             </div>
           </div>
         </div>

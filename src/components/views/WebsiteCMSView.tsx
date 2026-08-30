@@ -20,7 +20,8 @@ import {
   UserCheck,
   Smartphone,
   Layers,
-  Users
+  Users,
+  Search
 } from 'lucide-react';
 import { CmsHeroTab } from './cms/CmsHeroTab';
 import { CmsCoursesTab } from './cms/CmsCoursesTab';
@@ -36,6 +37,7 @@ import { CmsNoticesTab } from './cms/CmsNoticesTab';
 import { CmsFaqsTab } from './cms/CmsFaqsTab';
 import { CmsStudentPortalTab } from './cms/CmsStudentPortalTab';
 import { CmsNotificationsTab } from './cms/CmsNotificationsTab';
+import { CmsSeoTab } from './cms/CmsSeoTab';
 
 interface WebsiteCMSViewProps {
   onOpenPublicWebsite?: () => void;
@@ -52,6 +54,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
   const { academySettings } = useAcademy();
 
   const [activeTab, setActiveTab] = useState<
+    | 'seo'
     | 'hero'
     | 'trainers'
     | 'portal_config'
@@ -66,7 +69,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
     | 'notices'
     | 'faqs'
     | 'policies'
-  >('hero');
+  >('seo');
 
   const [toastMessage, setToastMessage] = useState('');
 
@@ -76,7 +79,8 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
   };
 
   const navTabs = [
-    { id: 'hero', label: 'Hero & Banner Slider', icon: Layers, count: null, isHot: true },
+    { id: 'seo', label: 'SEO & Local Search Hub', icon: Search, count: null, isHot: true, isPhase4: true },
+    { id: 'hero', label: 'Hero & Banner Slider', icon: Layers, count: null, isHot: false },
     { id: 'trainers', label: 'Faculty & Mentors', icon: Users, count: null, isNew: true },
     { id: 'reviews', label: 'Student Reviews', icon: MessageSquare, count: null, isNew: true },
     { id: 'gallery', label: 'Photo Gallery', icon: ImageIcon, count: null },
@@ -185,6 +189,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
 
       {/* Tab Content Display */}
       <div>
+        {activeTab === 'seo' && <CmsSeoTab onSaveToast={triggerToast} />}
         {activeTab === 'hero' && <CmsHeroTab onSuccessToast={triggerToast} />}
         {activeTab === 'trainers' && <CmsTrainersTab />}
         {activeTab === 'portal_config' && (

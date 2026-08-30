@@ -9,9 +9,11 @@ import {
   CourseLandingCurriculumModule,
   CourseLandingFeatureCard,
   CourseLandingTargetAudienceItem,
-  CourseLandingGalleryImage
+  CourseLandingGalleryImage,
+  CoursePreferredScheduleOption
 } from '../../types';
 import { cleanWhatsAppNumber } from '../../utils/whatsappHelper';
+import { generateSlug } from '../../utils/seoHelper';
 import {
   X,
   Sparkles,
@@ -44,7 +46,12 @@ import {
   Image as ImageIcon,
   Camera,
   RefreshCw,
-  Check
+  Check,
+  Search,
+  Globe,
+  Share2,
+  Link2,
+  Tag
 } from 'lucide-react';
 
 interface CourseLandingPageEditorModalProps {
@@ -85,7 +92,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
 
   // Tabs
   const [activeTab, setActiveTab] = useState<
-    'hero_cta' | 'pain_points' | 'curriculum' | 'features_audience' | 'pricing_seats' | 'bonuses_campus' | 'gallery_photos' | 'faqs_reviews'
+    'hero_cta' | 'pain_points' | 'curriculum' | 'schedules' | 'features_audience' | 'pricing_seats' | 'bonuses_campus' | 'gallery_photos' | 'faqs_reviews' | 'seo'
   >('hero_cta');
 
   // Tab 1: Hero & Messaging
@@ -116,6 +123,26 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   const [newPhotoTitle, setNewPhotoTitle] = useState('');
   const [newPhotoCategory, setNewPhotoCategory] = useState('কম্পিউটার ল্যাব');
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
+
+  // Tab: Preferred Schedules & Batch Timings
+  const [preferredSchedulesTitle, setPreferredSchedulesTitle] = useState(
+    existingConfig.preferredSchedulesTitle || 'পছন্দের ব্যাচ ও ক্লাসের শিডিউল নির্বাচন করুন'
+  );
+  const [preferredSchedules, setPreferredSchedules] = useState<CoursePreferredScheduleOption[]>(
+    existingConfig.preferredSchedules && existingConfig.preferredSchedules.length > 0
+      ? existingConfig.preferredSchedules
+      : [
+          { id: 'sch-1', label: 'শুক্রবার ও শনিবার (সকাল ১০:০০ - ১২:০০)', days: 'শুক্র ও শনিবার', timeSlot: 'সকাল ১০:০০ - ১২:০০', mode: 'Offline', availableSeats: 5, isActive: true },
+          { id: 'sch-2', label: 'শুক্রবার ও শনিবার (বিকাল ৩:০০ - ৫:০০)', days: 'শুক্র ও শনিবার', timeSlot: 'বিকাল ৩:০০ - ৫:০০', mode: 'Offline', availableSeats: 7, isActive: true },
+          { id: 'sch-3', label: 'রবি, মঙ্গল ও বৃহস্পতিবার (সন্ধ্যা ৬:৩০ - ৮:৩০)', days: 'রবি, মঙ্গল ও বৃহস্পতি', timeSlot: 'সন্ধ্যা ৬:৩০ - ৮:৩০', mode: 'Both', availableSeats: 6, isActive: true },
+          { id: 'sch-4', label: 'অনলাইন লাইভ নাইট ব্যাচ (রাত ৯:০০ - ১০:৩০)', days: 'শনি, সোম ও বুধ', timeSlot: 'রাত ৯:০০ - ১০:৩০', mode: 'Online Live', availableSeats: 12, isActive: true }
+        ]
+  );
+  const [newSchLabel, setNewSchLabel] = useState('');
+  const [newSchDays, setNewSchDays] = useState('');
+  const [newSchTimeSlot, setNewSchTimeSlot] = useState('');
+  const [newSchMode, setNewSchMode] = useState<'Offline' | 'Online Live' | 'Hybrid' | 'Both'>('Offline');
+  const [newSchSeats, setNewSchSeats] = useState(8);
 
   // Tab 2: Pain Points vs Reality (Problem - Solution)
   const [painPointsHeadline, setPainPointsHeadline] = useState(
@@ -378,6 +405,61 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   const [newReviewRole, setNewReviewRole] = useState('');
   const [newReviewText, setNewReviewText] = useState('');
 
+  // Tab 10: SEO & AI Search Visibility
+  const [slug, setSlug] = useState(
+    course.seo?.slug || existingConfig.slug || course.slug || generateSlug(course.name)
+  );
+  const [seoTitle, setSeoTitle] = useState(
+    course.seo?.seoTitle || existingConfig.seoTitle || `${course.name} Course in Farmgate, Dhaka | Practical IT Training`
+  );
+  const [seoMetaDescription, setSeoMetaDescription] = useState(
+    course.seo?.metaDescription ||
+    existingConfig.seoMetaDescription ||
+    course.description ||
+    `${course.name} at Nexgen Computer Academy, Farmgate. ${course.duration} practical hands-on lab training with 1-on-1 mentorship, verifiable certificate & career guidance in Dhaka.`
+  );
+  const [focusKeyword, setFocusKeyword] = useState(
+    course.seo?.focusKeyword || existingConfig.focusKeyword || `${course.name} in Farmgate`
+  );
+  const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>(
+    course.seo?.secondaryKeywords ||
+    existingConfig.secondaryKeywords || [
+      `${course.name} course Dhaka`,
+      `${course.name} training Farmgate`,
+      `best ${course.category} institute Dhaka`,
+      'Computer training Farmgate'
+    ]
+  );
+  const [newKeywordInput, setNewKeywordInput] = useState('');
+  const [canonicalUrl, setCanonicalUrl] = useState(
+    course.seo?.canonicalUrl || existingConfig.canonicalUrl || ''
+  );
+  const [ogTitle, setOgTitle] = useState(
+    course.seo?.ogTitle || existingConfig.seoOgTitle || ''
+  );
+  const [ogDescription, setOgDescription] = useState(
+    course.seo?.ogDescription || existingConfig.seoOgDescription || ''
+  );
+  const [ogImage, setOgImage] = useState(
+    course.seo?.ogImage || existingConfig.seoOgImage || course.thumbnailUrl || ''
+  );
+  const [noIndex, setNoIndex] = useState<boolean>(
+    course.seo?.noIndex ?? existingConfig.noIndex ?? false
+  );
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+
+  const handleAddKeyword = () => {
+    if (!newKeywordInput.trim()) return;
+    if (!secondaryKeywords.includes(newKeywordInput.trim())) {
+      setSecondaryKeywords([...secondaryKeywords, newKeywordInput.trim()]);
+    }
+    setNewKeywordInput('');
+  };
+
+  const handleRemoveKeyword = (index: number) => {
+    setSecondaryKeywords(secondaryKeywords.filter((_, i) => i !== index));
+  };
+
   if (!isOpen) return null;
 
   // Pain point handlers
@@ -538,6 +620,33 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
     setCustomReviews(customReviews.filter((_, i) => i !== idx));
   };
 
+  const handleAddSchedule = () => {
+    if (!newSchLabel.trim()) return;
+    const newSch: CoursePreferredScheduleOption = {
+      id: `sch-${Date.now()}`,
+      label: newSchLabel.trim(),
+      days: newSchDays.trim() || 'Flexible Days',
+      timeSlot: newSchTimeSlot.trim(),
+      mode: newSchMode,
+      availableSeats: Number(newSchSeats) || 8,
+      isActive: true
+    };
+    setPreferredSchedules([...preferredSchedules, newSch]);
+    setNewSchLabel('');
+    setNewSchDays('');
+    setNewSchTimeSlot('');
+  };
+
+  const handleUpdateSchedule = (idx: number, field: keyof CoursePreferredScheduleOption, val: any) => {
+    const updated = [...preferredSchedules];
+    updated[idx] = { ...updated[idx], [field]: val };
+    setPreferredSchedules(updated);
+  };
+
+  const handleRemoveSchedule = (idx: number) => {
+    setPreferredSchedules(preferredSchedules.filter((_, i) => i !== idx));
+  };
+
   const handleSave = () => {
     const updatedLandingConfig: CourseLandingPageConfig = {
       ...existingConfig,
@@ -556,6 +665,8 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
       curriculumHeadline: curriculumHeadline.trim(),
       curriculumSubheadline: curriculumSubheadline.trim(),
       editableModules,
+      preferredSchedulesTitle: preferredSchedulesTitle.trim(),
+      preferredSchedules,
       whyChooseHeadline: whyChooseHeadline.trim(),
       featureCards,
       audienceHeadline: audienceHeadline.trim(),
@@ -573,14 +684,39 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
       galleryImages,
       faqsHeadline: faqsHeadline.trim(),
       faqs,
-      customReviews
+      customReviews,
+      slug: slug.trim() || undefined,
+      seoTitle: seoTitle.trim() || undefined,
+      seoMetaDescription: seoMetaDescription.trim() || undefined,
+      seoOgTitle: ogTitle.trim() || undefined,
+      seoOgDescription: ogDescription.trim() || undefined,
+      seoOgImage: ogImage.trim() || undefined,
+      canonicalUrl: canonicalUrl.trim() || undefined,
+      focusKeyword: focusKeyword.trim() || undefined,
+      secondaryKeywords: secondaryKeywords.length > 0 ? secondaryKeywords : undefined,
+      noIndex
+    };
+
+    const updatedSeo = {
+      slug: slug.trim() || undefined,
+      seoTitle: seoTitle.trim() || undefined,
+      metaDescription: seoMetaDescription.trim() || undefined,
+      ogTitle: ogTitle.trim() || undefined,
+      ogDescription: ogDescription.trim() || undefined,
+      ogImage: ogImage.trim() || undefined,
+      canonicalUrl: canonicalUrl.trim() || undefined,
+      focusKeyword: focusKeyword.trim() || undefined,
+      secondaryKeywords: secondaryKeywords.length > 0 ? secondaryKeywords : undefined,
+      noIndex
     };
 
     updateCourse(course.id, {
       offerFee: Number(offerFee) || 0,
       regularFee: Number(regularFee) || 0,
       thumbnailUrl: customBannerUrl.trim() || course.thumbnailUrl,
-      landingConfig: updatedLandingConfig
+      landingConfig: updatedLandingConfig,
+      seo: updatedSeo,
+      slug: slug.trim() || course.slug
     });
 
     onClose();
@@ -675,6 +811,18 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
           </button>
 
           <button
+            onClick={() => setActiveTab('schedules')}
+            className={`py-3 px-3 font-bold text-xs border-b-2 flex items-center space-x-1.5 whitespace-nowrap transition-colors ${
+              activeTab === 'schedules'
+                ? 'border-indigo-600 text-indigo-600 bg-white shadow-xs rounded-t-lg'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+            <span>৪. পছন্দের শিডিউল ({preferredSchedules.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('features_audience')}
             className={`py-3 px-3 font-bold text-xs border-b-2 flex items-center space-x-1.5 whitespace-nowrap transition-colors ${
               activeTab === 'features_audience'
@@ -683,7 +831,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
             }`}
           >
             <Target className="w-3.5 h-3.5 text-emerald-600" />
-            <span>৪. বিশেষত্ব & অডিয়েন্স</span>
+            <span>৫. বিশেষত্ব & অডিয়েন্স</span>
           </button>
 
           <button
@@ -695,7 +843,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
             }`}
           >
             <DollarSign className="w-3.5 h-3.5 text-blue-600" />
-            <span>৫. ফি & কাউন্টডাউন</span>
+            <span>৬. ফি & কাউন্টডাউন</span>
           </button>
 
           <button
@@ -707,7 +855,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
             }`}
           >
             <Building className="w-3.5 h-3.5 text-purple-600" />
-            <span>৬. ফ্রি বোনাস & ক্যাম্পাস</span>
+            <span>৭. ফ্রি বোনাস & ক্যাম্পাস</span>
           </button>
 
           <button
@@ -719,7 +867,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
             }`}
           >
             <Laptop className="w-3.5 h-3.5 text-emerald-600" />
-            <span>৭. ল্যাব ও ক্যাম্পাস ছবি ({galleryImages.length})</span>
+            <span>৮. ল্যাব ও ক্যাম্পাস ছবি ({galleryImages.length})</span>
           </button>
 
           <button
@@ -731,7 +879,19 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
             }`}
           >
             <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
-            <span>৮. প্রশ্ন & রিভিউ</span>
+            <span>৯. প্রশ্ন & রিভিউ</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('seo')}
+            className={`py-3 px-3 font-bold text-xs border-b-2 flex items-center space-x-1.5 whitespace-nowrap transition-colors ${
+              activeTab === 'seo'
+                ? 'border-indigo-600 text-indigo-600 bg-white shadow-xs rounded-t-lg'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Search className="w-3.5 h-3.5 text-blue-600" />
+            <span>১০. সার্চ ইঞ্জিন (SEO & SERP)</span>
           </button>
         </div>
 
@@ -1277,6 +1437,169 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
                   <Plus className="w-4 h-4" />
                   <span>+ নতুন কারিকুলাম মডিউল যোগ করুন</span>
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: PREFERRED SCHEDULES */}
+          {activeTab === 'schedules' && (
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700">
+                  শিডিউল সেকশন শিরোনাম (Section Headline)
+                </label>
+                <input
+                  type="text"
+                  value={preferredSchedulesTitle}
+                  onChange={e => setPreferredSchedulesTitle(e.target.value)}
+                  placeholder="পছন্দের ব্যাচ ও ক্লাসের শিডিউল নির্বাচন করুন"
+                  className="w-full text-xs font-bold px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                />
+              </div>
+
+              {/* Existing Schedules */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-black text-sm text-slate-900">কনফিগার করা ব্যাচ শিডিউল তালিকা ({preferredSchedules.length})</h4>
+                    <p className="text-xs text-slate-500">শিক্ষার্থীরা ল্যান্ডিং পেজ ও কোর্স ডিটেইলস মডালে এই অপশনগুলো থেকে বেছে নিতে পারবে</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {preferredSchedules.map((sch, sIdx) => (
+                    <div
+                      key={sch.id || sIdx}
+                      className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-indigo-600">শিডিউল #{sIdx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSchedule(sIdx)}
+                          className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
+                          title="মুছে ফেলুন"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            শিডিউলের মূল লেবেল *
+                          </label>
+                          <input
+                            type="text"
+                            value={sch.label}
+                            onChange={e => handleUpdateSchedule(sIdx, 'label', e.target.value)}
+                            placeholder="যেমন: শুক্রবার ও শনিবার (সকাল ১০:০০ - ১২:০০)"
+                            className="w-full text-xs font-bold p-2.5 bg-white border border-slate-200 rounded-xl outline-hidden"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            ক্লাসের দিনসমূহ (Days)
+                          </label>
+                          <input
+                            type="text"
+                            value={sch.days || ''}
+                            onChange={e => handleUpdateSchedule(sIdx, 'days', e.target.value)}
+                            placeholder="যেমন: Fri & Sat / শুক্র ও শনিবার"
+                            className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl outline-hidden"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            সময় স্লট (Time Slot)
+                          </label>
+                          <input
+                            type="text"
+                            value={sch.timeSlot || ''}
+                            onChange={e => handleUpdateSchedule(sIdx, 'timeSlot', e.target.value)}
+                            placeholder="যেমন: 10:00 AM - 12:00 PM"
+                            className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl outline-hidden"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                              লার্নিং মোড
+                            </label>
+                            <select
+                              value={sch.mode || 'Offline'}
+                              onChange={e => handleUpdateSchedule(sIdx, 'mode', e.target.value)}
+                              className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl outline-hidden"
+                            >
+                              <option value="Offline">Offline Lab</option>
+                              <option value="Online Live">Online Live</option>
+                              <option value="Hybrid">Hybrid</option>
+                              <option value="Both">Both (Lab + Live)</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                              অবশিষ্ট আসন (Seats)
+                            </label>
+                            <input
+                              type="number"
+                              value={sch.availableSeats ?? 8}
+                              onChange={e => handleUpdateSchedule(sIdx, 'availableSeats', Number(e.target.value))}
+                              className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl outline-hidden font-bold"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Add New Schedule Form */}
+                <div className="p-4 bg-indigo-50/60 border border-indigo-200 rounded-2xl space-y-3">
+                  <h5 className="font-black text-xs text-indigo-900">+ নতুন শিডিউল যোগ করুন</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="sm:col-span-2">
+                      <input
+                        type="text"
+                        value={newSchLabel}
+                        onChange={e => setNewSchLabel(e.target.value)}
+                        placeholder="শিডিউল লেবেল (যেমন: রবি, মঙ্গল ও বৃহস্পতিবার বিকাল ৪:০০ - ৬:০০)"
+                        className="w-full text-xs font-bold p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        value={newSchDays}
+                        onChange={e => setNewSchDays(e.target.value)}
+                        placeholder="দিনসমূহ (যেমন: রবি, মঙ্গল ও বৃহস্পতি)"
+                        className="w-full text-xs p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        value={newSchTimeSlot}
+                        onChange={e => setNewSchTimeSlot(e.target.value)}
+                        placeholder="সময় (যেমন: 4:00 PM - 6:00 PM)"
+                        className="w-full text-xs p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddSchedule}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center space-x-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>শিডিউল তালিকায় যুক্ত করুন</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -1963,6 +2286,305 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
                     <Plus className="w-3.5 h-3.5" />
                     <span>রিভিউ যুক্ত করুন</span>
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 10: SEO & SERP PREVIEWS */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6">
+              {/* Header Info */}
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl flex items-start space-x-3 text-xs text-slate-800">
+                <Search className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-slate-900">কোর্স সার্চ ইঞ্জিন অপটিমাইজেশন (Dynamic Course SEO & Local AI Signals)</p>
+                  <p className="text-slate-600 mt-0.5 leading-relaxed">
+                    গুগল ও লোকাল সার্চে "{course.name}" লিখে সার্চ করলে আপনার এই পেজটি কীভাবে প্রদর্শিত হবে তা নির্ধারণ করুন। এখানে দেয়া মেটা ট্যাগ ও JSON-LD স্কিমা সরাসরি অটোমেটিক জেনারেট হবে।
+                  </p>
+                </div>
+              </div>
+
+              {/* SERP & Social Previews */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Google Search Result Preview */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Globe className="w-4 h-4 text-blue-600" />
+                      <span className="text-xs font-bold text-slate-900">Google Search Result Preview</span>
+                    </div>
+                    <div className="flex items-center bg-slate-200 rounded-lg p-0.5 text-[10px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDevice('desktop')}
+                        className={`px-2 py-0.5 rounded-md transition-colors ${previewDevice === 'desktop' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'}`}
+                      >
+                        Desktop
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDevice('mobile')}
+                        className={`px-2 py-0.5 rounded-md transition-colors ${previewDevice === 'mobile' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'}`}
+                      >
+                        Mobile
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-1.5 shadow-xs font-sans">
+                    <div className="flex items-center space-x-2 text-[11px] text-slate-500 truncate">
+                      <div className="w-4 h-4 rounded-full bg-indigo-600 text-white text-[8px] flex items-center justify-center font-bold">N</div>
+                      <span className="font-medium text-slate-800">Nexgen Computer Academy</span>
+                      <span className="text-slate-400">›</span>
+                      <span className="truncate text-slate-500">courses › {slug || generateSlug(course.name)}</span>
+                    </div>
+
+                    <h4 className="text-base text-blue-800 hover:underline font-medium cursor-pointer line-clamp-1 leading-snug">
+                      {seoTitle || `${course.name} Course in Farmgate, Dhaka | Practical IT Training`}
+                    </h4>
+
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      {seoMetaDescription || `${course.name} at Nexgen Computer Academy, Farmgate. ${course.duration} practical hands-on lab training with 1-on-1 mentorship, verifiable certificate & career guidance in Dhaka.`}
+                    </p>
+
+                    {/* Mini Rich Snippets */}
+                    <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-3 text-[11px] text-slate-600 font-medium">
+                      <span className="flex items-center text-amber-600 font-bold">
+                        ★ 4.9 <span className="text-slate-400 font-normal ml-1">(120+ reviews)</span>
+                      </span>
+                      <span>•</span>
+                      <span className="text-emerald-700 font-bold">৳{course.offerFee?.toLocaleString() || '6,500'} BDT</span>
+                      <span>•</span>
+                      <span className="text-slate-500">{course.duration}</span>
+                      <span>•</span>
+                      <span className="text-indigo-600 font-semibold">Farmgate Campus</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Social Share Preview Card */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Share2 className="w-4 h-4 text-indigo-600" />
+                    <span className="text-xs font-bold text-slate-900">Facebook & Social Link Preview</span>
+                  </div>
+
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                    <div className="h-32 w-full bg-slate-800 relative overflow-hidden flex items-center justify-center">
+                      <img
+                        src={ogImage || customBannerUrl || course.thumbnailUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'}
+                        alt={seoTitle}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+                      <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-indigo-600 text-white text-[10px] font-bold">
+                        {course.code}
+                      </span>
+                    </div>
+                    <div className="p-3 space-y-1 bg-slate-50 border-t border-slate-200">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">nexgenacademy.edu.bd</span>
+                      <h5 className="text-xs font-bold text-slate-900 line-clamp-1">{ogTitle || seoTitle || course.name}</h5>
+                      <p className="text-[11px] text-slate-500 line-clamp-1">{ogDescription || seoMetaDescription || course.description}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Controls */}
+              <div className="space-y-4 pt-2">
+                {/* URL Slug */}
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Link2 className="w-3.5 h-3.5 text-indigo-600" />
+                      URL Slug (কোর্স ওয়েব অ্যাড্রেস)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setSlug(generateSlug(course.name))}
+                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Auto-generate from Course Name
+                    </button>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="px-3 py-2.5 bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl text-xs text-slate-500 font-mono">
+                      /courses/
+                    </span>
+                    <input
+                      type="text"
+                      value={slug}
+                      onChange={e => setSlug(generateSlug(e.target.value))}
+                      placeholder="computer-office-application"
+                      className="flex-1 px-3 py-2.5 bg-white border border-slate-200 rounded-r-xl text-xs font-mono font-bold text-indigo-900 outline-hidden focus:border-indigo-600"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    ইংরেজি ছোট হাতের অক্ষর এবং হাইফেন (-) ব্যবহার করুন। সার্চ ইঞ্জিনে র‍্যাংক করার জন্য এই স্লাগটি অত্যন্ত গুরুত্বপূর্ণ।
+                  </p>
+                </div>
+
+                {/* Meta Title */}
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800">
+                      SEO Meta Title (ব্রাউজার ট্যাব ও গুগল সার্চ টাইটেল)
+                    </label>
+                    <span className={`text-[11px] font-bold ${seoTitle.length > 65 ? 'text-rose-600' : 'text-slate-400'}`}>
+                      {seoTitle.length} / 60 characters
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={seoTitle}
+                    onChange={e => setSeoTitle(e.target.value)}
+                    placeholder="Computer Office Application Course in Farmgate, Dhaka | Nexgen Academy"
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-hidden focus:border-indigo-600"
+                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSeoTitle(`${course.name} Course in Farmgate, Dhaka | Practical Training`)}
+                      className="text-[10px] font-bold px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition-colors"
+                    >
+                      + Standard Title
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSeoTitle(`Best ${course.name} Training Center in Dhaka | Nexgen Academy`)}
+                      className="text-[10px] font-bold px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition-colors"
+                    >
+                      + Best Institute Format
+                    </button>
+                  </div>
+                </div>
+
+                {/* Meta Description */}
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-800">
+                      SEO Meta Description (সার্চ ইঞ্জিনের বিবরণী)
+                    </label>
+                    <span className={`text-[11px] font-bold ${seoMetaDescription.length > 165 ? 'text-rose-600' : 'text-slate-400'}`}>
+                      {seoMetaDescription.length} / 160 characters
+                    </span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={seoMetaDescription}
+                    onChange={e => setSeoMetaDescription(e.target.value)}
+                    placeholder="কোর্সের সংক্ষেপ বিবরণ ও অফার..."
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 outline-hidden focus:border-indigo-600 leading-relaxed"
+                  />
+                  <p className="text-[11px] text-slate-500">
+                    গুগলে সার্চ রেজাল্টে টাইটেলের নিচে এই ২ লাইনের বিবরণ প্রদর্শিত হয়।
+                  </p>
+                </div>
+
+                {/* Focus & Secondary Keywords */}
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5 text-indigo-600" />
+                      Primary Focus Keyword (প্রধান টার্গেট কি-ওয়ার্ড)
+                    </label>
+                    <input
+                      type="text"
+                      value={focusKeyword}
+                      onChange={e => setFocusKeyword(e.target.value)}
+                      placeholder="e.g. Computer Office Application in Farmgate"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-hidden focus:border-indigo-600"
+                    />
+                  </div>
+
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <label className="text-xs font-bold text-slate-800">
+                      Secondary Keywords & Search Phrases ({secondaryKeywords.length})
+                    </label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {secondaryKeywords.map((kw, i) => (
+                        <span
+                          key={i}
+                          className="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-medium flex items-center gap-1.5"
+                        >
+                          <span>{kw}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveKeyword(i)}
+                            className="text-indigo-400 hover:text-indigo-700"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newKeywordInput}
+                        onChange={e => setNewKeywordInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddKeyword();
+                          }
+                        }}
+                        placeholder="নতুন কি-ওয়ার্ড লিখে Enter চাপুন..."
+                        className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddKeyword}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        যুক্ত করুন
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Open Graph & Canonical Controls */}
+                <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3">
+                  <h4 className="text-xs font-bold text-slate-900">Advanced Metadata & Indexing Controls</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-700">Open Graph Social Image URL</label>
+                      <input
+                        type="text"
+                        value={ogImage}
+                        onChange={e => setOgImage(e.target.value)}
+                        placeholder="https://..."
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-700">Custom Canonical URL (Optional)</label>
+                      <input
+                        type="text"
+                        value={canonicalUrl}
+                        onChange={e => setCanonicalUrl(e.target.value)}
+                        placeholder="https://nexgenacademy.edu.bd/courses/..."
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <label className="flex items-center space-x-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={noIndex}
+                        onChange={e => setNoIndex(e.target.checked)}
+                        className="rounded-sm border-slate-300 text-rose-600 focus:ring-rose-500 w-4 h-4"
+                      />
+                      <span>সার্চ ইঞ্জিনে ইন্ডেক্সিং বন্ধ রাখুন (noindex - Do NOT index in Google)</span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

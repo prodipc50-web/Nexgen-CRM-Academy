@@ -64,6 +64,7 @@ import {
   getDeviceType
 } from '../../utils/analyticsTracker';
 import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
+import { getHomepageSeoMetadata, applySeoMetadata } from '../../utils/seoHelper';
 
 interface PublicWebsiteViewProps {
   onOpenStaffLogin: () => void;
@@ -116,6 +117,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const [activePolicyModal, setActivePolicyModal] = useState<'terms' | 'privacy' | 'refund' | 'conduct' | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showExitIntent, setShowExitIntent] = useState(false);
+
+  // Auto-apply dynamic Homepage SEO metadata, Canonical URL & JSON-LD Schemas
+  React.useEffect(() => {
+    const seoMeta = getHomepageSeoMetadata(academySettings, websiteCmsConfig);
+    applySeoMetadata(seoMeta);
+  }, [academySettings, websiteCmsConfig]);
 
   // Auto-capture UTM params and fire Meta Pixel PageView
   React.useEffect(() => {
@@ -1642,6 +1649,51 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               </motion.div>
             ))}
           </div>
+
+          {/* Google Reviews CTA Badge & Link */}
+          {(websiteCmsConfig.seo?.googleBusinessProfile?.reviewUrl || websiteCmsConfig.seo?.googleReviewUrl || websiteCmsConfig.seo?.googleBusinessProfile?.mapsUrl) && (
+            <div className="mt-10 p-5 bg-gradient-to-r from-amber-50 via-white to-amber-50 rounded-2xl border border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-sm">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-lg shadow-md shrink-0">
+                  G
+                </div>
+                <div>
+                  <div className="flex items-center space-x-1.5 justify-center sm:justify-start">
+                    {websiteCmsConfig.seo?.googleBusinessProfile?.verifiedRating && websiteCmsConfig.seo.googleBusinessProfile.verifiedRating > 0 ? (
+                      <>
+                        <span className="font-black text-slate-900 text-sm">
+                          {websiteCmsConfig.seo.googleBusinessProfile.verifiedRating.toFixed(1)} Star Verified Rating on Google
+                        </span>
+                        <div className="flex text-amber-500">
+                          {[...Array(Math.round(websiteCmsConfig.seo.googleBusinessProfile.verifiedRating))].map((_, i) => (
+                            <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <span className="font-black text-slate-900 text-sm">
+                        Google Verified Training Centre • Farmgate, Dhaka
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Read verified feedback or share your authentic student learning experience on Google Maps
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href={websiteCmsConfig.seo?.googleBusinessProfile?.reviewUrl || websiteCmsConfig.seo?.googleBusinessProfile?.mapsUrl || websiteCmsConfig.seo?.googleReviewUrl || 'https://share.google/gSt3e5RNwwCyOOdGu'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all flex items-center space-x-1.5 shrink-0"
+              >
+                <Star className="w-3.5 h-3.5 fill-slate-950" />
+                <span>Review us on Google</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          )}
         </div>
       </section>
 

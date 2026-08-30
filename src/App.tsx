@@ -51,19 +51,19 @@ import { LoginView } from './components/auth/LoginView';
 import { Lead, Course } from './types';
 
 const AcademyAppContent: React.FC = () => {
-  const { leads, courses, isAuthenticated } = useAcademy();
+  const { leads, courses, isAuthenticated, websiteCmsConfig } = useAcademy();
   const [viewMode, setViewMode] = useState<'erp' | 'website' | 'student_portal' | 'course_landing'>('erp');
   const [landingCourse, setLandingCourse] = useState<Course | null>(null);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
 
-  // Auto-detect course parameter from URL or path on load
+  // Auto-detect course parameter from URL or path on load with redirect support
   useEffect(() => {
     if (typeof window !== 'undefined' && courses.length > 0) {
       const urlParams = new URLSearchParams(window.location.search);
       const courseQuery = urlParams.get('course') || urlParams.get('courseId');
       
-      // Also check path-based URL: /course/graphic-design-with-ai
+      // Also check path-based URL: /course/graphic-design-with-ai or /courses/...
       let pathSlug = '';
       const path = window.location.pathname;
       const courseMatch = path.match(/^\/courses?\/([^/?#]+)/i);
@@ -71,12 +71,28 @@ const AcademyAppContent: React.FC = () => {
         pathSlug = decodeURIComponent(courseMatch[1]).trim();
       }
 
-      const target = (courseQuery || pathSlug || '').trim();
+      let target = (courseQuery || pathSlug || '').trim();
+
+      // Check if this slug has an active 301 redirect configured
+      if (target && websiteCmsConfig?.seo?.courseRedirects?.length) {
+        const matchingRedirect = websiteCmsConfig.seo.courseRedirects.find(
+          r => (r.fromSlug || r.oldSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '') === target.toLowerCase().replace(/[^a-z0-9]/g, '')
+        );
+        const destinationSlug = matchingRedirect?.toSlug || matchingRedirect?.newSlug;
+        if (destinationSlug) {
+          target = destinationSlug;
+          // Update URL in browser history without page reload
+          const newUrl = `/courses/${destinationSlug}`;
+          window.history.replaceState(null, '', newUrl);
+        }
+      }
 
       if (target) {
         const targetClean = target.toLowerCase().replace(/[^a-z0-9]/g, '');
         const found = courses.find(c => {
-          const courseSlug = (c as any).slug || c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const courseSlug = c.seo?.slug || c.landingConfig?.slug || (c as any).slug || c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const customSeoSlugClean = (c.seo?.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const landingSlugClean = (c.landingConfig?.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           const slugClean = courseSlug.toLowerCase().replace(/[^a-z0-9]/g, '');
           const nameClean = c.name.toLowerCase().replace(/[^a-z0-9]/g, '');
           const idClean = c.id.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -84,6 +100,8 @@ const AcademyAppContent: React.FC = () => {
 
           return (
             slugClean === targetClean ||
+            customSeoSlugClean === targetClean ||
+            landingSlugClean === targetClean ||
             idClean === targetClean ||
             codeClean === targetClean ||
             nameClean === targetClean ||
@@ -98,7 +116,7 @@ const AcademyAppContent: React.FC = () => {
         }
       }
     }
-  }, [courses]);
+  }, [courses, websiteCmsConfig?.seo?.courseRedirects]);
 
   // Modal State Controllers (All hooks must be defined before any conditional return)
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);

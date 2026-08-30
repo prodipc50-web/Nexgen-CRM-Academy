@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { OnlineAdmissionModal } from './OnlineAdmissionModal';
 import { CourseLandingPageEditorModal } from '../courses/CourseLandingPageEditorModal';
+import { LeadForm } from '../LeadForm';
 import {
   trackMetaPixelEvent,
   getCapturedUtmParams
@@ -45,6 +46,7 @@ import {
   getMessengerDirectUrl
 } from '../../utils/whatsappHelper';
 import { copyToClipboardSafe } from '../../utils/clipboardHelper';
+import { getCourseSeoMetadata, applySeoMetadata } from '../../utils/seoHelper';
 
 interface CourseLandingPageViewProps {
   course: Course;
@@ -55,13 +57,22 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
   course,
   onBackToFullWebsite
 }) => {
-  const { websiteCmsConfig, staffList } = useAcademy();
+  const { websiteCmsConfig, staffList, academySettings } = useAcademy();
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [openModuleIndex, setOpenModuleIndex] = useState<number | null>(0);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showExitIntent, setShowExitIntent] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+
+  // Dynamic Course SEO Metadata & JSON-LD Schemas (Course, BreadcrumbList, FAQPage)
+  useEffect(() => {
+    const assignedTrainers = staffList.filter(s =>
+      course.trainerIds?.includes(s.id) || s.id === course.trainerId
+    );
+    const seoMeta = getCourseSeoMetadata(course, academySettings, websiteCmsConfig, assignedTrainers);
+    applySeoMetadata(seoMeta);
+  }, [course, academySettings, websiteCmsConfig, staffList]);
 
   const utms = getCapturedUtmParams();
   const pixelId = websiteCmsConfig?.marketing?.metaPixelId;
@@ -816,6 +827,30 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
           </div>
         </section>
       )}
+
+      {/* Quick Application & Admission Inquiry Form */}
+      <section className="py-12 bg-gradient-to-b from-slate-950 to-slate-900 border-t border-slate-800">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <LeadForm
+            courseId={course.id}
+            courseName={course.name}
+            source="Dedicated Course Landing Page"
+            title="কোর্সে ভর্তি ও ফ্রি স্কলারশিপ আবেদন"
+            subtitle="কোর্সের ফি, অফার ডিসকাউন্ট এবং আগামী ব্যাচের সময়সূচি জানতে ফর্মটি পূরণ করুন।"
+            onSuccess={() => {
+              trackMetaPixelEvent(
+                'Lead',
+                {
+                  content_name: course.name,
+                  value: offerFee,
+                  currency: 'BDT'
+                },
+                pixelId
+              );
+            }}
+          />
+        </div>
+      </section>
 
       {/* FAQ Section */}
       <section className="py-12 bg-slate-900 border-t border-slate-800">
