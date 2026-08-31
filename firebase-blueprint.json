@@ -1,12 +1,26 @@
 {
   "entities": {
-    "AcademyDatabaseState": {
-      "title": "Academy Main Database State",
-      "description": "Global synced state containing staff, leads, students, batches, courses, payments, expenses, seminars, website CMS, and institute settings",
+    "PublicCatalogState": {
+      "title": "Public Website & Course Catalog State",
+      "description": "Public website content, course catalog, categories, CMS hero/banners, FAQs, reviews, and gallery",
+      "type": "object",
+      "properties": {
+        "courses": { "type": "array", "description": "Public academy course catalogue" },
+        "websiteCmsConfig": { "type": "object", "description": "Public website theme and CMS content" },
+        "websiteReviews": { "type": "array", "description": "Student testimonials" },
+        "websiteGallery": { "type": "array", "description": "Academy photo gallery" },
+        "websiteFaqs": { "type": "array", "description": "Frequently asked questions" },
+        "websiteBlogs": { "type": "array", "description": "Blog and news posts" },
+        "categories": { "type": "array", "description": "Public course categories" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      }
+    },
+    "CrmPrivateState": {
+      "title": "Private CRM ERP Operational State",
+      "description": "Private operational data including students, leads, admissions, payments, staff accounts, attendance, expenses, and audit logs",
       "type": "object",
       "properties": {
         "staffList": { "type": "array", "description": "Staff and user accounts" },
-        "courses": { "type": "array", "description": "Academy course catalogue" },
         "batches": { "type": "array", "description": "Batch schedules and rooms" },
         "leads": { "type": "array", "description": "Customer inquiry leads" },
         "followUps": { "type": "array", "description": "Lead follow-up logs" },
@@ -26,23 +40,30 @@
         "seminars": { "type": "array", "description": "Seminars and workshops" },
         "certificates": { "type": "array", "description": "Issued certificates" },
         "academySettings": { "type": "object", "description": "Institute profile and configuration" },
-        "websiteCmsConfig": { "type": "object", "description": "Public website theme and CMS content" },
-        "websiteReviews": { "type": "array", "description": "Student testimonials" },
-        "websiteGallery": { "type": "array", "description": "Academy photo gallery" },
-        "websiteFaqs": { "type": "array", "description": "Frequently asked questions" },
-        "websiteBlogs": { "type": "array", "description": "Blog and news posts" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
+      }
+    },
+    "AcademyDatabaseState": {
+      "title": "Legacy Master Synced State",
+      "description": "Legacy combined backup state for migration",
+      "type": "object",
+      "properties": {
         "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
       }
     }
   },
   "firestore": {
+    "/academy_data/public_catalog": {
+      "schema": "PublicCatalogState",
+      "description": "Publicly accessible website course catalog and CMS data"
+    },
+    "/academy_data/crm_private_data": {
+      "schema": "CrmPrivateState",
+      "description": "Private authenticated CRM and ERP operations database"
+    },
     "/academy_data/{docId}": {
       "schema": "AcademyDatabaseState",
-      "description": "Master synchronized state and historical backups for Nexgen Computer Academy"
-    },
-    "/test/{testId}": {
-      "schema": "AcademyDatabaseState",
-      "description": "Connection test and health-check documents"
+      "description": "Master synchronized state and historical backups"
     }
   }
 }

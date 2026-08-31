@@ -16,14 +16,36 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Academy Master Synced State & Backups
-    match /academy_data/{docId} {
-      allow read, write: if isValidId(docId);
+    // Public Website & Course Catalog:
+    // Anyone on the internet can READ public courses, fees, schedules, FAQs, reviews, and CMS hero content.
+    // Anonymous public clients CANNOT write, update, or delete.
+    match /academy_data/public_catalog {
+      allow read: if true;
+      allow create, update: if isSignedIn();
+      allow delete: if false;
     }
 
-    // System Connection Health Check
+    // Private CRM / ERP Operations:
+    // Students, leads, admissions, payments, staff accounts, attendance, expenses, and audit logs.
+    // Public visitors are COMPLETELY DENIED read and write access.
+    // Accessible ONLY to authenticated staff.
+    match /academy_data/crm_private_data {
+      allow read, write: if isSignedIn();
+      allow delete: if false;
+    }
+
+    // Legacy main_state & other backup records:
+    // Restricted strictly to authenticated staff (for safe migration & rollback).
+    match /academy_data/{docId} {
+      allow read, write: if isValidId(docId) && isSignedIn();
+      allow delete: if false;
+    }
+
+    // System Connection Health Check (authenticated only)
     match /test/{testId} {
-      allow read, write: if isValidId(testId);
+      allow read, write: if isValidId(testId) && isSignedIn();
+      allow delete: if false;
     }
   }
 }
+

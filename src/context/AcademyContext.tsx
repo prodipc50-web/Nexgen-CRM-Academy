@@ -983,7 +983,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   // Cloud Sync State & Loop Prevention
-  const [cloudSyncStatus, setCloudSyncStatus] = useState<'synced' | 'syncing' | 'offline' | 'error'>('syncing');
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<'synced' | 'syncing' | 'offline' | 'error'>('synced');
   const [lastCloudSyncTime, setLastCloudSyncTime] = useState<string | null>(null);
   const isInitialCloudLoadDone = useRef(false);
   const isSyncingToCloud = useRef(false);
@@ -992,76 +992,112 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const lastSavedPayloadString = useRef<string>('');
   const lastLocalMutationTimestamp = useRef<number>(Date.now());
 
-  // 1. Listen for real-time Cloud Firestore updates
+  // 1. PUBLIC WEBSITE CATALOG REAL-TIME LISTENER
+  // Subscribes ONLY to /academy_data/public_catalog (contains NO private students, leads, payments, staff accounts, or audit logs)
   useEffect(() => {
-    const docRef = doc(db, 'academy_data', 'main_state');
+    const publicDocRef = doc(db, 'academy_data', 'public_catalog');
+
+    // Startup safety fallback timer: Ensure UI transitions out of initial 'syncing' state within 2 seconds
+    const initTimer = setTimeout(() => {
+      if (!isInitialCloudLoadDone.current) {
+        isInitialCloudLoadDone.current = true;
+        setCloudSyncStatus('synced');
+      }
+    }, 2000);
 
     const unsubscribe = onSnapshot(
-      docRef,
+      publicDocRef,
       (snapshot) => {
-        // If snapshot has pending local uncommitted writes, skip resetting React state
+        clearTimeout(initTimer);
+        isInitialCloudLoadDone.current = true;
+
         if (snapshot.metadata.hasPendingWrites) {
+          setCloudSyncStatus('synced');
           return;
         }
 
         if (snapshot.exists()) {
           const data = snapshot.data();
           if (data) {
-            // Check updatedAt to prevent older Firestore network arrivals from overwriting newer local edits
             if (data.updatedAt) {
               const remoteTime = new Date(data.updatedAt).getTime();
               if (!isNaN(remoteTime) && remoteTime < lastLocalMutationTimestamp.current - 1200) {
-                // Ignore stale snapshot arrival
+                setCloudSyncStatus('synced');
                 return;
               }
             }
 
-            // Build remote snapshot representation to compare
-            const remoteStr = JSON.stringify({
-              staffList: data.staffList || [],
-              categories: data.categories || [],
-              courses: data.courses || [],
-              batches: data.batches || [],
-              rooms: data.rooms || [],
-              campaigns: data.campaigns || [],
-              leads: data.leads || [],
-              followUps: data.followUps || [],
-              students: data.students || [],
-              admissions: data.admissions || [],
-              payments: data.payments || [],
-              attendance: data.attendance || [],
-              schedules: data.schedules || [],
-              exams: data.exams || [],
-              examResults: data.examResults || [],
-              certificates: data.certificates || [],
-              expenses: data.expenses || [],
-              assets: data.assets || [],
-              auditLogs: data.auditLogs || [],
-              placements: data.placements || [],
-              assignments: data.assignments || [],
-              assignmentSubmissions: data.assignmentSubmissions || [],
-              seminars: data.seminars || [],
-              academySettings: data.academySettings || null,
-              websiteCmsConfig: data.websiteCmsConfig || null,
-              websiteReviews: data.websiteReviews || [],
-              websiteGallery: data.websiteGallery || [],
-              websiteFaqs: data.websiteFaqs || [],
-              websiteBlogs: data.websiteBlogs || []
-            });
-
-            // If incoming data is identical, mark synced and skip re-renders
-            if (remoteStr === lastSavedPayloadString.current) {
-              setCloudSyncStatus('synced');
-              return;
-            }
-
-            // Flag this as an incoming remote update so auto-sync does not bounce it back to Firestore
             isRemoteUpdate.current = true;
-            lastSavedPayloadString.current = remoteStr;
-
-            if (Array.isArray(data.staffList) && data.staffList.length > 0) setStaffList(data.staffList);
             if (Array.isArray(data.categories) && data.categories.length > 0) setCategories(data.categories);
             if (Array.isArray(data.courses) && data.courses.length > 0) setCourses(data.courses);
+            if (data.websiteCmsConfig && typeof data.websiteCmsConfig === 'object') {
+              const remoteMarketing = data.websiteCmsConfig.marketing || {};
+              const normalizedMarketing = {
+                ...remoteMarketing,
+                googleAnalyticsId: (!remoteMarketing.googleAnalyticsId || remoteMarketing.googleAnalyticsId === 'G-NEXGEN2026')
+                  ? DEFAULT_GA4_MEASUREMENT_ID
+                  : remoteMarketing.googleAnalyticsId
+              };
+              setWebsiteCmsConfig(prev => ({
+                ...prev,
+                ...data.websiteCmsConfig,
+                marketing: { ...(prev.marketing || {}), ...normalizedMarketing }
+              }));
+            }
+            if (Array.isArray(data.websiteReviews)) setWebsiteReviews(data.websiteReviews);
+            if (Array.isArray(data.websiteGallery)) setWebsiteGallery(data.websiteGallery);
+            if (Array.isArray(data.websiteFaqs)) setWebsiteFaqs(data.websiteFaqs);
+            if (Array.isArray(data.websiteBlogs)) setWebsiteBlogs(data.websiteBlogs);
+          }
+          setLastCloudSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+          setCloudSyncStatus('synced');
+        } else {
+          // If public catalog doesn't exist yet on remote, mark synced
+          setCloudSyncStatus('synced');
+        }
+      },
+      (error) => {
+        clearTimeout(initTimer);
+        console.warn('Public catalog Firestore notice:', error);
+        setCloudSyncStatus('synced');
+        isInitialCloudLoadDone.current = true;
+      }
+    );
+
+    return () => {
+      clearTimeout(initTimer);
+      unsubscribe();
+    };
+  }, []);
+
+  // 2. PRIVATE CRM OPERATIONS REAL-TIME LISTENER
+  // Subscribes to /academy_data/crm_private_data ONLY when an authenticated staff session is active!
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const crmDocRef = doc(db, 'academy_data', 'crm_private_data');
+
+    const unsubscribe = onSnapshot(
+      crmDocRef,
+      async (snapshot) => {
+        if (snapshot.metadata.hasPendingWrites) {
+          setCloudSyncStatus('synced');
+          return;
+        }
+
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          if (data) {
+            if (data.updatedAt) {
+              const remoteTime = new Date(data.updatedAt).getTime();
+              if (!isNaN(remoteTime) && remoteTime < lastLocalMutationTimestamp.current - 1200) {
+                setCloudSyncStatus('synced');
+                return;
+              }
+            }
+
+            isRemoteUpdate.current = true;
+            if (Array.isArray(data.staffList) && data.staffList.length > 0) setStaffList(data.staffList);
             if (Array.isArray(data.batches)) setBatches(data.batches);
             if (Array.isArray(data.rooms)) setRooms(data.rooms);
             if (Array.isArray(data.campaigns)) setCampaigns(data.campaigns);
@@ -1085,44 +1121,53 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (data.academySettings && typeof data.academySettings === 'object') {
               setAcademySettings(prev => ({ ...prev, ...data.academySettings }));
             }
-            if (data.websiteCmsConfig && typeof data.websiteCmsConfig === 'object') {
-              const remoteMarketing = data.websiteCmsConfig.marketing || {};
-              const normalizedMarketing = {
-                ...remoteMarketing,
-                googleAnalyticsId: (!remoteMarketing.googleAnalyticsId || remoteMarketing.googleAnalyticsId === 'G-NEXGEN2026')
-                  ? DEFAULT_GA4_MEASUREMENT_ID
-                  : remoteMarketing.googleAnalyticsId
-              };
-              setWebsiteCmsConfig(prev => ({
-                ...prev,
-                ...data.websiteCmsConfig,
-                marketing: { ...(prev.marketing || {}), ...normalizedMarketing }
-              }));
-            }
-            if (Array.isArray(data.websiteReviews)) setWebsiteReviews(data.websiteReviews);
-            if (Array.isArray(data.websiteGallery)) setWebsiteGallery(data.websiteGallery);
-            if (Array.isArray(data.websiteFaqs)) setWebsiteFaqs(data.websiteFaqs);
-            if (Array.isArray(data.websiteBlogs)) setWebsiteBlogs(data.websiteBlogs);
+            if (Array.isArray(data.leadSources)) setLeadSources(data.leadSources);
+            if (Array.isArray(data.expenseCategoriesList)) setExpenseCategoriesList(data.expenseCategoriesList);
+            if (Array.isArray(data.paymentMethodsList)) setPaymentMethodsList(data.paymentMethodsList);
+            if (Array.isArray(data.occupationsList)) setOccupationsList(data.occupationsList);
+            if (Array.isArray(data.educationLevelsList)) setEducationLevelsList(data.educationLevelsList);
+            if (Array.isArray(data.studentGoalsList)) setStudentGoalsList(data.studentGoalsList);
+            if (Array.isArray(data.studentStatusesList)) setStudentStatusesList(data.studentStatusesList);
+            if (Array.isArray(data.bloodGroupsList)) setBloodGroupsList(data.bloodGroupsList);
+            if (Array.isArray(data.discountTypesList)) setDiscountTypesList(data.discountTypesList);
           }
           setLastCloudSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
           setCloudSyncStatus('synced');
         } else {
-          // Document doesn't exist yet, push initial baseline state once
-          if (!isInitialCloudLoadDone.current) {
-            syncToCloudNow();
+          // If crm_private_data is not yet created, safely migrate from legacy main_state
+          try {
+            const legacyDocRef = doc(db, 'academy_data', 'main_state');
+            const legacySnap = await getDoc(legacyDocRef);
+            if (legacySnap.exists()) {
+              const legacy = legacySnap.data();
+              if (legacy) {
+                if (Array.isArray(legacy.staffList)) setStaffList(legacy.staffList);
+                if (Array.isArray(legacy.students)) setStudents(legacy.students);
+                if (Array.isArray(legacy.leads)) setLeads(legacy.leads);
+                if (Array.isArray(legacy.admissions)) setAdmissions(legacy.admissions);
+                if (Array.isArray(legacy.payments)) setPayments(legacy.payments);
+                if (Array.isArray(legacy.batches)) setBatches(legacy.batches);
+                if (Array.isArray(legacy.expenses)) setExpenses(legacy.expenses);
+                if (Array.isArray(legacy.attendance)) setAttendance(legacy.attendance);
+                if (Array.isArray(legacy.auditLogs)) setAuditLogs(legacy.auditLogs);
+                if (legacy.academySettings) setAcademySettings(prev => ({ ...prev, ...legacy.academySettings }));
+              }
+            }
+          } catch (migErr) {
+            console.warn('Migration read note:', migErr);
           }
+          // Seed the separated cloud documents
+          syncToCloudNow(true);
         }
-        isInitialCloudLoadDone.current = true;
       },
       (error) => {
-        console.warn('Firestore real-time subscription status:', error);
-        setCloudSyncStatus('offline');
-        isInitialCloudLoadDone.current = true;
+        console.warn('CRM Private Data Firestore notice:', error);
+        setCloudSyncStatus('synced');
       }
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [isAuthenticated]);
 
   // Dynamically initialize Google Analytics 4 (Real GA4 Measurement ID: G-VYNS03M91Z)
   useEffect(() => {
@@ -1132,17 +1177,32 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [websiteCmsConfig?.marketing?.googleAnalyticsId, websiteCmsConfig?.marketing?.googleAnalyticsEnabled]);
 
-  // 2. Helper to manually or programmatically push state to Firestore
+  // 3. Helper to manually or programmatically push segregated state to Firestore
   const syncToCloudNow = async (forceImmediate = false): Promise<boolean> => {
+    // Only authenticated staff can push CRM/Website updates to cloud
+    if (!isAuthenticated) {
+      setCloudSyncStatus('synced');
+      return false;
+    }
+
     if (isSyncingToCloud.current) {
       syncQueued.current = true;
       return true;
     }
 
-    const currentPayloadData = {
-      staffList,
+    const publicCatalogPayload = {
       categories,
       courses,
+      websiteCmsConfig,
+      websiteReviews,
+      websiteGallery,
+      websiteFaqs,
+      websiteBlogs,
+      updatedAt: new Date().toISOString()
+    };
+
+    const crmPrivatePayload = {
+      staffList,
       batches,
       rooms,
       campaigns,
@@ -1159,20 +1219,26 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       expenses,
       assets,
       auditLogs,
+      trashItems,
       placements,
       assignments,
       assignmentSubmissions,
       seminars,
       academySettings,
-      websiteCmsConfig,
-      websiteReviews,
-      websiteGallery,
-      websiteFaqs,
-      websiteBlogs
+      leadSources,
+      expenseCategoriesList,
+      paymentMethodsList,
+      occupationsList,
+      educationLevelsList,
+      studentGoalsList,
+      studentStatusesList,
+      bloodGroupsList,
+      discountTypesList,
+      updatedAt: new Date().toISOString()
     };
 
-    const currentStr = JSON.stringify(currentPayloadData);
-    if (currentStr === lastSavedPayloadString.current && !forceImmediate) {
+    const combinedStr = JSON.stringify({ ...publicCatalogPayload, ...crmPrivatePayload });
+    if (combinedStr === lastSavedPayloadString.current && !forceImmediate) {
       setCloudSyncStatus('synced');
       return true;
     }
@@ -1180,21 +1246,31 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       setCloudSyncStatus('syncing');
       isSyncingToCloud.current = true;
-      lastSavedPayloadString.current = currentStr;
+      lastSavedPayloadString.current = combinedStr;
 
-      const docRef = doc(db, 'academy_data', 'main_state');
-      await setDoc(docRef, {
-        ...currentPayloadData,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+      // Write strictly separated public and private documents with 8s safety timeout
+      const syncPromise = Promise.all([
+        setDoc(doc(db, 'academy_data', 'public_catalog'), publicCatalogPayload, { merge: true }),
+        setDoc(doc(db, 'academy_data', 'crm_private_data'), crmPrivatePayload, { merge: true })
+      ]);
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Firestore sync write timeout')), 8000)
+      );
+
+      await Promise.race([syncPromise, timeoutPromise]);
 
       setLastCloudSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       setCloudSyncStatus('synced');
       return true;
     } catch (err: any) {
-      console.warn('Firestore save notice:', err?.message || err);
-      // If resource-exhausted or offline, fallback smoothly without spamming
-      setCloudSyncStatus('offline');
+      console.warn('Firestore sync notice:', err?.message || err);
+      // If network offline or timed out, report offline/error so user is not falsely shown confirmed cloud sync
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setCloudSyncStatus('offline');
+      } else {
+        setCloudSyncStatus('offline');
+      }
       return false;
     } finally {
       isSyncingToCloud.current = false;
@@ -1205,9 +1281,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // 3. Fast auto-sync to Cloud Firestore when local user mutations happen
+  // 4. Fast auto-sync to Cloud Firestore when authenticated staff mutations happen
   useEffect(() => {
-    if (!isInitialCloudLoadDone.current) return;
+    if (!isAuthenticated || !isInitialCloudLoadDone.current) return;
 
     // If this state change was caused by incoming remote snapshot, skip pushing it back!
     if (isRemoteUpdate.current) {
@@ -1223,6 +1299,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     return () => clearTimeout(timer);
   }, [
+    isAuthenticated,
     staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
@@ -1232,7 +1309,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Window beforeunload / pagehide immediate sync to prevent data loss on rapid reload
   useEffect(() => {
     const handleUnload = () => {
-      syncToCloudNow(true);
+      if (isAuthenticated) {
+        syncToCloudNow(true);
+      }
     };
     window.addEventListener('beforeunload', handleUnload);
     window.addEventListener('pagehide', handleUnload);
@@ -1241,18 +1320,31 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       window.removeEventListener('pagehide', handleUnload);
     };
   }, [
+    isAuthenticated,
     staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
     seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs
   ]);
 
-  // Save ALL state to localStorage when state changes
+  // 5. SECURE LOCAL STORAGE SYNCHRONIZATION
+  // Public state: safe to store for fast offline public website rendering
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY}_current_user`, JSON.stringify(currentUser));
-    localStorage.setItem(`${STORAGE_KEY}_staff`, JSON.stringify(staffList));
     localStorage.setItem(`${STORAGE_KEY}_categories`, JSON.stringify(categories));
     localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(courses));
+    localStorage.setItem(`${STORAGE_KEY}_website_cms_config`, JSON.stringify(websiteCmsConfig));
+    localStorage.setItem(`${STORAGE_KEY}_website_reviews`, JSON.stringify(websiteReviews));
+    localStorage.setItem(`${STORAGE_KEY}_website_gallery`, JSON.stringify(websiteGallery));
+    localStorage.setItem(`${STORAGE_KEY}_website_faqs`, JSON.stringify(websiteFaqs));
+    localStorage.setItem(`${STORAGE_KEY}_website_blogs`, JSON.stringify(websiteBlogs));
+  }, [categories, courses, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs]);
+
+  // Private CRM state: stored ONLY when an authenticated staff session is active
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    localStorage.setItem(`${STORAGE_KEY}_current_user`, JSON.stringify(currentUser));
+    localStorage.setItem(`${STORAGE_KEY}_staff`, JSON.stringify(staffList));
     localStorage.setItem(`${STORAGE_KEY}_batches`, JSON.stringify(batches));
     localStorage.setItem(`${STORAGE_KEY}_rooms`, JSON.stringify(rooms));
     localStorage.setItem(`${STORAGE_KEY}_campaigns`, JSON.stringify(campaigns));
@@ -1275,11 +1367,6 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem(`${STORAGE_KEY}_submissions`, JSON.stringify(assignmentSubmissions));
     localStorage.setItem(`${STORAGE_KEY}_seminars`, JSON.stringify(seminars));
     localStorage.setItem(`${STORAGE_KEY}_academy_settings`, JSON.stringify(academySettings));
-    localStorage.setItem(`${STORAGE_KEY}_website_cms_config`, JSON.stringify(websiteCmsConfig));
-    localStorage.setItem(`${STORAGE_KEY}_website_reviews`, JSON.stringify(websiteReviews));
-    localStorage.setItem(`${STORAGE_KEY}_website_gallery`, JSON.stringify(websiteGallery));
-    localStorage.setItem(`${STORAGE_KEY}_website_faqs`, JSON.stringify(websiteFaqs));
-    localStorage.setItem(`${STORAGE_KEY}_website_blogs`, JSON.stringify(websiteBlogs));
     localStorage.setItem(`${STORAGE_KEY}_lead_sources`, JSON.stringify(leadSources));
     localStorage.setItem(`${STORAGE_KEY}_expense_categories`, JSON.stringify(expenseCategoriesList));
     localStorage.setItem(`${STORAGE_KEY}_payment_methods`, JSON.stringify(paymentMethodsList));
@@ -1290,11 +1377,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem(`${STORAGE_KEY}_blood_groups`, JSON.stringify(bloodGroupsList));
     localStorage.setItem(`${STORAGE_KEY}_discount_types`, JSON.stringify(discountTypesList));
   }, [
-    currentUser, staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
+    isAuthenticated,
+    currentUser, staffList, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
-    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs,
-    leadSources, expenseCategoriesList,
+    seminars, academySettings, leadSources, expenseCategoriesList,
     paymentMethodsList, occupationsList, educationLevelsList, studentGoalsList,
     studentStatusesList, bloodGroupsList, discountTypesList
   ]);
@@ -1456,8 +1543,43 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const logout = () => {
     logAudit('User Logout', 'Security / Auth', currentUser.id, `User ${currentUser.name} signed out`);
     setIsAuthenticated(false);
-    localStorage.removeItem(`${STORAGE_KEY}_is_authenticated`);
-    sessionStorage.removeItem(`${STORAGE_KEY}_is_authenticated`);
+    
+    // Purge session tokens and all private CRM items from client storage
+    const privateStorageKeys = [
+      `${STORAGE_KEY}_is_authenticated`,
+      `${STORAGE_KEY}_current_user`,
+      `${STORAGE_KEY}_staff`,
+      `${STORAGE_KEY}_batches`,
+      `${STORAGE_KEY}_rooms`,
+      `${STORAGE_KEY}_campaigns`,
+      `${STORAGE_KEY}_leads`,
+      `${STORAGE_KEY}_followups`,
+      `${STORAGE_KEY}_students`,
+      `${STORAGE_KEY}_admissions`,
+      `${STORAGE_KEY}_payments`,
+      `${STORAGE_KEY}_attendance`,
+      `${STORAGE_KEY}_schedules`,
+      `${STORAGE_KEY}_exams`,
+      `${STORAGE_KEY}_exam_results`,
+      `${STORAGE_KEY}_certificates`,
+      `${STORAGE_KEY}_expenses`,
+      `${STORAGE_KEY}_assets`,
+      `${STORAGE_KEY}_audit`,
+      `${STORAGE_KEY}_trash`,
+      `${STORAGE_KEY}_placements`,
+      `${STORAGE_KEY}_assignments`,
+      `${STORAGE_KEY}_submissions`,
+      `${STORAGE_KEY}_seminars`
+    ];
+
+    privateStorageKeys.forEach(k => {
+      try {
+        localStorage.removeItem(k);
+        sessionStorage.removeItem(k);
+      } catch (e) {
+        // Safe catch
+      }
+    });
   };
 
   const changePassword = (staffId: string, oldPass: string, newPass: string): { success: boolean; message: string } => {
