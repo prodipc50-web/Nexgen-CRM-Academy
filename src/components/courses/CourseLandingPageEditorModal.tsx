@@ -85,7 +85,13 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   onClose,
   course
 }) => {
-  const { updateCourse, websiteCmsConfig } = useAcademy();
+  const { updateCourse, websiteCmsConfig, isAuthenticated, currentUser } = useAcademy();
+  const canEdit = Boolean(isAuthenticated && currentUser && ['SUPER_ADMIN', 'ADMIN', 'BRANCH_MANAGER'].includes(currentUser.role));
+
+  if (!isOpen || !canEdit) {
+    return null;
+  }
+
   const existingConfig = course.landingConfig || {};
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
   const galleryFileInputRef = useRef<HTMLInputElement>(null);
@@ -648,6 +654,10 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   };
 
   const handleSave = () => {
+    if (!canEdit) {
+      console.warn('Unauthorized attempt to modify landing page configuration.');
+      return;
+    }
     const updatedLandingConfig: CourseLandingPageConfig = {
       ...existingConfig,
       headline: headline.trim(),

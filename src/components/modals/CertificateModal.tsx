@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Certificate } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
+import { ImageUploadCropModal } from '../common/ImageUploadCropModal';
+import { compressImageBase64 } from '../../utils/imageCompressor';
 import {
   X,
   Printer,
@@ -19,6 +21,7 @@ import {
   Save,
   Check,
   Upload,
+  Crop,
   Image as ImageIcon
 } from 'lucide-react';
 
@@ -139,36 +142,33 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
     watermarkType: 'crest' as 'crest' | 'award' | 'custom'
   });
 
+  const [isLogoCropOpen, setIsLogoCropOpen] = useState(false);
+  const [isWatermarkCropOpen, setIsWatermarkCropOpen] = useState(false);
+
   const logoFileInputRef = useRef<HTMLInputElement>(null);
   const watermarkFileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.result) {
-          setCertData(prev => ({ ...prev, customLogoUrl: reader.result as string }));
-        }
-      };
-      reader.readAsDataURL(file);
+      const compressed = await compressImageBase64(file, { maxWidth: 600, maxHeight: 600, quality: 0.85 });
+      if (compressed) {
+        setCertData(prev => ({ ...prev, customLogoUrl: compressed }));
+      }
     }
   };
 
-  const handleWatermarkUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWatermarkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.result) {
-          setCertData(prev => ({
-            ...prev,
-            customWatermarkUrl: reader.result as string,
-            watermarkType: 'custom'
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
+      const compressed = await compressImageBase64(file, { maxWidth: 1000, maxHeight: 1000, quality: 0.80 });
+      if (compressed) {
+        setCertData(prev => ({
+          ...prev,
+          customWatermarkUrl: compressed,
+          watermarkType: 'custom'
+        }));
+      }
     }
   };
 
@@ -734,14 +734,22 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                     <span className="font-mono font-bold text-indigo-600 w-12 text-right">{certData.logoSize}px</span>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsLogoCropOpen(true)}
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow-xs transition-colors text-xs shrink-0"
+                    >
+                      <Crop className="w-3.5 h-3.5" />
+                      <span>Crop & Resize Logo</span>
+                    </button>
                     <button
                       type="button"
                       onClick={() => logoFileInputRef.current?.click()}
-                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold border border-indigo-200 transition-colors text-xs shrink-0"
+                      className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold border border-slate-300 transition-colors text-xs shrink-0"
                     >
                       <Upload className="w-3.5 h-3.5" />
-                      <span>Upload Logo</span>
+                      <span>Direct Upload</span>
                     </button>
                     <input
                       ref={logoFileInputRef}
@@ -755,7 +763,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                       placeholder="Or paste Logo Image URL..."
                       value={certData.customLogoUrl}
                       onChange={e => setCertData(prev => ({ ...prev, customLogoUrl: e.target.value }))}
-                      className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 text-xs outline-none focus:border-indigo-500"
+                      className="flex-1 min-w-[140px] bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 text-xs outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -767,15 +775,26 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                       <Sparkles className="w-4 h-4 text-amber-600" />
                       <span>Watermark Size & Position (জলছাপ সাইজ ও পজিশন)</span>
                     </label>
-                    <select
-                      value={certData.watermarkType}
-                      onChange={e => setCertData(prev => ({ ...prev, watermarkType: e.target.value as any }))}
-                      className="bg-slate-50 border border-slate-300 rounded-lg px-2 py-0.5 text-xs outline-none font-semibold"
-                    >
-                      <option value="crest">Nexgen Crest Watermark</option>
-                      <option value="award">Gold Award Watermark</option>
-                      <option value="custom">Custom Uploaded Image</option>
-                    </select>
+                    <div className="flex items-center space-x-2">
+                      {certData.customWatermarkUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setCertData(prev => ({ ...prev, customWatermarkUrl: '', watermarkType: 'crest' }))}
+                          className="text-[10px] text-rose-600 font-semibold hover:underline"
+                        >
+                          Reset
+                        </button>
+                      )}
+                      <select
+                        value={certData.watermarkType}
+                        onChange={e => setCertData(prev => ({ ...prev, watermarkType: e.target.value as any }))}
+                        className="bg-slate-50 border border-slate-300 rounded-lg px-2 py-0.5 text-xs outline-none font-semibold"
+                      >
+                        <option value="crest">Nexgen Crest Watermark</option>
+                        <option value="award">Gold Award Watermark</option>
+                        <option value="custom">Custom Uploaded Image</option>
+                      </select>
+                    </div>
                   </div>
 
                   {/* Watermark Size & Opacity Controls */}
@@ -813,15 +832,57 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Vertical Position Slider & Watermark Upload */}
-                  <div className="flex items-center space-x-2">
+                  {/* Position Sliders & Watermark Upload */}
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200 text-xs">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600 font-semibold">Vertical Pos:</span>
+                        <span className="font-mono font-bold text-amber-800 text-[11px]">{certData.watermarkOffsetY}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-160"
+                        max="160"
+                        step="5"
+                        value={certData.watermarkOffsetY}
+                        onChange={e => setCertData(prev => ({ ...prev, watermarkOffsetY: parseInt(e.target.value) || 0 }))}
+                        className="w-full accent-amber-600"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-600 font-semibold">Horizontal Pos:</span>
+                        <span className="font-mono font-bold text-amber-800 text-[11px]">{certData.watermarkOffsetX}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-160"
+                        max="160"
+                        step="5"
+                        value={certData.watermarkOffsetX}
+                        onChange={e => setCertData(prev => ({ ...prev, watermarkOffsetX: parseInt(e.target.value) || 0 }))}
+                        className="w-full accent-amber-600"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsWatermarkCropOpen(true)}
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold shadow-xs transition-colors text-xs shrink-0"
+                    >
+                      <Crop className="w-3.5 h-3.5" />
+                      <span>Crop & Resize Watermark</span>
+                    </button>
                     <button
                       type="button"
                       onClick={() => watermarkFileInputRef.current?.click()}
-                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg font-bold border border-amber-200 transition-colors text-xs shrink-0"
+                      className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg font-semibold border border-amber-200 transition-colors text-xs shrink-0"
                     >
                       <Upload className="w-3.5 h-3.5" />
-                      <span>Upload Image</span>
+                      <span>Upload Direct</span>
                     </button>
                     <input
                       ref={watermarkFileInputRef}
@@ -830,18 +891,6 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                       onChange={handleWatermarkUpload}
                       className="hidden"
                     />
-                    <div className="flex-1 flex items-center space-x-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 text-[11px]">
-                      <span className="text-slate-500 shrink-0">V-Pos:</span>
-                      <input
-                        type="range"
-                        min="-120"
-                        max="120"
-                        step="5"
-                        value={certData.watermarkOffsetY}
-                        onChange={e => setCertData(prev => ({ ...prev, watermarkOffsetY: parseInt(e.target.value) || 0 }))}
-                        className="w-full accent-amber-600"
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1086,6 +1135,40 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Certificate Logo Crop & Resize Modal */}
+      <ImageUploadCropModal
+        isOpen={isLogoCropOpen}
+        onClose={() => setIsLogoCropOpen(false)}
+        currentImageUrl={certData.customLogoUrl}
+        onSaveImage={(croppedUrl) => {
+          setCertData(prev => ({ ...prev, customLogoUrl: croppedUrl }));
+          setIsLogoCropOpen(false);
+        }}
+        title="Crop & Resize Certificate Logo"
+        subtitle="Upload or frame the academy or partner logo for official certificate generation."
+        aspectRatio="1:1"
+        recommendedSize="Recommended: 500 × 500px (1:1 Square) or transparent PNG"
+      />
+
+      {/* Certificate Watermark / Custom Graphic Crop & Resize Modal */}
+      <ImageUploadCropModal
+        isOpen={isWatermarkCropOpen}
+        onClose={() => setIsWatermarkCropOpen(false)}
+        currentImageUrl={certData.customWatermarkUrl}
+        onSaveImage={(croppedUrl) => {
+          setCertData(prev => ({
+            ...prev,
+            customWatermarkUrl: croppedUrl,
+            watermarkType: 'custom'
+          }));
+          setIsWatermarkCropOpen(false);
+        }}
+        title="Crop & Resize Certificate Watermark / Crest"
+        subtitle="Position and scale the center watermark graphic or emblem for the background overlay."
+        aspectRatio="1:1"
+        recommendedSize="Recommended: 800 × 800px (Center Crest / Emblem)"
+      />
     </div>
   );
 };

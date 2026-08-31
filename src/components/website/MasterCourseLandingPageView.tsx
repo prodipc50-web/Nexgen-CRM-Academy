@@ -235,8 +235,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   course: propCourse,
   onBackToFullWebsite
 }) => {
-  const { courses, websiteCmsConfig, staffList, addLead, academySettings } = useAcademy();
+  const { courses, websiteCmsConfig, staffList, addLead, academySettings, isAuthenticated, currentUser } = useAcademy();
   const course = courses.find(c => c.id === propCourse.id || c.code === propCourse.code) || propCourse;
+
+  // Authorization check: Only authenticated admins/managers can edit landing page contents
+  const canEdit = Boolean(
+    isAuthenticated &&
+    currentUser &&
+    ['SUPER_ADMIN', 'ADMIN', 'BRANCH_MANAGER'].includes(currentUser.role)
+  );
 
   // Dynamic Course SEO Metadata & JSON-LD Schemas (Course, BreadcrumbList, FAQPage)
   useEffect(() => {
@@ -633,13 +640,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             <Share2 className="w-3.5 h-3.5" />
             <span className="text-[11px] font-bold">{copiedUrl ? 'Copied!' : 'Share Link'}</span>
           </button>
-          <button
-            onClick={() => setIsEditorOpen(true)}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold flex items-center space-x-1.5 shadow-sm transition-all active:scale-95"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-            <span>এডিট ল্যান্ডিং পেজ (Edit CMS)</span>
-          </button>
+          {canEdit && (
+            <button
+              onClick={() => setIsEditorOpen(true)}
+              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold flex items-center space-x-1.5 shadow-sm transition-all active:scale-95"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>এডিট ল্যান্ডিং পেজ (Edit CMS)</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -799,17 +808,19 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 <span className="text-xs font-bold text-white bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-700">
                   🏢 আধুনিক কম্পিউটার ল্যাব ও এসি ক্লাসরুম
                 </span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditorOpen(true);
-                  }}
-                  className="pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity px-2.5 py-1 bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg backdrop-blur-md flex items-center space-x-1.5 shadow-md cursor-pointer"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  <span>ছবি পরিবর্তন</span>
-                </button>
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsEditorOpen(true);
+                    }}
+                    className="pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity px-2.5 py-1 bg-indigo-600/90 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg backdrop-blur-md flex items-center space-x-1.5 shadow-md cursor-pointer"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>ছবি পরিবর্তন</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1648,14 +1659,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               <Laptop className="w-4 h-4" />
               <span>ল্যাব ও ক্যাম্পাস এনভায়রনমেন্ট</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsEditorOpen(true)}
-              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-colors cursor-pointer"
-            >
-              <Edit3 className="w-3 h-3" />
-              <span>ছবি পরিবর্তন / আপলোড</span>
-            </button>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => setIsEditorOpen(true)}
+                className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-colors cursor-pointer"
+              >
+                <Edit3 className="w-3 h-3" />
+                <span>ছবি পরিবর্তন / আপলোড</span>
+              </button>
+            )}
           </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">প্র্যাকটিক্যাল ল্যাব সেশনের কিছু মুহূর্ত</h2>
           <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
@@ -1854,7 +1867,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       )}
 
       {/* Landing Page Content Editor Modal */}
-      {isEditorOpen && (
+      {isEditorOpen && canEdit && (
         <CourseLandingPageEditorModal
           isOpen={isEditorOpen}
           onClose={() => setIsEditorOpen(false)}
@@ -1996,18 +2009,22 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   </div>
                   <h5 className="font-bold text-white text-base">ক্লাস ট্রেলার ও ল্যাব ভিডিও</h5>
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
-                    অ্যাডমিন প্যানেলের এডিটর থেকে সরাসরি আপনার ইউটিউব বা ভিডিও লিংক যুক্ত করতে পারেন।
+                    {canEdit
+                      ? 'অ্যাডমিন প্যানেলের এডিটর থেকে সরাসরি আপনার ইউটিউব বা ভিডিও লিংক যুক্ত করতে পারেন।'
+                      : 'খুব শীঘ্রই ভিডিওটি আপডেট করা হবে। আমাদের ক্যাম্পাসে এসে সরাসরি ফ্রি ডেমো ক্লাস দেখতে পারেন।'}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsVideoModalOpen(false);
-                      setIsEditorOpen(true);
-                    }}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                  >
-                    ভিডিও লিংক বসান (Edit Video Link)
-                  </button>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsVideoModalOpen(false);
+                        setIsEditorOpen(true);
+                      }}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      ভিডিও লিংক বসান (Edit Video Link)
+                    </button>
+                  )}
                 </div>
               )}
             </div>

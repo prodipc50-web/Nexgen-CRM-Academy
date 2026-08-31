@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useAcademy } from '../context/AcademyContext';
 import { Course, Lead, LeadFormFieldSetting } from '../types';
-import { trackMetaPixelEvent, generateEventId } from '../utils/analyticsTracker';
+import { trackMetaPixelEvent, generateEventId, trackGa4LeadSubmit } from '../utils/analyticsTracker';
 
 interface LeadFormProps {
   courseId?: string;
@@ -313,7 +313,19 @@ export const LeadForm: React.FC<LeadFormProps> = ({
         setSuccessLead(result.lead);
         setIsDuplicateSubmitted(result.isDuplicate || false);
 
-        // Fire Meta Pixel & Meta Conversions API (CAPI) Dual-Channel Lead Event with Deduplication
+        // 1. Fire Google Analytics 4 Lead Event (Sanitized, No PII)
+        trackGa4LeadSubmit({
+          leadId: result.lead.id,
+          courseId: result.lead.courseId || selectedCourse?.id,
+          courseName: result.lead.courseName || selectedCourse?.name,
+          courseType: result.lead.learningMode || selectedCourse?.courseType,
+          preferredSchedule: result.lead.preferredSchedule,
+          fee: selectedCourse?.offerFee || selectedCourse?.regularFee || 0,
+          source: result.lead.leadSource || result.lead.source || 'Website Form',
+          isDuplicate: result.isDuplicate || false
+        });
+
+        // 2. Fire Meta Pixel & Meta Conversions API (CAPI) Dual-Channel Lead Event with Deduplication
         const marketing = websiteCmsConfig?.marketing;
         if (marketing?.metaPixelEnabled || marketing?.metaCapiEnabled) {
           const eventId = result.eventId || generateEventId('Lead');

@@ -1,13 +1,17 @@
 /**
  * Digital Marketing & Tracking Engine Utility
- * Provides seamless integration for:
+ * Nexgen Computer Academy — Centralized Single Source of Truth
+ * 
+ * Provides seamless, non-duplicated integration for:
+ * - Google Analytics 4 (Real GA4 Measurement ID: G-VYNS03M91Z)
  * - Meta Pixel (Browser-side fbq with event_id deduplication)
  * - Meta Conversions API (Server-side CAPI proxy via /api/marketing/capi-event)
- * - Google Analytics 4 (gtag)
- * - Google Tag Manager (GTM)
+ * - Google Ads Conversion Tracking (Optional AW- tags)
  * - UTM Parameter Extraction & Storage (utm_source, medium, campaign, content, term, fbclid, gclid)
- * - Device, Geolocation Hints & WhatsApp/Messenger Attribution
+ * - Device & Channel Attribution (WhatsApp, Messenger, Phone, Landing Pages)
  */
+
+export const DEFAULT_GA4_MEASUREMENT_ID = 'G-VYNS03M91Z';
 
 export interface UtmParams {
   utmSource?: string;
@@ -22,7 +26,7 @@ export interface UtmParams {
   capturedAt?: string;
 }
 
-// Generate unique event ID for Meta Browser/Server Deduplication
+// Generate unique event ID for Meta Browser/Server Deduplication and GA4 correlation
 export function generateEventId(eventName: string): string {
   const rand = Math.random().toString(36).substring(2, 9);
   return `evt_${eventName.toLowerCase()}_${Date.now()}_${rand}`;
@@ -116,10 +120,20 @@ export function initMetaPixel(pixelId: string) {
   }
 }
 
-// Initialize Google Analytics 4 (GA4) dynamically in the browser
-export function initGoogleAnalytics(measurementId: string) {
+// Track active GA4 measurement ID
+let activeGa4MeasurementId: string = DEFAULT_GA4_MEASUREMENT_ID;
+
+/**
+ * Initialize Google Analytics 4 (GA4) dynamically in the browser.
+ * Ensures the gtag.js script is loaded EXACTLY ONCE with send_page_view: false
+ * so that SPA pageviews can be triggered deterministically without duplicates.
+ */
+export function initGoogleAnalytics(measurementId: string = DEFAULT_GA4_MEASUREMENT_ID) {
   if (typeof window === 'undefined' || !measurementId) return;
   const w = window as any;
+  activeGa4MeasurementId = measurementId;
+
+  // If already initialized with this exact measurement ID, nothing to do
   if (w._ga4Initialized === measurementId) return;
 
   try {
@@ -129,17 +143,21 @@ export function initGoogleAnalytics(measurementId: string) {
     }
     w.gtag = w.gtag || gtag;
 
-    // Set default config
+    // Set default config: manual page_view control + anonymize IP for privacy
     w.gtag('js', new Date());
     w.gtag('config', measurementId, {
-      send_page_view: false, // controlled manually
+      send_page_view: false, // Prevents duplicate automatic pageviews on script load
       anonymize_ip: true
     });
 
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-    document.head.appendChild(script);
+    // Check if script tag already exists in DOM
+    const existingScript = document.querySelector(`script[src*="googletagmanager.com/gtag/js?id="]`);
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+      document.head.appendChild(script);
+    }
 
     w._ga4Initialized = measurementId;
     console.log(`[GA4 Initialized] Measurement ID: ${measurementId}`);
@@ -149,35 +167,41 @@ export function initGoogleAnalytics(measurementId: string) {
 }
 
 /**
- * Strips personally identifiable information (PII) before forwarding to GA4 / Ads
+ * Strips personally identifiable information (PII) before forwarding to GA4 / Ads.
+ * Strictly adheres to Google Analytics Terms of Service prohibiting transmission of PII.
  */
 export function sanitizeGa4Params(params: Record<string, any> = {}): Record<string, any> {
   const sanitized: Record<string, any> = {};
   const blockedKeys = new Set([
     'phone',
-    'phoneNumber',
+    'phonenumber',
     'mobile',
     'email',
+    'emailaddress',
     'address',
-    'fullAddress',
-    'studentName',
+    'fulladdress',
+    'studentname',
     'name',
-    'guardianName',
-    'guardianPhone',
+    'fullname',
+    'guardianname',
+    'guardianphone',
     'password',
     'secret',
     'token',
     'notes',
-    'messageNote',
+    'messagenote',
+    'followupnotes',
     'nid',
-    'dob'
+    'dob',
+    'birthdate'
   ]);
 
   for (const [key, value] of Object.entries(params)) {
-    if (!blockedKeys.has(key.toLowerCase()) && value !== undefined && value !== null) {
-      // Ensure strings are truncated if excessive
+    const lowerKey = key.toLowerCase();
+    if (!blockedKeys.has(lowerKey) && value !== undefined && value !== null) {
+      // Ensure strings are truncated to prevent accidental blob injection
       if (typeof value === 'string') {
-        sanitized[key] = value.substring(0, 100);
+        sanitized[key] = value.substring(0, 150);
       } else {
         sanitized[key] = value;
       }
@@ -188,12 +212,17 @@ export function sanitizeGa4Params(params: Record<string, any> = {}): Record<stri
 }
 
 /**
- * Dispatches a sanitized event to Google Analytics 4
+ * Dispatches a sanitized event to Google Analytics 4 (GA4)
  */
 export function trackGa4Event(eventName: string, params: Record<string, any> = {}) {
   if (typeof window === 'undefined') return;
   try {
     const w = window as any;
+    // Ensure GA4 is initialized
+    if (!w._ga4Initialized) {
+      initGoogleAnalytics(activeGa4MeasurementId);
+    }
+
     const cleanParams = sanitizeGa4Params(params);
     if (typeof w.gtag === 'function') {
       w.gtag('event', eventName, cleanParams);
@@ -204,6 +233,230 @@ export function trackGa4Event(eventName: string, params: Record<string, any> = {
   } catch (err) {
     console.warn('GA4 event error:', err);
   }
+}
+
+// Track last pageview to prevent duplicate events from React re-renders or component remounts
+let lastTrackedPageView: {
+  path: string;
+  timestamp: number;
+} | null = null;
+
+/**
+ * Dispatches a deduplicated page_view event to GA4
+ */
+export function trackGa4PageView(pageData?: {
+  pageTitle?: string;
+  pageLocation?: string;
+  pagePath?: string;
+  [key: string]: any;
+}) {
+  if (typeof window === 'undefined') return;
+  try {
+    const path = pageData?.pagePath || window.location.pathname || '/';
+    const now = Date.now();
+
+    // Suppress duplicate page_view within 800ms for identical path (prevents React double-render / mount loops)
+    if (lastTrackedPageView && lastTrackedPageView.path === path && (now - lastTrackedPageView.timestamp) < 800) {
+      return;
+    }
+    lastTrackedPageView = { path, timestamp: now };
+
+    const utms = getCapturedUtmParams();
+    const title = pageData?.pageTitle || document.title || 'Nexgen Computer Academy';
+    const location = pageData?.pageLocation || window.location.href;
+
+    const params: Record<string, any> = {
+      page_title: title,
+      page_location: location,
+      page_path: path,
+      utm_source: utms.utmSource,
+      utm_medium: utms.utmMedium,
+      utm_campaign: utms.utmCampaign,
+      utm_content: utms.utmContent,
+      utm_term: utms.utmTerm,
+      fbclid: utms.fbclid,
+      gclid: utms.gclid,
+      ...(pageData || {})
+    };
+
+    trackGa4Event('page_view', params);
+  } catch (err) {
+    console.warn('GA4 pageview tracking error:', err);
+  }
+}
+
+/**
+ * Tracks course details / syllabus view in GA4
+ */
+export function trackGa4CourseView(course: {
+  id?: string;
+  name: string;
+  category?: string;
+  regularFee?: number;
+  offerFee?: number;
+  duration?: string;
+  courseType?: string;
+}) {
+  const fee = course.offerFee || course.regularFee || 0;
+  trackGa4Event('view_course', {
+    course_id: course.id,
+    course_name: course.name,
+    course_category: course.category,
+    value: fee,
+    currency: 'BDT',
+    duration: course.duration,
+    learning_mode: course.courseType || 'Offline Lab + Online'
+  });
+
+  // Also send standard ecommerce view_item
+  trackGa4Event('view_item', {
+    currency: 'BDT',
+    value: fee,
+    items: [
+      {
+        item_id: course.id,
+        item_name: course.name,
+        item_category: course.category,
+        price: fee,
+        quantity: 1
+      }
+    ]
+  });
+}
+
+/**
+ * Tracks dedicated course landing page view in GA4
+ */
+export function trackGa4LandingPageView(course: {
+  id?: string;
+  name: string;
+  slug?: string;
+  category?: string;
+  regularFee?: number;
+  offerFee?: number;
+}) {
+  const fee = course.offerFee || course.regularFee || 0;
+  trackGa4Event('view_landing_page', {
+    course_id: course.id,
+    course_name: course.name,
+    slug: course.slug,
+    course_category: course.category,
+    value: fee,
+    currency: 'BDT',
+    landing_url: typeof window !== 'undefined' ? window.location.href : ''
+  });
+}
+
+/**
+ * Tracks WhatsApp click event in GA4
+ */
+export function trackGa4WhatsAppClick(context?: {
+  courseName?: string;
+  courseId?: string;
+  position?: string;
+}) {
+  trackGa4Event('whatsapp_click', {
+    channel: 'whatsapp',
+    course_name: context?.courseName,
+    course_id: context?.courseId,
+    position: context?.position || 'floating_button',
+    page_location: typeof window !== 'undefined' ? window.location.href : ''
+  });
+}
+
+/**
+ * Tracks Messenger click event in GA4
+ */
+export function trackGa4MessengerClick(context?: {
+  courseName?: string;
+  courseId?: string;
+  position?: string;
+}) {
+  trackGa4Event('messenger_click', {
+    channel: 'messenger',
+    course_name: context?.courseName,
+    course_id: context?.courseId,
+    position: context?.position || 'direct_cta',
+    page_location: typeof window !== 'undefined' ? window.location.href : ''
+  });
+}
+
+/**
+ * Tracks Phone / Hotline click event in GA4
+ */
+export function trackGa4PhoneClick(context?: {
+  phoneLabel?: string;
+  position?: string;
+}) {
+  trackGa4Event('phone_click', {
+    channel: 'phone',
+    phone_label: context?.phoneLabel || '01798444444',
+    position: context?.position || 'header_helpline',
+    page_location: typeof window !== 'undefined' ? window.location.href : ''
+  });
+}
+
+/**
+ * Tracks Lead Submission in GA4 (Without PII)
+ */
+export function trackGa4LeadSubmit(leadData: {
+  leadId: string;
+  courseId?: string;
+  courseName?: string;
+  courseType?: string;
+  preferredSchedule?: string;
+  fee?: number;
+  source?: string;
+  isDuplicate?: boolean;
+}) {
+  trackGa4Event('lead_submit', {
+    lead_id: leadData.leadId,
+    course_id: leadData.courseId,
+    course_name: leadData.courseName,
+    course_type: leadData.courseType,
+    preferred_schedule: leadData.preferredSchedule,
+    value: leadData.fee || 0,
+    currency: 'BDT',
+    lead_source: leadData.source || 'Website Form',
+    is_duplicate: leadData.isDuplicate || false
+  });
+
+  // Also send standard generate_lead event
+  trackGa4Event('generate_lead', {
+    value: leadData.fee || 0,
+    currency: 'BDT',
+    lead_id: leadData.leadId,
+    course_name: leadData.courseName
+  });
+}
+
+/**
+ * Tracks Initiate Checkout / Enroll click in GA4
+ */
+export function trackGa4InitiateCheckout(courseData: {
+  courseId?: string;
+  courseName?: string;
+  fee?: number;
+}) {
+  trackGa4Event('initiate_checkout', {
+    course_id: courseData.courseId,
+    course_name: courseData.courseName,
+    value: courseData.fee || 0,
+    currency: 'BDT'
+  });
+
+  trackGa4Event('begin_checkout', {
+    currency: 'BDT',
+    value: courseData.fee || 0,
+    items: [
+      {
+        item_id: courseData.courseId,
+        item_name: courseData.courseName,
+        price: courseData.fee || 0,
+        quantity: 1
+      }
+    ]
+  });
 }
 
 /**
@@ -240,6 +493,7 @@ export interface MetaEventOptions {
 
 /**
  * Dispatches a dual-channel Meta Event (Browser Pixel + Server CAPI with Deduplication)
+ * and automatically mirrors sanitized events to GA4.
  */
 export function trackMetaPixelEvent(
   eventName: string,
@@ -281,9 +535,67 @@ export function trackMetaPixelEvent(
       console.log(`[Meta Pixel Simulation] ${eventName} (Pixel ID: ${pixelId || 'Configured'}, EventID: ${eventId}):`, params);
     }
 
-    // 2. Google Analytics 4 (gtag)
-    if (typeof w.gtag === 'function') {
-      w.gtag('event', eventName, { ...params, event_id: eventId });
+    // 2. Mirror to Google Analytics 4 (GA4) with standard event mapping & PII sanitization
+    if (eventName === 'PageView') {
+      trackGa4PageView({
+        pageTitle: params.page_title,
+        pageLocation: params.url || params.page_location,
+        pagePath: params.page_path
+      });
+    } else if (eventName === 'ViewContent') {
+      trackGa4Event('view_course', {
+        course_id: params.content_ids?.[0] || params.course_id,
+        course_name: params.content_name || params.course_name,
+        category: params.content_category,
+        value: params.value,
+        currency: params.currency || 'BDT',
+        event_id: eventId
+      });
+    } else if (eventName === 'InitiateCheckout') {
+      trackGa4Event('initiate_checkout', {
+        course_id: params.content_ids?.[0] || params.course_id,
+        course_name: params.content_name || params.course_name,
+        value: params.value,
+        currency: params.currency || 'BDT',
+        event_id: eventId
+      });
+    } else if (eventName === 'Lead') {
+      trackGa4Event('lead_submit', {
+        lead_id: params.lead_id,
+        course_id: params.course_id,
+        course_name: params.content_name || params.course_name,
+        value: params.value,
+        currency: params.currency || 'BDT',
+        lead_source: params.source,
+        event_id: eventId
+      });
+    } else if (eventName === 'Contact') {
+      if (params.channel === 'WhatsApp Direct' || params.channel?.toLowerCase().includes('whatsapp')) {
+        trackGa4Event('whatsapp_click', {
+          channel: 'whatsapp',
+          course_name: params.course_name,
+          position: params.position || 'direct_cta',
+          event_id: eventId
+        });
+      } else if (params.channel === 'Messenger Direct' || params.channel?.toLowerCase().includes('messenger')) {
+        trackGa4Event('messenger_click', {
+          channel: 'messenger',
+          course_name: params.course_name,
+          position: params.position || 'direct_cta',
+          event_id: eventId
+        });
+      } else {
+        trackGa4Event('phone_click', {
+          channel: 'phone',
+          position: params.position || 'direct_cta',
+          event_id: eventId
+        });
+      }
+    } else {
+      trackGa4Event(eventName.toLowerCase(), {
+        ...params,
+        event_id: eventId
+      });
     }
 
     // 3. Server-side Conversions API (CAPI) Dispatch
@@ -308,7 +620,7 @@ export function trackMetaPixelEvent(
     }
 
     // 4. Save event to local activity session for ERP Live Analytics Dashboard
-    recordLocalMarketingEvent(eventName, { ...params, eventId, channel: 'Pixel + CAPI' });
+    recordLocalMarketingEvent(eventName, { ...params, eventId, channel: 'Pixel + CAPI + GA4' });
   } catch (err) {
     console.warn('Analytics event tracking error:', err);
   }
@@ -430,8 +742,14 @@ export function trackUnifiedMarketingEvent(
   if (typeof window === 'undefined') return;
 
   const eventId = generateEventId(eventName);
+  const gaId = config.googleAnalyticsId || activeGa4MeasurementId || DEFAULT_GA4_MEASUREMENT_ID;
 
-  // 1. Map to Meta Event Name
+  // 1. Initialize GA4 if not already done
+  if (config.googleAnalyticsEnabled !== false && gaId) {
+    initGoogleAnalytics(gaId);
+  }
+
+  // 2. Map to Meta Event Name
   let metaEventName: string | null = null;
   switch (eventName) {
     case 'page_view':
@@ -467,15 +785,16 @@ export function trackUnifiedMarketingEvent(
     });
   }
 
-  // 2. Dispatch to GA4 if enabled (without PII)
+  // 3. Dispatch to GA4 if enabled (without PII)
   if (config.googleAnalyticsEnabled !== false) {
-    if (config.googleAnalyticsId) {
-      initGoogleAnalytics(config.googleAnalyticsId);
+    if (eventName === 'page_view') {
+      trackGa4PageView(params);
+    } else {
+      trackGa4Event(eventName, { ...params, event_id: eventId });
     }
-    trackGa4Event(eventName, { ...params, event_id: eventId });
   }
 
-  // 3. Dispatch to Google Ads if conversion action and Ads is enabled
+  // 4. Dispatch to Google Ads if conversion action and Ads is enabled
   if (
     config.googleAdsEnabled &&
     config.googleAdsConversionId &&
@@ -490,5 +809,3 @@ export function trackUnifiedMarketingEvent(
     );
   }
 }
-
-

@@ -157,6 +157,7 @@ export interface Lead {
   educationLevel: string;
   institution?: string;
   interestedCourseId: string;
+  courseId?: string; // Optional convenience alias
   courseName?: string;
   interestedBatchId?: string;
   preferredTime?: string;

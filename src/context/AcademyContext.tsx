@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { db, doc, setDoc, getDoc, onSnapshot } from '../lib/firebase';
+import { compressImageBase64, estimatePayloadSize } from '../utils/imageCompressor';
 import {
   UserRole,
   UserProfile,
@@ -76,6 +77,7 @@ import {
   INITIAL_WEBSITE_BLOGS
 } from '../data/websiteSeedData';
 import { DEFAULT_THEME_CONFIG, applyThemeToDom } from '../data/themePresets';
+import { initGoogleAnalytics, DEFAULT_GA4_MEASUREMENT_ID } from '../utils/analyticsTracker';
 
 interface AcademyContextType {
   currentUser: UserProfile;
@@ -686,9 +688,17 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        const marketingConfig = {
+          ...INITIAL_WEBSITE_CMS_CONFIG.marketing,
+          ...(parsed.marketing || {}),
+          googleAnalyticsId: (!parsed.marketing?.googleAnalyticsId || parsed.marketing?.googleAnalyticsId === 'G-NEXGEN2026')
+            ? DEFAULT_GA4_MEASUREMENT_ID
+            : parsed.marketing.googleAnalyticsId
+        };
         return {
           ...INITIAL_WEBSITE_CMS_CONFIG,
           ...parsed,
+          marketing: marketingConfig,
           heroStats: { ...INITIAL_WEBSITE_CMS_CONFIG.heroStats, ...(parsed.heroStats || {}) },
           promoBanner: { ...INITIAL_WEBSITE_CMS_CONFIG.promoBanner, ...(parsed.promoBanner || {}) },
           socialLinks: { ...INITIAL_WEBSITE_CMS_CONFIG.socialLinks, ...(parsed.socialLinks || {}) },
@@ -977,8 +987,10 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [lastCloudSyncTime, setLastCloudSyncTime] = useState<string | null>(null);
   const isInitialCloudLoadDone = useRef(false);
   const isSyncingToCloud = useRef(false);
+  const syncQueued = useRef(false);
   const isRemoteUpdate = useRef(false);
   const lastSavedPayloadString = useRef<string>('');
+  const lastLocalMutationTimestamp = useRef<number>(Date.now());
 
   // 1. Listen for real-time Cloud Firestore updates
   useEffect(() => {
@@ -987,9 +999,23 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const unsubscribe = onSnapshot(
       docRef,
       (snapshot) => {
+        // If snapshot has pending local uncommitted writes, skip resetting React state
+        if (snapshot.metadata.hasPendingWrites) {
+          return;
+        }
+
         if (snapshot.exists()) {
           const data = snapshot.data();
           if (data) {
+            // Check updatedAt to prevent older Firestore network arrivals from overwriting newer local edits
+            if (data.updatedAt) {
+              const remoteTime = new Date(data.updatedAt).getTime();
+              if (!isNaN(remoteTime) && remoteTime < lastLocalMutationTimestamp.current - 1200) {
+                // Ignore stale snapshot arrival
+                return;
+              }
+            }
+
             // Build remote snapshot representation to compare
             const remoteStr = JSON.stringify({
               staffList: data.staffList || [],
@@ -1023,7 +1049,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
               websiteBlogs: data.websiteBlogs || []
             });
 
-            // If we are currently pushing our own write or incoming data is identical, don't re-apply
+            // If incoming data is identical, mark synced and skip re-renders
             if (remoteStr === lastSavedPayloadString.current) {
               setCloudSyncStatus('synced');
               return;
@@ -1060,7 +1086,18 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
               setAcademySettings(prev => ({ ...prev, ...data.academySettings }));
             }
             if (data.websiteCmsConfig && typeof data.websiteCmsConfig === 'object') {
-              setWebsiteCmsConfig(prev => ({ ...prev, ...data.websiteCmsConfig }));
+              const remoteMarketing = data.websiteCmsConfig.marketing || {};
+              const normalizedMarketing = {
+                ...remoteMarketing,
+                googleAnalyticsId: (!remoteMarketing.googleAnalyticsId || remoteMarketing.googleAnalyticsId === 'G-NEXGEN2026')
+                  ? DEFAULT_GA4_MEASUREMENT_ID
+                  : remoteMarketing.googleAnalyticsId
+              };
+              setWebsiteCmsConfig(prev => ({
+                ...prev,
+                ...data.websiteCmsConfig,
+                marketing: { ...(prev.marketing || {}), ...normalizedMarketing }
+              }));
             }
             if (Array.isArray(data.websiteReviews)) setWebsiteReviews(data.websiteReviews);
             if (Array.isArray(data.websiteGallery)) setWebsiteGallery(data.websiteGallery);
@@ -1087,9 +1124,20 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => unsubscribe();
   }, []);
 
+  // Dynamically initialize Google Analytics 4 (Real GA4 Measurement ID: G-VYNS03M91Z)
+  useEffect(() => {
+    if (websiteCmsConfig?.marketing?.googleAnalyticsEnabled !== false) {
+      const gaId = websiteCmsConfig?.marketing?.googleAnalyticsId || DEFAULT_GA4_MEASUREMENT_ID;
+      initGoogleAnalytics(gaId);
+    }
+  }, [websiteCmsConfig?.marketing?.googleAnalyticsId, websiteCmsConfig?.marketing?.googleAnalyticsEnabled]);
+
   // 2. Helper to manually or programmatically push state to Firestore
-  const syncToCloudNow = async (): Promise<boolean> => {
-    if (isSyncingToCloud.current) return false;
+  const syncToCloudNow = async (forceImmediate = false): Promise<boolean> => {
+    if (isSyncingToCloud.current) {
+      syncQueued.current = true;
+      return true;
+    }
 
     const currentPayloadData = {
       staffList,
@@ -1124,7 +1172,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     const currentStr = JSON.stringify(currentPayloadData);
-    if (currentStr === lastSavedPayloadString.current) {
+    if (currentStr === lastSavedPayloadString.current && !forceImmediate) {
       setCloudSyncStatus('synced');
       return true;
     }
@@ -1149,13 +1197,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setCloudSyncStatus('offline');
       return false;
     } finally {
-      setTimeout(() => {
-        isSyncingToCloud.current = false;
-      }, 1000);
+      isSyncingToCloud.current = false;
+      if (syncQueued.current) {
+        syncQueued.current = false;
+        syncToCloudNow();
+      }
     }
   };
 
-  // 3. Debounced auto-sync to Cloud Firestore when local user mutations happen
+  // 3. Fast auto-sync to Cloud Firestore when local user mutations happen
   useEffect(() => {
     if (!isInitialCloudLoadDone.current) return;
 
@@ -1165,9 +1215,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
 
+    lastLocalMutationTimestamp.current = Date.now();
+
     const timer = setTimeout(() => {
       syncToCloudNow();
-    }, 800);
+    }, 150);
 
     return () => clearTimeout(timer);
   }, [
@@ -1177,7 +1229,25 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs
   ]);
 
-  // Save to localStorage when state changes
+  // Window beforeunload / pagehide immediate sync to prevent data loss on rapid reload
+  useEffect(() => {
+    const handleUnload = () => {
+      syncToCloudNow(true);
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('pagehide', handleUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('pagehide', handleUnload);
+    };
+  }, [
+    staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
+    admissions, payments, attendance, schedules, exams, examResults, certificates,
+    expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
+    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs
+  ]);
+
+  // Save ALL state to localStorage when state changes
   useEffect(() => {
     localStorage.setItem(`${STORAGE_KEY}_current_user`, JSON.stringify(currentUser));
     localStorage.setItem(`${STORAGE_KEY}_staff`, JSON.stringify(staffList));
@@ -1204,6 +1274,12 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem(`${STORAGE_KEY}_assignments`, JSON.stringify(assignments));
     localStorage.setItem(`${STORAGE_KEY}_submissions`, JSON.stringify(assignmentSubmissions));
     localStorage.setItem(`${STORAGE_KEY}_seminars`, JSON.stringify(seminars));
+    localStorage.setItem(`${STORAGE_KEY}_academy_settings`, JSON.stringify(academySettings));
+    localStorage.setItem(`${STORAGE_KEY}_website_cms_config`, JSON.stringify(websiteCmsConfig));
+    localStorage.setItem(`${STORAGE_KEY}_website_reviews`, JSON.stringify(websiteReviews));
+    localStorage.setItem(`${STORAGE_KEY}_website_gallery`, JSON.stringify(websiteGallery));
+    localStorage.setItem(`${STORAGE_KEY}_website_faqs`, JSON.stringify(websiteFaqs));
+    localStorage.setItem(`${STORAGE_KEY}_website_blogs`, JSON.stringify(websiteBlogs));
     localStorage.setItem(`${STORAGE_KEY}_lead_sources`, JSON.stringify(leadSources));
     localStorage.setItem(`${STORAGE_KEY}_expense_categories`, JSON.stringify(expenseCategoriesList));
     localStorage.setItem(`${STORAGE_KEY}_payment_methods`, JSON.stringify(paymentMethodsList));
@@ -1217,7 +1293,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     currentUser, staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
-    seminars, leadSources, expenseCategoriesList,
+    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs,
+    leadSources, expenseCategoriesList,
     paymentMethodsList, occupationsList, educationLevelsList, studentGoalsList,
     studentStatusesList, bloodGroupsList, discountTypesList
   ]);

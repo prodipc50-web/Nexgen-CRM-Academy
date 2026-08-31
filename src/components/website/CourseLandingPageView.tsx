@@ -57,7 +57,12 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
   course,
   onBackToFullWebsite
 }) => {
-  const { websiteCmsConfig, staffList, academySettings } = useAcademy();
+  const { websiteCmsConfig, staffList, academySettings, isAuthenticated, currentUser } = useAcademy();
+  const canEdit = Boolean(
+    isAuthenticated &&
+    currentUser &&
+    ['SUPER_ADMIN', 'ADMIN', 'BRANCH_MANAGER'].includes(currentUser.role)
+  );
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [openModuleIndex, setOpenModuleIndex] = useState<number | null>(0);
@@ -288,15 +293,17 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
           </div>
 
           <div className="flex items-center space-x-2.5">
-            {/* Quick Edit button for Admin/Marketer */}
-            <button
-              onClick={() => setIsEditorOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 text-xs font-bold transition-colors flex items-center space-x-1.5 border border-indigo-500/40"
-              title="এই ল্যান্ডিং পেজের কনটেন্ট, অফার ফি, ছবি ও বাটন এডিট করুন"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">কনটেন্ট কাস্টমাইজ</span>
-            </button>
+            {/* Quick Edit button for Authenticated Admin/Marketer only */}
+            {canEdit && (
+              <button
+                onClick={() => setIsEditorOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 text-xs font-bold transition-colors flex items-center space-x-1.5 border border-indigo-500/40"
+                title="এই ল্যান্ডিং পেজের কনটেন্ট, অফার ফি, ছবি ও বাটন এডিট করুন"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">কনটেন্ট কাস্টমাইজ</span>
+              </button>
+            )}
 
             {onBackToFullWebsite && (
               <button
@@ -941,7 +948,7 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
       )}
 
       {/* Course Landing Page Editor Modal */}
-      {isEditorOpen && (
+      {isEditorOpen && canEdit && (
         <CourseLandingPageEditorModal
           isOpen={isEditorOpen}
           onClose={() => setIsEditorOpen(false)}

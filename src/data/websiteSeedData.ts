@@ -275,7 +275,7 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
       },
       {
         question: 'Where is Nexgen Computer Academy located?',
-        answer: 'Nexgen Computer Academy is located at Level 4 & 5, Al-Razi Complex, 166/1 Shahid Syed Nazrul Islam Sarani, Farmgate, Dhaka-1215 (Opposite Ananda Cinema Hall, 2 min from Farmgate Metro Station Exit 2).'
+        answer: 'Nexgen Computer Academy is located at 14/B, Garden Road, Kazipara, Farmgate, Dhaka–1215, Bangladesh (Behind Bashundhara City Market, easily accessible from Farmgate Metro & Panthapath).'
       },
       {
         question: 'Do you offer both Offline Classroom and Online Live courses?',
@@ -288,7 +288,7 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
   marketing: {
     metaPixelId: '3044343639090431',
     metaPixelEnabled: true,
-    googleAnalyticsId: 'G-NEXGEN2026',
+    googleAnalyticsId: 'G-VYNS03M91Z',
     googleAnalyticsEnabled: true,
     googleTagManagerId: 'GTM-NEXGEN99',
     googleTagManagerEnabled: false,
