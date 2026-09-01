@@ -694,7 +694,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             <div className="p-4 sm:p-5 bg-gradient-to-br from-slate-900 to-indigo-950/60 border border-indigo-500/30 rounded-3xl space-y-4">
               <div className="flex flex-wrap items-baseline gap-3">
                 <span className="text-3xl sm:text-4xl font-black text-white">
-                  ৳{(course.offerFee || 6500).toLocaleString()}
+                  ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}
                 </span>
                 {course.regularFee && (
                   <span className="text-lg text-slate-400 line-through font-semibold">
@@ -1819,7 +1819,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
             সরাসরি কথা বলুন:
           </span>
-          <span className="text-amber-300 font-black">ফি: ৳{(course.offerFee || 6500).toLocaleString()}</span>
+          <span className="text-amber-300 font-black">ফি: ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}</span>
         </div>
 
         <div className="grid grid-cols-3 gap-1.5">

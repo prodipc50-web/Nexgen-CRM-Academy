@@ -17,6 +17,7 @@ export interface UserProfile {
   avatar: string;
   phone: string;
   lastLogin?: string;
+  firebaseUid?: string;
 }
 
 export interface ThemeConfig {

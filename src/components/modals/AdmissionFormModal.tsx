@@ -121,9 +121,9 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
     leadSource: admission?.leadSource || 'Direct Campus Walk-in',
 
     // Financial Record
-    regularFee: admission?.regularFee || course?.regularFee || 15000,
+    regularFee: admission?.regularFee ?? course?.regularFee ?? course?.offerFee ?? 0,
     discountScholarship: (admission?.discount || 0) + (admission?.scholarship || 0),
-    finalFee: admission?.finalFee || course?.offerFee || 12000,
+    finalFee: admission?.finalFee ?? course?.offerFee ?? course?.regularFee ?? 0,
     paidAmount: admission?.totalPaid || 6000,
     dueBalance: admission?.due ?? 6000,
     nextDueDate: admission?.nextPaymentDate || '',

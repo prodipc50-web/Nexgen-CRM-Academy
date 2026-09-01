@@ -574,8 +574,9 @@ const DEFAULT_COURSES_SLUGS = [
   { slug: "python-programming-ai-automation", name: "Python Programming & AI Automation" }
 ];
 
-app.get("/sitemap.xml", (_req, res) => {
-  const baseUrl = "https://nexgenacademy.edu.bd";
+app.get("/sitemap.xml", (req, res) => {
+  const customOrigin = process.env.PUBLIC_CANONICAL_URL;
+  const baseUrl = customOrigin || "https://nexgenacademy.edu.bd";
   const now = new Date().toISOString().split("T")[0];
 
   const courseXml = DEFAULT_COURSES_SLUGS.map(
@@ -619,8 +620,9 @@ ${courseXml}
   res.send(sitemapContent);
 });
 
-app.get("/robots.txt", (_req, res) => {
-  const baseUrl = "https://nexgenacademy.edu.bd";
+app.get("/robots.txt", (req, res) => {
+  const customOrigin = process.env.PUBLIC_CANONICAL_URL;
+  const baseUrl = customOrigin || "https://nexgenacademy.edu.bd";
   const robotsContent = `# Nexgen Computer Academy Robots.txt
 User-agent: *
 Allow: /

@@ -324,8 +324,8 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   );
 
   // Tab 5: Pricing, Seats & Countdowns
-  const [offerFee, setOfferFee] = useState<number>(course.offerFee || 6500);
-  const [regularFee, setRegularFee] = useState<number>(course.regularFee || 15000);
+  const [offerFee, setOfferFee] = useState<number>(course.offerFee !== undefined ? course.offerFee : (course.regularFee || 0));
+  const [regularFee, setRegularFee] = useState<number>(course.regularFee !== undefined ? course.regularFee : (course.offerFee || 0));
   const [customDiscountBadge, setCustomDiscountBadge] = useState(existingConfig.customDiscountBadge || '৫০% স্পেশাল মেগা স্কলারশিপ');
   const [showBatchCountdown, setShowBatchCountdown] = useState<boolean>(existingConfig.showBatchCountdown ?? true);
   const [nextBatchStartDate, setNextBatchStartDate] = useState(existingConfig.nextBatchStartDate || '১৫ মে, ২০২৬');
@@ -2364,7 +2364,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
                         ★ 4.9 <span className="text-slate-400 font-normal ml-1">(120+ reviews)</span>
                       </span>
                       <span>•</span>
-                      <span className="text-emerald-700 font-bold">৳{course.offerFee?.toLocaleString() || '6,500'} BDT</span>
+                      <span className="text-emerald-700 font-bold">৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()} BDT</span>
                       <span>•</span>
                       <span className="text-slate-500">{course.duration}</span>
                       <span>•</span>

@@ -122,8 +122,8 @@ export const CourseLandingPageView: React.FC<CourseLandingPageViewProps> = ({
     landingConfig.customMessengerUrl || websiteCmsConfig?.socialLinks?.facebookPageUrl || websiteCmsConfig?.facebookPageUrl || 'nexgenacademy'
   );
 
-  const offerFee = course.offerFee || 6500;
-  const regularFee = course.regularFee || 15000;
+  const offerFee = course.offerFee ?? course.regularFee ?? 0;
+  const regularFee = course.regularFee || offerFee || 0;
   const discountPercent =
     regularFee && offerFee && regularFee > offerFee
       ? Math.round(((regularFee - offerFee) / regularFee) * 100)

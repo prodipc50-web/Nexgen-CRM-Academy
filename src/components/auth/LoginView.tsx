@@ -38,21 +38,24 @@ export const LoginView: React.FC<LoginViewProps> = ({ onBackToWebsite }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      const res = login(identifier, password, rememberMe);
+    try {
+      const res = await login(identifier, password, rememberMe);
       setIsLoading(false);
       if (!res.success) {
         setErrorMsg(res.message);
       } else {
         setSuccessMsg(res.message);
       }
-    }, 350);
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMsg(err?.message || 'Login failed. Please check your connection and credentials.');
+    }
   };
 
   const handleQuickFill = (staffUsername: string, staffPass: string) => {

@@ -1,5 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
-import { db, doc, setDoc, getDoc, onSnapshot } from '../lib/firebase';
+import {
+  db,
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot,
+  auth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  type User
+} from '../lib/firebase';
 import { compressImageBase64, estimatePayloadSize } from '../utils/imageCompressor';
 import {
   UserRole,
@@ -82,7 +94,8 @@ import { initGoogleAnalytics, DEFAULT_GA4_MEASUREMENT_ID } from '../utils/analyt
 interface AcademyContextType {
   currentUser: UserProfile;
   isAuthenticated: boolean;
-  login: (identifier: string, password: string, rememberMe?: boolean) => { success: boolean; message: string; user?: UserProfile };
+  firebaseUser?: User | null;
+  login: (identifier: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; message: string; user?: UserProfile }>;
   logout: () => void;
   updateCurrentUserProfile: (updates: Partial<UserProfile>) => void;
   updateStaffPhoto: (staffId: string, photoUrl: string) => void;
@@ -441,10 +454,20 @@ const STORAGE_KEY = 'NEXGEN_OFFICE_ACADEMY_DB_V1';
 const AcademyContext = createContext<AcademyContextType | null>(null);
 
 export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(() => auth.currentUser);
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const savedAuth = localStorage.getItem(`${STORAGE_KEY}_is_authenticated`) || sessionStorage.getItem(`${STORAGE_KEY}_is_authenticated`);
     return savedAuth === 'true';
   });
+
+  // Track Firebase Auth session changes
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+    });
+    return () => unsubscribeAuth();
+  }, []);
 
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
     const savedUser = localStorage.getItem(`${STORAGE_KEY}_current_user`) || sessionStorage.getItem(`${STORAGE_KEY}_current_user`);
@@ -990,7 +1013,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const syncQueued = useRef(false);
   const isRemoteUpdate = useRef(false);
   const lastSavedPayloadString = useRef<string>('');
-  const lastLocalMutationTimestamp = useRef<number>(Date.now());
+  const lastLocalMutationTimestamp = useRef<number>(0);
 
   // 1. PUBLIC WEBSITE CATALOG REAL-TIME LISTENER
   // Subscribes ONLY to /academy_data/public_catalog (contains NO private students, leads, payments, staff accounts, or audit logs)
@@ -1019,7 +1042,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (snapshot.exists()) {
           const data = snapshot.data();
           if (data) {
-            if (data.updatedAt) {
+            if (data.updatedAt && lastLocalMutationTimestamp.current > 0) {
               const remoteTime = new Date(data.updatedAt).getTime();
               if (!isNaN(remoteTime) && remoteTime < lastLocalMutationTimestamp.current - 1200) {
                 setCloudSyncStatus('synced');
@@ -1071,9 +1094,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   // 2. PRIVATE CRM OPERATIONS REAL-TIME LISTENER
-  // Subscribes to /academy_data/crm_private_data ONLY when an authenticated staff session is active!
+  // Subscribes to /academy_data/crm_private_data ONLY when an authenticated staff session is active AND Firebase user is authenticated!
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !firebaseUser) return;
 
     const crmDocRef = doc(db, 'academy_data', 'crm_private_data');
 
@@ -1088,7 +1111,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (snapshot.exists()) {
           const data = snapshot.data();
           if (data) {
-            if (data.updatedAt) {
+            if (data.updatedAt && lastLocalMutationTimestamp.current > 0) {
               const remoteTime = new Date(data.updatedAt).getTime();
               if (!isNaN(remoteTime) && remoteTime < lastLocalMutationTimestamp.current - 1200) {
                 setCloudSyncStatus('synced');
@@ -1167,6 +1190,33 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     );
 
     return () => unsubscribe();
+  }, [isAuthenticated, firebaseUser]);
+
+  // Multi-Tab Authentication Synchronization & Tamper Defense
+  useEffect(() => {
+    const handleStorageEvent = (e: StorageEvent) => {
+      if (e.key === `${STORAGE_KEY}_is_authenticated`) {
+        if (e.newValue !== 'true') {
+          setIsAuthenticated(false);
+        } else if (e.newValue === 'true' && !isAuthenticated) {
+          setIsAuthenticated(true);
+        }
+      }
+      if (e.key === `${STORAGE_KEY}_current_user` && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          const validRoles: UserRole[] = ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'COUNSELOR', 'ACCOUNTS_STAFF', 'ACCOUNTS', 'TRAINER'];
+          if (parsed && typeof parsed === 'object' && validRoles.includes(parsed.role)) {
+            setCurrentUser(parsed);
+          }
+        } catch {
+          // Ignore parse errors
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageEvent);
+    return () => window.removeEventListener('storage', handleStorageEvent);
   }, [isAuthenticated]);
 
   // Dynamically initialize Google Analytics 4 (Real GA4 Measurement ID: G-VYNS03M91Z)
@@ -1249,10 +1299,18 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       lastSavedPayloadString.current = combinedStr;
 
       // Write strictly separated public and private documents with 8s safety timeout
-      const syncPromise = Promise.all([
-        setDoc(doc(db, 'academy_data', 'public_catalog'), publicCatalogPayload, { merge: true }),
-        setDoc(doc(db, 'academy_data', 'crm_private_data'), crmPrivatePayload, { merge: true })
-      ]);
+      const writePromises = [
+        setDoc(doc(db, 'academy_data', 'public_catalog'), publicCatalogPayload, { merge: true })
+      ];
+
+      // Write private CRM document ONLY if user is authenticated with Firebase Auth
+      if (isAuthenticated && (firebaseUser || auth.currentUser)) {
+        writePromises.push(
+          setDoc(doc(db, 'academy_data', 'crm_private_data'), crmPrivatePayload, { merge: true })
+        );
+      }
+
+      const syncPromise = Promise.all(writePromises);
 
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Firestore sync write timeout')), 8000)
@@ -1313,11 +1371,27 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         syncToCloudNow(true);
       }
     };
+    const handleOnline = () => {
+      if (isAuthenticated) {
+        syncToCloudNow(true);
+      } else {
+        setCloudSyncStatus('synced');
+      }
+    };
+    const handleOffline = () => {
+      setCloudSyncStatus('offline');
+    };
+
     window.addEventListener('beforeunload', handleUnload);
     window.addEventListener('pagehide', handleUnload);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     return () => {
       window.removeEventListener('beforeunload', handleUnload);
       window.removeEventListener('pagehide', handleUnload);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, [
     isAuthenticated,
@@ -1432,7 +1506,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setAuditLogs(prev => [newLog, ...prev]);
   };
 
-  const login = (identifier: string, password: string, rememberMe: boolean = true) => {
+  const login = async (identifier: string, password: string, rememberMe: boolean = true): Promise<{ success: boolean; message: string; user?: UserProfile }> => {
     const cleanId = (identifier || '').trim().toLowerCase();
     const cleanPass = (password || '').trim();
 
@@ -1508,6 +1582,37 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return { success: false, message: 'Incorrect Password. Please check your credentials (e.g. admin123 or 123456).' };
     }
 
+    // 5. Authenticate with Firebase Authentication at SDK level
+    // Formulate a canonical email & password for Firebase Auth
+    const staffAuthEmail = (matchedStaff.email && matchedStaff.email.includes('@'))
+      ? matchedStaff.email.trim().toLowerCase()
+      : `${matchedStaff.username || 'staff'}_${matchedStaff.id || '01'}@nexgenacademy.edu`.toLowerCase();
+    
+    // Ensure Firebase Auth password meets minimum length (>= 6 chars)
+    const staffAuthPass = cleanPass.length >= 6 ? cleanPass : `${cleanPass}2026`;
+
+    let fbUser: User | null = null;
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, staffAuthEmail, staffAuthPass);
+      fbUser = userCred.user;
+    } catch (authErr: any) {
+      // If user doesn't exist in Firebase Auth yet, provision them seamlessly
+      if (
+        authErr?.code === 'auth/user-not-found' ||
+        authErr?.code === 'auth/invalid-credential' ||
+        authErr?.code === 'auth/invalid-email'
+      ) {
+        try {
+          const newCred = await createUserWithEmailAndPassword(auth, staffAuthEmail, staffAuthPass);
+          fbUser = newCred.user;
+        } catch (createErr: any) {
+          console.warn('Firebase Auth user registration note:', createErr?.message || createErr);
+        }
+      } else {
+        console.warn('Firebase Auth sign-in note:', authErr?.message || authErr);
+      }
+    }
+
     const updatedUser: UserProfile = {
       id: matchedStaff.id || 'st-01',
       name: matchedStaff.name || 'Prodip Chowdhury',
@@ -1516,9 +1621,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       role: matchedStaff.role || 'SUPER_ADMIN',
       avatar: matchedStaff.avatarUrl || CURRENT_USER.avatar,
       phone: matchedStaff.phone || '+880 1711-001122',
-      lastLogin: new Date().toISOString()
+      lastLogin: new Date().toISOString(),
+      ...(fbUser?.uid ? { firebaseUid: fbUser.uid } : {})
     };
 
+    if (fbUser) {
+      setFirebaseUser(fbUser);
+    }
     setCurrentUser(updatedUser);
     setIsAuthenticated(true);
 
@@ -1540,8 +1649,16 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return { success: true, message: 'Login successful! Welcome to Nexgen Academy ERP.', user: updatedUser };
   };
 
-  const logout = () => {
+  const logout = async () => {
     logAudit('User Logout', 'Security / Auth', currentUser.id, `User ${currentUser.name} signed out`);
+    
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn('Firebase Auth signOut note:', err);
+    }
+
+    setFirebaseUser(null);
     setIsAuthenticated(false);
     
     // Purge session tokens and all private CRM items from client storage
@@ -1936,8 +2053,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     remarks?: string;
     existingLeadId?: string;
   }) => {
-    const finalFee = Math.max(0, regularFee - (discount || 0) - (scholarship || 0));
-    const paid = Math.min(finalFee, Math.max(0, initialPaidAmount || 0));
+    const regularFeeNum = Math.max(0, Number(regularFee) || 0);
+    const discountNum = Math.max(0, Number(discount) || 0);
+    const scholarshipNum = Math.max(0, Number(scholarship) || 0);
+    const initialPaidNum = Math.max(0, Number(initialPaidAmount) || 0);
+
+    const finalFee = Math.max(0, regularFeeNum - discountNum - scholarshipNum);
+    const paid = Math.min(finalFee, initialPaidNum);
     const due = Math.max(0, finalFee - paid);
     const paymentStatus: Admission['paymentStatus'] = due === 0 ? 'Paid' : paid > 0 ? 'Partially Paid' : 'Due';
 
@@ -2009,9 +2131,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       leadSource,
       campaignId,
       referral,
-      regularFee,
-      discount,
-      scholarship,
+      regularFee: regularFeeNum,
+      discount: discountNum,
+      scholarship: scholarshipNum,
       finalFee,
       totalPaid: paid,
       due,
@@ -2026,7 +2148,12 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let newPayment: Payment | undefined;
     if (paid > 0) {
       const paymentId = `pay-${Date.now()}`;
-      const receiptNumber = `NCA-REC-2026-${8800 + payments.length + 1}`;
+      let receiptSeq = 8800 + payments.length + 1;
+      let receiptNumber = `NCA-REC-2026-${receiptSeq}`;
+      while (payments.some(p => p.receiptNumber === receiptNumber)) {
+        receiptSeq += 1;
+        receiptNumber = `NCA-REC-2026-${receiptSeq}`;
+      }
       newPayment = {
         id: paymentId,
         receiptNumber,
@@ -2070,10 +2197,17 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const targetAdm = admissions.find(a => a.id === admissionId);
     if (!targetAdm) throw new Error('Admission not found');
 
+    const safeAmount = Math.max(0, Number(amount) || 0);
     const previousPayments = payments.filter(p => p.admissionId === admissionId);
     const newInstallmentNum = previousPayments.length + 1;
     const paymentId = `pay-${Date.now()}`;
-    const receiptNumber = `NCA-REC-2026-${8800 + payments.length + 1}`;
+    
+    let receiptSeq = 8800 + payments.length + 1;
+    let receiptNumber = `NCA-REC-2026-${receiptSeq}`;
+    while (payments.some(p => p.receiptNumber === receiptNumber)) {
+      receiptSeq += 1;
+      receiptNumber = `NCA-REC-2026-${receiptSeq}`;
+    }
     const now = new Date().toISOString();
 
     const newPayment: Payment = {
@@ -2082,7 +2216,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       studentId: targetAdm.studentId,
       admissionId,
       date: now.split('T')[0],
-      amount,
+      amount: safeAmount,
       paymentMethod,
       transactionId: transactionId || `TX-${Date.now().toString().slice(-6)}`,
       installmentNumber: newInstallmentNum,
@@ -2094,7 +2228,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setPayments(prev => [newPayment, ...prev]);
 
     // Recalculate admission balance
-    const newTotalPaid = targetAdm.totalPaid + amount;
+    const newTotalPaid = Math.min(targetAdm.finalFee, targetAdm.totalPaid + safeAmount);
     const newDue = Math.max(0, targetAdm.finalFee - newTotalPaid);
     const newStatus: Admission['paymentStatus'] = newDue === 0 ? 'Paid' : newTotalPaid > 0 ? 'Partially Paid' : 'Due';
 
@@ -3931,6 +4065,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       value={{
         currentUser,
         isAuthenticated,
+        firebaseUser,
         login,
         logout,
         updateCurrentUserProfile,
