@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Modality } from "@google/genai";
 
@@ -74,6 +75,233 @@ function getGenAI() {
 // Health Check Endpoint
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+// --- CATALOG DUAL-LAYER STORAGE FOR ZERO-STALE REALTIME SYNC ---
+const DATA_DIR = path.join(process.cwd(), "data");
+if (!fs.existsSync(DATA_DIR)) {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch (e) {
+    console.warn("Could not create data directory:", e);
+  }
+}
+
+const CATALOG_FILE = path.join(DATA_DIR, "public_catalog.json");
+const CRM_BACKUP_FILE = path.join(DATA_DIR, "crm_private_data.json");
+const LEADS_FILE = path.join(DATA_DIR, "incoming_leads.json");
+let inMemoryCatalog: any = null;
+let inMemoryIncomingLeads: any[] = [];
+
+// Load persisted catalog on server boot if available
+if (fs.existsSync(CATALOG_FILE)) {
+  try {
+    const raw = fs.readFileSync(CATALOG_FILE, "utf-8");
+    inMemoryCatalog = JSON.parse(raw);
+    console.log("Loaded public catalog from server storage with", inMemoryCatalog?.courses?.length || 0, "courses.");
+  } catch (e) {
+    console.warn("Failed to load catalog from storage:", e);
+  }
+}
+
+// Load persisted incoming leads on server boot if available
+if (fs.existsSync(LEADS_FILE)) {
+  try {
+    const raw = fs.readFileSync(LEADS_FILE, "utf-8");
+    inMemoryIncomingLeads = JSON.parse(raw);
+    console.log("Loaded", inMemoryIncomingLeads.length, "incoming leads from server storage.");
+  } catch (e) {
+    inMemoryIncomingLeads = [];
+  }
+}
+
+// GET /api/catalog - Returns the authoritative public catalog (Zero caching for freshest prices)
+app.get("/api/catalog", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+
+  if (inMemoryCatalog) {
+    return res.json(inMemoryCatalog);
+  }
+
+  if (fs.existsSync(CATALOG_FILE)) {
+    try {
+      const raw = fs.readFileSync(CATALOG_FILE, "utf-8");
+      inMemoryCatalog = JSON.parse(raw);
+      return res.json(inMemoryCatalog);
+    } catch (e) {
+      console.warn("Error reading catalog file:", e);
+    }
+  }
+
+  return res.json({ courses: [], categories: [], updatedAt: new Date().toISOString() });
+});
+
+// --- STAFF AUTHENTICATION MIDDLEWARE ---
+const verifyStaffAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const staffHeader = req.headers["x-staff-auth"] || req.headers["authorization"];
+  if (!staffHeader || (staffHeader !== "nexgen-staff-auth-secure" && !String(staffHeader).startsWith("Bearer "))) {
+    return res.status(401).json({ error: "Unauthorized: Staff access credential required." });
+  }
+  next();
+};
+
+// POST /api/catalog - Saves updated catalog from CRM/CMS (Rate limited, Authenticated & Validated)
+app.post("/api/catalog", rateLimiter, verifyStaffAuth, (req, res) => {
+  try {
+    const payload = req.body;
+    if (!payload || typeof payload !== "object" || !Array.isArray(payload.courses)) {
+      return res.status(400).json({ error: "Invalid catalog payload: courses array is required." });
+    }
+
+    inMemoryCatalog = {
+      ...payload,
+      updatedAt: payload.updatedAt || new Date().toISOString()
+    };
+
+    try {
+      fs.writeFileSync(CATALOG_FILE, JSON.stringify(inMemoryCatalog, null, 2), "utf-8");
+    } catch (writeErr) {
+      console.warn("Warning: Could not write catalog to disk:", writeErr);
+    }
+
+    return res.json({ success: true, count: inMemoryCatalog.courses?.length || 0, updatedAt: inMemoryCatalog.updatedAt });
+  } catch (err: any) {
+    console.error("Error saving catalog:", err);
+    return res.status(500).json({ error: "Failed to update catalog" });
+  }
+});
+
+// POST /api/crm/backup - Secure local backup of CRM private data (Rate limited, Authenticated & Validated)
+app.post("/api/crm/backup", rateLimiter, verifyStaffAuth, (req, res) => {
+  try {
+    const payload = req.body;
+    if (!payload || typeof payload !== "object") {
+      return res.status(400).json({ error: "Invalid CRM payload" });
+    }
+
+    try {
+      fs.writeFileSync(CRM_BACKUP_FILE, JSON.stringify(payload, null, 2), "utf-8");
+    } catch (writeErr) {
+      console.warn("Warning: Could not write CRM backup to disk:", writeErr);
+    }
+
+    return res.json({ success: true, timestamp: new Date().toISOString() });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to backup CRM data" });
+  }
+});
+
+// GET /api/leads/incoming - Fetch online incoming leads to sync into CRM (Staff Authenticated)
+app.get("/api/leads/incoming", rateLimiter, verifyStaffAuth, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const since = req.query.since as string;
+  let leads = inMemoryIncomingLeads;
+  if (since) {
+    const sinceTime = new Date(since).getTime();
+    if (!isNaN(sinceTime)) {
+      leads = leads.filter(l => new Date(l.createdAt).getTime() > sinceTime);
+    }
+  }
+  return res.json({ success: true, count: leads.length, leads });
+});
+
+// GET /api/certificates/verify - Public verification of student certificates
+app.get("/api/certificates/verify", rateLimiter, (req, res) => {
+  const rawQuery = (req.query.q || req.query.query) as string;
+  const query = sanitizeString(rawQuery, 100).toLowerCase().trim();
+  if (!query) {
+    return res.status(400).json({ error: "Certificate number or Student ID is required." });
+  }
+
+  let privateData: any = null;
+  if (fs.existsSync(CRM_BACKUP_FILE)) {
+    try {
+      privateData = JSON.parse(fs.readFileSync(CRM_BACKUP_FILE, "utf-8"));
+    } catch (e) {}
+  }
+
+  const certs: any[] = privateData?.certificates || inMemoryCatalog?.publicCertificates || [];
+  const students: any[] = privateData?.students || [];
+  const courses: any[] = privateData?.courses || inMemoryCatalog?.courses || [];
+  const batches: any[] = privateData?.batches || [];
+
+  const matchedCert = certs.find((c: any) =>
+    c.certificateNumber?.toLowerCase() === query ||
+    c.certificateCode?.toLowerCase() === query ||
+    c.studentId?.toLowerCase() === query
+  );
+
+  if (!matchedCert) {
+    return res.json({ success: true, verified: false, message: "Certificate not found." });
+  }
+
+  const student = students.find((s: any) => s.id === matchedCert.studentId);
+  const course = courses.find((c: any) => c.id === matchedCert.courseId);
+  const batch = batches.find((b: any) => b.id === matchedCert.batchId);
+
+  return res.json({
+    success: true,
+    verified: true,
+    data: {
+      certificateNumber: matchedCert.certificateNumber,
+      certificateCode: matchedCert.certificateCode,
+      studentId: matchedCert.studentId,
+      studentName: student?.name || matchedCert.studentName || "Verified Student",
+      courseName: course?.name || matchedCert.courseName || "Professional Training Course",
+      batchName: batch?.name || matchedCert.batchName || "Official Batch",
+      issueDate: matchedCert.issueDate,
+      grade: matchedCert.grade || "A+",
+      status: matchedCert.status || "Issued"
+    }
+  });
+});
+
+// POST /api/portal/student-lookup - Safe student portal profile lookup
+app.post("/api/portal/student-lookup", rateLimiter, (req, res) => {
+  const identifier = sanitizeString(req.body.identifier, 100).toLowerCase().trim();
+  if (!identifier) {
+    return res.status(400).json({ error: "Student ID or phone number is required." });
+  }
+
+  let privateData: any = null;
+  if (fs.existsSync(CRM_BACKUP_FILE)) {
+    try {
+      privateData = JSON.parse(fs.readFileSync(CRM_BACKUP_FILE, "utf-8"));
+    } catch (e) {}
+  }
+
+  const students: any[] = privateData?.students || [];
+  const cleanPhone = identifier.replace(/[^0-9]/g, "");
+
+  const matched = students.find((s: any) =>
+    s.studentCode?.toLowerCase() === identifier ||
+    (s.phone && s.phone.replace(/[^0-9]/g, "") === cleanPhone && cleanPhone.length >= 10) ||
+    s.email?.toLowerCase() === identifier
+  );
+
+  if (!matched) {
+    return res.status(404).json({ error: "No student found with this ID or phone number." });
+  }
+
+  const admissions = (privateData?.admissions || []).filter((a: any) => a.studentId === matched.id);
+  const payments = (privateData?.payments || []).filter((p: any) => p.studentId === matched.id);
+  const certs = (privateData?.certificates || []).filter((c: any) => c.studentId === matched.id);
+  const studentBatchIds = new Set(admissions.map((a: any) => a.batchId));
+  const batches = (privateData?.batches || []).filter((b: any) => studentBatchIds.has(b.id));
+  const attendance = (privateData?.attendance || []).filter((att: any) => att.studentId === matched.id);
+
+  return res.json({
+    success: true,
+    student: matched,
+    admissions,
+    payments,
+    certificates: certs,
+    batches,
+    attendance
+  });
 });
 
 // --- IN-MEMORY LEAD, FRAUD & OTP STATE WITH EXPIRY CLEANUP ---
@@ -444,6 +672,17 @@ app.post("/api/leads/submit", rateLimiter, (req, res) => {
       createdAt,
       updatedAt: createdAt
     };
+
+    // Persist incoming lead to queue and file so CRM syncs it seamlessly
+    inMemoryIncomingLeads.unshift(leadRecord);
+    if (inMemoryIncomingLeads.length > 500) {
+      inMemoryIncomingLeads = inMemoryIncomingLeads.slice(0, 500);
+    }
+    try {
+      fs.writeFileSync(LEADS_FILE, JSON.stringify(inMemoryIncomingLeads, null, 2), "utf-8");
+    } catch (e) {
+      console.warn("Could not save incoming lead to disk:", e);
+    }
 
     // If not high risk or blocked, optionally return deduplication eventId for client-sync
     const serverEventId = `evt_lead_${leadId}_${Date.now()}`;

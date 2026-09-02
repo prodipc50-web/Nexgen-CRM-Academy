@@ -47,7 +47,7 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
   initialCourse,
   onOpenCategoryManager
 }) => {
-  const { categories, courses, staffList, addCourse, updateCourse } = useAcademy();
+  const { categories, courses, staffList, addCourse, updateCourse, syncToCloudNow } = useAcademy();
   const isEditing = !!initialCourse;
 
   const [activeTab, setActiveTab] = useState<TabType>('basic');
@@ -398,6 +398,7 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       addCourse(coursePayload);
     }
 
+    syncToCloudNow(true);
     onClose();
   };
 

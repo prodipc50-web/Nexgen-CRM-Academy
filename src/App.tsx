@@ -7,7 +7,6 @@ import { SidebarNav } from './components/layout/SidebarNav';
 
 // Public & Auth Views (Fast Direct Load)
 import { PublicWebsiteView } from './components/website/PublicWebsiteView';
-import { CourseLandingPageView } from './components/website/CourseLandingPageView';
 import { MasterCourseLandingPageView } from './components/website/MasterCourseLandingPageView';
 import { LoginView } from './components/auth/LoginView';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';

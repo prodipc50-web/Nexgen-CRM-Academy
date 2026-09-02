@@ -85,12 +85,15 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   onClose,
   course
 }) => {
-  const { updateCourse, websiteCmsConfig, isAuthenticated, currentUser } = useAcademy();
+  const { updateCourse, syncToCloudNow, websiteCmsConfig, academySettings, isAuthenticated, currentUser } = useAcademy();
   const canEdit = Boolean(isAuthenticated && currentUser && ['SUPER_ADMIN', 'ADMIN', 'BRANCH_MANAGER'].includes(currentUser.role));
 
   if (!isOpen || !canEdit) {
     return null;
   }
+
+  const defaultPhone = academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01798444444';
+  const defaultAddress = academySettings?.officialAddress || '১৪/বি, গার্ডেন রোড, কাজী নজরুল ইসলাম সরণি, ফার্মগেট, ঢাকা-১২১৫';
 
   const existingConfig = course.landingConfig || {};
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +114,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   // CTAs (WhatsApp, Messenger, Admission)
   const [ctaMode, setCtaMode] = useState<CourseLandingPageConfig['ctaMode']>(existingConfig.ctaMode || 'both');
   const [customWhatsAppNumber, setCustomWhatsAppNumber] = useState(
-    existingConfig.customWhatsAppNumber || websiteCmsConfig?.marketing?.floatingWhatsAppNumber || '01798444444'
+    existingConfig.customWhatsAppNumber || websiteCmsConfig?.marketing?.floatingWhatsAppNumber || defaultPhone
   );
   const [customWhatsAppMessage, setCustomWhatsAppMessage] = useState(
     existingConfig.customWhatsAppMessage || `Hello Nexgen Academy! আমি "${course.name}" কোর্সে ভর্তি হতে চাই ও অফার জানতে চাই।`
@@ -349,9 +352,9 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   );
   const [newBonusInput, setNewBonusInput] = useState('');
   const [campusAddress, setCampusAddress] = useState(
-    existingConfig.campusAddress || '১৪/বি, গার্ডেন রোড, কাজী নজরুল ইসলাম সরণি, ফার্মগেট, ঢাকা-১২১৫'
+    existingConfig.campusAddress || defaultAddress
   );
-  const [campusPhone, setCampusPhone] = useState(existingConfig.campusPhone || '০১৭৯৮-৪৪৪৪৪৪');
+  const [campusPhone, setCampusPhone] = useState(existingConfig.campusPhone || defaultPhone);
   const [campusHours, setCampusHours] = useState(existingConfig.campusHours || 'সকাল ৯:০০ টা থেকে রাত ৮:০০ টা (প্রতিদিন খোলা)');
 
   // Tab 7: FAQs & Reviews
@@ -729,6 +732,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
       slug: slug.trim() || course.slug
     });
 
+    syncToCloudNow(true);
     onClose();
   };
 

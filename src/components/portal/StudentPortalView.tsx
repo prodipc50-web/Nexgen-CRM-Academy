@@ -61,13 +61,19 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
   // Authentication State for Portal
   const [identifierInput, setIdentifierInput] = useState('');
   const [loggedInStudent, setLoggedInStudent] = useState<Student | null>(null);
+  const [portalRemoteData, setPortalRemoteData] = useState<{
+    admissions?: Admission[];
+    payments?: Payment[];
+    certificates?: Certificate[];
+  } | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'batches' | 'payments' | 'attendance' | 'materials' | 'certificate'>('overview');
   const [language, setLanguage] = useState<'bn' | 'en'>('bn');
   const [idCardSide, setIdCardSide] = useState<'front' | 'back'>('front');
 
   // Handle Login
-  const handleStudentLogin = (e: React.FormEvent) => {
+  const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const query = identifierInput.trim().toLowerCase();
     if (!query) {
@@ -75,6 +81,10 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
       return;
     }
 
+    setLoginError('');
+    setIsLoggingIn(true);
+
+    // 1. Check local state first
     const matched = students.find(
       s =>
         s.studentCode.toLowerCase() === query ||
@@ -84,14 +94,37 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
 
     if (matched) {
       setLoggedInStudent(matched);
-      setLoginError('');
-    } else {
-      setLoginError(
-        language === 'bn'
-          ? 'কোনো শিক্ষার্থী পাওয়া যায়নি! অনুগ্রহ করে সঠিক স্টুডেন্ট আইডি বা মোবাইল নম্বর দিন।'
-          : 'No student found with this ID or phone number. Please check with academy help desk.'
-      );
+      setPortalRemoteData(null);
+      setIsLoggingIn(false);
+      return;
     }
+
+    // 2. Query secure server student-lookup endpoint
+    try {
+      const res = await fetch(`/api/portal/student-lookup?identifier=${encodeURIComponent(query)}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data && json.data.student) {
+          setLoggedInStudent(json.data.student);
+          setPortalRemoteData({
+            admissions: json.data.admissions || [],
+            payments: json.data.payments || [],
+            certificates: json.data.certificates || []
+          });
+          setIsLoggingIn(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Student portal lookup notice:', err);
+    }
+
+    setIsLoggingIn(false);
+    setLoginError(
+      language === 'bn'
+        ? 'কোনো শিক্ষার্থী পাওয়া যায়নি! অনুগ্রহ করে সঠিক স্টুডেন্ট আইডি বা মোবাইল নম্বর দিন।'
+        : 'No student found with this ID or phone number. Please check with academy help desk.'
+    );
   };
 
   // Demo Login
@@ -105,13 +138,19 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
   // Current Student Data Aggregation
   const studentAdmissions = useMemo(() => {
     if (!loggedInStudent) return [];
+    if (portalRemoteData?.admissions && portalRemoteData.admissions.length > 0) {
+      return portalRemoteData.admissions;
+    }
     return admissions.filter(a => a.studentId === loggedInStudent.id);
-  }, [loggedInStudent, admissions]);
+  }, [loggedInStudent, admissions, portalRemoteData]);
 
   const studentPayments = useMemo(() => {
     if (!loggedInStudent) return [];
+    if (portalRemoteData?.payments && portalRemoteData.payments.length > 0) {
+      return portalRemoteData.payments;
+    }
     return payments.filter(p => p.studentId === loggedInStudent.id);
-  }, [loggedInStudent, payments]);
+  }, [loggedInStudent, payments, portalRemoteData]);
 
   const totalCourseFee = studentAdmissions.reduce((acc, curr) => acc + (curr.finalFee || 0), 0);
   const totalPaidAmount = studentPayments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
@@ -125,8 +164,11 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
 
   const studentCertificates = useMemo(() => {
     if (!loggedInStudent) return [];
+    if (portalRemoteData?.certificates && portalRemoteData.certificates.length > 0) {
+      return portalRemoteData.certificates;
+    }
     return certificates.filter(c => c.studentId === loggedInStudent.id);
-  }, [loggedInStudent, certificates]);
+  }, [loggedInStudent, certificates, portalRemoteData]);
 
   const studentAttendanceRecords = useMemo(() => {
     if (!loggedInStudent) return [];

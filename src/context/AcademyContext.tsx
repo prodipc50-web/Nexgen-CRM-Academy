@@ -120,6 +120,7 @@ interface AcademyContextType {
   exams: Exam[];
   examResults: ExamResult[];
   certificates: Certificate[];
+  publicCertificates: any[];
   expenses: Expense[];
   assets: AssetInventory[];
   auditLogs: AuditLog[];
@@ -419,7 +420,7 @@ interface AcademyContextType {
   resetToSeedData: () => void;
   cloudSyncStatus: 'synced' | 'syncing' | 'offline' | 'error';
   lastCloudSyncTime: string | null;
-  syncToCloudNow: () => Promise<boolean>;
+  syncToCloudNow: (forceImmediate?: boolean) => Promise<boolean>;
 
   // Helpers
   getStudentById: (id: string) => Student | undefined;
@@ -634,6 +635,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const saved = localStorage.getItem(`${STORAGE_KEY}_certificates`);
     return saved ? JSON.parse(saved) : INITIAL_CERTIFICATES;
   });
+  const [publicCertificates, setPublicCertificates] = useState<any[]>([]);
 
   const [expenses, setExpenses] = useState<Expense[]>(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_expenses`);
@@ -1018,6 +1020,29 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // 1. PUBLIC WEBSITE CATALOG REAL-TIME LISTENER
   // Subscribes ONLY to /academy_data/public_catalog (contains NO private students, leads, payments, staff accounts, or audit logs)
   useEffect(() => {
+    // Fast initial fetch from server endpoint to populate state immediately without waiting for Firestore handshake
+    fetch('/api/catalog', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(cat => {
+        if (cat && Array.isArray(cat.courses) && cat.courses.length > 0) {
+          if (!isInitialCloudLoadDone.current) {
+            isRemoteUpdate.current = true;
+            setCourses(cat.courses);
+            if (Array.isArray(cat.categories) && cat.categories.length > 0) setCategories(cat.categories);
+            if (cat.websiteCmsConfig && typeof cat.websiteCmsConfig === 'object') {
+              setWebsiteCmsConfig(prev => ({ ...prev, ...cat.websiteCmsConfig }));
+            }
+            if (Array.isArray(cat.websiteReviews)) setWebsiteReviews(cat.websiteReviews);
+            if (Array.isArray(cat.websiteGallery)) setWebsiteGallery(cat.websiteGallery);
+            if (Array.isArray(cat.websiteFaqs)) setWebsiteFaqs(cat.websiteFaqs);
+            if (Array.isArray(cat.websiteBlogs)) setWebsiteBlogs(cat.websiteBlogs);
+            if (Array.isArray(cat.seminars)) setSeminars(cat.seminars);
+            if (Array.isArray(cat.publicCertificates)) setPublicCertificates(cat.publicCertificates);
+          }
+        }
+      })
+      .catch(() => {});
+
     const publicDocRef = doc(db, 'academy_data', 'public_catalog');
 
     // Startup safety fallback timer: Ensure UI transitions out of initial 'syncing' state within 2 seconds
@@ -1071,6 +1096,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (Array.isArray(data.websiteGallery)) setWebsiteGallery(data.websiteGallery);
             if (Array.isArray(data.websiteFaqs)) setWebsiteFaqs(data.websiteFaqs);
             if (Array.isArray(data.websiteBlogs)) setWebsiteBlogs(data.websiteBlogs);
+            if (Array.isArray(data.seminars)) setSeminars(data.seminars);
+            if (Array.isArray(data.publicCertificates)) setPublicCertificates(data.publicCertificates);
           }
           setLastCloudSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
           setCloudSyncStatus('synced');
@@ -1219,6 +1246,37 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => window.removeEventListener('storage', handleStorageEvent);
   }, [isAuthenticated]);
 
+  // Periodic background check to fetch new online leads into CRM
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchIncomingLeads = async () => {
+      try {
+        const res = await fetch('/api/leads/incoming', {
+          headers: { 'x-staff-auth': 'nexgen-staff-auth-secure' }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success && Array.isArray(data.leads) && data.leads.length > 0) {
+          setLeads(prev => {
+            const existingIds = new Set(prev.map(l => l.id));
+            const existingPhones = new Set(prev.map(l => l.phone.replace(/[^0-9]/g, '')));
+            const newLeads = data.leads.filter((l: Lead) => !existingIds.has(l.id) && !existingPhones.has(l.phone.replace(/[^0-9]/g, '')));
+            if (newLeads.length > 0) {
+              return [...newLeads, ...prev];
+            }
+            return prev;
+          });
+        }
+      } catch (e) {
+        // Quiet fallback
+      }
+    };
+
+    fetchIncomingLeads();
+    const interval = setInterval(fetchIncomingLeads, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
   // Dynamically initialize Google Analytics 4 (Real GA4 Measurement ID: G-VYNS03M91Z)
   useEffect(() => {
     if (websiteCmsConfig?.marketing?.googleAnalyticsEnabled !== false) {
@@ -1240,9 +1298,28 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return true;
     }
 
+    const publicCertificatesPayload = certificates.map(c => {
+      const student = students.find(s => s.id === c.studentId);
+      const course = courses.find(crs => crs.id === c.courseId);
+      const batch = batches.find(b => b.id === c.batchId);
+      return {
+        certificateNumber: c.certificateNumber,
+        certificateCode: c.certificateCode,
+        studentId: c.studentId,
+        studentName: student?.name || 'Verified Student',
+        courseName: course?.name || 'Professional IT Course',
+        batchName: batch?.batchNumber || 'Official Batch',
+        issueDate: c.issueDate,
+        grade: c.grade,
+        status: c.status
+      };
+    });
+
     const publicCatalogPayload = {
       categories,
       courses,
+      seminars,
+      publicCertificates: publicCertificatesPayload,
       websiteCmsConfig,
       websiteReviews,
       websiteGallery,
@@ -1293,21 +1370,45 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return true;
     }
 
+    const cleanPublicPayload = JSON.parse(JSON.stringify(publicCatalogPayload));
+    const cleanCrmPayload = JSON.parse(JSON.stringify(crmPrivatePayload));
+
     try {
       setCloudSyncStatus('syncing');
       isSyncingToCloud.current = true;
-      lastSavedPayloadString.current = combinedStr;
 
       // Write strictly separated public and private documents with 8s safety timeout
-      const writePromises = [
-        setDoc(doc(db, 'academy_data', 'public_catalog'), publicCatalogPayload, { merge: true })
+      const writePromises: Promise<any>[] = [
+        setDoc(doc(db, 'academy_data', 'public_catalog'), cleanPublicPayload, { merge: true })
       ];
 
-      // Write private CRM document ONLY if user is authenticated with Firebase Auth
+      // Write private CRM document if user is authenticated with Firebase Auth
       if (isAuthenticated && (firebaseUser || auth.currentUser)) {
         writePromises.push(
-          setDoc(doc(db, 'academy_data', 'crm_private_data'), crmPrivatePayload, { merge: true })
+          setDoc(doc(db, 'academy_data', 'crm_private_data'), cleanCrmPayload, { merge: true })
         );
+      }
+
+      // Dual-layer server sync: also push to local server for instant multi-device sync
+      const serverSyncPromise = fetch('/api/catalog', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-staff-auth': 'nexgen-staff-auth-secure'
+        },
+        body: JSON.stringify(cleanPublicPayload)
+      }).catch(e => console.warn('Catalog local server sync notice:', e));
+      writePromises.push(serverSyncPromise);
+
+      if (isAuthenticated) {
+        fetch('/api/crm/backup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-staff-auth': 'nexgen-staff-auth-secure'
+          },
+          body: JSON.stringify(cleanCrmPayload)
+        }).catch(e => console.warn('CRM server backup notice:', e));
       }
 
       const syncPromise = Promise.all(writePromises);
@@ -1318,10 +1419,12 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       await Promise.race([syncPromise, timeoutPromise]);
 
+      lastSavedPayloadString.current = combinedStr;
       setLastCloudSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       setCloudSyncStatus('synced');
       return true;
     } catch (err: any) {
+      lastSavedPayloadString.current = ''; // Reset so that subsequent retry or manual sync is not blocked!
       console.warn('Firestore sync notice:', err?.message || err);
       // If network offline or timed out, report offline/error so user is not falsely shown confirmed cloud sync
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
@@ -2523,6 +2626,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       )
     );
     logAudit('Course Updated', 'Courses', id, `Updated course details for ID: ${id}`);
+    setTimeout(() => {
+      syncToCloudNow(true);
+    }, 60);
   };
 
   const duplicateCourse = (courseId: string): Course => {
@@ -4091,6 +4197,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         exams,
         examResults,
         certificates,
+        publicCertificates,
         expenses,
         assets,
         auditLogs,

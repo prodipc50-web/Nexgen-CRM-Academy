@@ -235,7 +235,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   course: propCourse,
   onBackToFullWebsite
 }) => {
-  const { courses, websiteCmsConfig, staffList, addLead, academySettings, isAuthenticated, currentUser } = useAcademy();
+  const { courses, websiteCmsConfig, staffList, addLead, submitPublicLead, academySettings, isAuthenticated, currentUser } = useAcademy();
   const course = courses.find(c => c.id === propCourse.id || c.code === propCourse.code) || propCourse;
 
   // Authorization check: Only authenticated admins/managers can edit landing page contents
@@ -482,16 +482,48 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       ? `[ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার কাউন্সিলিং রিকোয়েস্ট] Schedule: ${leadSchedule}. Discount/Batch: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`
       : `Fast Inquiry on Course Landing Page. Schedule: ${leadSchedule}. Discount Code: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`;
 
+    const leadSourceStr = utms.utmSource
+      ? `Ad: ${utms.utmSource} (${isCounselingMode ? 'Counseling' : 'Direct'})`
+      : isCounselingMode
+      ? 'Course Landing Free Counseling'
+      : 'Course Landing Fast Form';
+
+    // 1. Send to server-side lead pipeline and disk queue
+    submitPublicLead({
+      fullName: leadName.trim(),
+      studentName: leadName.trim(),
+      phone: leadPhone.trim(),
+      email: leadEmail.trim() || undefined,
+      courseId: course.id,
+      courseName: course.name,
+      interestedCourseId: course.id,
+      preferredSchedule: leadSchedule,
+      preferredTime: leadSchedule,
+      leadSource: leadSourceStr,
+      source: leadSourceStr,
+      landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+      landingPage: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      utmSource: utms.utmSource,
+      utmMedium: utms.utmMedium,
+      utmCampaign: utms.utmCampaign,
+      utmContent: utms.utmContent,
+      utmTerm: utms.utmTerm,
+      comments: commentsText,
+      message: commentsText,
+      honeypotVal: honeypot,
+      renderTimestampMs: formRenderTime,
+      otpVerified: !!otpCode
+    }).catch(err => {
+      console.warn('Network submission notice, queued locally:', err);
+    });
+
+    // 2. Also register in local state for instant client-side feedback
     addLead({
       name: leadName.trim(),
       phone: leadPhone.trim(),
       email: leadEmail.trim() || undefined,
       interestedCourseId: course.id,
-      leadSource: utms.utmSource
-        ? `Ad: ${utms.utmSource} (${isCounselingMode ? 'Counseling' : 'Direct'})`
-        : isCounselingMode
-        ? 'Course Landing Free Counseling'
-        : 'Course Landing Fast Form',
+      leadSource: leadSourceStr,
       campaignId: utms.utmCampaign,
       utmSource: utms.utmSource,
       utmMedium: utms.utmMedium,

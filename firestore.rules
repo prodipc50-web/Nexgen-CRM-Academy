@@ -18,7 +18,7 @@ service cloud.firestore {
 
     // Public Website & Course Catalog:
     // Anyone on the internet can READ public courses, fees, schedules, FAQs, reviews, and CMS hero content.
-    // Anonymous public clients CANNOT write, update, or delete.
+    // Authorized CMS/CRM updates persist to the public catalog; delete is strictly blocked.
     match /academy_data/public_catalog {
       allow read: if true;
       allow create, update: if isSignedIn();

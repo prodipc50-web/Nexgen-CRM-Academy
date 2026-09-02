@@ -4,31 +4,82 @@ import { ShieldCheck, Search, Award, CheckCircle, AlertCircle, Calendar, User, B
 import { NexgenLogo } from '../common/NexgenLogo';
 
 export const CertificateVerificationSection: React.FC = () => {
-  const { certificates, students, courses, batches } = useAcademy();
+  const { certificates, publicCertificates, students, courses, batches } = useAcademy();
   const [searchQuery, setSearchQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [matchedCert, setMatchedCert] = useState<any | null>(null);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const query = searchQuery.trim().toLowerCase();
     if (!query) return;
 
     setHasSearched(true);
-    const cert = certificates.find(c =>
+    setIsVerifying(true);
+
+    // 1. Check local private certificates first (if in admin session)
+    const localCert = certificates.find(c =>
       c.certificateNumber?.toLowerCase() === query ||
       c.certificateCode?.toLowerCase() === query ||
       c.studentId?.toLowerCase() === query
     );
 
-    if (cert) {
-      const student = students.find(s => s.id === cert.studentId);
-      const course = courses.find(c => c.id === cert.courseId);
-      const batch = batches.find(b => b.id === cert.batchId);
-      setMatchedCert({ cert, student, course, batch });
-    } else {
-      setMatchedCert(null);
+    if (localCert) {
+      const student = students.find(s => s.id === localCert.studentId);
+      const course = courses.find(c => c.id === localCert.courseId);
+      const batch = batches.find(b => b.id === localCert.batchId);
+      setMatchedCert({
+        studentName: student?.name,
+        studentId: student?.studentCode || student?.id || localCert.studentId,
+        certificateNumber: localCert.certificateNumber,
+        courseName: course?.name || 'Professional IT Course',
+        grade: localCert.grade,
+        issueDate: localCert.issueDate,
+        status: localCert.status
+      });
+      setIsVerifying(false);
+      return;
     }
+
+    // 2. Check publicCertificates from catalog
+    const pubCert = (publicCertificates || []).find((c: any) =>
+      c.certificateNumber?.toLowerCase() === query ||
+      c.certificateCode?.toLowerCase() === query ||
+      c.studentId?.toLowerCase() === query
+    );
+
+    if (pubCert) {
+      setMatchedCert({
+        studentName: pubCert.studentName,
+        studentId: pubCert.studentId,
+        certificateNumber: pubCert.certificateNumber,
+        courseName: pubCert.courseName,
+        grade: pubCert.grade,
+        issueDate: pubCert.issueDate,
+        status: pubCert.status
+      });
+      setIsVerifying(false);
+      return;
+    }
+
+    // 3. Fallback: Query server verification endpoint directly
+    try {
+      const res = await fetch(`/api/certificates/verify?q=${encodeURIComponent(query)}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.verified && json.data) {
+          setMatchedCert(json.data);
+          setIsVerifying(false);
+          return;
+        }
+      }
+    } catch (e) {
+      // quiet fallback
+    }
+
+    setMatchedCert(null);
+    setIsVerifying(false);
   };
 
   return (
@@ -102,10 +153,10 @@ export const CertificateVerificationSection: React.FC = () => {
                     <span>✓ Officially Verified Credential</span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-black text-white">
-                    {matchedCert.student?.name || 'Verified Graduate'}
+                    {matchedCert.studentName || matchedCert.student?.name || 'Verified Graduate'}
                   </h3>
                   <p className="text-xs text-slate-300 font-mono">
-                    ID: {matchedCert.student?.studentIdCode || matchedCert.cert.studentId} • Cert #{matchedCert.cert.certificateNumber}
+                    ID: {matchedCert.studentId || matchedCert.student?.studentIdCode || matchedCert.cert?.studentId} • Cert #{matchedCert.certificateNumber || matchedCert.cert?.certificateNumber}
                   </p>
                 </div>
               </div>
@@ -123,7 +174,7 @@ export const CertificateVerificationSection: React.FC = () => {
                   <span>Course Title</span>
                 </span>
                 <span className="font-bold text-white text-sm">
-                  {matchedCert.course?.title || 'Professional IT Course'}
+                  {matchedCert.courseName || matchedCert.course?.title || matchedCert.course?.name || 'Professional IT Course'}
                 </span>
               </div>
 
@@ -133,7 +184,7 @@ export const CertificateVerificationSection: React.FC = () => {
                   <span>Performance Grade</span>
                 </span>
                 <span className="font-black text-emerald-400 text-sm">
-                  Grade {matchedCert.cert.grade || 'A+'} (Distinction)
+                  Grade {matchedCert.grade || matchedCert.cert?.grade || 'A+'} (Distinction)
                 </span>
               </div>
 
@@ -143,7 +194,7 @@ export const CertificateVerificationSection: React.FC = () => {
                   <span>Issue Date</span>
                 </span>
                 <span className="font-bold text-white text-sm">
-                  {matchedCert.cert.issueDate}
+                  {matchedCert.issueDate || matchedCert.cert?.issueDate}
                 </span>
               </div>
             </div>
@@ -156,7 +207,7 @@ export const CertificateVerificationSection: React.FC = () => {
                 </span>
               </div>
               <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 font-mono font-bold rounded-lg shrink-0">
-                Status: Active Valid
+                Status: {matchedCert.status || 'Active Valid'}
               </span>
             </div>
           </div>

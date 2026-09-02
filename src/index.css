@@ -8,9 +8,10 @@
   --website-primary: #4f46e5;
   --website-primary-hover: #4338ca;
   --website-secondary: #f59e0b;
-  --font-erp: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-website-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-website-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-erp: 'Plus Jakarta Sans', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+  --font-website-heading: 'Plus Jakarta Sans', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+  --font-website-body: 'Inter', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+  --font-bangla: 'Hind Siliguri', 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 .font-erp {
@@ -23,6 +24,10 @@
 
 .font-website-body {
   font-family: var(--font-website-body);
+}
+
+.font-bangla {
+  font-family: var(--font-bangla);
 }
 
 .theme-erp-bg {
