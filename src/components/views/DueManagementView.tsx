@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { exportDuesSpreadsheet } from '../../utils/spreadsheetExport';
+import { useDebounce } from '../../hooks/useDebounce';
+import { getDueReminderWhatsAppUrl } from '../../utils/whatsappHelper';
 import {
   AlertCircle,
   CreditCard,
   Search,
   MessageSquare,
+  MessageCircle,
   Copy,
   Check,
   Calendar,
@@ -30,6 +33,7 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
   const { admissions, students, courses, batches, stats, deleteStudent, deleteAdmission, waiveAdmissionDue } = useAcademy();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 250);
   const [filterDueStatus, setFilterDueStatus] = useState<'all' | 'overdue' | 'upcoming'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -54,8 +58,8 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
     if (adm.due <= 0) return false;
     const stu = students.find(s => s.id === adm.studentId);
     const matchesSearch =
-      (stu && (stu.name.toLowerCase().includes(searchTerm.toLowerCase()) || stu.studentCode.toLowerCase().includes(searchTerm.toLowerCase()) || stu.phone.includes(searchTerm))) ||
-      ((adm.admissionCode || adm.admissionNumber || '').toLowerCase().includes(searchTerm.toLowerCase()));
+      (stu && (stu.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || stu.studentCode.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || stu.phone.includes(debouncedSearchTerm))) ||
+      ((adm.admissionCode || adm.admissionNumber || '').toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
 
     const dueDate = adm.nextPaymentDate || adm.nextDueDate;
     const isOverdue = dueDate && dueDate < todayStr;
@@ -206,9 +210,137 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
         </div>
       </div>
 
-      {/* Due Accounts Table */}
+      {/* Due Accounts Container: Mobile Cards + Desktop Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Responsive Cards (md:hidden) */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {dueAdmissions.map(adm => {
+            const stu = students.find(s => s.id === adm.studentId);
+            const crs = courses.find(c => c.id === adm.courseId);
+            const batch = batches.find(b => b.id === adm.batchId);
+            const dueDate = adm.nextPaymentDate || adm.nextDueDate;
+            const isOverdue = dueDate && dueDate < todayStr;
+            const waUrl = getDueReminderWhatsAppUrl({
+              phone: stu?.phone,
+              studentName: stu?.name || 'Student',
+              courseName: crs?.name || 'Course',
+              dueAmount: adm.due,
+              dueDate: dueDate
+            });
+
+            return (
+              <div key={adm.id} className="p-3.5 space-y-3 hover:bg-slate-50 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <button
+                      onClick={() => onSelectStudent(adm.studentId)}
+                      className="font-bold text-slate-900 hover:text-indigo-600 text-left text-sm"
+                    >
+                      {stu?.name || 'Student Record'}
+                    </button>
+                    <div className="text-[11px] text-slate-500 font-mono">
+                      {stu?.studentCode || adm.admissionCode} • {stu?.phone || 'No Phone'}
+                    </div>
+                  </div>
+
+                  <span className="inline-block bg-rose-50 border border-rose-200 text-rose-700 px-2.5 py-1 rounded-lg font-black text-xs">
+                    ৳{adm.due.toLocaleString()} Due
+                  </span>
+                </div>
+
+                <div className="bg-slate-50 p-2.5 rounded-xl text-xs space-y-1">
+                  <div className="font-semibold text-slate-800 truncate">{crs?.name || 'Course Enrollment'}</div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Batch #{batch?.batchNumber || 'General'}</span>
+                    <span>Fee: ৳{adm.finalFee.toLocaleString()} | Paid: ৳{adm.totalPaid.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Deadline */}
+                <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-slate-400 text-[11px]">Deadline:</span>
+                    {dueDate ? (
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        isOverdue ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {dueDate} {isOverdue && '(OVERDUE)'}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">-</span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center space-x-1.5">
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-xs font-semibold inline-flex items-center space-x-1"
+                      title="Send WhatsApp Reminder"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span className="text-[10px]">WA</span>
+                    </a>
+
+                    <button
+                      onClick={() =>
+                        handleCopyReminder(
+                          adm.id,
+                          stu?.name || 'Student',
+                          crs?.name || 'Course',
+                          adm.due,
+                          dueDate
+                        )
+                      }
+                      className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center space-x-1"
+                      title="Copy SMS text"
+                    >
+                      {copiedId === adm.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <MessageSquare className="w-3.5 h-3.5" />}
+                    </button>
+
+                    <button
+                      onClick={() => onOpenCollectPayment(adm.id)}
+                      className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs inline-flex items-center space-x-1 shadow-xs"
+                    >
+                      <CreditCard className="w-3 h-3" />
+                      <span>Collect</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setDeletingDue({
+                          admissionId: adm.id,
+                          admissionCode: adm.admissionCode || adm.admissionNumber || adm.id,
+                          studentId: adm.studentId,
+                          studentName: stu?.name || 'Student',
+                          studentCode: stu?.studentCode || 'N/A',
+                          dueAmount: adm.due,
+                          courseName: crs?.name || 'Course'
+                        });
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      title="Waive / Remove Due"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {dueAdmissions.length === 0 && (
+            <div className="py-10 text-center text-slate-400 px-4">
+              <Check className="w-8 h-8 mx-auto mb-2 text-emerald-500 opacity-60" />
+              <p className="text-xs font-semibold">Zero pending dues matching the filter criteria!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop View: Full Data Table (hidden md:block) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[10px]">
               <tr>
@@ -228,6 +360,13 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                 const batch = batches.find(b => b.id === adm.batchId);
                 const dueDate = adm.nextPaymentDate || adm.nextDueDate;
                 const isOverdue = dueDate && dueDate < todayStr;
+                const waUrl = getDueReminderWhatsAppUrl({
+                  phone: stu?.phone,
+                  studentName: stu?.name || 'Student',
+                  courseName: crs?.name || 'Course',
+                  dueAmount: adm.due,
+                  dueDate: dueDate
+                });
 
                 return (
                   <tr key={adm.id} className="hover:bg-slate-50">
@@ -282,6 +421,17 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                     </td>
 
                     <td className="py-3 px-4 text-right space-x-1.5">
+                      <a
+                        href={waUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded text-xs font-bold transition-all inline-flex items-center space-x-1"
+                        title="Send WhatsApp Reminder"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>WhatsApp</span>
+                      </a>
+
                       <button
                         onClick={() =>
                           handleCopyReminder(
@@ -307,7 +457,7 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                         ) : (
                           <>
                             <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
-                            <span>SMS Reminder</span>
+                            <span>SMS</span>
                           </>
                         )}
                       </button>

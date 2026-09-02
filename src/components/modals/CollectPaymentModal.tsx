@@ -16,13 +16,22 @@ export const CollectPaymentModal: React.FC<CollectPaymentModalProps> = ({
   targetAdmissionId,
   onSuccessPayment
 }) => {
-  const { admissions, students, courses, batches, addPayment } = useAcademy();
+  const { admissions, students, courses, batches, addPayment, payments } = useAcademy();
 
   const [selectedAdmissionId, setSelectedAdmissionId] = useState<string>(targetAdmissionId || '');
   const [amount, setAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bKash');
   const [transactionId, setTransactionId] = useState('');
   const [note, setNote] = useState('');
+
+  // Duplicate Transaction ID detector
+  const duplicatePayment = transactionId.trim()
+    ? payments.find(
+        p =>
+          p.transactionId &&
+          p.transactionId.trim().toLowerCase() === transactionId.trim().toLowerCase()
+      )
+    : null;
 
   useEffect(() => {
     if (targetAdmissionId) {
@@ -51,6 +60,13 @@ export const CollectPaymentModal: React.FC<CollectPaymentModalProps> = ({
     if (!selectedAdmissionId || amount <= 0) {
       alert('Please select an admission and enter a valid collection amount.');
       return;
+    }
+
+    if (duplicatePayment) {
+      const confirmDup = window.confirm(
+        `সতর্কবার্তা: Transaction ID "${transactionId}" ইতিপূর্বে রশিদ #${duplicatePayment.receiptNumber} (৳${duplicatePayment.amount}) এ ব্যবহৃত হয়েছে। আপনি কি নিশ্চিত যে এটি বৈধ এবং সংগ্রহ করতে চান?`
+      );
+      if (!confirmDup) return;
     }
 
     try {
@@ -188,8 +204,18 @@ export const CollectPaymentModal: React.FC<CollectPaymentModalProps> = ({
               placeholder="e.g. BK9928172"
               value={transactionId}
               onChange={e => setTransactionId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-mono font-medium outline-none"
+              className={`w-full bg-slate-50 border rounded-lg px-3 py-2 font-mono font-medium outline-none ${
+                duplicatePayment ? 'border-rose-400 bg-rose-50 text-rose-900 ring-2 ring-rose-200' : 'border-slate-200 text-slate-900'
+              }`}
             />
+            {duplicatePayment && (
+              <div className="mt-1.5 p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] flex items-start space-x-1.5">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold">সতর্কতা: ডুপ্লিকেট Transaction ID!</span> এই ট্রানজাকশন আইডিটি ইতিপূর্বে রশিদ <span className="font-bold underline">#{duplicatePayment.receiptNumber}</span> (৳{duplicatePayment.amount?.toLocaleString()}) এ <span className="font-semibold">{duplicatePayment.date}</span> তারিখে ব্যবহার করা হয়েছে।
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

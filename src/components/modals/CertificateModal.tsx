@@ -1088,14 +1088,31 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                 </div>
               </div>
 
-              {/* Bottom Verification Note */}
+              {/* Bottom Verification Note & Verification QR Code */}
               {certData.showVerification && (
-                <div className={`pt-4 border-t ${themeStyles.divider} flex items-center justify-between text-[10px] font-sans text-slate-400`}>
-                  <div className="flex items-center space-x-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Verified Online: {certData.verificationUrl}</span>
+                <div className={`pt-4 border-t ${themeStyles.divider} flex flex-col sm:flex-row items-center justify-between text-[10px] font-sans text-slate-500 gap-2`}>
+                  <div className="flex items-center space-x-2.5">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(
+                        certData.verificationUrl || `https://nexgenacademy.edu.bd/verify/${certData.certificateSerial}`
+                      )}`}
+                      alt="Verification QR Code"
+                      className="w-12 h-12 bg-white border border-slate-300 rounded p-0.5 shadow-2xs shrink-0"
+                    />
+                    <div className="text-left">
+                      <div className="flex items-center space-x-1 font-bold text-slate-700">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Online Authenticity Verification</span>
+                      </div>
+                      <span className="font-mono text-[9px] text-slate-400 block max-w-sm truncate">
+                        {certData.verificationUrl}
+                      </span>
+                    </div>
                   </div>
-                  <span>Issue Date: {certData.issueDate}</span>
+                  <div className="text-right">
+                    <span>Issue Date: <strong className="text-slate-800 font-semibold">{certData.issueDate}</strong></span>
+                    <span className="block text-[9px] text-slate-400">Nexgen Academic Credentials Registry</span>
+                  </div>
                 </div>
               )}
             </div>

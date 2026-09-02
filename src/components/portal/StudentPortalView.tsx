@@ -605,6 +605,16 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
                     </div>
                   )}
                 </div>
+
+                <div className="mt-3">
+                  <button
+                    onClick={() => window.print()}
+                    className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 flex items-center justify-center space-x-1.5 transition-colors shadow-2xs"
+                  >
+                    <Printer className="w-4 h-4 text-indigo-600" />
+                    <span>{language === 'bn' ? 'ডিজিটাল আইডি কার্ড প্রিন্ট করুন' : 'Print Official Student ID Card'}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -975,15 +985,25 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
                       </div>
                     </div>
 
-                    {onOpenCertificateModal && (
-                      <button
-                        onClick={() => onOpenCertificateModal(cert.certificateNumber)}
-                        className="px-5 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black text-xs rounded-2xl shadow-md flex items-center space-x-2"
+                    <div className="flex items-center space-x-2">
+                      <a
+                        href={`/#verify-certificate?cert=${encodeURIComponent(cert.certificateNumber)}`}
+                        className="px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-2xl border border-emerald-200 shadow-2xs flex items-center space-x-1.5 transition-colors"
                       >
-                        <Printer className="w-4 h-4" />
-                        <span>{language === 'bn' ? 'সার্টিফিকেট প্রিন্ট / ভিউ' : 'View / Print Certificate'}</span>
-                      </button>
-                    )}
+                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                        <span>{language === 'bn' ? 'অনলাইন যাচাই' : 'Verify Online'}</span>
+                      </a>
+
+                      {onOpenCertificateModal && (
+                        <button
+                          onClick={() => onOpenCertificateModal(cert.certificateNumber)}
+                          className="px-5 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black text-xs rounded-2xl shadow-md flex items-center space-x-2 transition-all"
+                        >
+                          <Printer className="w-4 h-4" />
+                          <span>{language === 'bn' ? 'সার্টিফিকেট প্রিন্ট / ভিউ' : 'View / Print Certificate'}</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

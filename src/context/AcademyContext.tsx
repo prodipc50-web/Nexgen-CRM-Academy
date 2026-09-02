@@ -1378,15 +1378,20 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       isSyncingToCloud.current = true;
 
       // Write strictly separated public and private documents with 8s safety timeout
-      const writePromises: Promise<any>[] = [
-        setDoc(doc(db, 'academy_data', 'public_catalog'), cleanPublicPayload, { merge: true })
-      ];
+      const writePromises: Promise<any>[] = [];
 
-      // Write private CRM document if user is authenticated with Firebase Auth
-      if (isAuthenticated && (firebaseUser || auth.currentUser)) {
+      // Write to Cloud Firestore only when Firebase Auth session is active
+      const hasFirebaseAuth = Boolean(firebaseUser || auth.currentUser);
+      if (hasFirebaseAuth) {
         writePromises.push(
-          setDoc(doc(db, 'academy_data', 'crm_private_data'), cleanCrmPayload, { merge: true })
+          setDoc(doc(db, 'academy_data', 'public_catalog'), cleanPublicPayload, { merge: true })
         );
+
+        if (isAuthenticated) {
+          writePromises.push(
+            setDoc(doc(db, 'academy_data', 'crm_private_data'), cleanCrmPayload, { merge: true })
+          );
+        }
       }
 
       // Dual-layer server sync: also push to local server for instant multi-device sync

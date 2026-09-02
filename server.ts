@@ -8,11 +8,20 @@ const app = express();
 const PORT = 3000;
 
 // Security & Header hardening middleware
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
+  // Disallow MIME sniffing
   res.setHeader("X-Content-Type-Options", "nosniff");
+  // Frame options: allow sameorigin
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  // Cross-site scripting protection
   res.setHeader("X-XSS-Protection", "1; mode=block");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  // HSTS (HTTP Strict Transport Security) for production HTTPS
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  }
+  // Remove X-Powered-By to prevent fingerprinting
+  res.removeHeader("X-Powered-By");
   next();
 });
 

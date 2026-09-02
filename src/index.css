@@ -8,10 +8,35 @@
   --website-primary: #4f46e5;
   --website-primary-hover: #4338ca;
   --website-secondary: #f59e0b;
-  --font-erp: 'Plus Jakarta Sans', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
-  --font-website-heading: 'Plus Jakarta Sans', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
-  --font-website-body: 'Inter', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
-  --font-bangla: 'Hind Siliguri', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-erp: 'Plus Jakarta Sans', 'Hind Siliguri', 'Noto Sans Bengali', 'Anek Bangla', system-ui, -apple-system, sans-serif;
+  --font-website-heading: 'Plus Jakarta Sans', 'Hind Siliguri', 'Noto Sans Bengali', 'Anek Bangla', system-ui, -apple-system, sans-serif;
+  --font-website-body: 'Plus Jakarta Sans', 'Hind Siliguri', 'Noto Sans Bengali', 'Anek Bangla', system-ui, -apple-system, sans-serif;
+  --font-bangla: 'Hind Siliguri', 'Noto Sans Bengali', 'Anek Bangla', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-bangla);
+  color: #0f172a;
+  line-height: 1.6;
+}
+
+/* Ensure Bengali text scales optically and maintains comfortable line-height for all diacritics */
+.font-bangla, [lang="bn"], :lang(bn) {
+  font-family: var(--font-bangla);
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+}
+
+/* Prevent broken alignments in badges, pills, and action chips */
+.nowrap, .pill-nowrap {
+  white-space: nowrap;
 }
 
 .font-erp {
@@ -122,11 +147,32 @@
     box-shadow: none !important;
   }
 
+  /* 80mm POS Thermal Receipt Page Setup */
+  .print-page-pos80 {
+    width: 78mm !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 2mm 1mm !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-shadow: none !important;
+  }
+
+  .print-page-pos80 * {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
   /* Never break cards or tables across pages */
   .page-break-avoid,
   #id-card-printable,
   #admit-card-printable,
   #money-receipt-printable,
+  #pos-receipt-printable,
   #admission-form-printable,
   #certificate-printable {
     page-break-inside: avoid !important;

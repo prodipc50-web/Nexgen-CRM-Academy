@@ -220,22 +220,22 @@ export const CRMView: React.FC<CRMViewProps> = ({
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex flex-wrap items-center gap-3 text-xs">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-wrap items-center gap-3 text-sm">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
             placeholder="Filter by name, phone, code..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 font-medium"
+            className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 font-medium text-sm text-slate-900 placeholder:text-slate-500"
           />
         </div>
 
         <select
           value={courseFilter}
           onChange={e => setCourseFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium outline-none"
+          className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 font-semibold outline-none text-sm"
         >
           <option value="all">All Courses</option>
           {courses.map(c => (
@@ -248,7 +248,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
         <select
           value={counselorFilter}
           onChange={e => setCounselorFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium outline-none"
+          className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 font-semibold outline-none text-sm"
         >
           <option value="all">All Counselors</option>
           {staffList.map(s => (
@@ -261,7 +261,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-semibold outline-none"
+          className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 font-bold outline-none text-sm"
         >
           <option value="all">All Pipeline Stages</option>
           <option value="New">New</option>
@@ -313,10 +313,10 @@ export const CRMView: React.FC<CRMViewProps> = ({
                         {/* Top: Name & Code */}
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 leading-tight">
+                            <h4 className="text-sm font-bold text-slate-900 leading-tight">
                               {lead.name}
                             </h4>
-                            <div className="text-[10px] font-mono text-blue-600 mt-0.5">
+                            <div className="text-xs font-mono text-blue-700 font-semibold mt-0.5">
                               {lead.leadCode} • {lead.phone}
                             </div>
                           </div>
@@ -325,27 +325,27 @@ export const CRMView: React.FC<CRMViewProps> = ({
                             <button
                               onClick={() => openEditModal(lead)}
                               title="Edit Lead Details"
-                              className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-slate-100 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors cursor-pointer"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setDeletingLead(lead)}
                               title="Delete Lead"
-                              className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
 
                         {/* Move stage dropdown */}
-                        <div className="flex items-center justify-between text-[11px] pt-1">
-                          <span className="text-[10px] text-slate-400 font-medium">Stage:</span>
+                        <div className="flex items-center justify-between text-xs pt-1 gap-1">
+                          <span className="text-xs text-slate-600 font-bold shrink-0">Stage:</span>
                           <select
                             value={lead.status}
                             onChange={e => handleStatusChange(lead.id, e.target.value as LeadStatus)}
-                            className="text-[10px] font-bold bg-slate-50 border border-slate-200 rounded px-1.5 py-0.5 text-slate-700 outline-none"
+                            className="text-xs font-bold bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-slate-800 outline-none max-w-[130px] truncate cursor-pointer"
                           >
                             <option value="New">New</option>
                             <option value="Contacted">Contacted</option>
@@ -359,20 +359,20 @@ export const CRMView: React.FC<CRMViewProps> = ({
                         </div>
 
                         {/* Course & Source */}
-                        <div className="text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg space-y-1">
-                          <div className="font-semibold text-slate-900 truncate">
+                        <div className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl space-y-1.5 border border-slate-100">
+                          <div className="font-bold text-slate-900 truncate">
                             {crs?.name || 'General Inquiry'}
                           </div>
-                          <div className="text-[10px] text-slate-500 flex items-center justify-between">
-                            <span className="flex items-center space-x-1">
-                              <Calendar className="w-3 h-3 text-slate-400" />
-                              <span>Visited: <strong className="text-slate-700">{lead.visitDate || lead.createdAt?.split('T')[0] || 'N/A'}</strong></span>
+                          <div className="text-xs text-slate-600 flex items-center justify-between gap-1">
+                            <span className="flex items-center space-x-1 min-w-0 truncate">
+                              <Calendar className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                              <span className="truncate">Visited: <strong className="text-slate-800">{lead.visitDate || lead.createdAt?.split('T')[0] || 'N/A'}</strong></span>
                             </span>
-                            <span>{counselor?.name?.split(' ')[0]}</span>
+                            <span className="font-semibold text-slate-700 shrink-0 whitespace-nowrap">{counselor?.name?.split(' ')[0]}</span>
                           </div>
                           {lead.utmCampaign && (
                             <div className="pt-0.5">
-                              <span className="inline-block px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 font-mono text-[9px] border border-indigo-200">
+                              <span className="inline-block px-2 py-0.5 rounded bg-indigo-100 text-indigo-900 font-mono text-[11px] font-bold border border-indigo-200 truncate max-w-full">
                                 🎯 Ad: {lead.utmCampaign} ({lead.deviceType || 'web'})
                               </span>
                             </div>
@@ -381,40 +381,40 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
                         {/* Visitor Comments / What Visitor Said */}
                         {lead.comments && (
-                          <div className="text-[10px] text-slate-700 bg-blue-50/70 border border-blue-100 rounded-lg p-2 space-y-0.5">
-                            <div className="font-bold text-blue-900 flex items-center space-x-1">
-                              <MessageSquare className="w-3 h-3 text-blue-600 shrink-0" />
-                              <span>Visitor Remarks (সে কী বলেছে):</span>
+                          <div className="text-xs text-slate-800 bg-blue-50/80 border border-blue-200 rounded-xl p-2.5 space-y-1">
+                            <div className="font-bold text-blue-950 flex items-center space-x-1.5">
+                              <MessageSquare className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                              <span className="truncate">Visitor Remarks (মন্তব্য):</span>
                             </div>
-                            <p className="line-clamp-2 text-slate-600 italic">"{lead.comments}"</p>
+                            <p className="line-clamp-2 text-slate-700 italic font-medium leading-relaxed">"{lead.comments}"</p>
                           </div>
                         )}
 
                         {/* Next Follow Up Date Pill */}
                         {lead.nextFollowUpDate && (
-                          <div className="text-[10px] flex items-center space-x-1 text-amber-800 bg-amber-50 px-2 py-1 rounded-md font-medium border border-amber-100">
-                            <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                          <div className="text-xs flex items-center space-x-1.5 text-amber-900 bg-amber-50 px-2.5 py-1 rounded-lg font-bold border border-amber-200">
+                            <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                             <span className="truncate">Follow-up: <strong>{lead.nextFollowUpDate}</strong></span>
                           </div>
                         )}
 
                         {/* Card Actions */}
-                        <div className="pt-1 flex items-center justify-between border-t border-slate-100 text-[11px]">
+                        <div className="pt-1.5 flex items-center justify-between border-t border-slate-100 text-xs">
                           <button
                             onClick={() => onOpenFollowUp(lead.id)}
-                            className="text-slate-600 hover:text-indigo-600 font-semibold flex items-center space-x-1"
+                            className="text-slate-700 hover:text-indigo-600 font-bold flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
                           >
-                            <PhoneCall className="w-3 h-3" />
+                            <PhoneCall className="w-3.5 h-3.5 shrink-0" />
                             <span>Log ({leadFollowUps.length})</span>
                           </button>
 
                           {lead.status !== 'Admitted' && (
                             <button
                               onClick={() => onOpenAdmissionWithLead(lead)}
-                              className="text-emerald-700 hover:text-emerald-800 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded flex items-center space-x-1"
+                              className="text-emerald-800 hover:text-emerald-900 font-bold bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg flex items-center space-x-1 border border-emerald-200 cursor-pointer whitespace-nowrap shrink-0"
                             >
                               <span>Admit</span>
-                              <ArrowRight className="w-3 h-3" />
+                              <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                             </button>
                           )}
                         </div>

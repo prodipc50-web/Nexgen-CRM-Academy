@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react';
-import { GraduationCap, Loader2, ShieldAlert } from 'lucide-react';
+import {
+  GraduationCap,
+  Loader2,
+  ShieldAlert,
+  LayoutDashboard,
+  AlertCircle,
+  Users,
+  Menu
+} from 'lucide-react';
 import { AcademyProvider, useAcademy } from './context/AcademyContext';
 import { UserRole } from './types';
 import { HeaderNavbar } from './components/layout/HeaderNavbar';
@@ -161,7 +169,7 @@ const TAB_ALLOWED_ROLES: Record<string, UserRole[]> = {
 };
 
 const AcademyAppContent: React.FC = () => {
-  const { leads, courses, isAuthenticated, currentUser, websiteCmsConfig } = useAcademy();
+  const { leads, courses, isAuthenticated, currentUser, websiteCmsConfig, stats } = useAcademy();
   const initialRoute = useMemo(() => getInitialRouteState(), []);
   const [viewMode, setViewMode] = useState<'erp' | 'website' | 'student_portal' | 'course_landing'>(initialRoute.mode);
   const [currentCourseSlug, setCurrentCourseSlug] = useState<string>(initialRoute.targetSlug);
@@ -382,7 +390,7 @@ const AcademyAppContent: React.FC = () => {
       />
 
       {/* Main Workspace Body */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6 items-start">
+      <div className="flex-1 flex max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6 items-start pb-20 lg:pb-6">
         {/* Left Navigation Sidebar */}
         <SidebarNav
           activeTab={activeTab}
@@ -607,6 +615,65 @@ const AcademyAppContent: React.FC = () => {
           onClose={() => setIsBulkIdModalOpen(false)}
         />
       </Suspense>
+
+      {/* Mobile Bottom Navigation Bar (lg:hidden) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1 flex items-center justify-around shadow-lg">
+        <button
+          onClick={() => setActiveTab('dashboard')}
+          className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-colors ${
+            activeTab === 'dashboard' ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <LayoutDashboard className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">Dashboard</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('students')}
+          className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-colors ${
+            activeTab === 'students' ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <GraduationCap className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">Students</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('due')}
+          className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-colors relative ${
+            activeTab === 'due' ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <AlertCircle className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">Dues</span>
+          {stats.overdueDueAmount > 0 && (
+            <span className="absolute top-1 right-1/4 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('crm')}
+          className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-colors relative ${
+            activeTab === 'crm' ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Users className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">Leads</span>
+          {stats.todayFollowupsCount > 0 && (
+            <span className="absolute top-1 right-1/4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black leading-tight">
+              {stats.todayFollowupsCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-slate-500 hover:text-slate-800 transition-colors"
+        >
+          <Menu className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">Menu</span>
+        </button>
+      </nav>
 
       {/* Progressive Web App (PWA) Mobile Install Prompt */}
       <PWAInstallPrompt />

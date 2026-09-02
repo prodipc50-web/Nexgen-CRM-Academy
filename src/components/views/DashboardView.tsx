@@ -171,7 +171,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md hover:border-indigo-200 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Students</span>
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Active Students</span>
             <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <GraduationCap className="w-5 h-5" />
             </div>
@@ -183,7 +183,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               +{stats.admissionsThisMonth} this month
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">{stats.totalStudents} total enrolled historically</p>
+          <p className="text-xs text-slate-600 font-medium mt-1">{stats.totalStudents} total enrolled historically</p>
         </div>
 
         {/* Monthly Revenue */}
@@ -192,7 +192,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md hover:border-emerald-200 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Month Collection</span>
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Month Collection</span>
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <TrendingUp className="w-5 h-5" />
             </div>
@@ -205,7 +205,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               ৳{stats.todayCollection.toLocaleString()} today
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
+          <p className="text-xs text-slate-600 font-medium mt-1">
             Net: ৳{stats.netIncomeMonth.toLocaleString()} after expenses
           </p>
         </div>
@@ -216,7 +216,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md hover:border-rose-200 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Due Pipeline</span>
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Total Due Pipeline</span>
             <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <AlertCircle className="w-5 h-5" />
             </div>
@@ -229,7 +229,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               ৳{stats.overdueDueAmount.toLocaleString()} Overdue
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">Across all active course batches</p>
+          <p className="text-xs text-slate-600 font-medium mt-1">Across all active course batches</p>
         </div>
 
         {/* CRM Followups */}
@@ -238,7 +238,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md hover:border-amber-200 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's CRM Tasks</span>
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Today's CRM Tasks</span>
             <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Users className="w-5 h-5" />
             </div>
@@ -251,7 +251,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {stats.overdueFollowupsCount} Overdue
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">{stats.newLeadsThisMonth} new leads registered this month</p>
+          <p className="text-xs text-slate-600 font-medium mt-1">{stats.newLeadsThisMonth} new leads registered this month</p>
         </div>
       </div>
 

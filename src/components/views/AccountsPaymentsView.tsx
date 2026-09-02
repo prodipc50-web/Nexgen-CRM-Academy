@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Payment, PaymentMethod } from '../../types';
 import { exportPaymentsSpreadsheet } from '../../utils/spreadsheetExport';
+import { DailyCashClosingModal } from '../modals/DailyCashClosingModal';
 import {
   CreditCard,
   PlusCircle,
@@ -18,7 +19,8 @@ import {
   X,
   Save,
   RotateCcw,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Wallet
 } from 'lucide-react';
 
 interface AccountsPaymentsViewProps {
@@ -53,6 +55,7 @@ export const AccountsPaymentsView: React.FC<AccountsPaymentsViewProps> = ({
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [deletingPayment, setDeletingPayment] = useState<Payment | null>(null);
   const [showClearAllModal, setShowClearAllModal] = useState(false);
+  const [showClosingModal, setShowClosingModal] = useState(false);
 
   // Edit form state
   const [editAmount, setEditAmount] = useState<number>(0);
@@ -141,6 +144,15 @@ export const AccountsPaymentsView: React.FC<AccountsPaymentsViewProps> = ({
         </div>
 
         <div className="flex items-center flex-wrap gap-2">
+          <button
+            onClick={() => setShowClosingModal(true)}
+            className="flex items-center space-x-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-2xs transition-colors"
+            title="Open Daily Cash Drawer Closing & EOD Reconciliation Sheet"
+          >
+            <Wallet className="w-4 h-4 text-amber-700" />
+            <span>Daily Cash Closing</span>
+          </button>
+
           <button
             onClick={() => exportPaymentsSpreadsheet(filteredPayments, students, admissions, courses, batches)}
             className="flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-2xs transition-colors"
@@ -644,6 +656,12 @@ export const AccountsPaymentsView: React.FC<AccountsPaymentsViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Daily Cash Closing & EOD Reconciliation Modal */}
+      <DailyCashClosingModal
+        isOpen={showClosingModal}
+        onClose={() => setShowClosingModal(false)}
+      />
     </div>
   );
 };

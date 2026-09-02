@@ -691,57 +691,57 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Left Column: Headline, Subheadline, Guarantee & Badges */}
           <div className="lg:col-span-7 space-y-5 text-left">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-black tracking-wide">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-200 text-sm font-black tracking-wide">
               <Flame className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse" />
               <span>{landingConfig.heroBadge || '🚀 স্পেশাল স্কলারশিপ ব্যাচ অ্যাডমিশন শুরু'}</span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight sm:leading-none tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
               {landingConfig.headline || course.name}
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg text-slate-200 font-medium leading-relaxed max-w-2xl">
               {landingConfig.subheadline ||
                 course.description ||
                 '১০০% প্র্যাকটিক্যাল কম্পিউটার ল্যাব ট্রেনিং, লাইভ মার্কেটপ্লেস ও প্রজেক্ট সাপোর্ট এবং চাকরি ও ফ্রিল্যান্সিং গাইডলাইন।'}
             </p>
 
             {/* Micro Highlights Pill */}
-            <div className="flex flex-wrap gap-2 text-xs">
-              <div className="flex items-center space-x-1.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-slate-200">
-                <Clock className="w-4 h-4 text-indigo-400" />
+            <div className="flex flex-wrap gap-2.5 text-xs sm:text-sm">
+              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-slate-100 font-semibold shadow-xs">
+                <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>{course.durationMonths} মাস প্র্যাকটিক্যাল ট্রেনিং</span>
               </div>
-              <div className="flex items-center space-x-1.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-slate-200">
-                <Laptop className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-slate-100 font-semibold shadow-xs">
+                <Laptop className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>ডেডিকেটেড হাই-কনফিগ পিসি ল্যাব</span>
               </div>
-              <div className="flex items-center space-x-1.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-slate-200">
-                <Award className="w-4 h-4 text-amber-400" />
+              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-slate-100 font-semibold shadow-xs">
+                <Award className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>ভেরিফায়েবল সার্টিফিকেট</span>
               </div>
             </div>
 
             {/* Pricing Box & Countdown Card */}
-            <div className="p-4 sm:p-5 bg-gradient-to-br from-slate-900 to-indigo-950/60 border border-indigo-500/30 rounded-3xl space-y-4">
+            <div className="p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/70 border border-indigo-500/40 rounded-3xl space-y-4 shadow-xl">
               <div className="flex flex-wrap items-baseline gap-3">
                 <span className="text-3xl sm:text-4xl font-black text-white">
                   ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}
                 </span>
                 {course.regularFee && (
-                  <span className="text-lg text-slate-400 line-through font-semibold">
+                  <span className="text-lg text-slate-300 line-through font-bold">
                     ৳{course.regularFee.toLocaleString()}
                   </span>
                 )}
-                <span className="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-black">
+                <span className="px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/40 text-xs sm:text-sm font-black">
                   {landingConfig.customDiscountBadge || `${discountPercent}% স্কলারশিপ ছাড়`}
                 </span>
               </div>
 
               {landingConfig.showBatchCountdown && (
-                <div className="flex items-center justify-between text-xs text-amber-300 font-bold bg-amber-500/10 border border-amber-500/20 px-3.5 py-2 rounded-2xl">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-amber-200 font-bold bg-amber-500/15 border border-amber-500/30 px-4 py-2.5 rounded-2xl">
                   <span>পরবর্তী ব্যাচ শুরু: {landingConfig.nextBatchStartDate || '১৫ মে, ২০২৬'}</span>
-                  <span>বাকি সিট: {landingConfig.availableSeats || 8} টি</span>
+                  <span className="text-amber-300 font-black whitespace-nowrap shrink-0">বাকি সিট: {landingConfig.availableSeats || 8} টি</span>
                 </div>
               )}
 
@@ -750,38 +750,38 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 {(ctaMode === 'both' || ctaMode === 'admission_only' || ctaMode === 'whatsapp_and_admission') && (
                   <button
                     onClick={() => setIsAdmissionOpen(true)}
-                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-black text-sm sm:text-base shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+                    className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-black text-sm sm:text-base shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
                   >
-                    <GraduationCap className="w-5 h-5" />
+                    <GraduationCap className="w-5 h-5 shrink-0" />
                     <span>অনলাইনে এখনই ভর্তি আবেদন করুন</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 shrink-0" />
                   </button>
                 )}
 
                 {/* Highlighted Direct Chat Box for Social Contact */}
                 {ctaMode !== 'admission_only' && (
-                  <div className="p-3 bg-slate-950/90 border border-slate-700/80 rounded-2xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                        সরাসরি কথা বলতে চাইলে মেসেজ করুন:
+                  <div className="p-3.5 bg-slate-950/90 border border-slate-700 rounded-2xl space-y-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-xs sm:text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+                        <span>সরাসরি কথা বলতে চাইলে মেসেজ করুন:</span>
                       </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 whitespace-nowrap shrink-0">
                         Instant Reply
                       </span>
                     </div>
 
-                    <div className={`grid gap-2 ${ctaMode === 'whatsapp_only' || ctaMode === 'messenger_only' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                    <div className={`grid gap-2.5 ${ctaMode === 'whatsapp_only' || ctaMode === 'messenger_only' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
                       {(ctaMode === 'both' || ctaMode === 'whatsapp_only' || ctaMode === 'whatsapp_and_admission') && (
                         <a
                           href={whatsAppUrl}
                           target="_blank"
                           rel="noreferrer"
                           onClick={handleWhatsAppClick}
-                          className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+                          className="py-3 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
                         >
-                          <MessageCircle className="w-4 h-4 fill-white" />
-                          <span>WhatsApp এ সরাসরি মেসেজ করুন</span>
+                          <MessageCircle className="w-4 h-4 fill-white shrink-0" />
+                          <span className="whitespace-nowrap">WhatsApp এ মেসেজ দিন</span>
                         </a>
                       )}
 
@@ -791,10 +791,10 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                           target="_blank"
                           rel="noreferrer"
                           onClick={handleMessengerClick}
-                          className="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+                          className="py-3 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
                         >
-                          <Smartphone className="w-4 h-4" />
-                          <span>Facebook মেসেঞ্জারে মেসেজ দিন</span>
+                          <Smartphone className="w-4 h-4 shrink-0" />
+                          <span className="whitespace-nowrap">Facebook মেসেঞ্জারে মেসেজ দিন</span>
                         </a>
                       )}
                     </div>
@@ -804,7 +804,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
               {/* Trust Guarantee Note */}
               {landingConfig.guaranteeText && (
-                <div className="flex items-center space-x-2 text-xs text-slate-400 pt-1">
+                <div className="flex items-center space-x-2 text-xs sm:text-sm text-slate-300 pt-1 font-medium">
                   <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>{landingConfig.guaranteeText}</span>
                 </div>
@@ -857,45 +857,45 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             </div>
 
             {/* Fast Registration Card with Dual Admission / Counseling Tabs */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-3.5 text-left">
+            <div className="bg-slate-900/95 border border-slate-700/80 rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4 text-left">
               {/* Dual Tab Mode Toggle */}
-              <div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800">
+              <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
                 <button
                   type="button"
                   onClick={() => setLeadFormMode('admission')}
-                  className={`flex-1 py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                     leadFormMode === 'admission'
                       ? 'bg-indigo-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      : 'text-slate-300 hover:text-white'
                   }`}
                 >
-                  <GraduationCap className="w-3.5 h-3.5" />
+                  <GraduationCap className="w-4 h-4 shrink-0" />
                   <span>সরাসরি সিট বুকিং</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setLeadFormMode('counseling')}
-                  className={`flex-1 py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                     leadFormMode === 'counseling'
                       ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      : 'text-slate-300 hover:text-white'
                   }`}
                 >
-                  <MessageCircle className="w-3.5 h-3.5" />
+                  <MessageCircle className="w-4 h-4 shrink-0" />
                   <span>ফ্রি ল্যাব কাউন্সিলিং</span>
                 </button>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex items-center space-x-2 text-indigo-400">
-                  <Sparkles className="w-4 h-4" />
-                  <h3 className="font-black text-sm sm:text-base text-white">
+                  <Sparkles className="w-4 h-4 shrink-0" />
+                  <h3 className="font-black text-base sm:text-lg text-white">
                     {leadFormMode === 'admission'
                       ? 'অনলাইন ফাস্ট সিট বুকিং ফরম'
                       : 'ফ্রি ২০ মিনিটের ক্যারিয়ার ও ল্যাব ভিজিট কাউন্সিলিং'}
                   </h3>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
                   {leadFormMode === 'admission'
                     ? 'আপনার নাম ও মোবাইল নাম্বার দিন, আমাদের টিম কল দিয়ে স্কলারশিপ অফার কনফার্ম করবে।'
                     : 'ফার্মগেট ক্যাম্পাসে সরাসরি এসে ল্যাব ঘুরে দেখুন এবং এক্সপার্ট মেন্টরের সাথে ক্যারিয়ার পরামর্শ নিন (সম্পূর্ণ ফ্রি)।'}
@@ -903,19 +903,19 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               </div>
 
               {leadSuccess ? (
-                <div className="p-6 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl text-center space-y-2">
-                  <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-                  <h4 className="font-black text-white text-sm">
+                <div className="p-6 bg-emerald-950/50 border border-emerald-500/40 rounded-2xl text-center space-y-2.5">
+                  <CheckCircle2 className="w-11 h-11 text-emerald-400 mx-auto" />
+                  <h4 className="font-black text-white text-base">
                     {leadFormMode === 'counseling'
                       ? 'ধন্যবাদ! আপনার ফ্রি কাউন্সিলিং রিকোয়েস্ট গ্রহণ করা হয়েছে।'
                       : 'ধন্যবাদ! আপনার অ্যাডমিশন রিকোয়েস্ট গ্রহণ করা হয়েছে।'}
                   </h4>
-                  <p className="text-xs text-slate-300">
+                  <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
                     আমাদের সিনিয়র কাউন্সেলর টিম দ্রুত আপনার দেওয়া নাম্বারে কল দিয়ে সময় ও ব্যাচ কনফার্ম করবে।
                   </p>
                 </div>
               ) : (
-                <form id="fast-lead-form-box" onSubmit={handleFastLeadSubmit} className="space-y-3">
+                <form id="fast-lead-form-box" onSubmit={handleFastLeadSubmit} className="space-y-3.5">
                   {/* Invisible Honeypot */}
                   <input
                     type="text"
@@ -928,14 +928,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   />
 
                   {leadError && (
-                    <div className="p-2.5 bg-rose-500/20 border border-rose-500/40 rounded-xl text-xs text-rose-200 font-bold flex items-center space-x-2">
+                    <div className="p-3 bg-rose-500/20 border border-rose-500/50 rounded-xl text-xs sm:text-sm text-rose-100 font-bold flex items-center space-x-2">
                       <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
                       <span>{leadError}</span>
                     </div>
                   )}
 
                   <div>
-                    <label className="block text-[11px] font-black text-slate-300 uppercase mb-1">
+                    <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
                       আপনার নাম *
                     </label>
                     <input
@@ -944,12 +944,12 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       value={leadName}
                       onChange={e => setLeadName(e.target.value)}
                       placeholder="e.g. মোঃ সাকিব হাসান"
-                      className="w-full px-3.5 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 bg-slate-800/90 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-black text-slate-300 uppercase mb-1">
+                    <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
                       সচল মোবাইল নাম্বার (১১ ডিজিট) *
                     </label>
                     <input
@@ -958,13 +958,13 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       value={leadPhone}
                       onChange={e => setLeadPhone(e.target.value)}
                       placeholder="017XXXXXXXX"
-                      className="w-full px-3.5 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 bg-slate-800/90 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-300 uppercase mb-1">
+                      <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
                         ইমেইল (ঐচ্ছিক)
                       </label>
                       <input
@@ -972,18 +972,18 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                         value={leadEmail}
                         onChange={e => setLeadEmail(e.target.value)}
                         placeholder="email@example.com"
-                        className="w-full px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-3.5 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-black text-slate-300 uppercase mb-1">
+                      <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
                         পছন্দের শিডিউল
                       </label>
                       <select
                         value={leadSchedule}
                         onChange={e => setLeadSchedule(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-xl text-xs text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-semibold"
+                        className="w-full px-3.5 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-bold"
                       >
                         {availableSchedules.map(sch => (
                           <option key={sch.id} value={sch.label}>
@@ -997,14 +997,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`w-full py-3 text-white rounded-xl font-black text-xs shadow-lg flex items-center justify-center space-x-2 transition-all mt-2 disabled:opacity-50 cursor-pointer ${
+                    className={`w-full py-3.5 text-white rounded-xl font-black text-sm sm:text-base shadow-lg flex items-center justify-center space-x-2 transition-all mt-2 disabled:opacity-50 cursor-pointer ${
                       leadFormMode === 'counseling'
                         ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'
                         : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/30'
                     }`}
                   >
                     {isSubmitting ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <RefreshCw className="w-5 h-5 animate-spin" />
                     ) : leadFormMode === 'counseling' ? (
                       <>
                         <span>ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার সেশন বুক করুন</span>
@@ -1017,7 +1017,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       </>
                     )}
                   </button>
-                  <p className="text-[10px] text-slate-500 text-center">
+                  <p className="text-xs text-slate-300 font-medium text-center">
                     🔒 সম্পূর্ণ গোপনীয় ও সুরক্ষিত। স্প্যামমুক্ত নিশ্চয়তা।
                   </p>
                 </form>
@@ -1028,52 +1028,52 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </header>
 
       {/* SECTION 1.5: QUICK SNAPSHOT INFO BAR */}
-      <section className="bg-slate-900/90 border-y border-slate-800/80 py-5 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
-          <div className="flex items-center space-x-3 p-3 sm:p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-left">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+      <section className="bg-slate-900/90 border-y border-slate-800 py-6 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
+          <div className="flex items-center space-x-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left shadow-xs min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center shrink-0">
               <Clock className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">কোর্স মেয়াদ ও সেশন</span>
-              <p className="text-xs sm:text-sm font-black text-white">
-                {landingConfig.quickSnapshot?.duration || `${course.durationMonths || 3} মাস`} / {landingConfig.quickSnapshot?.totalSessions || '২৪টি প্র্যাকটিক্যাল ল্যাব'}
+            <div className="min-w-0 flex-1">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">কোর্স মেয়াদ ও সেশন</span>
+              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug">
+                {landingConfig.quickSnapshot?.duration || `${course.durationMonths || 3} মাস`} / {landingConfig.quickSnapshot?.totalSessions || '২৪টি ল্যাব'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 sm:p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-left">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+          <div className="flex items-center space-x-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left shadow-xs min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
               <Laptop className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">ল্যাব ও কম্পিউটার</span>
-              <p className="text-xs sm:text-sm font-black text-white">
-                {landingConfig.quickSnapshot?.batchSize || '১ শিক্ষার্থী = ১ ডেডিকেটেড পিসি'}
+            <div className="min-w-0 flex-1">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">ল্যাব ও কম্পিউটার</span>
+              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug">
+                {landingConfig.quickSnapshot?.batchSize || '১ শিক্ষার্থী = ১ পিসি'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 sm:p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-left">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+          <div className="flex items-center space-x-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left shadow-xs min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
               <Briefcase className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">লাইভ প্রজেক্ট</span>
-              <p className="text-xs sm:text-sm font-black text-white">
-                {landingConfig.quickSnapshot?.projectsCount || '১০+ রিয়েল কর্পোরেট ফাইল'}
+            <div className="min-w-0 flex-1">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">লাইভ প্রজেক্ট</span>
+              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug">
+                {landingConfig.quickSnapshot?.projectsCount || '১০+ রিয়েল ফাইল'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 sm:p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-left">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+          <div className="flex items-center space-x-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left shadow-xs min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">সাপোর্ট ও ব্যাকআপ</span>
-              <p className="text-xs sm:text-sm font-black text-white">
-                {landingConfig.quickSnapshot?.supportType || 'লাইফটাইম ল্যাব ও গ্রুপ সাপোর্ট'}
+            <div className="min-w-0 flex-1">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">সাপোর্ট ও ব্যাকআপ</span>
+              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug">
+                {landingConfig.quickSnapshot?.supportType || 'লাইফটাইম সাপোর্ট'}
               </p>
             </div>
           </div>
@@ -1083,16 +1083,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       {/* SECTION 2: PROBLEM VS REALITY (PAIN POINTS & MODERN WORKPLACE) */}
       {painPoints.length > 0 && (
         <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60">
-          <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs sm:text-sm font-bold">
-              <Flame className="w-4 h-4 text-rose-500" />
+          <div className="text-center space-y-2.5 mb-8">
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-bold">
+              <Flame className="w-4 h-4 text-rose-400" />
               <span>চ্যালেঞ্জ ও আধুনিক সমাধান</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
               {landingConfig.painPointsHeadline || 'পুরোনো পদ্ধতি বনাম ২০২৬-এর স্মার্ট অফিস স্কিল'}
             </h2>
             {landingConfig.painPointsSubheadline && (
-              <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
                 {landingConfig.painPointsSubheadline}
               </p>
             )}
@@ -1264,15 +1264,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       {/* SECTION 4.5: PREFERRED SCHEDULES & BATCH TIMINGS */}
       {availableSchedules.length > 0 && (
         <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
-          <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-sm font-bold">
+          <div className="text-center space-y-2.5 mb-8">
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-bold">
               <Calendar className="w-4 h-4" />
               <span>সুবিধাজনক ক্লাসের সময়সূচী</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
               {landingConfig.preferredSchedulesTitle || 'পছন্দের ব্যাচ ও ক্লাসের শিডিউল নির্বাচন করুন'}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
               আপনার পড়াশোনা বা চাকুরির পাশাপাশি সুবিধাজনক স্লটে ক্লাস করতে পছন্দের দিন ও সময় বেছে নিন
             </p>
           </div>
@@ -1293,32 +1293,32 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 text-[11px] font-black rounded-lg border border-emerald-500/30">
+                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-200 text-xs font-black rounded-lg border border-emerald-500/30">
                         {sch.days || 'Flexible'}
                       </span>
-                      <span className="text-[10px] font-bold text-slate-400 font-mono">
+                      <span className="text-xs font-bold text-slate-300 font-mono">
                         {sch.mode || 'Offline'}
                       </span>
                     </div>
 
-                    <h4 className="font-bold text-white text-base leading-snug">{sch.label}</h4>
+                    <h4 className="font-bold text-white text-base sm:text-lg leading-snug">{sch.label}</h4>
 
                     {sch.timeSlot && (
-                      <p className="text-xs text-slate-300 flex items-center space-x-1.5 font-mono">
-                        <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <p className="text-sm text-slate-200 flex items-center space-x-2 font-mono font-medium">
+                        <Clock className="w-4 h-4 text-amber-400 shrink-0" />
                         <span>{sch.timeSlot}</span>
                       </p>
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                    <span className="text-amber-400 font-bold">
+                  <div className="pt-3.5 border-t border-slate-800/80 flex items-center justify-between text-xs sm:text-sm">
+                    <span className="text-amber-300 font-bold">
                       🔥 {sch.availableSeats || 8} Seats Remaining
                     </span>
                     <button
                       type="button"
-                      className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
-                        isSelected ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                        isSelected ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
                       }`}
                     >
                       {isSelected ? 'Selected ✓' : 'Select'}
@@ -1845,25 +1845,25 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* STICKY BOTTOM MOBILE ACTION BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800/80 px-3 py-2 sm:hidden backdrop-blur-md shadow-2xl space-y-1.5">
-        <div className="flex items-center justify-between text-[10px] text-slate-300 font-bold px-1">
-          <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/98 border-t border-slate-800 px-3.5 py-2.5 sm:hidden backdrop-blur-md shadow-2xl space-y-2">
+        <div className="flex items-center justify-between text-xs text-slate-200 font-bold px-1">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
             সরাসরি কথা বলুন:
           </span>
-          <span className="text-amber-300 font-black">ফি: ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}</span>
+          <span className="text-amber-300 font-black text-sm">ফি: ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}</span>
         </div>
 
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
           {/* Mobile WhatsApp */}
           <a
             href={whatsAppUrl}
             target="_blank"
             rel="noreferrer"
             onClick={handleWhatsAppClick}
-            className="py-2 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] font-bold"
+            className="py-2.5 px-1 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] sm:text-xs font-bold whitespace-nowrap"
           >
-            <MessageCircle className="w-3.5 h-3.5 fill-white" />
+            <MessageCircle className="w-3.5 h-3.5 fill-white shrink-0" />
             <span>WhatsApp</span>
           </a>
 
@@ -1873,17 +1873,18 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             target="_blank"
             rel="noreferrer"
             onClick={handleMessengerClick}
-            className="py-2 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] font-bold"
+            className="py-2.5 px-1 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] sm:text-xs font-bold whitespace-nowrap"
           >
-            <Smartphone className="w-3.5 h-3.5" />
+            <Smartphone className="w-3.5 h-3.5 shrink-0" />
             <span>Messenger</span>
           </a>
 
           {/* Mobile Admission */}
           <button
             onClick={() => setIsAdmissionOpen(true)}
-            className="py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-[11px] rounded-xl shadow-lg active:scale-95 flex items-center justify-center space-x-1 cursor-pointer"
+            className="py-2.5 px-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-[11px] sm:text-xs rounded-xl shadow-lg active:scale-95 flex items-center justify-center space-x-1 cursor-pointer whitespace-nowrap"
           >
+            <GraduationCap className="w-3.5 h-3.5 shrink-0" />
             <span>ভর্তি আবেদন</span>
           </button>
         </div>

@@ -308,12 +308,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
 
           {/* Quick Contact & Staff Access */}
-          <div className="flex items-center space-x-3 shrink-0 text-[11px] sm:text-xs">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0 text-xs">
             <a
               href={`tel:${multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}`}
-              className="flex items-center space-x-1 hover:text-amber-400 font-bold transition-colors"
+              className="flex items-center space-x-1 hover:text-amber-400 font-bold transition-colors whitespace-nowrap"
             >
-              <Phone className="w-3.5 h-3.5 text-amber-400" />
+              <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span className="hidden md:inline">Hotline: {multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}</span>
               <span className="md:hidden">{multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}</span>
             </a>
@@ -324,7 +324,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <button
               type="button"
               onClick={() => setLanguage(l => (l === 'bn' ? 'en' : 'bn'))}
-              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-lg border border-slate-700 transition-colors flex items-center space-x-1"
+              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-lg border border-slate-700 transition-colors flex items-center space-x-1 whitespace-nowrap shrink-0 cursor-pointer"
               title="Toggle Language / ভাষা পরিবর্তন"
             >
               <span>{language === 'bn' ? 'English' : 'বাংলা'}</span>
@@ -335,10 +335,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenStudentPortal}
-                className="flex items-center space-x-1.5 px-2.5 py-1 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 hover:text-white border border-indigo-700/50 rounded-lg transition-colors font-bold"
+                className="flex items-center space-x-1.5 px-2.5 py-1 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 hover:text-white border border-indigo-700/50 rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer"
                 title="Student ID, Ledger & Certificate Portal"
               >
-                <GraduationCap className="w-3.5 h-3.5 text-indigo-400" />
+                <GraduationCap className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                 <span>{language === 'bn' ? 'স্টুডেন্ট পোর্টাল' : 'Student Portal'}</span>
               </button>
             )}
@@ -347,9 +347,9 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <button
               type="button"
               onClick={onOpenStaffLogin}
-              className="flex items-center space-x-1.5 px-2.5 py-1 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg transition-colors font-bold"
+              className="flex items-center space-x-1.5 px-2.5 py-1 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <LogIn className="w-3.5 h-3.5 text-indigo-400" />
+              <LogIn className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
               <span>{isAuthenticated ? 'ERP Portal' : 'Staff Login'}</span>
             </button>
 
@@ -384,34 +384,34 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <h1 className="text-sm sm:text-base md:text-lg font-black text-slate-900 leading-tight truncate">
                 {academySettings.instituteName || 'Nexgen Computer Academy'}
               </h1>
-              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate">
+              <p className="text-xs text-slate-600 font-medium truncate">
                 {academySettings.campusName || 'Farmgate Campus'} • Govt. Standard IT Institute
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center space-x-3.5 2xl:space-x-4 text-xs font-bold text-slate-700">
+          <nav className="hidden xl:flex items-center space-x-3.5 2xl:space-x-4 text-sm font-bold text-slate-700">
             <a
               href="#"
               onClick={(e) => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-900 bg-slate-100 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg whitespace-nowrap"
+              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-900 bg-slate-100 hover:bg-indigo-50 px-3 py-1.5 rounded-lg whitespace-nowrap"
             >
-              <Home className="w-3.5 h-3.5 text-indigo-600" />
+              <Home className="w-4 h-4 text-indigo-600" />
               <span>Home (হোম)</span>
             </a>
             <a href="#courses" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Courses (কোর্স)</a>
             <a href="#about" className="hover:text-indigo-600 transition-colors whitespace-nowrap">About Us</a>
             <a href="#community" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-blue-700 whitespace-nowrap">
-              <Users className="w-3.5 h-3.5" />
+              <Users className="w-4 h-4" />
               <span>Community</span>
             </a>
             <a href="#seminars" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 whitespace-nowrap">
               <span>Free Seminars</span>
-              <span className="bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded-full text-[9px] font-black">Free</span>
+              <span className="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full text-[10px] font-black">Free</span>
             </a>
             <a href="#blog" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Blog</a>
             <a href="#gallery" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Gallery</a>
@@ -499,14 +499,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <Sparkles className="w-4 h-4 text-amber-400" />
-                  <h3 className="text-sm sm:text-base font-black text-white">
+                  <h3 className="text-base sm:text-lg font-black text-white">
                     {language === 'bn' ? 'কোর্স খুঁজুন ও ক্যারিয়ার গাইডেন্স' : 'Search Courses & Career Guidance'}
                   </h3>
                 </div>
 
                 {/* Hero Search & Category Quick Filter Bar */}
-                <div className="bg-slate-800/90 border border-slate-700/80 p-2 sm:p-2.5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-stretch gap-2">
-                  <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/60 rounded-xl px-3 py-2 shrink-0">
+                <div className="bg-slate-800/90 border border-slate-700 p-2.5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-stretch gap-2.5">
+                  <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 shrink-0">
                     <BookOpen className="w-4 h-4 text-indigo-400 shrink-0" />
                     <select
                       value={selectedCategory}
@@ -515,7 +515,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                         const el = document.getElementById('courses');
                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                       }}
-                      className="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer"
+                      className="bg-transparent text-sm font-bold text-slate-200 focus:outline-none cursor-pointer"
                     >
                       <option value="All" className="bg-slate-900 text-white">All Categories (সব বিভাগ)</option>
                       {categories.map((cat) => (
@@ -524,64 +524,64 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     </select>
                   </div>
 
-                  <div className="flex-1 flex items-center space-x-2 bg-slate-900/90 border border-slate-700/60 rounded-xl px-3 py-2">
+                  <div className="flex-1 flex items-center space-x-2 bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5">
                     <Search className="w-4 h-4 text-slate-400 shrink-0" />
                     <input
                       type="text"
                       value={courseSearchQuery}
                       onChange={(e) => setCourseSearchQuery(e.target.value)}
                       placeholder="Search courses (e.g. Video Editing, Web, AI, Graphic...)"
-                      className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none"
+                      className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 focus:outline-none font-medium"
                     />
                     {courseSearchQuery && (
                       <button
                         type="button"
                         onClick={() => setCourseSearchQuery('')}
-                        className="text-slate-400 hover:text-white text-xs px-1"
+                        className="text-slate-400 hover:text-white text-xs px-1 cursor-pointer"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                       </button>
                     )}
                   </div>
 
                   <a
                     href="#courses"
-                    className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center space-x-1.5 shrink-0"
+                    className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-1.5 shrink-0"
                   >
-                    <Search className="w-3.5 h-3.5" />
+                    <Search className="w-4 h-4" />
                     <span>Search</span>
                   </a>
                 </div>
               </div>
 
               {/* Stats Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3 border-t border-slate-800">
-                <div className="p-2.5 sm:p-3 bg-slate-800/40 rounded-xl border border-slate-700/50 text-center lg:text-left">
-                  <span className="block text-lg sm:text-2xl font-black text-amber-400">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-800">
+                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
+                  <span className="block text-xl sm:text-2xl font-black text-amber-400">
                     {websiteCmsConfig.heroStats?.totalTrained || '8,500+'}
                   </span>
-                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Students Trained</span>
+                  <span className="text-xs text-slate-300 font-medium">Students Trained</span>
                 </div>
 
-                <div className="p-2.5 sm:p-3 bg-slate-800/40 rounded-xl border border-slate-700/50 text-center lg:text-left">
-                  <span className="block text-lg sm:text-2xl font-black text-emerald-400">
+                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
+                  <span className="block text-xl sm:text-2xl font-black text-emerald-400">
                     {websiteCmsConfig.heroStats?.successRate || '96.4%'}
                   </span>
-                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Completion Rate</span>
+                  <span className="text-xs text-slate-300 font-medium">Completion Rate</span>
                 </div>
 
-                <div className="p-2.5 sm:p-3 bg-slate-800/40 rounded-xl border border-slate-700/50 text-center lg:text-left">
-                  <span className="block text-lg sm:text-2xl font-black text-indigo-400">
+                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
+                  <span className="block text-xl sm:text-2xl font-black text-indigo-400">
                     {websiteCmsConfig.heroStats?.expertTrainers || '28+'}
                   </span>
-                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Industry Mentors</span>
+                  <span className="text-xs text-slate-300 font-medium">Industry Mentors</span>
                 </div>
 
-                <div className="p-2.5 sm:p-3 bg-slate-800/40 rounded-xl border border-slate-700/50 text-center lg:text-left">
-                  <span className="block text-lg sm:text-2xl font-black text-rose-400">
+                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
+                  <span className="block text-xl sm:text-2xl font-black text-rose-400">
                     {websiteCmsConfig.heroStats?.jobPlacementRatio || '89.2%'}
                   </span>
-                  <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Job Placements</span>
+                  <span className="text-xs text-slate-300 font-medium">Job Placements</span>
                 </div>
               </div>
             </div>
@@ -667,11 +667,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               className="p-5 rounded-3xl bg-emerald-50/70 border border-emerald-200/80 hover:border-emerald-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
             >
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 shrink-0">
                     <Building className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-0.5 bg-emerald-200/80 text-emerald-900 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 bg-emerald-200/80 text-emerald-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
                     ল্যাব ব্যাচ
                   </span>
                 </div>
@@ -700,12 +700,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               className="p-5 rounded-3xl bg-rose-50/70 border border-rose-200/80 hover:border-rose-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
             >
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200 shrink-0">
                     <Video className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-0.5 bg-rose-200/80 text-rose-900 rounded-full text-[10px] font-black uppercase tracking-wider">
-                    লাইভ ইন্টারেক্টিভ
+                  <span className="px-2.5 py-0.5 bg-rose-200/80 text-rose-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                    লাইভ ক্লাস
                   </span>
                 </div>
                 <div>
@@ -733,11 +733,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               className="p-5 rounded-3xl bg-purple-50/70 border border-purple-200/80 hover:border-purple-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
             >
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-200">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-200 shrink-0">
                     <PlaySquare className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-0.5 bg-purple-200/80 text-purple-900 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 bg-purple-200/80 text-purple-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
                     সেলফ-পেসড
                   </span>
                 </div>
@@ -765,11 +765,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               className="p-5 rounded-3xl bg-cyan-50/70 border border-cyan-200/80 hover:border-cyan-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
             >
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center shadow-md shadow-cyan-200">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-12 h-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center shadow-md shadow-cyan-200 shrink-0">
                     <Briefcase className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-0.5 bg-cyan-200/80 text-cyan-900 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 bg-cyan-200/80 text-cyan-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
                     কর্পোরেট
                   </span>
                 </div>

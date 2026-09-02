@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /#courses
+Allow: /#admission
+Allow: /#verify-certificate
+Disallow: /api/
+Disallow: /api/leads/
+Disallow: /api/crm/
+
+Sitemap: /sitemap.xml

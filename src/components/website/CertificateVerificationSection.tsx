@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { ShieldCheck, Search, Award, CheckCircle, AlertCircle, Calendar, User, BookOpen, Printer, ExternalLink } from 'lucide-react';
 import { NexgenLogo } from '../common/NexgenLogo';
@@ -10,9 +10,8 @@ export const CertificateVerificationSection: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [matchedCert, setMatchedCert] = useState<any | null>(null);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const query = searchQuery.trim().toLowerCase();
+  const performVerification = useCallback(async (rawQuery: string) => {
+    const query = rawQuery.trim().toLowerCase();
     if (!query) return;
 
     setHasSearched(true);
@@ -80,6 +79,39 @@ export const CertificateVerificationSection: React.FC = () => {
 
     setMatchedCert(null);
     setIsVerifying(false);
+  }, [certificates, publicCertificates, students, courses, batches]);
+
+  // Auto-verify if URL contains cert, verify, or q query parameter
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      let certParam = params.get('cert') || params.get('verify') || params.get('certificate') || params.get('q');
+      
+      // Also check hash like #verify-certificate?cert=NCA-123
+      if (!certParam && window.location.hash.includes('cert=')) {
+        const hashQuery = window.location.hash.split('?')[1];
+        if (hashQuery) {
+          const hashParams = new URLSearchParams(hashQuery);
+          certParam = hashParams.get('cert') || hashParams.get('verify');
+        }
+      }
+
+      if (certParam) {
+        setSearchQuery(certParam);
+        performVerification(certParam);
+        const sectionElem = document.getElementById('verify-certificate');
+        if (sectionElem) {
+          sectionElem.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [performVerification]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    performVerification(searchQuery);
   };
 
   return (

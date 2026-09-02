@@ -62,3 +62,77 @@ export function getMessengerDirectUrl(pageUrlOrId?: string): string {
   const cleanHandle = pageUrlOrId.replace(/[^a-zA-Z0-9._-]/g, '');
   return `https://m.me/${cleanHandle || 'nexgenacademy'}`;
 }
+
+export interface DueReminderParams {
+  phone?: string;
+  studentName: string;
+  courseName: string;
+  dueAmount: number;
+  dueDate?: string;
+  instituteName?: string;
+  hotline?: string;
+}
+
+export function getDueReminderWhatsAppUrl(params: DueReminderParams): string {
+  const {
+    phone,
+    studentName,
+    courseName,
+    dueAmount,
+    dueDate,
+    instituteName = 'Nexgen Computer Academy',
+    hotline = '01798444444'
+  } = params;
+
+  const msg = `আসসালামু আলাইকুম ${studentName},
+${instituteName}-এর পক্ষ থেকে শুভেচ্ছা।
+
+আপনার "${courseName}" কোর্সের ফি বাবদ বকেয়া ৳${dueAmount.toLocaleString()}${dueDate ? ` (পরিশোধের নির্ধারিত তারিখ: ${dueDate})` : ''}।
+সম্মানিত শিক্ষার্থী হিসেবে নির্ধারিত তারিখের মধ্যে ফি পরিশোধ করে একাডেমিক কার্যক্রম ও ক্লাস সচল রাখার জন্য অনুরোধ করা হলো।
+
+💳 পেমেন্ট মাধ্যম: বিকাশ / নগদ / ব্যাংক অথবা ক্যাম্পাসে সরাসরি।
+📞 যেকোনো তথ্যে যোগাযোগ করুন: ${hotline}
+ধন্যবাদ!`;
+
+  return getWhatsAppDirectUrl(phone, msg);
+}
+
+export interface AdmissionWelcomeParams {
+  phone?: string;
+  studentName: string;
+  studentCode: string;
+  courseName: string;
+  batchNumber?: string;
+  classDays?: string;
+  instituteName?: string;
+  hotline?: string;
+}
+
+export function getAdmissionWelcomeWhatsAppUrl(params: AdmissionWelcomeParams): string {
+  const {
+    phone,
+    studentName,
+    studentCode,
+    courseName,
+    batchNumber,
+    classDays,
+    instituteName = 'Nexgen Computer Academy',
+    hotline = '01798444444'
+  } = params;
+
+  const msg = `অভিনন্দন ${studentName}! 🎓
+${instituteName}-এ সফলভাবে ভর্তির জন্য আপনাকে স্বাগতম।
+
+📋 *ভর্তি বিবরণ:*
+• শিক্ষার্থী আইডি: ${studentCode}
+• কোর্স: ${courseName}
+${batchNumber ? `• ব্যাচ: ${batchNumber}` : ''}
+${classDays ? `• ক্লাসের দিন: ${classDays}` : ''}
+
+ক্যাম্পাসে আসার সময় আপনার শিক্ষার্থী আইডি কার্ড অথবা মানি রিসিট সঙ্গে রাখুন।
+📞 হেল্পলাইন: ${hotline}
+আপনার সাফল্য কামনা করি!`;
+
+  return getWhatsAppDirectUrl(phone, msg);
+}
+

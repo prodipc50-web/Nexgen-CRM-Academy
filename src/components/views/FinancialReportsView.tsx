@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
+import { DailyCashClosingModal } from '../modals/DailyCashClosingModal';
 import {
   TrendingUp,
   Download,
@@ -10,13 +11,15 @@ import {
   CreditCard,
   Building2,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Wallet
 } from 'lucide-react';
 
 export const FinancialReportsView: React.FC = () => {
   const { payments, expenses, courses, admissions, stats } = useAcademy();
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().substring(0, 7)); // YYYY-MM
+  const [showClosingModal, setShowClosingModal] = useState(false);
 
   // Filter payments and expenses by selected month
   const monthPayments = payments.filter(p => p.date.startsWith(selectedMonth));
@@ -84,6 +87,14 @@ export const FinancialReportsView: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-2.5">
+          <button
+            onClick={() => setShowClosingModal(true)}
+            className="flex items-center space-x-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold px-3.5 py-2 rounded-xl shadow-2xs transition-colors"
+          >
+            <Wallet className="w-4 h-4 text-amber-700" />
+            <span>Daily Cash Closing</span>
+          </button>
+
           <input
             type="month"
             value={selectedMonth}
@@ -213,6 +224,11 @@ export const FinancialReportsView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <DailyCashClosingModal
+        isOpen={showClosingModal}
+        onClose={() => setShowClosingModal(false)}
+      />
     </div>
   );
 };

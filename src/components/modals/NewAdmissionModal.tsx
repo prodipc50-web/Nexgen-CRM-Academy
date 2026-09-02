@@ -39,7 +39,8 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
     leadSourcesList,
     paymentMethodsList,
     bloodGroupsList,
-    createAdmission
+    createAdmission,
+    payments
   } = useAcademy();
 
   // Form State
@@ -158,6 +159,14 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
   const enrolledInBatch = admissions.filter(a => a.batchId === selectedBatchId).length;
   const isBatchFull = currentBatch ? enrolledInBatch >= currentBatch.seatCapacity : false;
 
+  const duplicatePayment = transactionId.trim()
+    ? payments.find(
+        p =>
+          p.transactionId &&
+          p.transactionId.trim().toLowerCase() === transactionId.trim().toLowerCase()
+      )
+    : null;
+
   const finalFee = Math.max(0, regularFee - (discount || 0) - (scholarship || 0));
   const due = Math.max(0, finalFee - (initialPaid || 0));
 
@@ -166,6 +175,20 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
     if (!name.trim() || !phone.trim() || !selectedCourseId || !selectedBatchId) {
       alert('Please fill all required student and course fields.');
       return;
+    }
+
+    if (isBatchFull) {
+      const confirmOverflow = window.confirm(
+        `সতর্কবার্তা: ব্যাচ #${currentBatch?.batchNumber} এর নির্ধারিত আসন সংখ্যা (${currentBatch?.seatCapacity}) ইতিমধ্যে পূর্ণ! আপনি কি অতিরিক্ত (Lab Overflow) হিসেবে এই ভর্তি সম্পন্ন করতে চান?`
+      );
+      if (!confirmOverflow) return;
+    }
+
+    if (duplicatePayment) {
+      const confirmDup = window.confirm(
+        `সতর্কবার্তা: Transaction ID "${transactionId}" ইতিপূর্বে রশিদ #${duplicatePayment.receiptNumber} এ ব্যবহৃত হয়েছে। আপনি কি নিশ্চিত যে এটি সঠিক?`
+      );
+      if (!confirmDup) return;
     }
 
     try {
@@ -682,8 +705,15 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
                   placeholder="e.g. BK9X8821"
                   value={transactionId}
                   onChange={e => setTransactionId(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono font-medium outline-none"
+                  className={`w-full bg-white border rounded-lg px-3 py-2 font-mono font-medium outline-none ${
+                    duplicatePayment ? 'border-rose-400 bg-rose-50 text-rose-900 ring-2 ring-rose-200' : 'border-slate-300 text-slate-900'
+                  }`}
                 />
+                {duplicatePayment && (
+                  <p className="mt-1 text-[10px] text-rose-600 font-bold">
+                    ⚠️ ডুপ্লিকেট TrxID! ইতিপূর্বে রশিদ #{duplicatePayment.receiptNumber} এ ব্যবহৃত হয়েছে।
+                  </p>
+                )}
               </div>
 
               <div className={`border rounded-xl p-2.5 flex flex-col justify-center ${due > 0 ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'}`}>

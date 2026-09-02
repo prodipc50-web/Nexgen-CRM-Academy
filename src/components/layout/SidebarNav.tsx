@@ -122,7 +122,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
             <NexgenLogo variant="crest" size={38} className="bg-white/10 p-1 rounded-xl" />
             <div>
               <div className="text-sm font-black text-white tracking-wide uppercase leading-tight">Nexgen Academy</div>
-              <div className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Internal Portal</div>
+              <div className="text-xs text-indigo-400 font-bold uppercase tracking-wider">Internal Portal</div>
             </div>
           </div>
           <button
@@ -140,8 +140,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
             if (accessibleItems.length === 0) return null;
 
             return (
-              <div key={idx} className="space-y-1">
-                <div className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <div key={idx} className="space-y-1.5">
+                <div className="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
                   {section.title}
                 </div>
                 {accessibleItems.map(item => {
@@ -155,18 +155,18 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
                         onSelectTab(item.id);
                         onCloseMobile();
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                         isActive
                           ? 'bg-indigo-600 text-white shadow-xs font-semibold'
-                          : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                          : 'text-slate-300 hover:bg-slate-800/90 hover:text-white'
                       }`}
                     >
-                      <div className="flex items-center space-x-2.5">
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                      <div className="flex items-center space-x-3">
+                        <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                         <span>{item.label}</span>
                       </div>
                       {item.badge !== undefined && (
-                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full text-white ${item.badgeColor || 'bg-slate-700'}`}>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full text-white ${item.badgeColor || 'bg-slate-700'}`}>
                           {item.badge}
                         </span>
                       )}
