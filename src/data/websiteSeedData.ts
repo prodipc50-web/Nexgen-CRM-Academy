@@ -167,12 +167,12 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
 
   // Legacy fallbacks
   whatsappSupportNumber: '01798444444',
-  facebookPageUrl: 'https://facebook.com/nexgenacademybd',
+  facebookPageUrl: 'https://www.facebook.com/nexgencomputeracademy',
   youtubeChannelUrl: 'https://youtube.com/@nexgenacademybd',
 
   // Advanced Social & Community Hub
   socialLinks: {
-    facebookPageUrl: 'https://facebook.com/nexgenacademybd',
+    facebookPageUrl: 'https://www.facebook.com/nexgencomputeracademy',
     facebookGroupUrl: 'https://facebook.com/groups/nexgencommunitybd',
     facebookGroupName: 'Nexgen IT & Freelancers Community BD',
     facebookGroupMembersCount: '32,500+ Active Members',

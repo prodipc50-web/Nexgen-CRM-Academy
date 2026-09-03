@@ -120,7 +120,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
     existingConfig.customWhatsAppMessage || `Hello Nexgen Academy! আমি "${course.name}" কোর্সে ভর্তি হতে চাই ও অফার জানতে চাই।`
   );
   const [customMessengerUrl, setCustomMessengerUrl] = useState(
-    existingConfig.customMessengerUrl || websiteCmsConfig?.socialLinks?.facebookPageUrl || websiteCmsConfig?.facebookPageUrl || 'https://m.me/nexgenacademy'
+    existingConfig.customMessengerUrl || websiteCmsConfig?.socialLinks?.facebookPageUrl || websiteCmsConfig?.facebookPageUrl || 'https://www.facebook.com/nexgencomputeracademy'
   );
 
   // Gallery Photos
@@ -150,6 +150,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   const [newSchLabel, setNewSchLabel] = useState('');
   const [newSchDays, setNewSchDays] = useState('');
   const [newSchTimeSlot, setNewSchTimeSlot] = useState('');
+  const [newSchStartDate, setNewSchStartDate] = useState('');
   const [newSchMode, setNewSchMode] = useState<'Offline' | 'Online Live' | 'Hybrid' | 'Both'>('Offline');
   const [newSchSeats, setNewSchSeats] = useState(8);
 
@@ -630,12 +631,16 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   };
 
   const handleAddSchedule = () => {
-    if (!newSchLabel.trim()) return;
+    if (!newSchLabel.trim() && !newSchDays.trim()) return;
+    const generatedLabel =
+      newSchLabel.trim() ||
+      `${newSchDays.trim() || 'উইকেন্ড/রেগুলার'}${newSchTimeSlot.trim() ? ` (${newSchTimeSlot.trim()})` : ''}${newSchStartDate.trim() ? ` [শুরু: ${newSchStartDate.trim()}]` : ''}`;
     const newSch: CoursePreferredScheduleOption = {
       id: `sch-${Date.now()}`,
-      label: newSchLabel.trim(),
+      label: generatedLabel,
       days: newSchDays.trim() || 'Flexible Days',
       timeSlot: newSchTimeSlot.trim(),
+      startDate: newSchStartDate.trim() || undefined,
       mode: newSchMode,
       availableSeats: Number(newSchSeats) || 8,
       isActive: true
@@ -644,6 +649,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
     setNewSchLabel('');
     setNewSchDays('');
     setNewSchTimeSlot('');
+    setNewSchStartDate('');
   };
 
   const handleUpdateSchedule = (idx: number, field: keyof CoursePreferredScheduleOption, val: any) => {
@@ -1514,7 +1520,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                            ক্লাসের দিনসমূহ (Days)
+                            ক্লাসের দিনসমূহ (Days / কি কি বার)
                           </label>
                           <input
                             type="text"
@@ -1527,18 +1533,31 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
 
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                            সময় স্লট (Time Slot)
+                            সময় স্লট (Time Slot / ক্লাসের সময়)
                           </label>
                           <input
                             type="text"
                             value={sch.timeSlot || ''}
                             onChange={e => handleUpdateSchedule(sIdx, 'timeSlot', e.target.value)}
-                            placeholder="যেমন: 10:00 AM - 12:00 PM"
+                            placeholder="যেমন: 10:00 AM - 12:00 PM / সকাল ১০টা - ১২টা"
                             className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl outline-hidden"
                           />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            ক্লাস শুরুর তারিখ (Start Date)
+                          </label>
+                          <input
+                            type="text"
+                            value={sch.startDate || ''}
+                            onChange={e => handleUpdateSchedule(sIdx, 'startDate', e.target.value)}
+                            placeholder="যেমন: ১৫ মে, ২০২৬ / চলমান ব্যাচ"
+                            className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl outline-hidden font-medium text-emerald-700"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 sm:col-span-2">
                           <div>
                             <label className="block text-[11px] font-bold text-slate-700 mb-1">
                               লার্নিং মোড
@@ -1573,42 +1592,161 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
                 </div>
 
                 {/* Add New Schedule Form */}
-                <div className="p-4 bg-indigo-50/60 border border-indigo-200 rounded-2xl space-y-3">
-                  <h5 className="font-black text-xs text-indigo-900">+ নতুন শিডিউল যোগ করুন</h5>
+                <div className="p-4 bg-indigo-50/70 border border-indigo-200 rounded-2xl space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-black text-xs text-indigo-950 flex items-center space-x-1.5">
+                      <Plus className="w-4 h-4 text-indigo-600" />
+                      <span>ম্যানুয়ালি নতুন শিডিউল যোগ করুন (Add New Schedule)</span>
+                    </h5>
+                    <span className="text-[10px] text-indigo-600 font-bold bg-indigo-100/70 px-2 py-0.5 rounded-full">
+                      Time, Date & Days Editor
+                    </span>
+                  </div>
+
+                  {/* Quick Preset Buttons for Days */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      দ্রুত দিন সিলেক্ট করুন (বা নিজে লিখুন):
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {['শুক্র ও শনিবার', 'রবি, মঙ্গল ও বৃহস্পতি', 'সোম ও বুধবার', 'প্রতিদিন (সাপ্তাহিক)'].map(d => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => {
+                            setNewSchDays(d);
+                            if (!newSchLabel) {
+                              setNewSchLabel(`${d} ${newSchTimeSlot ? `(${newSchTimeSlot})` : ''}`);
+                            }
+                          }}
+                          className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-colors ${
+                            newSchDays === d
+                              ? 'bg-indigo-600 text-white border-indigo-600'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-indigo-50'
+                          }`}
+                        >
+                          {d}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick Preset Buttons for Times */}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      দ্রুত সময় সিলেক্ট করুন (বা নিজে লিখুন):
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {['সকাল ১০:০০ - ১২:০০', 'বিকাল ৩:০০ - ৫:০০', 'সন্ধ্যা ৬:৩০ - ৮:৩০', 'রাত ৯:০০ - ১০:৩০'].map(t => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => {
+                            setNewSchTimeSlot(t);
+                            if (newSchDays) {
+                              setNewSchLabel(`${newSchDays} (${t})`);
+                            }
+                          }}
+                          className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-colors ${
+                            newSchTimeSlot === t
+                              ? 'bg-indigo-600 text-white border-indigo-600'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-indigo-50'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        শিডিউল লেবেল / নাম *
+                      </label>
                       <input
                         type="text"
                         value={newSchLabel}
                         onChange={e => setNewSchLabel(e.target.value)}
-                        placeholder="শিডিউল লেবেল (যেমন: রবি, মঙ্গল ও বৃহস্পতিবার বিকাল ৪:০০ - ৬:০০)"
+                        placeholder="যেমন: উইকেন্ড মর্নিং ব্যাচ (শুক্র ও শনিবার সকাল ১০:০০ - ১২:০০)"
                         className="w-full text-xs font-bold p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden"
                       />
                     </div>
+
                     <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        কি কি বার (Days)
+                      </label>
                       <input
                         type="text"
                         value={newSchDays}
                         onChange={e => setNewSchDays(e.target.value)}
-                        placeholder="দিনসমূহ (যেমন: রবি, মঙ্গল ও বৃহস্পতি)"
+                        placeholder="যেমন: শুক্র ও শনিবার / Fri & Sat"
                         className="w-full text-xs p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden"
                       />
                     </div>
+
                     <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        ক্লাসের সময় (Time Slot)
+                      </label>
                       <input
                         type="text"
                         value={newSchTimeSlot}
                         onChange={e => setNewSchTimeSlot(e.target.value)}
-                        placeholder="সময় (যেমন: 4:00 PM - 6:00 PM)"
+                        placeholder="যেমন: সকাল ১০:০০ - ১২:০০"
                         className="w-full text-xs p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        ক্লাস শুরুর তারিখ (Start Date)
+                      </label>
+                      <input
+                        type="text"
+                        value={newSchStartDate}
+                        onChange={e => setNewSchStartDate(e.target.value)}
+                        placeholder="যেমন: ১ মে, ২০২৬ / প্রতি শুক্রবার"
+                        className="w-full text-xs p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden font-medium text-emerald-700"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          লার্নিং মোড
+                        </label>
+                        <select
+                          value={newSchMode}
+                          onChange={e => setNewSchMode(e.target.value as any)}
+                          className="w-full text-xs p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden font-bold"
+                        >
+                          <option value="Offline">Offline Lab</option>
+                          <option value="Online Live">Online Live</option>
+                          <option value="Hybrid">Hybrid</option>
+                          <option value="Both">Both</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          সিট সংখ্যা
+                        </label>
+                        <input
+                          type="number"
+                          value={newSchSeats}
+                          onChange={e => setNewSchSeats(Number(e.target.value))}
+                          className="w-full text-xs p-2.5 bg-white border border-indigo-200 rounded-xl outline-hidden font-bold"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={handleAddSchedule}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center space-x-1.5"
+                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-xs transition-colors flex items-center space-x-1.5 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>শিডিউল তালিকায় যুক্ত করুন</span>

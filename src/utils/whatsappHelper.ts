@@ -45,22 +45,24 @@ export function getWhatsAppDirectUrl(phone: string | undefined, message: string 
 }
 
 export function getMessengerDirectUrl(pageUrlOrId?: string): string {
-  if (!pageUrlOrId) return 'https://m.me/nexgenacademy';
+  if (!pageUrlOrId) return 'https://m.me/nexgencomputeracademy';
   
   // If it's already a m.me link
   if (pageUrlOrId.includes('m.me/')) {
     return pageUrlOrId.startsWith('http') ? pageUrlOrId : `https://${pageUrlOrId}`;
   }
   
-  // If it's a full Facebook page URL like https://facebook.com/nexgenit
+  // If it's a full Facebook page URL like https://www.facebook.com/nexgencomputeracademy
   if (pageUrlOrId.includes('facebook.com/')) {
-    const pageHandle = pageUrlOrId.split('facebook.com/')[1]?.replace(/[^a-zA-Z0-9._-]/g, '') || 'nexgenacademy';
+    const afterDomain = pageUrlOrId.split('facebook.com/')[1] || '';
+    const cleanSegment = afterDomain.split('/')[0]?.split('?')[0]?.replace(/[^a-zA-Z0-9._-]/g, '');
+    const pageHandle = cleanSegment && cleanSegment !== 'profile.php' ? cleanSegment : 'nexgencomputeracademy';
     return `https://m.me/${pageHandle}`;
   }
 
   // If it's just a username/page ID
   const cleanHandle = pageUrlOrId.replace(/[^a-zA-Z0-9._-]/g, '');
-  return `https://m.me/${cleanHandle || 'nexgenacademy'}`;
+  return `https://m.me/${cleanHandle || 'nexgencomputeracademy'}`;
 }
 
 export interface DueReminderParams {

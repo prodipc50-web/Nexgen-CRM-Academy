@@ -53,7 +53,9 @@ import {
   AlertTriangle,
   Target,
   Shield,
-  Check
+  Check,
+  Trash2,
+  Plus
 } from 'lucide-react';
 import { OnlineAdmissionModal } from './OnlineAdmissionModal';
 import { CourseLandingPageEditorModal } from '../courses/CourseLandingPageEditorModal';
@@ -235,7 +237,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   course: propCourse,
   onBackToFullWebsite
 }) => {
-  const { courses, websiteCmsConfig, staffList, addLead, submitPublicLead, academySettings, isAuthenticated, currentUser } = useAcademy();
+  const { courses, websiteCmsConfig, staffList, addLead, submitPublicLead, academySettings, isAuthenticated, currentUser, updateCourse } = useAcademy();
   const course = courses.find(c => c.id === propCourse.id || c.code === propCourse.code) || propCourse;
 
   // Authorization check: Only authenticated admins/managers can edit landing page contents
@@ -269,10 +271,24 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   const [leadName, setLeadName] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
-  const [leadSchedule, setLeadSchedule] = useState('Weekend (Fri-Sat)');
+  const [leadAddress, setLeadAddress] = useState('');
+  const [leadSchedule, setLeadSchedule] = useState('উইকেন্ড (শুক্র-শনিবার সকাল ১০:০০ - ১২:০০)');
+  const [isCustomSchedule, setIsCustomSchedule] = useState(false);
+  const [customScheduleInput, setCustomScheduleInput] = useState('');
   const [leadSuccess, setLeadSuccess] = useState(false);
   const [leadError, setLeadError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Direct Schedule Quick Add / Edit Manager Modal State
+  const [isScheduleManagerOpen, setIsScheduleManagerOpen] = useState(false);
+  const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
+  const [schMgrLabel, setSchMgrLabel] = useState('');
+  const [schMgrDays, setSchMgrDays] = useState('');
+  const [schMgrTimeSlot, setSchMgrTimeSlot] = useState('');
+  const [schMgrStartDate, setSchMgrStartDate] = useState('');
+  const [schMgrMode, setSchMgrMode] = useState<'Offline' | 'Online Live' | 'Hybrid' | 'Both'>('Offline');
+  const [schMgrSeats, setSchMgrSeats] = useState<number>(8);
+  const [schFeedbackMessage, setSchFeedbackMessage] = useState('');
 
   // Social Proof Admission Alert Ticker State
   const [isTickerVisible, setIsTickerVisible] = useState(true);
@@ -296,11 +312,107 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     landingConfig.preferredSchedules && landingConfig.preferredSchedules.length > 0
       ? landingConfig.preferredSchedules
       : [
-          { id: 'sch-1', label: 'উইকেন্ড (শুক্র-শনিবার সকাল ১০:০০ - ১২:০০)', days: 'Fri & Sat', timeSlot: '10:00 AM - 12:00 PM', mode: 'Offline', availableSeats: 5 },
-          { id: 'sch-2', label: 'উইকেন্ড (শুক্র-শনিবার বিকাল ৩:০০ - ৫:০০)', days: 'Fri & Sat', timeSlot: '3:00 PM - 5:00 PM', mode: 'Offline', availableSeats: 7 },
-          { id: 'sch-3', label: 'সান্ধ্যকালীন ব্যাচ (রবি, মঙ্গল ও বৃহস্পতি সন্ধ্যা ৬:৩০ - ৮:৩০)', days: 'Sun, Tue & Thu', timeSlot: '6:30 PM - 8:30 PM', mode: 'Both', availableSeats: 6 },
-          { id: 'sch-4', label: 'অনলাইন লাইভ নাইট ব্যাচ (রাত ৯:০০ - ১০:৩০)', days: 'Sat, Mon & Wed', timeSlot: '9:00 PM - 10:30 PM', mode: 'Online Live', availableSeats: 12 }
+          { id: 'sch-1', label: 'উইকেন্ড (শুক্র-শনিবার সকাল ১০:০০ - ১২:০০)', days: 'শুক্র ও শনিবার', timeSlot: 'সকাল ১০:০০ - ১২:০০', startDate: 'চলমান ব্যাচ', mode: 'Offline', availableSeats: 5 },
+          { id: 'sch-2', label: 'উইকেন্ড (শুক্র-শনিবার বিকাল ৩:০০ - ৫:০০)', days: 'শুক্র ও শনিবার', timeSlot: 'বিকাল ৩:০০ - ৫:০০', startDate: 'চলমান ব্যাচ', mode: 'Offline', availableSeats: 7 },
+          { id: 'sch-3', label: 'সান্ধ্যকালীন ব্যাচ (রবি, মঙ্গল ও বৃহস্পতি সন্ধ্যা ৬:৩০ - ৮:৩০)', days: 'রবি, মঙ্গল ও বৃহস্পতি', timeSlot: 'সন্ধ্যা ৬:৩০ - ৮:৩০', startDate: 'চলমান ব্যাচ', mode: 'Both', availableSeats: 6 },
+          { id: 'sch-4', label: 'অনলাইন লাইভ নাইট ব্যাচ (রাত ৯:০০ - ১০:৩০)', days: 'শনি, সোম ও বুধ', timeSlot: 'রাত ৯:০০ - ১০:৩০', startDate: 'চলমান ব্যাচ', mode: 'Online Live', availableSeats: 12 }
         ];
+
+  // Schedule Quick Manager handlers
+  const handleOpenAddSchedule = () => {
+    setEditingScheduleId(null);
+    setSchMgrLabel('');
+    setSchMgrDays('শুক্র ও শনিবার');
+    setSchMgrTimeSlot('সকাল ১০:০০ - ১২:০০');
+    setSchMgrStartDate('১৫ মে, ২০২৬');
+    setSchMgrMode('Offline');
+    setSchMgrSeats(8);
+    setSchFeedbackMessage('');
+    setIsScheduleManagerOpen(true);
+  };
+
+  const handleOpenEditSchedule = (sch: CoursePreferredScheduleOption) => {
+    setEditingScheduleId(sch.id);
+    setSchMgrLabel(sch.label || '');
+    setSchMgrDays(sch.days || '');
+    setSchMgrTimeSlot(sch.timeSlot || '');
+    setSchMgrStartDate(sch.startDate || '');
+    setSchMgrMode((sch.mode as any) || 'Offline');
+    setSchMgrSeats(sch.availableSeats ?? 8);
+    setSchFeedbackMessage('');
+    setIsScheduleManagerOpen(true);
+  };
+
+  const handleSaveScheduleDirectly = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!schMgrDays.trim() && !schMgrLabel.trim()) {
+      setSchFeedbackMessage('অনুগ্রহ করে কি কি বার বা শিডিউলের নাম লিখুন।');
+      return;
+    }
+
+    const autoLabel = schMgrLabel.trim() ||
+      `${schMgrDays.trim() || 'রেগুলার ব্যাচ'}${schMgrTimeSlot.trim() ? ` (${schMgrTimeSlot.trim()})` : ''}${schMgrStartDate.trim() ? ` [শুরু: ${schMgrStartDate.trim()}]` : ''}`;
+
+    const currentList: CoursePreferredScheduleOption[] = [ ...availableSchedules ];
+    let updatedList: CoursePreferredScheduleOption[] = [];
+
+    if (editingScheduleId) {
+      updatedList = currentList.map(item => {
+        if (item.id === editingScheduleId) {
+          return {
+            ...item,
+            label: autoLabel,
+            days: schMgrDays.trim(),
+            timeSlot: schMgrTimeSlot.trim(),
+            startDate: schMgrStartDate.trim() || undefined,
+            mode: schMgrMode,
+            availableSeats: Number(schMgrSeats) || 8,
+            isActive: true
+          };
+        }
+        return item;
+      });
+    } else {
+      const newOption: CoursePreferredScheduleOption = {
+        id: `sch-${Date.now()}`,
+        label: autoLabel,
+        days: schMgrDays.trim() || 'Flexible Days',
+        timeSlot: schMgrTimeSlot.trim(),
+        startDate: schMgrStartDate.trim() || undefined,
+        mode: schMgrMode,
+        availableSeats: Number(schMgrSeats) || 8,
+        isActive: true
+      };
+      updatedList = [ ...currentList, newOption ];
+    }
+
+    const newConfig = {
+      ...landingConfig,
+      preferredSchedules: updatedList
+    };
+
+    updateCourse(course.id, { landingConfig: newConfig });
+    setLeadSchedule(autoLabel);
+    setSchFeedbackMessage('শিডিউল সফলভাবে সংরক্ষিত হয়েছে!');
+    setTimeout(() => {
+      setIsScheduleManagerOpen(false);
+      setSchFeedbackMessage('');
+    }, 900);
+  };
+
+  const handleDeleteScheduleDirectly = (idToDelete: string) => {
+    if (!window.confirm('আপনি কি এই শিডিউলটি তালিকা থেকে মুছে ফেলতে চান?')) return;
+    const currentList: CoursePreferredScheduleOption[] = [ ...availableSchedules ];
+    const updatedList = currentList.filter(item => item.id !== idToDelete);
+    const newConfig = {
+      ...landingConfig,
+      preferredSchedules: updatedList
+    };
+    updateCourse(course.id, { landingConfig: newConfig });
+    if (leadSchedule === idToDelete || !updatedList.some(s => s.label === leadSchedule)) {
+      setLeadSchedule(updatedList[0]?.label || '');
+    }
+  };
 
   // Social Proof Ticker Items
   const socialTickerItems =
@@ -477,10 +589,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     const utms = getCapturedUtmParams();
     const today = new Date().toISOString().split('T')[0];
 
+    const effectiveSchedule = isCustomSchedule
+      ? (customScheduleInput.trim() || 'ম্যানুয়াল কাস্টম শিডিউল')
+      : (leadSchedule || 'Flexible Schedule');
+    const addressText = leadAddress.trim();
+
     const isCounselingMode = leadFormMode === 'counseling';
     const commentsText = isCounselingMode
-      ? `[ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার কাউন্সিলিং রিকোয়েস্ট] Schedule: ${leadSchedule}. Discount/Batch: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`
-      : `Fast Inquiry on Course Landing Page. Schedule: ${leadSchedule}. Discount Code: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`;
+      ? `[ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার কাউন্সিলিং রিকোয়েস্ট] ঠিকানা: ${addressText || 'দেওয়া হয়নি'}, শিডিউল: ${effectiveSchedule}. Discount/Batch: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`
+      : `Fast Inquiry on Course Landing Page. ঠিকানা: ${addressText || 'দেওয়া হয়নি'}, শিডিউল: ${effectiveSchedule}. Discount Code: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`;
 
     const leadSourceStr = utms.utmSource
       ? `Ad: ${utms.utmSource} (${isCounselingMode ? 'Counseling' : 'Direct'})`
@@ -494,11 +611,12 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       studentName: leadName.trim(),
       phone: leadPhone.trim(),
       email: leadEmail.trim() || undefined,
+      address: addressText || undefined,
       courseId: course.id,
       courseName: course.name,
       interestedCourseId: course.id,
-      preferredSchedule: leadSchedule,
-      preferredTime: leadSchedule,
+      preferredSchedule: effectiveSchedule,
+      preferredTime: effectiveSchedule,
       leadSource: leadSourceStr,
       source: leadSourceStr,
       landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
@@ -522,6 +640,8 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       name: leadName.trim(),
       phone: leadPhone.trim(),
       email: leadEmail.trim() || undefined,
+      address: addressText || undefined,
+      preferredSchedule: effectiveSchedule,
       interestedCourseId: course.id,
       leadSource: leadSourceStr,
       campaignId: utms.utmCampaign,
@@ -531,7 +651,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       utmContent: utms.utmContent,
       utmTerm: utms.utmTerm,
       deviceType: 'Mobile',
-      locationCity: 'Dhaka',
+      locationCity: addressText || 'Dhaka',
       occupation: 'Student',
       educationLevel: 'HSC / Graduate',
       counselorId: 'counselor-01',
@@ -644,14 +764,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white pb-24 sm:pb-20">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white pb-36 sm:pb-24">
       {/* Top Floating Admin / Navigation Toolbar */}
-      <div className="bg-slate-900 border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between text-xs sticky top-0 z-40 backdrop-blur-md">
+      <div className="bg-slate-900/95 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between text-xs sticky top-0 z-40 backdrop-blur-md">
         <div className="flex items-center space-x-3">
           {onBackToFullWebsite && (
             <button
               onClick={onBackToFullWebsite}
-              className="flex items-center space-x-1.5 text-slate-300 hover:text-white font-bold transition-colors"
+              className="flex items-center space-x-1.5 text-slate-200 hover:text-white font-bold transition-colors"
             >
               <span>← মূল ওয়েবসাইট (Main Website)</span>
             </button>
@@ -666,7 +786,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         <div className="flex items-center space-x-2">
           <button
             onClick={handleShareClick}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg flex items-center space-x-1 transition-colors"
+            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg flex items-center space-x-1 transition-colors"
             title="Copy Ad Landing Link"
           >
             <Share2 className="w-3.5 h-3.5" />
@@ -685,61 +805,61 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </div>
 
       {/* SECTION 1: HERO & MAIN CTA */}
-      <header className="relative pt-8 pb-14 px-4 sm:px-6 max-w-7xl mx-auto overflow-hidden">
+      <header className="relative pt-6 sm:pt-8 pb-10 sm:pb-14 px-4 sm:px-6 max-w-7xl mx-auto overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           {/* Left Column: Headline, Subheadline, Guarantee & Badges */}
           <div className="lg:col-span-7 space-y-5 text-left">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-200 text-sm font-black tracking-wide">
-              <Flame className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse" />
+            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-500/20 border border-indigo-400/40 text-indigo-200 text-xs sm:text-sm font-black tracking-wide shadow-sm">
+              <Flame className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse shrink-0" />
               <span>{landingConfig.heroBadge || '🚀 স্পেশাল স্কলারশিপ ব্যাচ অ্যাডমিশন শুরু'}</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight sm:leading-tight tracking-tight">
               {landingConfig.headline || course.name}
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-200 font-medium leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-lg text-slate-100 font-medium leading-relaxed max-w-2xl">
               {landingConfig.subheadline ||
                 course.description ||
                 '১০০% প্র্যাকটিক্যাল কম্পিউটার ল্যাব ট্রেনিং, লাইভ মার্কেটপ্লেস ও প্রজেক্ট সাপোর্ট এবং চাকরি ও ফ্রিল্যান্সিং গাইডলাইন।'}
             </p>
 
             {/* Micro Highlights Pill */}
-            <div className="flex flex-wrap gap-2.5 text-xs sm:text-sm">
-              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-slate-100 font-semibold shadow-xs">
+            <div className="flex flex-wrap gap-2 sm:gap-2.5 text-xs sm:text-sm">
+              <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/90 px-3.5 py-2 rounded-xl text-white font-bold shadow-xs">
                 <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>{course.durationMonths} মাস প্র্যাকটিক্যাল ট্রেনিং</span>
               </div>
-              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-slate-100 font-semibold shadow-xs">
+              <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/90 px-3.5 py-2 rounded-xl text-white font-bold shadow-xs">
                 <Laptop className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>ডেডিকেটেড হাই-কনফিগ পিসি ল্যাব</span>
               </div>
-              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-slate-100 font-semibold shadow-xs">
+              <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/90 px-3.5 py-2 rounded-xl text-white font-bold shadow-xs">
                 <Award className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>ভেরিফায়েবল সার্টিফিকেট</span>
               </div>
             </div>
 
             {/* Pricing Box & Countdown Card */}
-            <div className="p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/70 border border-indigo-500/40 rounded-3xl space-y-4 shadow-xl">
+            <div className="p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/80 border border-indigo-500/50 rounded-3xl space-y-4 shadow-xl">
               <div className="flex flex-wrap items-baseline gap-3">
                 <span className="text-3xl sm:text-4xl font-black text-white">
                   ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}
                 </span>
                 {course.regularFee && (
-                  <span className="text-lg text-slate-300 line-through font-bold">
+                  <span className="text-base sm:text-lg text-slate-300 line-through font-semibold">
                     ৳{course.regularFee.toLocaleString()}
                   </span>
                 )}
-                <span className="px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/40 text-xs sm:text-sm font-black">
+                <span className="px-3 py-1 rounded-full bg-rose-500/25 text-rose-200 border border-rose-400/50 text-xs sm:text-sm font-black shadow-xs">
                   {landingConfig.customDiscountBadge || `${discountPercent}% স্কলারশিপ ছাড়`}
                 </span>
               </div>
 
               {landingConfig.showBatchCountdown && (
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-amber-200 font-bold bg-amber-500/15 border border-amber-500/30 px-4 py-2.5 rounded-2xl">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-amber-200 font-bold bg-amber-500/20 border border-amber-500/40 px-4 py-2.5 rounded-2xl">
                   <span>পরবর্তী ব্যাচ শুরু: {landingConfig.nextBatchStartDate || '১৫ মে, ২০২৬'}</span>
                   <span className="text-amber-300 font-black whitespace-nowrap shrink-0">বাকি সিট: {landingConfig.availableSeats || 8} টি</span>
                 </div>
@@ -762,7 +882,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 {ctaMode !== 'admission_only' && (
                   <div className="p-3.5 bg-slate-950/90 border border-slate-700 rounded-2xl space-y-2.5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-xs sm:text-sm font-bold text-slate-200 flex items-center gap-2">
+                      <span className="text-xs sm:text-sm font-bold text-slate-100 flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
                         <span>সরাসরি কথা বলতে চাইলে মেসেজ করুন:</span>
                       </span>
@@ -804,7 +924,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
               {/* Trust Guarantee Note */}
               {landingConfig.guaranteeText && (
-                <div className="flex items-center space-x-2 text-xs sm:text-sm text-slate-300 pt-1 font-medium">
+                <div className="flex items-center space-x-2 text-xs sm:text-sm text-slate-200 pt-1 font-medium">
                   <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>{landingConfig.guaranteeText}</span>
                 </div>
@@ -895,7 +1015,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       : 'ফ্রি ২০ মিনিটের ক্যারিয়ার ও ল্যাব ভিজিট কাউন্সিলিং'}
                   </h3>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
                   {leadFormMode === 'admission'
                     ? 'আপনার নাম ও মোবাইল নাম্বার দিন, আমাদের টিম কল দিয়ে স্কলারশিপ অফার কনফার্ম করবে।'
                     : 'ফার্মগেট ক্যাম্পাসে সরাসরি এসে ল্যাব ঘুরে দেখুন এবং এক্সপার্ট মেন্টরের সাথে ক্যারিয়ার পরামর্শ নিন (সম্পূর্ণ ফ্রি)।'}
@@ -903,14 +1023,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               </div>
 
               {leadSuccess ? (
-                <div className="p-6 bg-emerald-950/50 border border-emerald-500/40 rounded-2xl text-center space-y-2.5">
+                <div className="p-6 bg-emerald-950/60 border border-emerald-500/50 rounded-2xl text-center space-y-2.5">
                   <CheckCircle2 className="w-11 h-11 text-emerald-400 mx-auto" />
                   <h4 className="font-black text-white text-base">
                     {leadFormMode === 'counseling'
                       ? 'ধন্যবাদ! আপনার ফ্রি কাউন্সিলিং রিকোয়েস্ট গ্রহণ করা হয়েছে।'
                       : 'ধন্যবাদ! আপনার অ্যাডমিশন রিকোয়েস্ট গ্রহণ করা হয়েছে।'}
                   </h4>
-                  <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed">
                     আমাদের সিনিয়র কাউন্সেলর টিম দ্রুত আপনার দেওয়া নাম্বারে কল দিয়ে সময় ও ব্যাচ কনফার্ম করবে।
                   </p>
                 </div>
@@ -935,7 +1055,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   )}
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-100 uppercase tracking-wider mb-1.5">
                       আপনার নাম *
                     </label>
                     <input
@@ -944,12 +1064,12 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       value={leadName}
                       onChange={e => setLeadName(e.target.value)}
                       placeholder="e.g. মোঃ সাকিব হাসান"
-                      className="w-full px-4 py-3 bg-slate-800/90 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 bg-slate-800/90 border border-slate-600 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-100 uppercase tracking-wider mb-1.5">
                       সচল মোবাইল নাম্বার (১১ ডিজিট) *
                     </label>
                     <input
@@ -958,39 +1078,104 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       value={leadPhone}
                       onChange={e => setLeadPhone(e.target.value)}
                       placeholder="017XXXXXXXX"
-                      className="w-full px-4 py-3 bg-slate-800/90 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 bg-slate-800/90 border border-slate-600 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-100 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                      <span className="flex items-center space-x-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>ঠিকানা / এলাকা (Address) *</span>
+                      </span>
+                      <span className="text-[11px] text-slate-200 font-medium">যেমন: ফার্মগেট / মিরপুর / ধানমন্ডি</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={leadAddress}
+                      onChange={e => setLeadAddress(e.target.value)}
+                      placeholder="আপনার বর্তমান ঠিকানা বা এলাকার নাম লিখুন"
+                      className="w-full px-4 py-3 bg-slate-800/90 border border-slate-600 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
-                        ইমেইল (ঐচ্ছিক)
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-bold text-slate-100 uppercase tracking-wider flex items-center space-x-1.5">
+                          <Clock className="w-3.5 h-3.5 text-amber-400" />
+                          <span>পছন্দের শিডিউল *</span>
+                        </label>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => setIsCustomSchedule(!isCustomSchedule)}
+                            className="text-xs text-indigo-300 hover:text-indigo-100 underline font-bold flex items-center space-x-0.5 cursor-pointer"
+                          >
+                            <Edit3 className="w-3 h-3 mr-0.5 inline" />
+                            <span>{isCustomSchedule ? '📋 ড্রপডাউন তালিকা' : '✏️ ম্যানুয়ালি লিখুন'}</span>
+                          </button>
+                          {canEdit && (
+                            <button
+                              type="button"
+                              onClick={handleOpenAddSchedule}
+                              className="text-xs text-emerald-300 hover:text-emerald-100 underline font-bold flex items-center space-x-0.5 cursor-pointer"
+                              title="শিডিউল ম্যানেজ ও এডিট করুন (শুধুমাত্র অ্যাডমিন)"
+                            >
+                              <span>[⚙️ শিডিউল এডিট]</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {isCustomSchedule ? (
+                        <div className="space-y-1.5">
+                          <input
+                            type="text"
+                            required
+                            value={customScheduleInput}
+                            onChange={e => setCustomScheduleInput(e.target.value)}
+                            placeholder="যেমন: শুক্র ও শনিবার সকাল ১০টা, বা যেকোনো সুবিধাজনক বার ও সময়"
+                            className="w-full px-4 py-3 bg-slate-800/90 border-2 border-indigo-500 rounded-xl text-sm text-white placeholder:text-slate-400 font-bold focus:outline-hidden focus:ring-2 focus:ring-indigo-400"
+                          />
+                          <p className="text-[11px] text-indigo-300 font-medium">
+                            💡 আপনার সুবিধাজনক দিন, তারিখ বা সময় নিজের মতো সরাসরি লিখে দিন।
+                          </p>
+                        </div>
+                      ) : (
+                        <select
+                          value={leadSchedule}
+                          onChange={e => {
+                            if (e.target.value === '__custom_manual__') {
+                              setIsCustomSchedule(true);
+                            } else {
+                              setLeadSchedule(e.target.value);
+                            }
+                          }}
+                          className="w-full px-4 py-3 bg-slate-800/90 border border-slate-600 rounded-xl text-sm text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-bold"
+                        >
+                          {availableSchedules.map(sch => (
+                            <option key={sch.id} value={sch.label}>
+                              {sch.label} {sch.availableSeats ? `(${sch.availableSeats} সিট বাকি)` : ''}
+                            </option>
+                          ))}
+                          <option value="__custom_manual__">✏️ অন্য যেকোনো সময় ম্যানুয়ালি লিখুন...</option>
+                        </select>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-100 uppercase tracking-wider mb-1.5">
+                        ইমেইল এড্রেস (ঐচ্ছিক)
                       </label>
                       <input
                         type="email"
                         value={leadEmail}
                         onChange={e => setLeadEmail(e.target.value)}
                         placeholder="email@example.com"
-                        className="w-full px-3.5 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-2.5 bg-slate-800/90 border border-slate-600 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                       />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1.5">
-                        পছন্দের শিডিউল
-                      </label>
-                      <select
-                        value={leadSchedule}
-                        onChange={e => setLeadSchedule(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-bold"
-                      >
-                        {availableSchedules.map(sch => (
-                          <option key={sch.id} value={sch.label}>
-                            {sch.label} {sch.availableSeats ? `(${sch.availableSeats} সিট বাকি)` : ''}
-                          </option>
-                        ))}
-                      </select>
                     </div>
                   </div>
 
@@ -1017,7 +1202,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       </>
                     )}
                   </button>
-                  <p className="text-xs text-slate-300 font-medium text-center">
+                  <p className="text-xs text-slate-200 font-medium text-center">
                     🔒 সম্পূর্ণ গোপনীয় ও সুরক্ষিত। স্প্যামমুক্ত নিশ্চয়তা।
                   </p>
                 </form>
@@ -1028,51 +1213,51 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </header>
 
       {/* SECTION 1.5: QUICK SNAPSHOT INFO BAR */}
-      <section className="bg-slate-900/90 border-y border-slate-800 py-6 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
-          <div className="flex items-center space-x-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left shadow-xs min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center shrink-0">
+      <section className="bg-slate-900 border-y border-slate-800 py-6 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
+          <div className="flex items-center space-x-3 p-3 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-700/70 text-left shadow-xs min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">কোর্স মেয়াদ ও সেশন</span>
-              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug">
+              <span className="text-xs text-slate-200 font-bold uppercase tracking-wider block truncate">কোর্স মেয়াদ ও সেশন</span>
+              <p className="text-xs sm:text-base font-black text-white mt-0.5 leading-snug truncate">
                 {landingConfig.quickSnapshot?.duration || `${course.durationMonths || 3} মাস`} / {landingConfig.quickSnapshot?.totalSessions || '২৪টি ল্যাব'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left shadow-xs min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+          <div className="flex items-center space-x-3 p-3 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-700/70 text-left shadow-xs min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
               <Laptop className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">ল্যাব ও কম্পিউটার</span>
-              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug">
+              <span className="text-xs text-slate-200 font-bold uppercase tracking-wider block truncate">ল্যাব ও কম্পিউটার</span>
+              <p className="text-xs sm:text-base font-black text-white mt-0.5 leading-snug truncate">
                 {landingConfig.quickSnapshot?.batchSize || '১ শিক্ষার্থী = ১ পিসি'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left shadow-xs min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+          <div className="flex items-center space-x-3 p-3 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-700/70 text-left shadow-xs min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
               <Briefcase className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">লাইভ প্রজেক্ট</span>
-              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug">
+              <span className="text-xs text-slate-200 font-bold uppercase tracking-wider block truncate">লাইভ প্রজেক্ট</span>
+              <p className="text-xs sm:text-base font-black text-white mt-0.5 leading-snug truncate">
                 {landingConfig.quickSnapshot?.projectsCount || '১০+ রিয়েল ফাইল'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left shadow-xs min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center shrink-0">
+          <div className="flex items-center space-x-3 p-3 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-700/70 text-left shadow-xs min-w-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">সাপোর্ট ও ব্যাকআপ</span>
-              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug">
+              <span className="text-xs text-slate-200 font-bold uppercase tracking-wider block truncate">সাপোর্ট ও ব্যাকআপ</span>
+              <p className="text-xs sm:text-base font-black text-white mt-0.5 leading-snug truncate">
                 {landingConfig.quickSnapshot?.supportType || 'লাইফটাইম সাপোর্ট'}
               </p>
             </div>
@@ -1082,17 +1267,17 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
       {/* SECTION 2: PROBLEM VS REALITY (PAIN POINTS & MODERN WORKPLACE) */}
       {painPoints.length > 0 && (
-        <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60">
+        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800">
           <div className="text-center space-y-2.5 mb-8">
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-bold">
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs sm:text-sm font-bold shadow-xs">
               <Flame className="w-4 h-4 text-rose-400" />
               <span>চ্যালেঞ্জ ও আধুনিক সমাধান</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
               {landingConfig.painPointsHeadline || 'পুরোনো পদ্ধতি বনাম ২০২৬-এর স্মার্ট অফিস স্কিল'}
             </h2>
             {landingConfig.painPointsSubheadline && (
-              <p className="text-sm sm:text-base text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
+              <p className="text-xs sm:text-base text-slate-200 font-medium max-w-2xl mx-auto leading-relaxed">
                 {landingConfig.painPointsSubheadline}
               </p>
             )}
@@ -1102,18 +1287,18 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             {painPoints.map((pt, idx) => (
               <div
                 key={idx}
-                className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4 hover:border-slate-700 transition-all text-left shadow-md"
+                className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 space-y-4 hover:border-slate-600 transition-all text-left shadow-lg"
               >
                 {/* Problem */}
                 <div className="flex items-start space-x-3 text-rose-300">
-                  <div className="w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 mt-0.5 text-sm font-black">
+                  <div className="w-7 h-7 rounded-full bg-rose-500/25 text-rose-300 flex items-center justify-center shrink-0 mt-0.5 text-sm font-black border border-rose-500/40">
                     ✕
                   </div>
                   <div>
-                    <span className="text-xs font-black text-rose-400 uppercase tracking-wider block">
+                    <span className="text-xs font-black text-rose-300 uppercase tracking-wider block">
                       পুরোনো সমস্যা:
                     </span>
-                    <p className="text-sm font-semibold text-slate-200 mt-1 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-100 mt-1 leading-relaxed">
                       {pt.problem}
                     </p>
                   </div>
@@ -1123,14 +1308,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
                 {/* Solution */}
                 <div className="flex items-start space-x-3 text-emerald-300">
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 text-sm font-black">
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/25 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5 text-sm font-black border border-emerald-500/40">
                     ✓
                   </div>
                   <div>
-                    <span className="text-xs font-black text-emerald-400 uppercase tracking-wider block">
+                    <span className="text-xs font-black text-emerald-300 uppercase tracking-wider block">
                       আমাদের ২০২৬ AI সল্যুশন:
                     </span>
-                    <p className="text-sm font-bold text-white mt-1 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-bold text-white mt-1 leading-relaxed">
                       {pt.solution}
                     </p>
                   </div>
@@ -1143,13 +1328,13 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
       {/* SECTION 3: KEY FEATURES & WHY CHOOSE US */}
       {featureCards.length > 0 && (
-        <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60">
+        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800">
           <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
               <Sparkles className="w-4 h-4" />
               <span>কোর্সের বিশেষ সুবিধা সমূহ</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
               {landingConfig.whyChooseHeadline || 'কেন আমাদের এই কোর্সটি আপনার ক্যারিয়ার বদলে দেবে?'}
             </h2>
           </div>
@@ -1158,13 +1343,13 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             {featureCards.map((card, idx) => (
               <div
                 key={idx}
-                className="bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 rounded-3xl p-5 sm:p-6 space-y-3 transition-all group shadow-md"
+                className="bg-slate-900 border border-slate-700/80 hover:border-indigo-500/60 rounded-3xl p-5 sm:p-6 space-y-3 transition-all group shadow-lg"
               >
-                <div className="w-12 h-12 rounded-2xl bg-slate-800 group-hover:bg-indigo-600/20 border border-slate-700 group-hover:border-indigo-500/40 flex items-center justify-center transition-colors">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 group-hover:bg-indigo-600/30 border border-slate-700 group-hover:border-indigo-500/50 flex items-center justify-center transition-colors">
                   {renderFeatureIcon(card.iconName)}
                 </div>
                 <h4 className="font-black text-white text-base sm:text-lg">{card.title}</h4>
-                <p className="text-sm text-slate-300 leading-relaxed">{card.description}</p>
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{card.description}</p>
               </div>
             ))}
           </div>
@@ -1172,16 +1357,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       )}
 
       {/* SECTION 4: EDITABLE RICH CURRICULUM MODULES */}
-      <section className="py-14 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800/60 text-left">
+      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800 text-left">
         <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
             <BookOpen className="w-4 h-4" />
             <span>সিলেবাস ও প্রজেক্ট কারিকুলাম</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
             {landingConfig.curriculumHeadline || 'হাতে-কলমে যা যা শেখানো হবে (১০০% প্র্যাকটিক্যাল ল্যাব)'}
           </h2>
-          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
+          <p className="text-xs sm:text-base text-slate-200 max-w-xl mx-auto">
             {landingConfig.curriculumSubheadline || 'বেসিক থেকে ইন্ডাস্ট্রি লেভেল প্রজেক্ট পর্যন্ত সম্পূর্ণ স্টেপ-বাই-স্টেপ গাইডলাইন'}
           </p>
         </div>
@@ -1192,15 +1377,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             return (
               <div
                 key={mod.id || idx}
-                className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden transition-all hover:border-slate-700"
+                className="bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden transition-all hover:border-slate-600 shadow-sm"
               >
                 <button
                   type="button"
                   onClick={() => setOpenModuleIndex(isOpen ? null : idx)}
-                  className="w-full p-4.5 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
+                  className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center space-x-3.5">
-                    <span className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 font-black text-sm flex items-center justify-center shrink-0">
+                    <span className="w-8 h-8 rounded-xl bg-indigo-500/25 text-indigo-200 font-black text-sm flex items-center justify-center shrink-0 border border-indigo-500/40">
                       {mod.moduleNumber || idx + 1}
                     </span>
                     <div>
@@ -1208,7 +1393,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       {mod.subtitle && (
                         <p className="text-xs sm:text-sm text-indigo-300 font-medium">{mod.subtitle}</p>
                       )}
-                      <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                      <p className="text-xs text-slate-300 mt-0.5 font-medium">
                         {mod.estimatedClasses ? `${mod.estimatedClasses}` : '৪টি প্র্যাকটিক্যাল সেশন'}
                       </p>
                     </div>
@@ -1216,26 +1401,26 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   {isOpen ? (
                     <ChevronUp className="w-5 h-5 text-indigo-400" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-slate-500" />
+                    <ChevronDown className="w-5 h-5 text-slate-400" />
                   )}
                 </button>
 
                 {isOpen && (
-                  <div className="p-5 pt-1 border-t border-slate-800/80 bg-slate-950/60 space-y-3.5">
+                  <div className="p-4 sm:p-5 pt-1 border-t border-slate-800 bg-slate-950/80 space-y-3.5">
                     {mod.description && (
-                      <p className="text-sm text-slate-200 leading-relaxed">{mod.description}</p>
+                      <p className="text-xs sm:text-sm text-slate-100 leading-relaxed font-normal">{mod.description}</p>
                     )}
 
                     {mod.topics && mod.topics.length > 0 && (
                       <div className="space-y-2 pt-1">
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">
+                        <span className="text-xs font-black text-slate-300 uppercase tracking-wider block">
                           টপিকসমূহ:
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
                           {mod.topics.map((t, tidx) => (
                             <div
                               key={tidx}
-                              className="flex items-center space-x-2 text-sm text-slate-200 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800/80"
+                              className="flex items-center space-x-2 text-xs sm:text-sm text-slate-100 bg-slate-900 p-2.5 rounded-xl border border-slate-700/80"
                             >
                               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                               <span className="font-medium">{t}</span>
@@ -1246,7 +1431,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     )}
 
                     {mod.practicalProject && (
-                      <div className="p-3.5 bg-indigo-950/60 border border-indigo-500/30 rounded-xl text-sm flex items-center space-x-2.5 text-indigo-200">
+                      <div className="p-3.5 bg-indigo-950/70 border border-indigo-500/40 rounded-xl text-xs sm:text-sm flex items-center space-x-2.5 text-indigo-100">
                         <Briefcase className="w-4 h-4 text-indigo-400 shrink-0" />
                         <span>
                           <strong className="font-bold text-white">রিয়েল প্রজেক্ট:</strong> {mod.practicalProject}
@@ -1262,84 +1447,171 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* SECTION 4.5: PREFERRED SCHEDULES & BATCH TIMINGS */}
-      {availableSchedules.length > 0 && (
-        <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
-          <div className="text-center space-y-2.5 mb-8">
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-bold">
-              <Calendar className="w-4 h-4" />
-              <span>সুবিধাজনক ক্লাসের সময়সূচী</span>
+      <section id="schedules-section" className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div className="space-y-2.5">
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs sm:text-sm font-bold shadow-xs">
+              <Calendar className="w-4 h-4 text-emerald-400" />
+              <span>সুবিধাজনক ক্লাসের সময়সূচী ও ব্যাচ</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
               {landingConfig.preferredSchedulesTitle || 'পছন্দের ব্যাচ ও ক্লাসের শিডিউল নির্বাচন করুন'}
             </h2>
-            <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              আপনার পড়াশোনা বা চাকুরির পাশাপাশি সুবিধাজনক স্লটে ক্লাস করতে পছন্দের দিন ও সময় বেছে নিন
+            <p className="text-xs sm:text-base text-slate-200 max-w-2xl leading-relaxed">
+              আপনার পড়াশোনা বা চাকুরির পাশাপাশি সুবিধাজনক স্লটে ক্লাস করতে পছন্দের দিন, সময় ও শুরুর তারিখ বেছে নিন
             </p>
           </div>
 
+          {canEdit && (
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleOpenAddSchedule}
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-xs sm:text-sm flex items-center space-x-1.5 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ ম্যানুয়ালি নতুন শিডিউল যোগ করুন</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditorOpen(true)}
+                className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 transition-colors cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-indigo-400" />
+                <span>এডিটর ওপেন</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {availableSchedules.length === 0 ? (
+          <div className="p-8 text-center bg-slate-900 border border-slate-800 rounded-3xl space-y-3">
+            <Clock className="w-10 h-10 text-emerald-400 mx-auto" />
+            <h4 className="text-white font-bold text-base">বর্তমানে কোনো শিডিউল তালিকাভুক্ত নেই</h4>
+            <p className="text-xs sm:text-sm text-slate-300">শিডিউল শীঘ্রই আপডেট করা হবে অথবা উপরে সরাসরি আপনার সুবিধাজনক সময় লিখে আবেদন করতে পারেন।</p>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={handleOpenAddSchedule}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs sm:text-sm inline-flex items-center space-x-1.5 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>প্রথম শিডিউল যোগ করুন</span>
+              </button>
+            )}
+          </div>
+        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {availableSchedules.map((sch, idx) => {
-              const isSelected = leadSchedule === sch.label;
+              const isSelected = !isCustomSchedule && leadSchedule === sch.label;
               return (
                 <div
                   key={sch.id || idx}
-                  onClick={() => {
-                    setLeadSchedule(sch.label);
-                    document.getElementById('fast-lead-form-box')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className={`bg-slate-900/90 rounded-3xl p-5 border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 hover:border-emerald-500/50 shadow-lg ${
-                    isSelected ? 'border-emerald-500 bg-emerald-950/20 ring-2 ring-emerald-500/30' : 'border-slate-800'
+                  className={`bg-slate-900 rounded-3xl p-5 border-2 transition-all flex flex-col justify-between space-y-4 hover:border-emerald-500/70 shadow-lg relative group ${
+                    isSelected ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/40' : 'border-slate-700/80'
                   }`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-200 text-xs font-black rounded-lg border border-emerald-500/30">
-                        {sch.days || 'Flexible'}
+                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-200 text-xs font-black rounded-lg border border-emerald-500/40 flex items-center space-x-1">
+                        <Calendar className="w-3 h-3 mr-1 text-emerald-400" />
+                        <span>{sch.days || 'Flexible'}</span>
                       </span>
-                      <span className="text-xs font-bold text-slate-300 font-mono">
-                        {sch.mode || 'Offline'}
-                      </span>
+
+                      {canEdit && (
+                        <div className="flex items-center space-x-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEditSchedule(sch);
+                            }}
+                            className="p-1.5 text-slate-300 hover:text-white bg-slate-800 hover:bg-indigo-600 rounded-lg transition-colors cursor-pointer"
+                            title="এই শিডিউলটি এডিট করুন"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteScheduleDirectly(sch.id);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-rose-400 bg-slate-800 hover:bg-rose-950/60 rounded-lg transition-colors cursor-pointer"
+                            title="মুছে ফেলুন"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
 
-                    <h4 className="font-bold text-white text-base sm:text-lg leading-snug">{sch.label}</h4>
+                    <div
+                      className="space-y-2 cursor-pointer"
+                      onClick={() => {
+                        setIsCustomSchedule(false);
+                        setLeadSchedule(sch.label);
+                        document.getElementById('fast-lead-form-box')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
+                      <h4 className="font-bold text-white text-base sm:text-lg leading-snug">{sch.label}</h4>
 
-                    {sch.timeSlot && (
-                      <p className="text-sm text-slate-200 flex items-center space-x-2 font-mono font-medium">
-                        <Clock className="w-4 h-4 text-amber-400 shrink-0" />
-                        <span>{sch.timeSlot}</span>
-                      </p>
-                    )}
+                      {sch.timeSlot && (
+                        <p className="text-xs sm:text-sm text-slate-100 flex items-center space-x-2 font-mono font-medium">
+                          <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+                          <span>{sch.timeSlot}</span>
+                        </p>
+                      )}
+
+                      {sch.startDate && (
+                        <p className="text-xs text-emerald-300 flex items-center space-x-1.5 font-bold">
+                          <span>🗓️ শুরুর তারিখ:</span>
+                          <span className="text-white font-black">{sch.startDate}</span>
+                        </p>
+                      )}
+
+                      <div className="flex items-center space-x-2 text-[11px] text-slate-300 font-bold">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700">
+                          {sch.mode || 'Offline Lab'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="pt-3.5 border-t border-slate-800/80 flex items-center justify-between text-xs sm:text-sm">
-                    <span className="text-amber-300 font-bold">
-                      🔥 {sch.availableSeats || 8} Seats Remaining
+                  <div className="pt-3.5 border-t border-slate-800 flex items-center justify-between text-xs sm:text-sm">
+                    <span className="text-amber-300 font-black">
+                      🔥 {sch.availableSeats || 8} সিট বাকি
                     </span>
                     <button
                       type="button"
-                      className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                        isSelected ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                      onClick={() => {
+                        setIsCustomSchedule(false);
+                        setLeadSchedule(sch.label);
+                        document.getElementById('fast-lead-form-box')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                        isSelected ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-100 hover:bg-slate-700'
                       }`}
                     >
-                      {isSelected ? 'Selected ✓' : 'Select'}
+                      {isSelected ? 'Selected ✓' : 'বেছে নিন'}
                     </button>
                   </div>
                 </div>
               );
             })}
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* SECTION 5: TARGET AUDIENCE (WHO IS THIS COURSE FOR) */}
       {audienceList.length > 0 && (
-        <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
           <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs sm:text-sm font-bold">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-bold">
               <Target className="w-4 h-4" />
               <span>কার জন্য এই কোর্সটি</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
               {landingConfig.audienceHeadline || 'এই কোর্সটি কাদের জন্য ১০০% উপযুক্ত?'}
             </h2>
           </div>
@@ -1348,14 +1620,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             {audienceList.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-3 flex flex-col justify-between hover:border-purple-500/40 transition-all shadow-md"
+                className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 space-y-3 flex flex-col justify-between hover:border-purple-500/50 transition-all shadow-md"
               >
                 <div>
-                  <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 font-black text-sm flex items-center justify-center mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/25 text-purple-200 font-black text-sm flex items-center justify-center mb-3 border border-purple-500/40">
                     {idx + 1}
                   </div>
                   <h4 className="font-bold text-white text-base leading-snug">{item.group}</h4>
-                  <p className="text-sm text-slate-300 mt-2 leading-relaxed">{item.benefit}</p>
+                  <p className="text-xs sm:text-sm text-slate-200 mt-2 leading-relaxed font-normal">{item.benefit}</p>
                 </div>
               </div>
             ))}
@@ -1365,31 +1637,31 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
       {/* SECTION 6: FREE BONUSES & PERKS */}
       {bonusItems.length > 0 && (
-        <section className="py-14 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800/60 text-left">
-          <div className="bg-gradient-to-br from-indigo-950/80 via-slate-900 to-purple-950/60 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800 text-left">
+          <div className="bg-gradient-to-br from-indigo-950/90 via-slate-900 to-purple-950/70 border border-indigo-500/40 rounded-3xl p-5 sm:p-8 space-y-6 shadow-2xl">
             <div className="text-center space-y-2">
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs sm:text-sm font-black border border-amber-500/30">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-200 text-xs sm:text-sm font-black border border-amber-500/40">
                 <Gift className="w-4 h-4 text-amber-400" />
                 <span>স্পেশাল ফ্রি বোনাস প্যাকেজ</span>
               </div>
-              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+              <h3 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
                 {landingConfig.bonusHeadline || 'কোর্সে ভর্তির সাথে সাথে যা যা ফ্রি পাবেন'}
               </h3>
-              <p className="text-sm text-slate-300">
+              <p className="text-xs sm:text-sm text-slate-200 font-medium">
                 এই ব্যাচে ভর্তি হওয়া শিক্ষার্থীদের জন্য সম্পূর্ণ ফ্রিতে লাইফটাইম অ্যাক্সেস সহ প্রদান করা হবে
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
               {bonusItems.map((bonus, idx) => (
                 <div
                   key={idx}
-                  className="p-4 bg-slate-900/90 border border-indigo-500/20 rounded-2xl flex items-center space-x-3.5 shadow-sm"
+                  className="p-4 bg-slate-900 border border-indigo-500/30 rounded-2xl flex items-center space-x-3.5 shadow-sm"
                 >
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-black">
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/25 text-emerald-300 flex items-center justify-center shrink-0 font-black border border-emerald-500/40">
                     <Check className="w-4 h-4" />
                   </div>
-                  <span className="text-sm font-bold text-white leading-snug">{bonus}</span>
+                  <span className="text-xs sm:text-sm font-bold text-white leading-snug">{bonus}</span>
                 </div>
               ))}
             </div>
@@ -1398,28 +1670,28 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       )}
 
       {/* SECTION 7: TRAINERS & FACULTY */}
-      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
         <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
             <Users className="w-4 h-4" />
             <span>ইন্ডাস্ট্রি এক্সপার্ট ট্রেইনার</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">আপনার মেন্টর ও ফ্যাকাল্টি প্যানেল</h2>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">আপনার মেন্টর ও ফ্যাকাল্টি প্যানেল</h2>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto font-medium">
             বাস্তব সফটওয়্যার ফার্ম ও টপ-রেটেড ফ্রিল্যান্সিংয়ে দীর্ঘদিনের অভিজ্ঞ মেন্টরদের সরাসরি গাইডেন্স
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {displayTrainers.map(trainer => (
             <div
               key={trainer.id}
-              className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5 shadow-lg"
+              className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5 shadow-lg"
             >
               <img
                 src={trainer.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'}
                 alt={trainer.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-indigo-500/30 shrink-0"
+                className="w-18 h-18 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-indigo-500/40 shrink-0"
               />
               <div className="space-y-1.5 flex-1">
                 <div className="flex items-center justify-between">
@@ -1428,12 +1700,12 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     {trainer.experienceYears} Years Exp
                   </span>
                 </div>
-                <p className="text-sm text-indigo-400 font-bold">{trainer.designation}</p>
-                <p className="text-sm text-slate-300 leading-relaxed">{trainer.shortBio}</p>
+                <p className="text-xs sm:text-sm text-indigo-300 font-bold">{trainer.designation}</p>
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{trainer.shortBio}</p>
                 {trainer.skills && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {trainer.skills.slice(0, 4).map((s, sidx) => (
-                      <span key={sidx} className="text-xs bg-slate-800 border border-slate-700 text-slate-200 px-2.5 py-0.5 rounded-lg font-medium">
+                      <span key={sidx} className="text-xs bg-slate-800 border border-slate-600 text-slate-100 px-2.5 py-0.5 rounded-lg font-semibold">
                         {s}
                       </span>
                     ))}
@@ -1448,43 +1720,44 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       {/* SECTION 8: STUDENT REVIEWS & TESTIMONIALS */}
       <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
         <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs sm:text-sm font-bold">
-            <Star className="w-4 h-4 fill-amber-400" />
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs sm:text-sm font-bold">
+            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             <span>শিক্ষার্থীদের মতামত ও সাফল্য</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">আমাদের গ্র্যাজুয়েটরা যা বলছেন</h2>
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">আমাদের গ্র্যাজুয়েটরা যা বলছেন</h2>
+          <p className="text-xs sm:text-sm text-slate-200 max-w-xl mx-auto font-medium">কোর্স সম্পন্ন করে যারা সফলভাবে ক্যারিয়ার শুরু করেছেন তাদের অভিজ্ঞতা</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           {/* Custom Reviews from landingConfig if available */}
           {customReviews.length > 0
             ? customReviews.map((rev, idx) => (
                 <div
                   key={idx}
-                  className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-700 transition-all"
+                  className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 font-black flex items-center justify-center text-base">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/25 text-amber-200 font-black flex items-center justify-center text-base border border-amber-500/40">
                           {rev.name.charAt(0)}
                         </div>
                         <div>
-                          <h4 className="font-bold text-white text-sm">{rev.name}</h4>
-                          <p className="text-xs text-slate-400">{rev.roleOrBatch}</p>
+                          <h4 className="font-bold text-white text-sm sm:text-base">{rev.name}</h4>
+                          <p className="text-xs text-slate-200 font-medium">{rev.roleOrBatch}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-0.5 text-amber-400">
                         <Star className="w-4 h-4 fill-amber-400" />
-                        <span className="text-xs font-bold">{rev.rating || 5}.0</span>
+                        <span className="text-xs font-black text-amber-300">{rev.rating || 5}.0</span>
                       </div>
                     </div>
 
-                    <p className="text-sm text-slate-200 leading-relaxed italic">"{rev.text}"</p>
+                    <p className="text-xs sm:text-sm text-slate-100 leading-relaxed italic">"{rev.text}"</p>
                   </div>
 
-                  <div className="text-xs text-slate-400 pt-2 border-t border-slate-800/80 font-medium">
-                    ✓ ভেরিফায়েড শিক্ষার্থী রিভিউ
+                  <div className="text-xs text-emerald-400 pt-2.5 border-t border-slate-800 font-semibold flex items-center gap-1">
+                    <span>✓ ভেরিফায়েড শিক্ষার্থী রিভিউ</span>
                   </div>
                 </div>
               ))
@@ -1492,7 +1765,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             ? displayCmsReviews.map(rev => (
                 <div
                   key={rev.id}
-                  className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-700 transition-all"
+                  className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -1500,23 +1773,23 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                         <img
                           src={rev.studentPhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
                           alt={rev.studentName}
-                          className="w-11 h-11 rounded-xl object-cover ring-1 ring-amber-400/40"
+                          className="w-11 h-11 rounded-xl object-cover ring-2 ring-amber-400/50"
                         />
                         <div>
-                          <h4 className="font-bold text-white text-sm">{rev.studentName}</h4>
-                          <p className="text-xs text-slate-400">{rev.profession || 'Student'}</p>
+                          <h4 className="font-bold text-white text-sm sm:text-base">{rev.studentName}</h4>
+                          <p className="text-xs text-slate-200 font-medium">{rev.profession || 'Student'}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-0.5 text-amber-400">
                         <Star className="w-4 h-4 fill-amber-400" />
-                        <span className="text-xs font-bold">{rev.rating}.0</span>
+                        <span className="text-xs font-black text-amber-300">{rev.rating}.0</span>
                       </div>
                     </div>
 
-                    <p className="text-sm text-slate-200 leading-relaxed italic">"{rev.reviewText}"</p>
+                    <p className="text-xs sm:text-sm text-slate-100 leading-relaxed italic">"{rev.reviewText}"</p>
                   </div>
 
-                  <div className="text-xs text-slate-400 pt-2 border-t border-slate-800/80 font-medium">
+                  <div className="text-xs text-slate-200 pt-2.5 border-t border-slate-800 font-semibold">
                     {rev.batchNumber} • {rev.location}
                   </div>
                 </div>
@@ -1524,30 +1797,30 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             : DEFAULT_REVIEWS.map((rev, idx) => (
                 <div
                   key={idx}
-                  className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-700 transition-all"
+                  className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 font-black flex items-center justify-center text-base">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/25 text-amber-200 font-black flex items-center justify-center text-base border border-amber-500/40">
                           {rev.name.charAt(0)}
                         </div>
                         <div>
-                          <h4 className="font-bold text-white text-sm">{rev.name}</h4>
-                          <p className="text-xs text-slate-400">{rev.roleOrBatch}</p>
+                          <h4 className="font-bold text-white text-sm sm:text-base">{rev.name}</h4>
+                          <p className="text-xs text-slate-200 font-medium">{rev.roleOrBatch}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-0.5 text-amber-400">
                         <Star className="w-4 h-4 fill-amber-400" />
-                        <span className="text-xs font-bold">{rev.rating || 5}.0</span>
+                        <span className="text-xs font-black text-amber-300">{rev.rating || 5}.0</span>
                       </div>
                     </div>
 
-                    <p className="text-sm text-slate-200 leading-relaxed italic">"{rev.text}"</p>
+                    <p className="text-xs sm:text-sm text-slate-100 leading-relaxed italic">"{rev.text}"</p>
                   </div>
 
-                  <div className="text-xs text-slate-400 pt-2 border-t border-slate-800/80 font-medium">
-                    ✓ ভেরিফায়েড শিক্ষার্থী রিভিউ
+                  <div className="text-xs text-emerald-400 pt-2.5 border-t border-slate-800 font-semibold flex items-center gap-1">
+                    <span>✓ ভেরিফায়েড শিক্ষার্থী রিভিউ</span>
                   </div>
                 </div>
               ))}
@@ -1555,41 +1828,41 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* SECTION 8.5: CERTIFICATE SHOWCASE & VERIFICATION */}
-      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
         <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs sm:text-sm font-bold">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-200 text-xs sm:text-sm font-bold">
             <Award className="w-4 h-4 text-amber-400" />
             <span>প্রফেশনাল ভেরিফায়েড সার্টিফিকেট</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
             {landingConfig.certificateConfig?.headline || 'কোর্স শেষে ভেরিফায়েবল প্রফেশনাল সার্টিফিকেট'}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-slate-200 max-w-2xl mx-auto font-medium">
             {landingConfig.certificateConfig?.subheadline || 'প্রতিটি সার্টিফিকেটে রয়েছে ইউনিক কিউআর কোড (QR Code) যা স্ক্যান করে দেশ-বিদেশের যেকোনো প্রতিষ্ঠান থেকে অনলাইন ভেরিফাই করা যাবে।'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-8 shadow-xl">
           {/* Left Certificate Mockup Preview */}
           <div className="lg:col-span-6 relative group">
-            <div className="rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-2xl bg-slate-950 p-2 sm:p-3 relative">
-              <div className="border border-amber-500/20 rounded-xl p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/40 text-center space-y-4">
+            <div className="rounded-2xl overflow-hidden border-2 border-amber-500/50 shadow-2xl bg-slate-950 p-2 sm:p-3 relative">
+              <div className="border border-amber-500/30 rounded-xl p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/50 text-center space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div className="flex items-center space-x-2">
                     <Award className="w-6 h-6 text-amber-400" />
-                    <span className="font-black text-xs uppercase tracking-widest text-amber-400">Academy Certificate</span>
+                    <span className="font-black text-xs uppercase tracking-widest text-amber-300">Academy Certificate</span>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 bg-amber-500/10 text-amber-300 rounded border border-amber-500/20 font-bold">
+                  <span className="text-[10px] font-mono px-2 py-0.5 bg-amber-500/20 text-amber-200 rounded border border-amber-500/30 font-bold">
                     ISO & Govt Reg. Compliant
                   </span>
                 </div>
 
-                <div className="space-y-1 py-2">
-                  <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">This is proudly presented to</p>
-                  <h3 className="text-xl sm:text-2xl font-black text-white text-indigo-300">
+                <div className="space-y-1.5 py-2">
+                  <p className="text-[11px] text-slate-200 uppercase tracking-wider font-semibold">This is proudly presented to</p>
+                  <h3 className="text-xl sm:text-2xl font-black text-indigo-200">
                     {landingConfig.certificateConfig?.sampleStudentName || 'মোঃ তানভীর হাসান'}
                   </h3>
-                  <p className="text-xs text-slate-300">
+                  <p className="text-xs text-slate-200 font-medium">
                     for successfully completing hands-on practical training in
                   </p>
                   <h4 className="text-sm sm:text-base font-black text-amber-300">
@@ -1597,13 +1870,13 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   </h4>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-[10px] text-slate-400">
+                <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-[10px] text-slate-200 font-medium">
                   <div className="text-left">
-                    <span className="block font-mono text-slate-300">ID: NXC-2026-{course.id?.slice(0, 5) || '9823'}</span>
+                    <span className="block font-mono text-slate-100 font-bold">ID: NXC-2026-{course.id?.slice(0, 5) || '9823'}</span>
                     <span>Issued with Distinction</span>
                   </div>
-                  <div className="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-emerald-400 font-bold flex items-center space-x-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  <div className="px-2.5 py-1 bg-slate-900 border border-slate-700 rounded-lg text-emerald-300 font-bold flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                     <span>QR Verified</span>
                   </div>
                 </div>
@@ -1621,15 +1894,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 'দেশীয় কর্পোরেট অফিস এবং রিমোট/ফ্রিল্যান্স মার্কেটপ্লেসে সম্পূর্ণ গ্রহণযোগ্য',
                 'লাইফটাইম ডিজিটাল ভেরিফিকেশন লিংক ও প্রিন্টযোগ্য হাই-রেজুলেশন হার্ডকপি'
               ]).map((feat, fIdx) => (
-                <div key={fIdx} className="flex items-start space-x-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                <div key={fIdx} className="flex items-start space-x-3 p-3.5 rounded-xl bg-slate-950/80 border border-slate-700/70">
                   <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                  <span className="text-xs sm:text-sm text-slate-200 font-semibold leading-relaxed">{feat}</span>
+                  <span className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed">{feat}</span>
                 </div>
               ))}
             </div>
 
-            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center space-x-2 text-xs text-amber-300 font-bold">
-              <ShieldCheck className="w-4 h-4 shrink-0" />
+            <div className="p-3.5 bg-amber-500/15 border border-amber-500/30 rounded-2xl flex items-center space-x-2.5 text-xs sm:text-sm text-amber-200 font-bold">
+              <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0" />
               <span>{landingConfig.certificateConfig?.verificationNote || 'আমাদের সার্টিফিকেট দেশের শীর্ষস্থানীয় শতাধিক প্রতিষ্ঠানে মূল্যায়নযোগ্য।'}</span>
             </div>
           </div>
@@ -1637,16 +1910,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* SECTION 8.6: POST-COURSE LIFETIME SUPPORT & JOB GUIDELINE */}
-      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
         <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs sm:text-sm font-bold">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
             <Shield className="w-4 h-4 text-indigo-400" />
             <span>লাইফটাইম মেন্টরশিপ ও ক্যারিয়ার সাপোর্ট</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
             {landingConfig.lifetimeSupportConfig?.headline || 'কোর্স শেষ হওয়ার পরেও কি আপনি একা? একদমই না!'}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-slate-200 max-w-2xl mx-auto font-medium">
             {landingConfig.lifetimeSupportConfig?.subheadline || 'আমাদের সাথে একবার যুক্ত হলে আপনি পাচ্ছেন লাইফটাইম ক্যারিয়ার এবং টেকনিক্যাল ব্যাকআপ সুবিধা।'}
           </p>
         </div>
@@ -1671,23 +1944,23 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           ]).map((supportItem, sIdx) => (
             <div
               key={sIdx}
-              className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-3 hover:border-indigo-500/40 transition-all shadow-lg"
+              className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 space-y-3 hover:border-indigo-500/50 transition-all shadow-lg"
             >
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center border border-indigo-500/30">
                 {renderFeatureIcon(supportItem.iconName)}
               </div>
-              <h3 className="text-base font-black text-white">{supportItem.title}</h3>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{supportItem.desc}</p>
+              <h3 className="text-base sm:text-lg font-black text-white">{supportItem.title}</h3>
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{supportItem.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* SECTION 9: CLASSROOM & LAB GALLERY */}
-      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
+      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
         <div className="text-center space-y-2 mb-8">
           <div className="flex items-center justify-center gap-2">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-sm font-bold">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-bold">
               <Laptop className="w-4 h-4" />
               <span>ল্যাব ও ক্যাম্পাস এনভায়রনমেন্ট</span>
             </div>
@@ -1695,15 +1968,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               <button
                 type="button"
                 onClick={() => setIsEditorOpen(true)}
-                className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-colors cursor-pointer"
+                className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-colors cursor-pointer border border-slate-700"
               >
                 <Edit3 className="w-3 h-3" />
                 <span>ছবি পরিবর্তন / আপলোড</span>
               </button>
             )}
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">প্র্যাকটিক্যাল ল্যাব সেশনের কিছু মুহূর্ত</h2>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">প্র্যাকটিক্যাল ল্যাব সেশনের কিছু মুহূর্ত</h2>
+          <p className="text-xs sm:text-sm text-slate-200 max-w-2xl mx-auto font-medium">
             ফার্মগেট ক্যাম্পাসের শীতাতপ নিয়ন্ত্রিত আধুনিক মাল্টিমিডিয়া ল্যাব ও প্রতিটি শিক্ষার্থীর জন্য আলাদা ডেডিকেটেড কম্পিউটার
           </p>
         </div>
@@ -1718,24 +1991,24 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             <div
               key={photo.id || idx}
               onClick={() => setSelectedLightboxImage({ url: photo.url, title: photo.title, category: photo.category })}
-              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 aspect-4/3 cursor-pointer shadow-lg hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all duration-300"
+              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 border border-slate-700/80 aspect-4/3 cursor-pointer shadow-lg hover:border-emerald-500/60 hover:shadow-emerald-500/20 transition-all duration-300"
             >
               <img
                 src={photo.url}
                 alt={photo.title || 'Lab Photo'}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent opacity-80 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
                 <div className="flex items-end justify-between gap-2">
                   <div>
                     <h4 className="text-sm sm:text-base font-black text-white leading-snug drop-shadow-sm">{photo.title}</h4>
                     {photo.category && (
-                      <span className="inline-block mt-1 text-xs font-semibold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md">
+                      <span className="inline-block mt-1 text-xs font-bold text-emerald-200 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded-md">
                         {photo.category}
                       </span>
                     )}
                   </div>
-                  <span className="p-2 rounded-xl bg-white/10 backdrop-blur-md text-white group-hover:bg-emerald-600 transition-colors shrink-0">
+                  <span className="p-2 rounded-xl bg-white/20 backdrop-blur-md text-white group-hover:bg-emerald-600 transition-colors shrink-0">
                     <Sparkles className="w-4 h-4" />
                   </span>
                 </div>
@@ -1747,16 +2020,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
       {/* SECTION 10: FAQS ACCORDION */}
       {faqs.length > 0 && (
-        <section className="py-14 px-4 sm:px-6 max-w-4xl mx-auto border-t border-slate-800/60 text-left">
+        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-4xl mx-auto border-t border-slate-800 text-left">
           <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs sm:text-sm font-bold">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
               <HelpCircle className="w-4 h-4" />
               <span>সাধারণ প্রশ্ন ও উত্তর</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
               {landingConfig.faqsHeadline || 'সচরাচর জিজ্ঞাসিত প্রশ্ন (FAQs)'}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400">
+            <p className="text-xs sm:text-sm text-slate-200 font-medium">
               কোর্স সম্পর্কিত আপনার যেকোনো প্রশ্নের উত্তর নিচে জেনে নিন
             </p>
           </div>
@@ -1767,12 +2040,12 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               return (
                 <div
                   key={idx}
-                  className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition-colors"
+                  className="bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden hover:border-slate-600 transition-colors shadow-sm"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                    className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
+                    className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors cursor-pointer"
                   >
                     <span className="font-bold text-sm sm:text-base text-white pr-3 leading-snug">
                       {idx + 1}. {faq.question}
@@ -1780,11 +2053,11 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     {isOpen ? (
                       <ChevronUp className="w-5 h-5 text-indigo-400 shrink-0" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-slate-500 shrink-0" />
+                      <ChevronDown className="w-5 h-5 text-slate-400 shrink-0" />
                     )}
                   </button>
                   {isOpen && (
-                    <div className="p-4 sm:p-5 pt-1 border-t border-slate-800 text-sm text-slate-200 leading-relaxed bg-slate-950/60">
+                    <div className="p-4 sm:p-5 pt-1 border-t border-slate-800 text-xs sm:text-sm text-slate-100 font-normal leading-relaxed bg-slate-950/80">
                       {faq.answer}
                     </div>
                   )}
@@ -1796,24 +2069,24 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       )}
 
       {/* SECTION 11: CAMPUS LOCATION & DIRECT CONTACT FOOTER */}
-      <section className="py-12 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800/60 text-left">
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+      <section className="py-10 sm:py-12 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800 text-left">
+        <div className="bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center shadow-xl">
           <div className="space-y-3">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
               <Building className="w-4 h-4" />
               <span>ক্যাম্পাস ভিজিট ও অফলাইন ভর্তি</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-black text-white">সরাসরি ক্যাম্পাসে এসে কথা বলুন</h3>
-            <div className="space-y-2 text-xs text-slate-300 pt-1">
-              <p className="flex items-start space-x-2">
+            <div className="space-y-2.5 text-xs sm:text-sm text-slate-200 pt-1">
+              <p className="flex items-start space-x-2 font-medium">
                 <MapPin className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                 <span>{campusAddress}</span>
               </p>
-              <p className="flex items-center space-x-2">
+              <p className="flex items-center space-x-2 font-medium">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>হটলাইন: <strong className="text-white font-bold">{campusPhone}</strong></span>
               </p>
-              <p className="flex items-center space-x-2">
+              <p className="flex items-center space-x-2 font-medium">
                 <Clock className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>সময়সূচী: {campusHours}</span>
               </p>
@@ -1835,7 +2108,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               target="_blank"
               rel="noreferrer"
               onClick={handleWhatsAppClick}
-              className="w-full py-3 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+              className="w-full py-3 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
             >
               <MessageCircle className="w-4 h-4 fill-white" />
               <span>হোয়াটসঅ্যাপে তাৎক্ষণিক কথা বলুন ({cleanWhatsAppNumber(rawPhone)})</span>
@@ -1845,25 +2118,25 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* STICKY BOTTOM MOBILE ACTION BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/98 border-t border-slate-800 px-3.5 py-2.5 sm:hidden backdrop-blur-md shadow-2xl space-y-2">
-        <div className="flex items-center justify-between text-xs text-slate-200 font-bold px-1">
-          <span className="flex items-center gap-1.5">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-700/90 px-3.5 py-2.5 sm:hidden backdrop-blur-md shadow-2xl space-y-2">
+        <div className="flex items-center justify-between text-xs text-white font-bold px-1">
+          <span className="flex items-center gap-1.5 text-slate-100">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            সরাসরি কথা বলুন:
+            সরাসরি যোগাযোগ ও ভর্তি:
           </span>
           <span className="text-amber-300 font-black text-sm">ফি: ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}</span>
         </div>
 
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {/* Mobile WhatsApp */}
           <a
             href={whatsAppUrl}
             target="_blank"
             rel="noreferrer"
             onClick={handleWhatsAppClick}
-            className="py-2.5 px-1 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] sm:text-xs font-bold whitespace-nowrap"
+            className="min-h-[44px] py-2.5 px-2 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-xs font-bold whitespace-nowrap"
           >
-            <MessageCircle className="w-3.5 h-3.5 fill-white shrink-0" />
+            <MessageCircle className="w-4 h-4 fill-white shrink-0" />
             <span>WhatsApp</span>
           </a>
 
@@ -1873,18 +2146,18 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             target="_blank"
             rel="noreferrer"
             onClick={handleMessengerClick}
-            className="py-2.5 px-1 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] sm:text-xs font-bold whitespace-nowrap"
+            className="min-h-[44px] py-2.5 px-2 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-xs font-bold whitespace-nowrap"
           >
-            <Smartphone className="w-3.5 h-3.5 shrink-0" />
+            <Smartphone className="w-4 h-4 shrink-0" />
             <span>Messenger</span>
           </a>
 
           {/* Mobile Admission */}
           <button
             onClick={() => setIsAdmissionOpen(true)}
-            className="py-2.5 px-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-[11px] sm:text-xs rounded-xl shadow-lg active:scale-95 flex items-center justify-center space-x-1 cursor-pointer whitespace-nowrap"
+            className="min-h-[44px] py-2.5 px-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-xs rounded-xl shadow-lg active:scale-95 flex items-center justify-center space-x-1 cursor-pointer whitespace-nowrap"
           >
-            <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+            <GraduationCap className="w-4 h-4 shrink-0" />
             <span>ভর্তি আবেদন</span>
           </button>
         </div>
@@ -1917,9 +2190,9 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             </div>
             <div>
               <h3 className="font-black text-white text-base">OTP সিকিউরিটি ভেরিফিকেশন</h3>
-              <p className="text-xs text-slate-400 mt-1">{otpNotice || `${leadPhone} নাম্বারে ৬ ডিজিটের কোড পাঠানো হয়েছে`}</p>
+              <p className="text-xs sm:text-sm text-slate-200 mt-1 font-medium">{otpNotice || `${leadPhone} নাম্বারে ৬ ডিজিটের কোড পাঠানো হয়েছে`}</p>
               {otpSimulatedCode && (
-                <div className="mt-2 p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs font-mono text-indigo-300 font-bold">
+                <div className="mt-2 p-2 bg-indigo-500/20 border border-indigo-500/40 rounded-xl text-xs font-mono text-indigo-200 font-bold">
                   Simulated Code: {otpSimulatedCode}
                 </div>
               )}
@@ -1942,14 +2215,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 <button
                   type="button"
                   onClick={() => setIsOtpModalOpen(false)}
-                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold"
+                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isVerifyingOtp}
-                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black"
+                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black cursor-pointer"
                 >
                   {isVerifyingOtp ? 'Verifying...' : 'Verify OTP'}
                 </button>
@@ -2041,7 +2314,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     <Play className="w-8 h-8 ml-1" />
                   </div>
                   <h5 className="font-bold text-white text-base">ক্লাস ট্রেলার ও ল্যাব ভিডিও</h5>
-                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  <p className="text-xs sm:text-sm text-slate-200 max-w-md mx-auto font-medium">
                     {canEdit
                       ? 'অ্যাডমিন প্যানেলের এডিটর থেকে সরাসরি আপনার ইউটিউব বা ভিডিও লিংক যুক্ত করতে পারেন।'
                       : 'খুব শীঘ্রই ভিডিওটি আপডেট করা হবে। আমাদের ক্যাম্পাসে এসে সরাসরি ফ্রি ডেমো ক্লাস দেখতে পারেন।'}
@@ -2061,6 +2334,182 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Direct Schedule Management Modal (Admin Only) */}
+      {isScheduleManagerOpen && canEdit && (
+        <div
+          onClick={() => setIsScheduleManagerOpen(false)}
+          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="relative max-w-lg w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-5 sm:p-6 text-left"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center space-x-2 text-emerald-400">
+                <Calendar className="w-5 h-5 shrink-0" />
+                <h3 className="text-base sm:text-lg font-black text-white">
+                  {editingScheduleId ? 'শিডিউল তথ্য এডিট করুন' : 'ম্যানুয়ালি নতুন শিডিউল যোগ করুন'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsScheduleManagerOpen(false)}
+                className="p-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {schFeedbackMessage && (
+              <div className="p-3 bg-emerald-500/20 border border-emerald-500/50 rounded-xl text-xs sm:text-sm text-emerald-200 font-bold flex items-center space-x-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{schFeedbackMessage}</span>
+              </div>
+            )}
+
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                handleSaveScheduleDirectly();
+              }}
+              className="space-y-3.5"
+            >
+              <div>
+                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                  ক্লাসের বারসমূহ (Days) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={schMgrDays}
+                  onChange={e => setSchMgrDays(e.target.value)}
+                  placeholder="যেমন: শুক্র ও শনি, অথবা রবি, মঙ্গল ও বৃহস্পতি"
+                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                />
+                {/* Quick day suggestion buttons */}
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {['শুক্র ও শনিবার', 'রবি, মঙ্গল ও বৃহস্পতি', 'সোম ও বুধবার', 'প্রতিদিন (Fast-track)'].map(preset => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setSchMgrDays(preset)}
+                      className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-200 hover:text-white border border-slate-700 cursor-pointer"
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                  ক্লাসের সময় (Time Slot) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={schMgrTimeSlot}
+                  onChange={e => setSchMgrTimeSlot(e.target.value)}
+                  placeholder="যেমন: সকাল ১০:০০ - দুপুর ১২:০০, অথবা সন্ধ্যা ৭:০০ - রাত ৮:৩০"
+                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                />
+                {/* Quick time suggestions */}
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {['সকাল ১০:০০ - দুপুর ১২:০০', 'বিকেল ৩:০০ - ৫:০০', 'সন্ধ্যা ৬:০০ - ৭:৩০', 'রাত ৮:০০ - ৯:৩০'].map(timePreset => (
+                    <button
+                      key={timePreset}
+                      type="button"
+                      onClick={() => setSchMgrTimeSlot(timePreset)}
+                      className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-200 hover:text-white border border-slate-700 cursor-pointer"
+                    >
+                      {timePreset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                    ক্লাস শুরুর তারিখ (Date)
+                  </label>
+                  <input
+                    type="text"
+                    value={schMgrStartDate}
+                    onChange={e => setSchMgrStartDate(e.target.value)}
+                    placeholder="যেমন: ১৫ এপ্রিল ২০২৬"
+                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                    বাকি সিট সংখ্যা (Seats)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={schMgrSeats}
+                    onChange={e => setSchMgrSeats(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                    ক্লাসের মোড (Mode)
+                  </label>
+                  <select
+                    value={schMgrMode}
+                    onChange={e => setSchMgrMode(e.target.value as any)}
+                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                  >
+                    <option value="Offline">অফলাইন ল্যাব (ফার্মগেট ক্যাম্পাস)</option>
+                    <option value="Online Live">অনলাইন লাইভ ক্লাস</option>
+                    <option value="Hybrid">হাইব্রিড (ল্যাব + অনলাইন)</option>
+                    <option value="Both">অফলাইন ও অনলাইন উভয়ই</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                    শিডিউল নাম (ঐচ্ছিক)
+                  </label>
+                  <input
+                    type="text"
+                    value={schMgrLabel}
+                    onChange={e => setSchMgrLabel(e.target.value)}
+                    placeholder="ফাঁকা রাখলে স্বয়ংক্রিয় তৈরি হবে"
+                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 pt-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsScheduleManagerOpen(false)}
+                  className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs sm:text-sm font-bold transition-colors cursor-pointer"
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-emerald-600/30 transition-all cursor-pointer flex items-center justify-center space-x-1"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{editingScheduleId ? 'আপডেট সম্পন্ন করুন' : 'শিডিউল যুক্ত করুন'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

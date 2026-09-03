@@ -480,6 +480,7 @@ export interface CoursePreferredScheduleOption {
   label: string; // e.g. "শুক্রবার ও শনিবার (সকাল ১০:০০ - ১২:০০)"
   days?: string; // e.g. "Friday & Saturday"
   timeSlot?: string; // e.g. "10:00 AM - 12:00 PM"
+  startDate?: string; // e.g. "১৫ অক্টোবর ২০২৬"
   mode?: 'Offline' | 'Online Live' | 'Hybrid' | 'Both';
   availableSeats?: number;
   isActive?: boolean;
