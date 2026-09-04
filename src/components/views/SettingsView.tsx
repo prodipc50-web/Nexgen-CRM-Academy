@@ -34,6 +34,8 @@ import {
 import { ThemeEditor } from '../settings/ThemeEditor';
 import { MarketingAnalyticsDashboard } from '../marketing/MarketingAnalyticsDashboard';
 import { FraudAndSecuritySettings } from '../settings/FraudAndSecuritySettings';
+import { PaymentGatewaysSettings } from '../settings/PaymentGatewaysSettings';
+import { CreditCard } from 'lucide-react';
 
 interface SettingsViewProps {
   onViewPublicWebsite?: () => void;
@@ -100,7 +102,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     emptyTrash
   } = useAcademy();
 
-  const [activeTab, setActiveTab] = useState<'security' | 'theme' | 'marketing' | 'profile' | 'dropdowns' | 'rbac' | 'audit' | 'backup'>('marketing');
+  const [activeTab, setActiveTab] = useState<'security' | 'payments' | 'theme' | 'marketing' | 'profile' | 'dropdowns' | 'rbac' | 'audit' | 'backup'>('marketing');
   const [resetSuccess, setResetSuccess] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -480,6 +482,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
         </button>
 
         <button
+          onClick={() => setActiveTab('payments')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'payments'
+              ? 'border-emerald-600 text-emerald-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <CreditCard className="w-4 h-4 text-emerald-600" />
+          <span>পেমেন্ট গেটওয়ে ও সিল/স্বাক্ষর</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('profile')}
           className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
             activeTab === 'profile'
@@ -491,6 +505,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
           <span>Academy Profile & Receipts</span>
         </button>
       </div>
+
+      {/* TAB: PAYMENT GATEWAYS & MFS NUMBERS */}
+      {activeTab === 'payments' && <PaymentGatewaysSettings />}
 
       {/* TAB: FRAUD PROTECTION & OTP GATEWAY */}
       {activeTab === 'security' && <FraudAndSecuritySettings />}

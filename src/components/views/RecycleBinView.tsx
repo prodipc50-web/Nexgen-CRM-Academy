@@ -39,6 +39,8 @@ export const RecycleBinView: React.FC = () => {
     switch (type) {
       case 'student':
         return <GraduationCap className="w-4 h-4 text-indigo-600" />;
+      case 'admission':
+        return <PackageCheck className="w-4 h-4 text-emerald-600" />;
       case 'lead':
         return <Users className="w-4 h-4 text-sky-600" />;
       case 'schedule':
@@ -67,6 +69,10 @@ export const RecycleBinView: React.FC = () => {
     switch (type) {
       case 'student':
         return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'admission':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'assignment':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'lead':
         return 'bg-sky-50 text-sky-700 border-sky-200';
       case 'schedule':
@@ -211,7 +217,9 @@ export const RecycleBinView: React.FC = () => {
         >
           <option value="all">All Modules ({trashItems.length})</option>
           <option value="student">Students ({typeCounts['student'] || 0})</option>
+          <option value="admission">Admissions ({typeCounts['admission'] || 0})</option>
           <option value="lead">Leads ({typeCounts['lead'] || 0})</option>
+          <option value="assignment">Assignments ({typeCounts['assignment'] || 0})</option>
           <option value="schedule">Class Schedules ({typeCounts['schedule'] || 0})</option>
           <option value="attendance">Attendance Records ({typeCounts['attendance'] || 0})</option>
           <option value="exam">Exams ({typeCounts['exam'] || 0})</option>

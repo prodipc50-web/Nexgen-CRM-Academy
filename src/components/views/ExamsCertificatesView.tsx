@@ -13,8 +13,11 @@ import {
   X,
   Trash2,
   AlertTriangle,
-  Edit3
+  Edit3,
+  Upload,
+  Crop
 } from 'lucide-react';
+import { ManualCertificateManagerModal } from '../website/ManualCertificateManagerModal';
 
 interface ExamsCertificatesViewProps {
   onOpenCertificateModal: (certificateNumber: string) => void;
@@ -44,6 +47,8 @@ export const ExamsCertificatesView: React.FC<ExamsCertificatesViewProps> = ({
 
   // Issue Certificate Form State
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [editManualCertId, setEditManualCertId] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
   const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id || '');
   const [grade, setGrade] = useState<'A+' | 'A' | 'B+' | 'B' | 'Passed'>('A+');
@@ -94,6 +99,17 @@ export const ExamsCertificatesView: React.FC<ExamsCertificatesViewProps> = ({
         </div>
 
         <div className="flex items-center space-x-2">
+          <button
+            onClick={() => {
+              setEditManualCertId(null);
+              setIsManualModalOpen(true);
+            }}
+            className="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-xs transition-colors"
+            title="Upload certificate image, crop and edit"
+          >
+            <Upload className="w-4 h-4" />
+            <span>ম্যানুয়াল সার্টিফিকেট আপলোড ও ক্রপ</span>
+          </button>
           <button
             onClick={() => setIsIssueModalOpen(true)}
             className="flex items-center space-x-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-colors"
@@ -199,6 +215,17 @@ export const ExamsCertificatesView: React.FC<ExamsCertificatesViewProps> = ({
 
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end space-x-1.5">
+                          <button
+                            onClick={() => {
+                              setEditManualCertId(cert.id);
+                              setIsManualModalOpen(true);
+                            }}
+                            className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded-lg text-xs flex items-center space-x-1 border border-amber-200 shadow-2xs transition-colors"
+                            title="Upload or Crop Scanned Certificate Image"
+                          >
+                            <Crop className="w-3.5 h-3.5" />
+                            <span>Crop/Scan</span>
+                          </button>
                           <button
                             onClick={() => onOpenCertificateModal(certCode)}
                             className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold rounded-lg text-xs flex items-center space-x-1 border border-indigo-200 shadow-2xs transition-colors"
@@ -532,6 +559,21 @@ export const ExamsCertificatesView: React.FC<ExamsCertificatesViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Manual Certificate Upload, Crop & Resize Modal */}
+      <ManualCertificateManagerModal
+        isOpen={isManualModalOpen}
+        onClose={() => {
+          setIsManualModalOpen(false);
+          setEditManualCertId(null);
+        }}
+        initialEditCertId={editManualCertId}
+        onSelectForVerification={(num) => {
+          setIsManualModalOpen(false);
+          setEditManualCertId(null);
+          onOpenCertificateModal(num);
+        }}
+      />
     </div>
   );
 };

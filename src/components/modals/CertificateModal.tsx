@@ -132,6 +132,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
     showVerification: true,
     customLogoUrl: '',
     customWatermarkUrl: '',
+    customSealUrl: academySettings.institutionSealUrl || '',
+    customSignatureUrl: academySettings.authorizedSignatureUrl || academySettings.directorSignatureUrl || '',
     watermarkOpacity: 0.06,
     watermarkSize: 420,
     watermarkOffsetY: 0,
@@ -208,7 +210,9 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
         sealText: 'Official Seal Nexgen',
         showLogo: true,
         showSeal: true,
-        showVerification: true
+        showVerification: true,
+        customSealUrl: academySettings.institutionSealUrl || prev.customSealUrl || '',
+        customSignatureUrl: academySettings.authorizedSignatureUrl || academySettings.directorSignatureUrl || prev.customSignatureUrl || ''
       }));
     }
   }, [certificate, students, courses, batches, isOpen, academySettings]);
@@ -1069,9 +1073,20 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                 {/* Seal */}
                 <div className="flex flex-col items-center">
                   {certData.showSeal ? (
-                    <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center font-bold text-[9px] uppercase tracking-wider text-center p-1 shadow-xs ${themeStyles.sealBorder}`}>
-                      {certData.sealText}
-                    </div>
+                    certData.customSealUrl ? (
+                      <div className="w-20 h-20 flex items-center justify-center">
+                        <img
+                          src={certData.customSealUrl}
+                          alt="Official Seal"
+                          referrerPolicy="no-referrer"
+                          className="w-20 h-20 object-contain drop-shadow-xs select-none"
+                        />
+                      </div>
+                    ) : (
+                      <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center font-bold text-[9px] uppercase tracking-wider text-center p-1 shadow-xs ${themeStyles.sealBorder}`}>
+                        {certData.sealText}
+                      </div>
+                    )
                   ) : (
                     <div className="w-16 h-16" />
                   )}
@@ -1081,8 +1096,19 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                 </div>
 
                 <div className="text-center">
-                  <div className="border-b border-slate-400 pb-1 font-semibold text-slate-800 font-serif italic text-sm">
-                    {certData.directorName}
+                  <div className="border-b border-slate-400 pb-1 flex flex-col items-center justify-end min-h-[48px]">
+                    {certData.customSignatureUrl ? (
+                      <img
+                        src={certData.customSignatureUrl}
+                        alt="Authorized Signature"
+                        referrerPolicy="no-referrer"
+                        className="max-h-11 max-w-[130px] object-contain mb-0.5 select-none"
+                      />
+                    ) : (
+                      <div className="font-semibold text-slate-800 font-serif italic text-sm">
+                        {certData.directorName}
+                      </div>
+                    )}
                   </div>
                   <div className="text-[10px] text-slate-500 mt-1 font-bold">{certData.directorTitle}</div>
                 </div>

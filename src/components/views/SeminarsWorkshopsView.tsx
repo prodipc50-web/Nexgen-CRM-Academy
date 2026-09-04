@@ -64,6 +64,9 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
   const [isFree, setIsFree] = useState(true);
   const [ticketPrice, setTicketPrice] = useState<number>(0);
   const [description, setDescription] = useState('');
+  const [whatsappGroupUrl, setWhatsappGroupUrl] = useState('');
+  const [googleMapsUrl, setGoogleMapsUrl] = useState('');
+  const [confirmationNote, setConfirmationNote] = useState('');
 
   const filteredSeminars = seminars.filter(s => {
     const matchesSearch =
@@ -95,6 +98,9 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
     setIsFree(true);
     setTicketPrice(0);
     setDescription('');
+    setWhatsappGroupUrl('');
+    setGoogleMapsUrl('');
+    setConfirmationNote('রেজিস্ট্রেশন সফল হয়েছে! ক্লাসের পূর্বে আপনার মোবাইলে এসএমএস কনফার্মেশন পাঠানো হবে।');
     setIsAddModalOpen(true);
   };
 
@@ -114,6 +120,9 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
     setIsFree(s.isFree !== false);
     setTicketPrice(s.ticketPrice || 0);
     setDescription(s.description || '');
+    setWhatsappGroupUrl(s.whatsappGroupUrl || '');
+    setGoogleMapsUrl(s.googleMapsUrl || '');
+    setConfirmationNote(s.confirmationNote || '');
     setIsAddModalOpen(true);
   };
 
@@ -137,7 +146,10 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
         status,
         isFree,
         ticketPrice,
-        description
+        description,
+        whatsappGroupUrl,
+        googleMapsUrl,
+        confirmationNote
       });
     } else {
       addSeminar({
@@ -155,7 +167,10 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
         status,
         isFree,
         ticketPrice,
-        description
+        description,
+        whatsappGroupUrl,
+        googleMapsUrl,
+        confirmationNote
       });
     }
     setIsAddModalOpen(false);
@@ -533,6 +548,54 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
                   onChange={e => setDescription(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                 />
+              </div>
+
+              {/* WhatsApp Group & Google Maps Venue Integration */}
+              <div className="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 space-y-3">
+                <div className="text-xs font-bold text-indigo-950 flex items-center space-x-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>কমিউনিটি ও ভেন্যু লিংক (Student Engagement Links)</span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-700 font-semibold mb-1 text-[11px]">
+                      WhatsApp Group Invite Link
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://chat.whatsapp.com/..."
+                      value={whatsappGroupUrl}
+                      onChange={e => setWhatsappGroupUrl(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 font-semibold mb-1 text-[11px]">
+                      Google Maps Location Pin
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://maps.app.goo.gl/..."
+                      value={googleMapsUrl}
+                      onChange={e => setGoogleMapsUrl(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1 text-[11px]">
+                    রেজিস্ট্রেশন কনফার্মেশন নোট (Confirmation Note to Student)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ক্লাসের ১০ মিনিট আগে উপস্থিত থাকার জন্য অনুরোধ করা হচ্ছে।"
+                    value={confirmationNote}
+                    onChange={e => setConfirmationNote(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end space-x-2 pt-3 border-t border-slate-200">

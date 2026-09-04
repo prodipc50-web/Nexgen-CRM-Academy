@@ -18,7 +18,11 @@ import {
   FileText,
   ArrowRightLeft,
   CheckCircle2,
-  Trash2
+  Trash2,
+  Sliders,
+  Sparkles,
+  DollarSign,
+  Check
 } from 'lucide-react';
 
 interface StudentDetailModalProps {
@@ -52,7 +56,9 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     updateStudent,
     transferStudentBatch,
     issueCertificate,
-    deletePayment
+    deletePayment,
+    adjustAdmissionLedger,
+    waiveAdmissionDue
   } = useAcademy();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'financials' | 'attendance' | 'academics' | 'timeline' | 'transfer'>('overview');
@@ -63,6 +69,13 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
   // Certificate issuance state
   const [certGrade, setCertGrade] = useState('A+ (Distinction)');
+
+  // Manual Ledger Adjustment State
+  const [isAdjustingLedger, setIsAdjustingLedger] = useState(false);
+  const [adjType, setAdjType] = useState<'Waiver' | 'Debit_Fine' | 'Custom_FinalFee'>('Waiver');
+  const [adjAmount, setAdjAmount] = useState<number>(0);
+  const [adjReason, setAdjReason] = useState<string>('');
+  const [adjSuccessMessage, setAdjSuccessMessage] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -390,6 +403,193 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     </button>
                   )}
                 </div>
+              </div>
+
+              {/* Ledger Adjustment & Waiver Controls */}
+              <div className="bg-gradient-to-r from-slate-50 to-indigo-50/50 border border-indigo-100/80 rounded-2xl p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Sliders className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        ম্যানুয়াল লেজার ও ফি সমন্বয় (Ledger Adjustments & Waivers)
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        বিশেষ ছাড়, জরিমানা যোগ বা সরাসরি কোর্স ফি সমন্বয় করুন
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAdjustingLedger(!isAdjustingLedger);
+                        setAdjAmount(adjType === 'Waiver' ? admission.due : 1000);
+                      }}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black flex items-center space-x-1.5 shadow-sm transition-all"
+                    >
+                      <Sliders className="w-3.5 h-3.5" />
+                      <span>{isAdjustingLedger ? 'প্যানেল বন্ধ করুন' : 'লেজার সমন্বয় করুন'}</span>
+                    </button>
+
+                    {admission.due > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const conf = confirm(`Are you sure you want to completely waive the remaining due of ৳${admission.due.toLocaleString()} for this student?`);
+                          if (conf) {
+                            waiveAdmissionDue(admission.id, 'Full pending due waived by administrative authority');
+                            setAdjSuccessMessage('সকল বকেয়া সফলভাবে মওকুফ করা হয়েছে!');
+                            setTimeout(() => setAdjSuccessMessage(null), 4000);
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-colors"
+                      >
+                        সম্পূর্ণ বকেয়া মওকুফ
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {adjSuccessMessage && (
+                  <div className="p-2.5 bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-xl text-xs font-bold flex items-center space-x-2 animate-in fade-in">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{adjSuccessMessage}</span>
+                  </div>
+                )}
+
+                {isAdjustingLedger && (
+                  <div className="bg-white p-4 rounded-xl border border-indigo-200 shadow-sm space-y-4 animate-in fade-in">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          সমন্বয়ের ধরণ (Adjustment Type)
+                        </label>
+                        <select
+                          value={adjType}
+                          onChange={e => {
+                            const newType = e.target.value as any;
+                            setAdjType(newType);
+                            if (newType === 'Waiver') {
+                              setAdjAmount(Math.min(admission.due, 1000));
+                            } else if (newType === 'Custom_FinalFee') {
+                              setAdjAmount(admission.finalFee);
+                            } else {
+                              setAdjAmount(500);
+                            }
+                          }}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-indigo-500"
+                        >
+                          <option value="Waiver">বিশেষ ছাড় / ওয়েভার (মাইনাস / হ্রাস)</option>
+                          <option value="Debit_Fine">অতিরিক্ত চার্জ / জরিমানা (প্লাস / বৃদ্ধি)</option>
+                          <option value="Custom_FinalFee">সরাসরি নতুন ফাইনাল ফি নির্ধারণ (Override)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          পরিমাণ (৳ Amount)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={adjAmount}
+                          onChange={e => setAdjAmount(Number(e.target.value) || 0)}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-black text-slate-900 focus:ring-2 focus:ring-indigo-500"
+                          placeholder="টাকার পরিমাণ লিখুন"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          কারণ / অনুমোদনের রেফারেন্স (Reason)
+                        </label>
+                        <input
+                          type="text"
+                          value={adjReason}
+                          onChange={e => setAdjReason(e.target.value)}
+                          placeholder="উদা: পরিচালক অনুমোদন ক্রমে মেরিট ছাড়"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Live Preview Box */}
+                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+                      <div>
+                        <span className="text-slate-500">পূর্ববর্তী ফি: </span>
+                        <strong className="font-mono">৳{admission.finalFee.toLocaleString()}</strong>
+                        <span className="text-slate-400 mx-2">➔</span>
+                        <span className="text-slate-500">নতুন ফাইনাল ফি: </span>
+                        <strong className="font-mono text-indigo-700">
+                          ৳{(
+                            adjType === 'Waiver'
+                              ? Math.max(admission.totalPaid, admission.finalFee - adjAmount)
+                              : adjType === 'Debit_Fine'
+                              ? admission.finalFee + adjAmount
+                              : Math.max(admission.totalPaid, adjAmount)
+                          ).toLocaleString()}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span className="text-slate-500">নতুন বকেয়া (New Due): </span>
+                        <strong className="font-mono text-rose-600">
+                          ৳{(
+                            Math.max(
+                              0,
+                              (adjType === 'Waiver'
+                                ? Math.max(admission.totalPaid, admission.finalFee - adjAmount)
+                                : adjType === 'Debit_Fine'
+                                ? admission.finalFee + adjAmount
+                                : Math.max(admission.totalPaid, adjAmount)) - admission.totalPaid
+                            )
+                          ).toLocaleString()}
+                        </strong>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!adjReason.trim()) {
+                              alert('অনুগ্রহ করে সমন্বয়ের কারণ বা রেফারেন্স উল্লেখ করুন।');
+                              return;
+                            }
+                            if (adjAmount <= 0 && adjType !== 'Custom_FinalFee') {
+                              alert('অনুগ্রহ করে সঠিক টাকার পরিমাণ দিন।');
+                              return;
+                            }
+
+                            adjustAdmissionLedger({
+                              admissionId: admission.id,
+                              adjustmentType: adjType,
+                              amount: adjAmount,
+                              reason: adjReason
+                            });
+
+                            setAdjSuccessMessage('লেজার সফলভাবে আপডেট ও সমন্বয় করা হয়েছে!');
+                            setIsAdjustingLedger(false);
+                            setAdjReason('');
+                            setTimeout(() => setAdjSuccessMessage(null), 4000);
+                          }}
+                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-lg text-xs flex items-center space-x-1 shadow-sm transition-all"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>সমন্বয় নিশ্চিত করুন</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {admission.remarks && (
+                  <div className="text-[11px] text-slate-500 bg-white/70 p-2.5 rounded-lg border border-slate-200/80">
+                    <span className="font-bold text-slate-700">লেজার ইতিহাস / নোট: </span>
+                    <span>{admission.remarks}</span>
+                  </div>
+                )}
               </div>
 
               {/* Payments History Table */}

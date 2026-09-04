@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
-import { X, Calendar, Clock, MapPin, User, Phone, Mail, CheckCircle2, Video, Sparkles, Send } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, User, Phone, Mail, CheckCircle2, Video, Sparkles, Send, MessageCircle, Navigation, ExternalLink } from 'lucide-react';
 import { SeminarWorkshop } from '../../types';
 import {
   trackMetaPixelEvent,
@@ -19,7 +19,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   onClose,
   seminar
 }) => {
-  const { addLead, registerLeadToSeminar } = useAcademy();
+  const { addLead, registerLeadToSeminar, websiteCmsConfig } = useAcademy();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -28,6 +28,9 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   const [error, setError] = useState('');
 
   if (!isOpen || !seminar) return null;
+
+  const whatsappLink = seminar.whatsappGroupUrl || websiteCmsConfig.socialLinks?.whatsappCommunityUrl;
+  const mapsLink = seminar.googleMapsUrl;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,20 +109,56 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
         </div>
 
         {isSuccess ? (
-          <div className="text-center py-6 space-y-3">
+          <div className="text-center py-6 space-y-4">
             <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h4 className="text-lg font-black text-slate-900">Seat Confirmed!</h4>
-            <p className="text-xs text-slate-600 max-w-xs mx-auto">
-              Thank you, <strong>{name}</strong>! Your seat for <strong>{seminar.title}</strong> on <strong>{seminar.date}</strong> is reserved. An SMS confirmation will be sent to <strong>{phone}</strong>.
+            <h4 className="text-lg font-black text-slate-900">Seat Confirmed! (আসন সংরক্ষিত)</h4>
+            <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
+              ধন্যবাদ, <strong>{name}</strong>! আপনার আসন <strong>{seminar.title}</strong> সেমিনারের জন্য ({seminar.date}, {seminar.time}) সফলভাবে নিশ্চিত করা হয়েছে।
             </p>
+
+            {seminar.confirmationNote && (
+              <div className="p-3 bg-amber-50 text-amber-900 border border-amber-200 rounded-2xl text-xs font-medium text-left">
+                <strong>নির্দেশনা:</strong> {seminar.confirmationNote}
+              </div>
+            )}
+
+            {/* Quick Action Buttons: WhatsApp Group & Google Maps */}
+            <div className="flex flex-col gap-2 pt-2">
+              {whatsappLink && (
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-xs transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>হোয়াটসঅ্যাপ গ্রুপে যুক্ত হোন (Join WhatsApp Group)</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-75" />
+                </a>
+              )}
+
+              {mapsLink && (
+                <a
+                  href={mapsLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl flex items-center justify-center space-x-2 border border-indigo-200 transition-colors"
+                >
+                  <Navigation className="w-4 h-4 text-indigo-600" />
+                  <span>ক্যাম্পাস ভেন্যু লোকেশন (Google Maps Pin)</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-75" />
+                </a>
+              )}
+            </div>
+
             <button
               type="button"
               onClick={onClose}
-              className="mt-3 px-5 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl shadow-xs"
+              className="mt-2 px-6 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800"
             >
-              Done
+              সম্পন্ন (Done)
             </button>
           </div>
         ) : (

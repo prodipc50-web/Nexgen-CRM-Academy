@@ -263,7 +263,10 @@ app.get("/api/certificates/verify", rateLimiter, (req, res) => {
       batchName: batch?.name || matchedCert.batchName || "Official Batch",
       issueDate: matchedCert.issueDate,
       grade: matchedCert.grade || "A+",
-      status: matchedCert.status || "Issued"
+      status: matchedCert.status || "Issued",
+      certificateImageUrl: matchedCert.certificateImageUrl || null,
+      isManualUpload: Boolean(matchedCert.isManualUpload),
+      remarks: matchedCert.remarks || null
     }
   });
 });

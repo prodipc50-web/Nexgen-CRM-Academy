@@ -818,8 +818,16 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
               </div>
             </div>
 
+            {/* Custom Printable Receipt Terms / Notes */}
+            {academySettings.receiptNotes && (
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-[10px] text-slate-600 space-y-0.5">
+                <div className="font-bold text-slate-800">শর্তাবলী ও নির্দেশিকা (Terms & Instructions):</div>
+                <div className="whitespace-pre-line leading-relaxed">{academySettings.receiptNotes}</div>
+              </div>
+            )}
+
             {/* Footer & Signature Stamps */}
-            <div className="pt-8 border-t border-slate-200 grid grid-cols-2 gap-8 items-end text-xs">
+            <div className="pt-6 border-t border-slate-200 grid grid-cols-2 gap-8 items-end text-xs">
               <div>
                 <div className="flex items-center space-x-1.5 text-emerald-700 font-bold text-[11px] mb-1">
                   <ShieldCheck className="w-4 h-4" />
@@ -828,12 +836,36 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
                 <p className="text-[10px] text-slate-400">
                   Printed on: {new Date().toLocaleString()} | Cashier: {receiptData.collectedBy}
                 </p>
+                {academySettings.institutionSealUrl && (
+                  <div className="mt-2">
+                    <img
+                      src={academySettings.institutionSealUrl}
+                      alt="Official Seal"
+                      className="w-16 h-16 object-contain mix-blend-multiply opacity-90"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="text-right">
-                <div className="inline-block border-b border-slate-400 w-48 text-center pb-1 font-semibold text-slate-700">
-                  {receiptData.signatoryTitle}
-                </div>
+                {academySettings.directorSignatureUrl ? (
+                  <div className="inline-block w-48 text-center">
+                    <img
+                      src={academySettings.directorSignatureUrl}
+                      alt="Signature"
+                      className="h-10 mx-auto object-contain mix-blend-multiply mb-1"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="border-t border-slate-400 pt-1 font-semibold text-slate-700">
+                      {receiptData.signatoryTitle}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="inline-block border-b border-slate-400 w-48 text-center pb-1 font-semibold text-slate-700">
+                    {receiptData.signatoryTitle}
+                  </div>
+                )}
                 <div className="text-[10px] text-slate-400 mt-1">{receiptData.instituteName}</div>
               </div>
             </div>

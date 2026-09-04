@@ -390,7 +390,7 @@ const AcademyAppContent: React.FC = () => {
       />
 
       {/* Main Workspace Body */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6 items-start pb-20 lg:pb-6">
+      <div className="flex-1 flex max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 gap-6 items-start pb-20 lg:pb-6">
         {/* Left Navigation Sidebar */}
         <SidebarNav
           activeTab={activeTab}

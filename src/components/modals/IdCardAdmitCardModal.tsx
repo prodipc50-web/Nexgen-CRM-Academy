@@ -81,7 +81,9 @@ export const IdCardAdmitCardModal: React.FC<IdCardAdmitCardModalProps> = ({
     examTime: examTime || '10:00 AM - 01:00 PM',
     examRoom: batch?.room || 'Computer Lab-1, Level-4',
     examInstructions: academySettings.admitCardInstructions || '1. Candidates must arrive at the examination hall at least 15 minutes before scheduled start time.\n2. Bring this official Admit Card and Nexgen Student ID Card for verification.\n3. Practical project submission and viva presentation will follow the written test.',
-    controllerName: academySettings.admitCardControllerName || 'Controller of Examinations'
+    controllerName: academySettings.admitCardControllerName || 'Controller of Examinations',
+    signatureUrl: academySettings.authorizedSignatureUrl || academySettings.directorSignatureUrl || '',
+    sealUrl: academySettings.institutionSealUrl || ''
   });
 
   // Sync with prop changes & academy settings
@@ -110,7 +112,9 @@ export const IdCardAdmitCardModal: React.FC<IdCardAdmitCardModalProps> = ({
         examTime: examTime || prev.examTime,
         examRoom: batch?.room || prev.examRoom,
         examInstructions: academySettings.admitCardInstructions || prev.examInstructions,
-        controllerName: academySettings.admitCardControllerName || prev.controllerName
+        controllerName: academySettings.admitCardControllerName || prev.controllerName,
+        signatureUrl: academySettings.authorizedSignatureUrl || academySettings.directorSignatureUrl || prev.signatureUrl || '',
+        sealUrl: academySettings.institutionSealUrl || prev.sealUrl || ''
       }));
     }
   }, [student, course, batch, examTitle, examDate, examTime, academySettings]);
@@ -669,14 +673,23 @@ export const IdCardAdmitCardModal: React.FC<IdCardAdmitCardModalProps> = ({
                   {/* Signatures */}
                   <div className="flex justify-between items-end pt-0.5 border-t border-slate-200 text-[7.5px]">
                     <div className="text-center">
-                      <div className="h-3.5 border-b border-slate-400 w-16 mb-0.5"></div>
+                      <div className="h-5 border-b border-slate-400 w-16 mb-0.5"></div>
                       <span className="text-slate-500 uppercase font-semibold">Student Sign</span>
                     </div>
                     <div className="text-center">
-                      <div className="h-3.5 flex items-center justify-center border-b border-indigo-600 w-20 mb-0.5">
-                        <span className="font-serif italic text-[8.5px] font-bold text-indigo-900">{cardData.signatoryName}</span>
+                      <div className="h-5 flex items-end justify-center border-b border-indigo-600 w-24 mb-0.5 pb-0.5">
+                        {cardData.signatureUrl ? (
+                          <img
+                            src={cardData.signatureUrl}
+                            alt="Signature"
+                            referrerPolicy="no-referrer"
+                            className="max-h-4.5 max-w-[80px] object-contain select-none"
+                          />
+                        ) : (
+                          <span className="font-serif italic text-[8.5px] font-bold text-indigo-900">{cardData.signatoryName}</span>
+                        )}
                       </div>
-                      <span className="text-indigo-900 uppercase font-black">{cardData.signatoryTitle}</span>
+                      <span className="text-indigo-900 uppercase font-black text-[7px]">{cardData.signatoryTitle}</span>
                     </div>
                   </div>
                 </div>
@@ -747,15 +760,37 @@ export const IdCardAdmitCardModal: React.FC<IdCardAdmitCardModalProps> = ({
                 {cardData.examInstructions}
               </div>
 
-              {/* Signatures */}
-              <div className="flex justify-between items-end pt-5 mt-2 border-t border-slate-300">
+              {/* Signatures & Seal */}
+              <div className="flex justify-between items-end pt-5 mt-2 border-t border-slate-300 relative">
                 <div className="text-center">
-                  <div className="h-6 border-b border-slate-400 w-32 mb-1"></div>
+                  <div className="h-8 border-b border-slate-400 w-32 mb-1"></div>
                   <span className="text-[10px] text-slate-600 font-bold uppercase">Candidate Signature</span>
                 </div>
+
+                {cardData.sealUrl && (
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={cardData.sealUrl}
+                      alt="Official Seal"
+                      referrerPolicy="no-referrer"
+                      className="w-14 h-14 object-contain opacity-85 select-none"
+                    />
+                    <span className="text-[8px] uppercase tracking-wider text-slate-500 font-semibold mt-0.5">Official Seal</span>
+                  </div>
+                )}
+
                 <div className="text-center">
-                  <div className="h-6 flex items-center justify-center border-b border-indigo-900 w-36 mb-1">
-                    <span className="font-serif italic text-xs font-bold text-indigo-950">{cardData.controllerName}</span>
+                  <div className="h-8 flex items-end justify-center border-b border-indigo-900 w-36 mb-1 pb-0.5">
+                    {cardData.signatureUrl ? (
+                      <img
+                        src={cardData.signatureUrl}
+                        alt="Signature"
+                        referrerPolicy="no-referrer"
+                        className="max-h-7 max-w-[120px] object-contain select-none"
+                      />
+                    ) : (
+                      <span className="font-serif italic text-xs font-bold text-indigo-950">{cardData.controllerName}</span>
+                    )}
                   </div>
                   <span className="text-[10px] text-indigo-950 font-black uppercase">Controller of Examinations</span>
                 </div>

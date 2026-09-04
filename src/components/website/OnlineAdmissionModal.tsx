@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
-import { X, CheckCircle2, User, Phone, Mail, BookOpen, GraduationCap, MapPin, Send, HelpCircle, Shield, Sparkles, CreditCard } from 'lucide-react';
+import { X, CheckCircle2, User, Phone, Mail, BookOpen, GraduationCap, MapPin, Send, HelpCircle, Shield, Sparkles, CreditCard, QrCode } from 'lucide-react';
 import { Course } from '../../types';
 import {
   trackMetaPixelEvent,
@@ -36,6 +36,10 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [activeQrModal, setActiveQrModal] = useState<{ name: string; url: string } | null>(null);
+
+  const activeAccounts = (academySettings.paymentAccounts || []).filter(a => a.isActive);
+  const primaryPhone = academySettings.primarySupportPhone || '01798444444';
 
   if (!isOpen) return null;
 
@@ -301,21 +305,56 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
                 </div>
               </div>
 
-              {/* Payment Advance / bKash Guide */}
-              <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/80 space-y-2">
-                <div className="flex items-center space-x-2 text-amber-900 font-bold">
-                  <CreditCard className="w-4 h-4 text-amber-700" />
-                  <span>Optional: bKash/Nagad Merchant Seat Booking</span>
+              {/* Payment Advance / MFS & Bank Guide */}
+              <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/80 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-amber-900 font-bold">
+                    <CreditCard className="w-4 h-4 text-amber-700" />
+                    <span>Optional: Seat Booking Advance (বিকাশ / নগদ / ব্যাংক)</span>
+                  </div>
+                  <span className="text-[10px] text-amber-700 font-medium">৳500 - ৳1,000 অগ্রিম</span>
                 </div>
-                <p className="text-[11px] text-amber-800">
-                  You can pay ৳500 to ৳1,000 seat booking advance via bKash Merchant / Personal: <strong className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-300">01798444444</strong> (Send Money / Payment) and provide TrxID below. You can also pay at our campus desk directly.
-                </p>
+
+                <div className="text-[11px] text-amber-900 space-y-1.5">
+                  {activeAccounts.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {activeAccounts.map(acc => (
+                        <div
+                          key={acc.id}
+                          className="bg-white px-2.5 py-1.5 rounded-xl border border-amber-300 text-[11px] flex items-center space-x-1.5 shadow-2xs"
+                        >
+                          <span className="font-bold text-slate-800">{acc.method} ({acc.accountType}):</span>
+                          <span className="font-mono font-bold text-indigo-900">{acc.accountNumber}</span>
+                          {acc.qrCodeUrl && (
+                            <button
+                              type="button"
+                              onClick={() => setActiveQrModal({ name: `${acc.method} QR Code`, url: acc.qrCodeUrl! })}
+                              className="text-indigo-600 hover:text-indigo-800 underline flex items-center space-x-0.5 ml-1 cursor-pointer"
+                              title="QR Code দেখুন"
+                            >
+                              <QrCode className="w-3 h-3" />
+                              <span className="text-[10px] font-bold">QR</span>
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>
+                      You can pay ৳500 to ৳1,000 seat booking advance via bKash / Nagad: <strong className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-300">{primaryPhone}</strong>
+                    </p>
+                  )}
+                  <p className="text-[10px] text-amber-800">
+                    টাকা পাঠিয়ে TrxID প্রদান করুন, অথবা সরাসরি ক্যাম্পাসে এসে অফিসে পেমেন্ট সম্পন্ন করতে পারেন।
+                  </p>
+                </div>
+
                 <input
                   type="text"
                   placeholder="Enter bKash/Nagad TrxID (if already paid) or leave blank"
                   value={formData.trxId}
                   onChange={e => setFormData({ ...formData, trxId: e.target.value })}
-                  className="w-full bg-white border border-amber-300 rounded-xl p-2 text-slate-900 text-xs font-mono outline-none focus:border-amber-600"
+                  className="w-full bg-white border border-amber-300 rounded-xl p-2 text-slate-900 text-xs font-mono outline-none focus:border-amber-600 shadow-2xs"
                 />
               </div>
 
@@ -338,6 +377,41 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* QR Code Lightbox Modal */}
+      {activeQrModal && (
+        <div
+          className="fixed inset-0 z-60 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setActiveQrModal(null)}
+        >
+          <div
+            className="bg-white rounded-3xl p-6 max-w-xs w-full shadow-2xl text-center space-y-4 animate-in zoom-in-95"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h4 className="font-bold text-slate-900 text-sm">{activeQrModal.name}</h4>
+              <button
+                type="button"
+                onClick={() => setActiveQrModal(null)}
+                className="text-slate-400 hover:text-slate-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 inline-block">
+              <img
+                src={activeQrModal.url}
+                alt={activeQrModal.name}
+                className="w-48 h-48 object-contain mx-auto"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <p className="text-[11px] text-slate-500">
+              বিকাশ বা সংশ্লিষ্ট অ্যাপ থেকে কিউআর কোড স্ক্যান করে পেমেন্ট সম্পন্ন করুন।
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

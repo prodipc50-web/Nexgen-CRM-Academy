@@ -55,7 +55,13 @@ import {
   Shield,
   Check,
   Trash2,
-  Plus
+  Plus,
+  TrendingUp,
+  MonitorCheck,
+  Cpu,
+  Headphones,
+  Compass,
+  FileCheck
 } from 'lucide-react';
 import { OnlineAdmissionModal } from './OnlineAdmissionModal';
 import { CourseLandingPageEditorModal } from '../courses/CourseLandingPageEditorModal';
@@ -263,6 +269,37 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [selectedLightboxImage, setSelectedLightboxImage] = useState<{ url: string; title?: string; category?: string } | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  // Live Urgency Countdown Timer (Dynamic countdown for scholarship & batch seats)
+  const [countdownTime, setCountdownTime] = useState({
+    days: 2,
+    hours: 14,
+    minutes: 38,
+    seconds: 45
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdownTime(prev => {
+        if (prev.seconds > 0) {
+          return { ...prev, seconds: prev.seconds - 1 };
+        } else if (prev.minutes > 0) {
+          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        } else if (prev.hours > 0) {
+          return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        } else if (prev.days > 0) {
+          return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
+        }
+        return { days: 2, hours: 14, minutes: 30, seconds: 0 };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const toBengaliDigits = (num: number | string): string => {
+    const bn = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return String(num).padStart(2, '0').replace(/\d/g, d => bn[Number(d)]);
+  };
 
   // Fast Lead Inline Form States
   const [leadFormMode, setLeadFormMode] = useState<'admission' | 'counseling'>('admission');
@@ -764,86 +801,88 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-600 selection:text-white pb-36 sm:pb-24">
+    <div className="min-h-screen edtech-dark-bg text-slate-100 font-website-body selection:bg-indigo-600 selection:text-white pb-36 sm:pb-24 antialiased overflow-x-hidden">
       {/* Top Floating Admin / Navigation Toolbar */}
-      <div className="bg-slate-900/95 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between text-xs sticky top-0 z-40 backdrop-blur-md">
-        <div className="flex items-center space-x-3">
-          {onBackToFullWebsite && (
-            <button
-              onClick={onBackToFullWebsite}
-              className="flex items-center space-x-1.5 text-slate-200 hover:text-white font-bold transition-colors"
-            >
-              <span>← মূল ওয়েবসাইট (Main Website)</span>
-            </button>
-          )}
-          <span className="hidden sm:inline-block text-slate-500">•</span>
-          <span className="hidden sm:inline-flex items-center space-x-1 text-indigo-400 font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>লাইভ ল্যান্ডিং পেজ (Dynamic CMS Enabled)</span>
-          </span>
-        </div>
+      <div className="bg-slate-900/90 border-b border-slate-800/80 px-4 sm:px-6 lg:px-10 py-2.5 sticky top-0 z-40 backdrop-blur-md">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto flex items-center justify-between text-xs">
+          <div className="flex items-center space-x-3">
+            {onBackToFullWebsite && (
+              <button
+                onClick={onBackToFullWebsite}
+                className="flex items-center space-x-1.5 text-slate-200 hover:text-white font-bold transition-colors cursor-pointer"
+              >
+                <span>← মূল ওয়েবসাইট (Main Website)</span>
+              </button>
+            )}
+            <span className="hidden sm:inline-block text-slate-600">•</span>
+            <span className="hidden sm:inline-flex items-center space-x-1 text-indigo-400 font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>লাইভ ল্যান্ডিং পেজ (Dynamic CMS Enabled)</span>
+            </span>
+          </div>
 
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={handleShareClick}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg flex items-center space-x-1 transition-colors"
-            title="Copy Ad Landing Link"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span className="text-[11px] font-bold">{copiedUrl ? 'Copied!' : 'Share Link'}</span>
-          </button>
-          {canEdit && (
+          <div className="flex items-center space-x-2">
             <button
-              onClick={() => setIsEditorOpen(true)}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold flex items-center space-x-1.5 shadow-sm transition-all active:scale-95"
+              onClick={handleShareClick}
+              className="p-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-lg flex items-center space-x-1 transition-colors cursor-pointer"
+              title="Copy Ad Landing Link"
             >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>এডিট ল্যান্ডিং পেজ (Edit CMS)</span>
+              <Share2 className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-bold">{copiedUrl ? 'Copied!' : 'Share Link'}</span>
             </button>
-          )}
+            {canEdit && (
+              <button
+                onClick={() => setIsEditorOpen(true)}
+                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold flex items-center space-x-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>এডিট ল্যান্ডিং পেজ (Edit CMS)</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* SECTION 1: HERO & MAIN CTA */}
-      <header className="relative pt-6 sm:pt-8 pb-10 sm:pb-14 px-4 sm:px-6 max-w-7xl mx-auto overflow-hidden">
+      <header className="relative pt-8 sm:pt-12 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           {/* Left Column: Headline, Subheadline, Guarantee & Badges */}
-          <div className="lg:col-span-7 space-y-5 text-left">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-500/20 border border-indigo-400/40 text-indigo-200 text-xs sm:text-sm font-black tracking-wide shadow-sm">
+          <div className="lg:col-span-7 space-y-6 text-left">
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-200 text-xs sm:text-sm font-bold tracking-wide shadow-xs">
               <Flame className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse shrink-0" />
               <span>{landingConfig.heroBadge || '🚀 স্পেশাল স্কলারশিপ ব্যাচ অ্যাডমিশন শুরু'}</span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight sm:leading-tight tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-[1.3] sm:leading-[1.25] font-website-heading tracking-tight">
               {landingConfig.headline || course.name}
             </h1>
 
-            <p className="text-sm sm:text-lg text-slate-100 font-medium leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-base lg:text-lg text-slate-200 font-normal leading-relaxed max-w-2xl">
               {landingConfig.subheadline ||
                 course.description ||
                 '১০০% প্র্যাকটিক্যাল কম্পিউটার ল্যাব ট্রেনিং, লাইভ মার্কেটপ্লেস ও প্রজেক্ট সাপোর্ট এবং চাকরি ও ফ্রিল্যান্সিং গাইডলাইন।'}
             </p>
 
             {/* Micro Highlights Pill */}
-            <div className="flex flex-wrap gap-2 sm:gap-2.5 text-xs sm:text-sm">
-              <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/90 px-3.5 py-2 rounded-xl text-white font-bold shadow-xs">
+            <div className="flex flex-wrap gap-2.5 text-xs sm:text-sm">
+              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-4 py-2.5 rounded-xl text-slate-100 font-bold shadow-xs">
                 <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>{course.durationMonths} মাস প্র্যাকটিক্যাল ট্রেনিং</span>
               </div>
-              <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/90 px-3.5 py-2 rounded-xl text-white font-bold shadow-xs">
+              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-4 py-2.5 rounded-xl text-slate-100 font-bold shadow-xs">
                 <Laptop className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>ডেডিকেটেড হাই-কনফিগ পিসি ল্যাব</span>
               </div>
-              <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/90 px-3.5 py-2 rounded-xl text-white font-bold shadow-xs">
+              <div className="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-4 py-2.5 rounded-xl text-slate-100 font-bold shadow-xs">
                 <Award className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>ভেরিফায়েবল সার্টিফিকেট</span>
               </div>
             </div>
 
             {/* Pricing Box & Countdown Card */}
-            <div className="p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/80 border border-indigo-500/50 rounded-3xl space-y-4 shadow-xl">
+            <div className="p-5 sm:p-7 edtech-card-glow rounded-3xl space-y-4 shadow-xl">
               <div className="flex flex-wrap items-baseline gap-3">
                 <span className="text-3xl sm:text-4xl font-black text-white">
                   ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}
@@ -858,19 +897,57 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 </span>
               </div>
 
-              {landingConfig.showBatchCountdown && (
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-amber-200 font-bold bg-amber-500/20 border border-amber-500/40 px-4 py-2.5 rounded-2xl">
-                  <span>পরবর্তী ব্যাচ শুরু: {landingConfig.nextBatchStartDate || '১৫ মে, ২০২৬'}</span>
-                  <span className="text-amber-300 font-black whitespace-nowrap shrink-0">বাকি সিট: {landingConfig.availableSeats || 8} টি</span>
+              {/* Live Urgency Countdown Timer */}
+              <div className="p-3.5 sm:p-4 bg-slate-950/90 border border-amber-500/40 rounded-2xl space-y-2.5">
+                <div className="flex items-center justify-between gap-2 text-xs font-bold text-amber-300">
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <Flame className="w-4 h-4 text-rose-400 animate-pulse shrink-0" />
+                    <span className="truncate">বিশেষ অফার ও স্কলারশিপ সিট শেষ হতে বাকি:</span>
+                  </span>
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap shrink-0">
+                    সীমিত আসন
+                  </span>
                 </div>
-              )}
+
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-1 shadow-inner">
+                    <span className="block text-lg sm:text-2xl font-black text-white font-mono leading-none">
+                      {toBengaliDigits(countdownTime.days)}
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-slate-400 font-bold mt-1 block">দিন</span>
+                  </div>
+                  <div className="bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-1 shadow-inner">
+                    <span className="block text-lg sm:text-2xl font-black text-white font-mono leading-none">
+                      {toBengaliDigits(countdownTime.hours)}
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-slate-400 font-bold mt-1 block">ঘণ্টা</span>
+                  </div>
+                  <div className="bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-1 shadow-inner">
+                    <span className="block text-lg sm:text-2xl font-black text-white font-mono leading-none">
+                      {toBengaliDigits(countdownTime.minutes)}
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-slate-400 font-bold mt-1 block">মিনিট</span>
+                  </div>
+                  <div className="bg-slate-900 border border-rose-500/50 rounded-xl py-2 px-1 shadow-inner relative overflow-hidden">
+                    <span className="block text-lg sm:text-2xl font-black text-rose-400 font-mono leading-none animate-pulse">
+                      {toBengaliDigits(countdownTime.seconds)}
+                    </span>
+                    <span className="text-[10px] sm:text-xs text-rose-300 font-bold mt-1 block">সেকেন্ড</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-slate-300 pt-1 font-medium border-t border-slate-800">
+                  <span>পরবর্তী ব্যাচ শুরু: <strong className="text-white">{landingConfig.nextBatchStartDate || '১৫ মে, ২০২৬'}</strong></span>
+                  <span className="text-amber-300 font-black">বাকি সিট: {landingConfig.availableSeats || 8} টি</span>
+                </div>
+              </div>
 
               {/* Primary Action Buttons based on ctaMode */}
               <div className="space-y-3 pt-1">
                 {(ctaMode === 'both' || ctaMode === 'admission_only' || ctaMode === 'whatsapp_and_admission') && (
                   <button
                     onClick={() => setIsAdmissionOpen(true)}
-                    className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-black text-sm sm:text-base shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+                    className="w-full py-4 px-6 rounded-2xl edtech-gradient-cta text-white font-black text-sm sm:text-base flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
                   >
                     <GraduationCap className="w-5 h-5 shrink-0" />
                     <span>অনলাইনে এখনই ভর্তি আবেদন করুন</span>
@@ -977,7 +1054,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             </div>
 
             {/* Fast Registration Card with Dual Admission / Counseling Tabs */}
-            <div className="bg-slate-900/95 border border-slate-700/80 rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4 text-left">
+            <div className="edtech-card-glow rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4 text-left">
               {/* Dual Tab Mode Toggle */}
               <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
                 <button
@@ -1213,51 +1290,51 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </header>
 
       {/* SECTION 1.5: QUICK SNAPSHOT INFO BAR */}
-      <section className="bg-slate-900 border-y border-slate-800 py-6 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
-          <div className="flex items-center space-x-3 p-3 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-700/70 text-left shadow-xs min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center shrink-0">
+      <section className="bg-slate-900/60 border-y border-slate-800/80 py-8 px-4 sm:px-6 lg:px-10">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="edtech-card-glow rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 text-left shadow-xs min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center shrink-0 border border-indigo-500/30">
               <Clock className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-200 font-bold uppercase tracking-wider block truncate">কোর্স মেয়াদ ও সেশন</span>
-              <p className="text-xs sm:text-base font-black text-white mt-0.5 leading-snug truncate">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">কোর্স মেয়াদ ও সেশন</span>
+              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">
                 {landingConfig.quickSnapshot?.duration || `${course.durationMonths || 3} মাস`} / {landingConfig.quickSnapshot?.totalSessions || '২৪টি ল্যাব'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-700/70 text-left shadow-xs min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
+          <div className="edtech-card-glow rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 text-left shadow-xs min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-500/30">
               <Laptop className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-200 font-bold uppercase tracking-wider block truncate">ল্যাব ও কম্পিউটার</span>
-              <p className="text-xs sm:text-base font-black text-white mt-0.5 leading-snug truncate">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">ল্যাব ও কম্পিউটার</span>
+              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">
                 {landingConfig.quickSnapshot?.batchSize || '১ শিক্ষার্থী = ১ পিসি'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-700/70 text-left shadow-xs min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+          <div className="edtech-card-glow rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 text-left shadow-xs min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/30">
               <Briefcase className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-200 font-bold uppercase tracking-wider block truncate">লাইভ প্রজেক্ট</span>
-              <p className="text-xs sm:text-base font-black text-white mt-0.5 leading-snug truncate">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">লাইভ প্রজেক্ট</span>
+              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">
                 {landingConfig.quickSnapshot?.projectsCount || '১০+ রিয়েল ফাইল'}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-3 sm:p-4 rounded-2xl bg-slate-950/80 border border-slate-700/70 text-left shadow-xs min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0">
+          <div className="edtech-card-glow rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 text-left shadow-xs min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0 border border-purple-500/30">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-200 font-bold uppercase tracking-wider block truncate">সাপোর্ট ও ব্যাকআপ</span>
-              <p className="text-xs sm:text-base font-black text-white mt-0.5 leading-snug truncate">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">সাপোর্ট ও ব্যাকআপ</span>
+              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">
                 {landingConfig.quickSnapshot?.supportType || 'লাইফটাইম সাপোর্ট'}
               </p>
             </div>
@@ -1265,32 +1342,109 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         </div>
       </section>
 
-      {/* SECTION 2: PROBLEM VS REALITY (PAIN POINTS & MODERN WORKPLACE) */}
+      {/* SECTION 1.8: CAREER IMPACT & TRUST STATS (পরিসংখ্যান ও বিশ্বাসযোগ্যতার ট্রাস্ট ব্যাজ) */}
+      <section className="py-10 sm:py-14 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80">
+        <div className="bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/90 border border-slate-700/80 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20"></div>
+
+          <div className="relative z-10 space-y-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800 pb-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs sm:text-sm font-bold">
+                  <Award className="w-4 h-4" />
+                  <span>আস্থার দীর্ঘ রেকর্ড ও সাফল্যের মাইলফলক</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white font-website-heading">
+                  কেন হাজারো শিক্ষার্থী ও অভিভাবকের প্রথম পছন্দ আমাদের একাডেমি?
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-md font-medium">
+                গত ৮ বছর ধরে বাস্তবমুখী প্র্যাকটিক্যাল ল্যাব ও সার্বক্ষণিক মেন্টরশিপের মাধ্যমে আমরা গড়ে তুলেছি আত্মবিশ্বাসী প্রফেশনাল।
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="p-5 sm:p-6 bg-slate-950/70 border border-slate-800 hover:border-amber-500/40 rounded-2xl transition-all group shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center mb-3 border border-amber-500/30 group-hover:scale-105 transition-transform">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <span className="block text-2xl sm:text-4xl font-black text-white font-mono tracking-tight group-hover:text-amber-300 transition-colors">
+                  ১৫,০০০+
+                </span>
+                <h4 className="text-sm sm:text-base font-bold text-slate-200 mt-1">সফল গ্র্যাজুয়েট</h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  হাতে-কলমে প্রশিক্ষণ নিয়ে জব ও ফ্রিল্যান্সিংয়ে প্রতিষ্ঠিত।
+                </p>
+              </div>
+
+              <div className="p-5 sm:p-6 bg-slate-950/70 border border-slate-800 hover:border-emerald-500/40 rounded-2xl transition-all group shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center mb-3 border border-emerald-500/30 group-hover:scale-105 transition-transform">
+                  <MonitorCheck className="w-6 h-6" />
+                </div>
+                <span className="block text-2xl sm:text-4xl font-black text-white font-mono tracking-tight group-hover:text-emerald-300 transition-colors">
+                  ১০০%
+                </span>
+                <h4 className="text-sm sm:text-base font-bold text-slate-200 mt-1">সিঙ্গেল পিসি ল্যাব</h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  কোনো শেয়ারিং নেই, প্রতিটি শিক্ষার্থীর নিজস্ব কম্পিউটার বরাদ্দ।
+                </p>
+              </div>
+
+              <div className="p-5 sm:p-6 bg-slate-950/70 border border-slate-800 hover:border-indigo-500/40 rounded-2xl transition-all group shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center mb-3 border border-indigo-500/30 group-hover:scale-105 transition-transform">
+                  <Building className="w-6 h-6" />
+                </div>
+                <span className="block text-2xl sm:text-4xl font-black text-white font-mono tracking-tight group-hover:text-indigo-300 transition-colors">
+                  ৮৫+
+                </span>
+                <h4 className="text-sm sm:text-base font-bold text-slate-200 mt-1">কর্পোরেট নেটওয়ার্ক</h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  ব্যাংক, বহুজাতিক প্রতিষ্ঠান ও আইটি সংস্থায় অ্যালামনাই কর্মরত।
+                </p>
+              </div>
+
+              <div className="p-5 sm:p-6 bg-slate-950/70 border border-slate-800 hover:border-purple-500/40 rounded-2xl transition-all group shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center mb-3 border border-purple-500/30 group-hover:scale-105 transition-transform">
+                  <Star className="w-6 h-6 text-purple-300 fill-purple-300" />
+                </div>
+                <span className="block text-2xl sm:text-4xl font-black text-white font-mono tracking-tight group-hover:text-purple-300 transition-colors">
+                  ৪.৯ / ৫
+                </span>
+                <h4 className="text-sm sm:text-base font-bold text-slate-200 mt-1">শিক্ষার্থী রেটিং</h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  ২,০০০+ ভেরিফায়েড রিভিউ এবং সার্বক্ষণিক লাইভ সহায়তা।
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       {painPoints.length > 0 && (
-        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800">
-          <div className="text-center space-y-2.5 mb-8">
+        <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80">
+          <div className="text-center space-y-3 mb-10">
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs sm:text-sm font-bold shadow-xs">
               <Flame className="w-4 h-4 text-rose-400" />
               <span>চ্যালেঞ্জ ও আধুনিক সমাধান</span>
             </div>
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
               {landingConfig.painPointsHeadline || 'পুরোনো পদ্ধতি বনাম ২০২৬-এর স্মার্ট অফিস স্কিল'}
             </h2>
             {landingConfig.painPointsSubheadline && (
-              <p className="text-xs sm:text-base text-slate-200 font-medium max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
                 {landingConfig.painPointsSubheadline}
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
             {painPoints.map((pt, idx) => (
               <div
                 key={idx}
-                className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 space-y-4 hover:border-slate-600 transition-all text-left shadow-lg"
+                className="edtech-card-glow rounded-3xl p-6 sm:p-7 space-y-4 text-left"
               >
                 {/* Problem */}
-                <div className="flex items-start space-x-3 text-rose-300">
+                <div className="flex items-start space-x-3.5 text-rose-300">
                   <div className="w-7 h-7 rounded-full bg-rose-500/25 text-rose-300 flex items-center justify-center shrink-0 mt-0.5 text-sm font-black border border-rose-500/40">
                     ✕
                   </div>
@@ -1298,7 +1452,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     <span className="text-xs font-black text-rose-300 uppercase tracking-wider block">
                       পুরোনো সমস্যা:
                     </span>
-                    <p className="text-xs sm:text-sm font-semibold text-slate-100 mt-1 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-200 mt-1 leading-relaxed">
                       {pt.problem}
                     </p>
                   </div>
@@ -1307,7 +1461,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 <div className="border-t border-slate-800" />
 
                 {/* Solution */}
-                <div className="flex items-start space-x-3 text-emerald-300">
+                <div className="flex items-start space-x-3.5 text-emerald-300">
                   <div className="w-7 h-7 rounded-full bg-emerald-500/25 text-emerald-300 flex items-center justify-center shrink-0 mt-0.5 text-sm font-black border border-emerald-500/40">
                     ✓
                   </div>
@@ -1328,61 +1482,215 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
       {/* SECTION 3: KEY FEATURES & WHY CHOOSE US */}
       {featureCards.length > 0 && (
-        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800">
-          <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
+        <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80">
+          <div className="text-center space-y-3 mb-10">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
               <Sparkles className="w-4 h-4" />
               <span>কোর্সের বিশেষ সুবিধা সমূহ</span>
             </div>
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
               {landingConfig.whyChooseHeadline || 'কেন আমাদের এই কোর্সটি আপনার ক্যারিয়ার বদলে দেবে?'}
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 text-left">
             {featureCards.map((card, idx) => (
               <div
                 key={idx}
-                className="bg-slate-900 border border-slate-700/80 hover:border-indigo-500/60 rounded-3xl p-5 sm:p-6 space-y-3 transition-all group shadow-lg"
+                className="edtech-card-glow rounded-3xl p-6 sm:p-7 space-y-4 hover:border-indigo-500/50 transition-all group"
               >
-                <div className="w-12 h-12 rounded-2xl bg-slate-800 group-hover:bg-indigo-600/30 border border-slate-700 group-hover:border-indigo-500/50 flex items-center justify-center transition-colors">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 group-hover:bg-indigo-600/30 border border-indigo-500/30 group-hover:border-indigo-500/50 flex items-center justify-center text-indigo-300 transition-colors">
                   {renderFeatureIcon(card.iconName)}
                 </div>
                 <h4 className="font-black text-white text-base sm:text-lg">{card.title}</h4>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{card.description}</p>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">{card.description}</p>
               </div>
             ))}
           </div>
         </section>
       )}
 
+      {/* SECTION 3.5: SOFTWARE & AI TOOLS STACK (আধুনিক সফটওয়্যার ও AI টুলস স্ট্যাক) */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="text-center space-y-3 mb-10">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-bold">
+            <Cpu className="w-4 h-4" />
+            <span>আধুনিক প্রযুক্তি ও সফটওয়্যার স্ট্যাক</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
+            যেসব ইন্ডাস্ট্রি-স্ট্যান্ডার্ড সফটওয়্যার ও AI টুলস সরাসরি ল্যাবে শেখানো হবে
+          </h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-normal">
+            শুধু থিওরি নয়, প্রতিটি সফটওয়্যারে ব্যক্তিগত কম্পিউটারে রিয়েল ফাইল ও লাইভ প্রজেক্ট তৈরি করে কাজ শিখবেন।
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="edtech-card-glow rounded-2xl p-5 sm:p-6 space-y-3 hover:border-indigo-500/50 transition-all group">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center border border-blue-500/30 group-hover:scale-105 transition-transform">
+                <FileText className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                Word Processing
+              </span>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-blue-200 transition-colors">
+              MS Word Advanced
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              অফিশিয়াল লেটার, প্রপোজাল, এগ্রিমেন্ট, সিভি, ইনভয়েস ও বাংলা-ইংরেজি নির্ভুল ড্রাফটিং।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-2xl p-5 sm:p-6 space-y-3 hover:border-emerald-500/50 transition-all group">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center border border-emerald-500/30 group-hover:scale-105 transition-transform">
+                <TrendingUp className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                Data Analytics
+              </span>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-200 transition-colors">
+              MS Excel Pro & Formulas
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              VLOOKUP, XLOOKUP, Pivot Table, পেরোল হিসাব, স্টক ট্র্যাকিং ও ইন্টার‍্যাক্টিভ ড্যাশবোর্ড।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-2xl p-5 sm:p-6 space-y-3 hover:border-amber-500/50 transition-all group">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center border border-amber-500/30 group-hover:scale-105 transition-transform">
+                <Layers className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                Presentation
+              </span>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-amber-200 transition-colors">
+              MS PowerPoint Mastery
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              আধুনিক স্লাইড ডেক, বিজনেস পিচ, চার্ট অ্যানিমেশন ও কর্পোরেট প্রফেশনাল প্রেজেন্টেশন।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-2xl p-5 sm:p-6 space-y-3 hover:border-purple-500/50 transition-all group">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center border border-purple-500/30 group-hover:scale-105 transition-transform">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                Smart AI
+              </span>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-purple-200 transition-colors">
+              ChatGPT & Gemini AI
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              প্রম্পট ইঞ্জিনিয়ারিং, স্মার্ট ড্রাফটিং, ফর্মুলা জেনারেশন ও দ্রুততম সময়ে অফিস টাস্ক অটোমেশন।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-2xl p-5 sm:p-6 space-y-3 hover:border-cyan-500/50 transition-all group">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-500/30 group-hover:scale-105 transition-transform">
+                <Laptop className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                Cloud Suite
+              </span>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-cyan-200 transition-colors">
+              Google Workspace
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Google Docs, Sheets, Drive, Forms, ক্লাউড ফাইল ম্যানেজমেন্ট ও মাল্টি-ইউজার লাইভ শেয়ারিং।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-2xl p-5 sm:p-6 space-y-3 hover:border-pink-500/50 transition-all group">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-pink-500/20 text-pink-300 flex items-center justify-center border border-pink-500/30 group-hover:scale-105 transition-transform">
+                <Zap className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-pink-500/10 text-pink-300 border border-pink-500/20">
+                Visual Branding
+              </span>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-pink-200 transition-colors">
+              Canva Pro Graphics
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              সোশ্যাল মিডিয়া ব্যানার, ব্র্যান্ড কিট, প্রফেশনাল রেজ্যুমে ও প্রেজেন্টেশন ডিজাইন।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-2xl p-5 sm:p-6 space-y-3 hover:border-slate-500/50 transition-all group">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-slate-700/40 text-slate-300 flex items-center justify-center border border-slate-600/50 group-hover:scale-105 transition-transform">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-700/40 text-slate-300 border border-slate-600">
+                Operating System
+              </span>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-slate-200 transition-colors">
+              Windows 11 & Security
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              সিস্টেম ট্রাবলশুটিং, ড্রাইভ ব্যাকআপ, কীবোর্ড শর্টকাট ও সাইবার হাইজিন প্র্যাকটিস।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-2xl p-5 sm:p-6 space-y-3 hover:border-indigo-500/50 transition-all group">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center border border-indigo-500/30 group-hover:scale-105 transition-transform">
+                <Briefcase className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                Career Track
+              </span>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-indigo-200 transition-colors">
+              Freelancing & Job Prep
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              মার্কেটপ্লেস প্রোফাইল গাইডলাইন, প্রজেক্ট পোর্টফোলিও ও কর্পোরেট ইন্টারভিউ প্রস্তুতি।
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 4: EDITABLE RICH CURRICULUM MODULES */}
-      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800 text-left">
-        <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="text-center space-y-3 mb-10">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
             <BookOpen className="w-4 h-4" />
             <span>সিলেবাস ও প্রজেক্ট কারিকুলাম</span>
           </div>
-          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
             {landingConfig.curriculumHeadline || 'হাতে-কলমে যা যা শেখানো হবে (১০০% প্র্যাকটিক্যাল ল্যাব)'}
           </h2>
-          <p className="text-xs sm:text-base text-slate-200 max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-normal">
             {landingConfig.curriculumSubheadline || 'বেসিক থেকে ইন্ডাস্ট্রি লেভেল প্রজেক্ট পর্যন্ত সম্পূর্ণ স্টেপ-বাই-স্টেপ গাইডলাইন'}
           </p>
         </div>
 
-        <div className="space-y-3.5">
+        <div className="max-w-5xl mx-auto space-y-4">
           {editableModules.map((mod, idx) => {
             const isOpen = openModuleIndex === idx;
             return (
               <div
                 key={mod.id || idx}
-                className="bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden transition-all hover:border-slate-600 shadow-sm"
+                className="edtech-card-glow rounded-2xl overflow-hidden transition-all shadow-sm"
               >
                 <button
                   type="button"
                   onClick={() => setOpenModuleIndex(isOpen ? null : idx)}
-                  className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors cursor-pointer"
+                  className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center space-x-3.5">
                     <span className="w-8 h-8 rounded-xl bg-indigo-500/25 text-indigo-200 font-black text-sm flex items-center justify-center shrink-0 border border-indigo-500/40">
@@ -1408,7 +1716,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 {isOpen && (
                   <div className="p-4 sm:p-5 pt-1 border-t border-slate-800 bg-slate-950/80 space-y-3.5">
                     {mod.description && (
-                      <p className="text-xs sm:text-sm text-slate-100 leading-relaxed font-normal">{mod.description}</p>
+                      <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{mod.description}</p>
                     )}
 
                     {mod.topics && mod.topics.length > 0 && (
@@ -1420,7 +1728,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                           {mod.topics.map((t, tidx) => (
                             <div
                               key={tidx}
-                              className="flex items-center space-x-2 text-xs sm:text-sm text-slate-100 bg-slate-900 p-2.5 rounded-xl border border-slate-700/80"
+                              className="flex items-center space-x-2 text-xs sm:text-sm text-slate-100 bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/80"
                             >
                               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                               <span className="font-medium">{t}</span>
@@ -1447,17 +1755,17 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* SECTION 4.5: PREFERRED SCHEDULES & BATCH TIMINGS */}
-      <section id="schedules-section" className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
+      <section id="schedules-section" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div className="space-y-2.5">
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs sm:text-sm font-bold shadow-xs">
               <Calendar className="w-4 h-4 text-emerald-400" />
               <span>সুবিধাজনক ক্লাসের সময়সূচী ও ব্যাচ</span>
             </div>
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
               {landingConfig.preferredSchedulesTitle || 'পছন্দের ব্যাচ ও ক্লাসের শিডিউল নির্বাচন করুন'}
             </h2>
-            <p className="text-xs sm:text-base text-slate-200 max-w-2xl leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
               আপনার পড়াশোনা বা চাকুরির পাশাপাশি সুবিধাজনক স্লটে ক্লাস করতে পছন্দের দিন, সময় ও শুরুর তারিখ বেছে নিন
             </p>
           </div>
@@ -1485,7 +1793,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         </div>
 
         {availableSchedules.length === 0 ? (
-          <div className="p-8 text-center bg-slate-900 border border-slate-800 rounded-3xl space-y-3">
+          <div className="p-8 text-center edtech-card-glow rounded-3xl space-y-3">
             <Clock className="w-10 h-10 text-emerald-400 mx-auto" />
             <h4 className="text-white font-bold text-base">বর্তমানে কোনো শিডিউল তালিকাভুক্ত নেই</h4>
             <p className="text-xs sm:text-sm text-slate-300">শিডিউল শীঘ্রই আপডেট করা হবে অথবা উপরে সরাসরি আপনার সুবিধাজনক সময় লিখে আবেদন করতে পারেন।</p>
@@ -1501,14 +1809,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {availableSchedules.map((sch, idx) => {
               const isSelected = !isCustomSchedule && leadSchedule === sch.label;
               return (
                 <div
                   key={sch.id || idx}
-                  className={`bg-slate-900 rounded-3xl p-5 border-2 transition-all flex flex-col justify-between space-y-4 hover:border-emerald-500/70 shadow-lg relative group ${
-                    isSelected ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/40' : 'border-slate-700/80'
+                  className={`edtech-card-glow rounded-3xl p-5 border-2 transition-all flex flex-col justify-between space-y-4 hover:border-emerald-500/70 shadow-lg relative group ${
+                    isSelected ? 'border-emerald-500 bg-emerald-950/30 ring-2 ring-emerald-500/40' : ''
                   }`}
                 >
                   <div className="space-y-3">
@@ -1603,31 +1911,109 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         )}
       </section>
 
+      {/* SECTION 4.8: ADMISSION JOURNEY ROADMAP (ভর্তি থেকে ক্যারিয়ার গড়ার ৪টি সহজ ধাপ) */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="text-center space-y-3 mb-12">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs sm:text-sm font-bold">
+            <Compass className="w-4 h-4" />
+            <span>ভর্তি ও লার্নিং জার্নি রোডম্যাপ</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
+            ভর্তি হওয়া থেকে ক্যারিয়ার গড়ার সহজ ৪টি ধাপ
+          </h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-normal">
+            কোনো জটিলতা ছাড়াই সম্পূর্ণ স্বচ্ছ প্রক্রিয়ায় শুরু করুন আপনার আধুনিক আইটি স্কিল ডেভেলপমেন্ট।
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 relative">
+          <div className="edtech-card-glow rounded-3xl p-6 sm:p-7 space-y-4 relative overflow-hidden group hover:border-blue-500/50 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-3xl font-black text-blue-400 font-mono">০১</span>
+              <div className="w-11 h-11 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center border border-blue-500/30">
+                <FileText className="w-5 h-5" />
+              </div>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-blue-200 transition-colors">
+              আবেদন বা ফ্রি কাউন্সেলিং
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+              সিলেবাস দেখে অনলাইনে দ্রুত আবেদন ফর্ম পূরণ করুন অথবা সরাসরি ফোন বা WhatsApp-এ মেন্টরের সাথে পরামর্শ নিন।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-3xl p-6 sm:p-7 space-y-4 relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-3xl font-black text-emerald-400 font-mono">০২</span>
+              <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center border border-emerald-500/30">
+                <Calendar className="w-5 h-5" />
+              </div>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-200 transition-colors">
+              ব্যাচ ও সিট কনফার্মেশন
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+              আপনার সুবিধাজনক দিন ও সময়ের ব্যাচ সিলেক্ট করে ভর্তি ফি প্রদানপূর্বক আসন নিশ্চিত করুন এবং স্লিপ বুঝে নিন।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-3xl p-6 sm:p-7 space-y-4 relative overflow-hidden group hover:border-amber-500/50 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-3xl font-black text-amber-400 font-mono">০৩</span>
+              <div className="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center border border-amber-500/30">
+                <Laptop className="w-5 h-5" />
+              </div>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-amber-200 transition-colors">
+              ওরিয়েন্টেশন ও ডেডিকেটেড পিসি
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+              প্রথম দিন ক্যাম্পাসে ল্যাব পরিচিতি এবং আপনার জন্য নির্ধারিত একক কম্পিউটারে প্রয়োজনীয় সফটওয়্যার টুলস সেটআপ।
+            </p>
+          </div>
+
+          <div className="edtech-card-glow rounded-3xl p-6 sm:p-7 space-y-4 relative overflow-hidden group hover:border-purple-500/50 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-3xl font-black text-purple-400 font-mono">০৪</span>
+              <div className="w-11 h-11 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center border border-purple-500/30">
+                <Award className="w-5 h-5" />
+              </div>
+            </div>
+            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-purple-200 transition-colors">
+              প্র্যাকটিক্যাল প্রজেক্ট ও সাপোর্ট
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+              ক্লাসেই বাস্তব কাজ করে পোর্টফোলিও তৈরি, সার্টিফিকেট অর্জন এবং কোর্স শেষেও আজীবন সাপোর্ট কমিউনিটি সুবিধা।
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 5: TARGET AUDIENCE (WHO IS THIS COURSE FOR) */}
       {audienceList.length > 0 && (
-        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
-          <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-bold">
+        <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+          <div className="text-center space-y-3 mb-10">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-bold">
               <Target className="w-4 h-4" />
               <span>কার জন্য এই কোর্সটি</span>
             </div>
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
               {landingConfig.audienceHeadline || 'এই কোর্সটি কাদের জন্য ১০০% উপযুক্ত?'}
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {audienceList.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 space-y-3 flex flex-col justify-between hover:border-purple-500/50 transition-all shadow-md"
+                className="edtech-card-glow rounded-3xl p-6 space-y-3 flex flex-col justify-between hover:border-purple-500/50 transition-all shadow-md"
               >
                 <div>
                   <div className="w-9 h-9 rounded-xl bg-purple-500/25 text-purple-200 font-black text-sm flex items-center justify-center mb-3 border border-purple-500/40">
                     {idx + 1}
                   </div>
                   <h4 className="font-bold text-white text-base leading-snug">{item.group}</h4>
-                  <p className="text-xs sm:text-sm text-slate-200 mt-2 leading-relaxed font-normal">{item.benefit}</p>
+                  <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed font-normal">{item.benefit}</p>
                 </div>
               </div>
             ))}
@@ -1637,31 +2023,31 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
       {/* SECTION 6: FREE BONUSES & PERKS */}
       {bonusItems.length > 0 && (
-        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800 text-left">
-          <div className="bg-gradient-to-br from-indigo-950/90 via-slate-900 to-purple-950/70 border border-indigo-500/40 rounded-3xl p-5 sm:p-8 space-y-6 shadow-2xl">
-            <div className="text-center space-y-2">
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-200 text-xs sm:text-sm font-black border border-amber-500/40">
+        <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+          <div className="bg-gradient-to-br from-indigo-950/80 via-slate-900 to-purple-950/60 border border-indigo-500/40 rounded-3xl p-6 sm:p-10 space-y-6 shadow-2xl">
+            <div className="text-center space-y-3">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 text-amber-200 text-xs sm:text-sm font-black border border-amber-500/40">
                 <Gift className="w-4 h-4 text-amber-400" />
                 <span>স্পেশাল ফ্রি বোনাস প্যাকেজ</span>
               </div>
-              <h3 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
                 {landingConfig.bonusHeadline || 'কোর্সে ভর্তির সাথে সাথে যা যা ফ্রি পাবেন'}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-200 font-medium">
+              <p className="text-sm sm:text-base text-slate-300 font-normal">
                 এই ব্যাচে ভর্তি হওয়া শিক্ষার্থীদের জন্য সম্পূর্ণ ফ্রিতে লাইফটাইম অ্যাক্সেস সহ প্রদান করা হবে
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               {bonusItems.map((bonus, idx) => (
                 <div
                   key={idx}
-                  className="p-4 bg-slate-900 border border-indigo-500/30 rounded-2xl flex items-center space-x-3.5 shadow-sm"
+                  className="p-4 sm:p-5 bg-slate-900/90 border border-indigo-500/30 rounded-2xl flex items-center space-x-3.5 shadow-sm"
                 >
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/25 text-emerald-300 flex items-center justify-center shrink-0 font-black border border-emerald-500/40">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/25 text-emerald-300 flex items-center justify-center shrink-0 font-black border border-emerald-500/40">
                     <Check className="w-4 h-4" />
                   </div>
-                  <span className="text-xs sm:text-sm font-bold text-white leading-snug">{bonus}</span>
+                  <span className="text-xs sm:text-base font-bold text-white leading-snug">{bonus}</span>
                 </div>
               ))}
             </div>
@@ -1670,30 +2056,30 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       )}
 
       {/* SECTION 7: TRAINERS & FACULTY */}
-      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
-        <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="text-center space-y-3 mb-10">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
             <Users className="w-4 h-4" />
             <span>ইন্ডাস্ট্রি এক্সপার্ট ট্রেইনার</span>
           </div>
-          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">আপনার মেন্টর ও ফ্যাকাল্টি প্যানেল</h2>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto font-medium">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">আপনার মেন্টর ও ফ্যাকাল্টি প্যানেল</h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-normal">
             বাস্তব সফটওয়্যার ফার্ম ও টপ-রেটেড ফ্রিল্যান্সিংয়ে দীর্ঘদিনের অভিজ্ঞ মেন্টরদের সরাসরি গাইডেন্স
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           {displayTrainers.map(trainer => (
             <div
               key={trainer.id}
-              className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-5 shadow-lg"
+              className="edtech-card-glow rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 shadow-lg"
             >
               <img
                 src={trainer.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'}
                 alt={trainer.name}
-                className="w-18 h-18 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-indigo-500/40 shrink-0"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-indigo-500/40 shrink-0"
               />
-              <div className="space-y-1.5 flex-1">
+              <div className="space-y-2 flex-1">
                 <div className="flex items-center justify-between">
                   <h4 className="font-black text-white text-base sm:text-lg">{trainer.name}</h4>
                   <span className="text-xs font-bold bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
@@ -1701,11 +2087,11 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-indigo-300 font-bold">{trainer.designation}</p>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{trainer.shortBio}</p>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">{trainer.shortBio}</p>
                 {trainer.skills && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {trainer.skills.slice(0, 4).map((s, sidx) => (
-                      <span key={sidx} className="text-xs bg-slate-800 border border-slate-600 text-slate-100 px-2.5 py-0.5 rounded-lg font-semibold">
+                      <span key={sidx} className="text-xs bg-slate-800 border border-slate-600 text-slate-200 px-2.5 py-0.5 rounded-lg font-semibold">
                         {s}
                       </span>
                     ))}
@@ -1718,23 +2104,23 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* SECTION 8: STUDENT REVIEWS & TESTIMONIALS */}
-      <section className="py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/60 text-left">
-        <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs sm:text-sm font-bold">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="text-center space-y-3 mb-10">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs sm:text-sm font-bold">
             <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             <span>শিক্ষার্থীদের মতামত ও সাফল্য</span>
           </div>
-          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">আমাদের গ্র্যাজুয়েটরা যা বলছেন</h2>
-          <p className="text-xs sm:text-sm text-slate-200 max-w-xl mx-auto font-medium">কোর্স সম্পন্ন করে যারা সফলভাবে ক্যারিয়ার শুরু করেছেন তাদের অভিজ্ঞতা</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">আমাদের গ্র্যাজুয়েটরা যা বলছেন</h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-normal">কোর্স সম্পন্ন করে যারা সফলভাবে ক্যারিয়ার শুরু করেছেন তাদের অভিজ্ঞতা</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
           {/* Custom Reviews from landingConfig if available */}
           {customReviews.length > 0
             ? customReviews.map((rev, idx) => (
                 <div
                   key={idx}
-                  className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
+                  className="edtech-card-glow rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -1744,7 +2130,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                         </div>
                         <div>
                           <h4 className="font-bold text-white text-sm sm:text-base">{rev.name}</h4>
-                          <p className="text-xs text-slate-200 font-medium">{rev.roleOrBatch}</p>
+                          <p className="text-xs text-slate-300 font-medium">{rev.roleOrBatch}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-0.5 text-amber-400">
@@ -1753,7 +2139,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       </div>
                     </div>
 
-                    <p className="text-xs sm:text-sm text-slate-100 leading-relaxed italic">"{rev.text}"</p>
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed italic">"{rev.text}"</p>
                   </div>
 
                   <div className="text-xs text-emerald-400 pt-2.5 border-t border-slate-800 font-semibold flex items-center gap-1">
@@ -1765,7 +2151,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             ? displayCmsReviews.map(rev => (
                 <div
                   key={rev.id}
-                  className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
+                  className="edtech-card-glow rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -1777,7 +2163,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                         />
                         <div>
                           <h4 className="font-bold text-white text-sm sm:text-base">{rev.studentName}</h4>
-                          <p className="text-xs text-slate-200 font-medium">{rev.profession || 'Student'}</p>
+                          <p className="text-xs text-slate-300 font-medium">{rev.profession || 'Student'}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-0.5 text-amber-400">
@@ -1786,10 +2172,10 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       </div>
                     </div>
 
-                    <p className="text-xs sm:text-sm text-slate-100 leading-relaxed italic">"{rev.reviewText}"</p>
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed italic">"{rev.reviewText}"</p>
                   </div>
 
-                  <div className="text-xs text-slate-200 pt-2.5 border-t border-slate-800 font-semibold">
+                  <div className="text-xs text-slate-300 pt-2.5 border-t border-slate-800 font-semibold">
                     {rev.batchNumber} • {rev.location}
                   </div>
                 </div>
@@ -1797,7 +2183,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             : DEFAULT_REVIEWS.map((rev, idx) => (
                 <div
                   key={idx}
-                  className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
+                  className="edtech-card-glow rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -1807,7 +2193,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                         </div>
                         <div>
                           <h4 className="font-bold text-white text-sm sm:text-base">{rev.name}</h4>
-                          <p className="text-xs text-slate-200 font-medium">{rev.roleOrBatch}</p>
+                          <p className="text-xs text-slate-300 font-medium">{rev.roleOrBatch}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-0.5 text-amber-400">
@@ -1816,7 +2202,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       </div>
                     </div>
 
-                    <p className="text-xs sm:text-sm text-slate-100 leading-relaxed italic">"{rev.text}"</p>
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed italic">"{rev.text}"</p>
                   </div>
 
                   <div className="text-xs text-emerald-400 pt-2.5 border-t border-slate-800 font-semibold flex items-center gap-1">
@@ -1828,21 +2214,21 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* SECTION 8.5: CERTIFICATE SHOWCASE & VERIFICATION */}
-      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
-        <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-200 text-xs sm:text-sm font-bold">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="text-center space-y-3 mb-10">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-200 text-xs sm:text-sm font-bold">
             <Award className="w-4 h-4 text-amber-400" />
             <span>প্রফেশনাল ভেরিফায়েড সার্টিফিকেট</span>
           </div>
-          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
             {landingConfig.certificateConfig?.headline || 'কোর্স শেষে ভেরিফায়েবল প্রফেশনাল সার্টিফিকেট'}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-200 max-w-2xl mx-auto font-medium">
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-normal">
             {landingConfig.certificateConfig?.subheadline || 'প্রতিটি সার্টিফিকেটে রয়েছে ইউনিক কিউআর কোড (QR Code) যা স্ক্যান করে দেশ-বিদেশের যেকোনো প্রতিষ্ঠান থেকে অনলাইন ভেরিফাই করা যাবে।'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-8 shadow-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center edtech-card-glow rounded-3xl p-6 sm:p-10 shadow-xl">
           {/* Left Certificate Mockup Preview */}
           <div className="lg:col-span-6 relative group">
             <div className="rounded-2xl overflow-hidden border-2 border-amber-500/50 shadow-2xl bg-slate-950 p-2 sm:p-3 relative">
@@ -1910,21 +2296,21 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </section>
 
       {/* SECTION 8.6: POST-COURSE LIFETIME SUPPORT & JOB GUIDELINE */}
-      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
-        <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="text-center space-y-3 mb-10">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
             <Shield className="w-4 h-4 text-indigo-400" />
             <span>লাইফটাইম মেন্টরশিপ ও ক্যারিয়ার সাপোর্ট</span>
           </div>
-          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
             {landingConfig.lifetimeSupportConfig?.headline || 'কোর্স শেষ হওয়ার পরেও কি আপনি একা? একদমই না!'}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-200 max-w-2xl mx-auto font-medium">
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-normal">
             {landingConfig.lifetimeSupportConfig?.subheadline || 'আমাদের সাথে একবার যুক্ত হলে আপনি পাচ্ছেন লাইফটাইম ক্যারিয়ার এবং টেকনিক্যাল ব্যাকআপ সুবিধা।'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
           {(landingConfig.lifetimeSupportConfig?.features || [
             {
               title: 'ডেডিকেটেড প্রাইভেট সাপোর্ট গ্রুপ',
@@ -1944,23 +2330,23 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           ]).map((supportItem, sIdx) => (
             <div
               key={sIdx}
-              className="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 space-y-3 hover:border-indigo-500/50 transition-all shadow-lg"
+              className="edtech-card-glow rounded-3xl p-6 sm:p-7 space-y-4 hover:border-indigo-500/50 transition-all shadow-lg"
             >
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center border border-indigo-500/30">
                 {renderFeatureIcon(supportItem.iconName)}
               </div>
               <h3 className="text-base sm:text-lg font-black text-white">{supportItem.title}</h3>
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{supportItem.desc}</p>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">{supportItem.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* SECTION 9: CLASSROOM & LAB GALLERY */}
-      <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800 text-left">
-        <div className="text-center space-y-2 mb-8">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="text-center space-y-3 mb-10">
           <div className="flex items-center justify-center gap-2">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-bold">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-bold">
               <Laptop className="w-4 h-4" />
               <span>ল্যাব ও ক্যাম্পাস এনভায়রনমেন্ট</span>
             </div>
@@ -1968,20 +2354,20 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               <button
                 type="button"
                 onClick={() => setIsEditorOpen(true)}
-                className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-colors cursor-pointer border border-slate-700"
+                className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-colors cursor-pointer border border-slate-700"
               >
                 <Edit3 className="w-3 h-3" />
                 <span>ছবি পরিবর্তন / আপলোড</span>
               </button>
             )}
           </div>
-          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">প্র্যাকটিক্যাল ল্যাব সেশনের কিছু মুহূর্ত</h2>
-          <p className="text-xs sm:text-sm text-slate-200 max-w-2xl mx-auto font-medium">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">প্র্যাকটিক্যাল ল্যাব সেশনের কিছু মুহূর্ত</h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-normal">
             ফার্মগেট ক্যাম্পাসের শীতাতপ নিয়ন্ত্রিত আধুনিক মাল্টিমিডিয়া ল্যাব ও প্রতিটি শিক্ষার্থীর জন্য আলাদা ডেডিকেটেড কম্পিউটার
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {(customGallery.length > 0
             ? customGallery
             : displayCmsPhotos.length > 0
@@ -2020,32 +2406,32 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
       {/* SECTION 10: FAQS ACCORDION */}
       {faqs.length > 0 && (
-        <section className="py-10 sm:py-14 px-4 sm:px-6 max-w-4xl mx-auto border-t border-slate-800 text-left">
-          <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
+        <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+          <div className="text-center space-y-3 mb-10">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-bold">
               <HelpCircle className="w-4 h-4" />
               <span>সাধারণ প্রশ্ন ও উত্তর</span>
             </div>
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight font-website-heading">
               {landingConfig.faqsHeadline || 'সচরাচর জিজ্ঞাসিত প্রশ্ন (FAQs)'}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-200 font-medium">
+            <p className="text-sm sm:text-base text-slate-300 font-normal">
               কোর্স সম্পর্কিত আপনার যেকোনো প্রশ্নের উত্তর নিচে জেনে নিন
             </p>
           </div>
 
-          <div className="space-y-3.5">
+          <div className="max-w-4xl mx-auto space-y-4">
             {faqs.map((faq, idx) => {
               const isOpen = openFaqIndex === idx;
               return (
                 <div
                   key={idx}
-                  className="bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden hover:border-slate-600 transition-colors shadow-sm"
+                  className="edtech-card-glow rounded-2xl overflow-hidden shadow-sm"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                    className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors cursor-pointer"
+                    className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
                   >
                     <span className="font-bold text-sm sm:text-base text-white pr-3 leading-snug">
                       {idx + 1}. {faq.question}
@@ -2057,7 +2443,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     )}
                   </button>
                   {isOpen && (
-                    <div className="p-4 sm:p-5 pt-1 border-t border-slate-800 text-xs sm:text-sm text-slate-100 font-normal leading-relaxed bg-slate-950/80">
+                    <div className="p-4 sm:p-5 pt-1 border-t border-slate-800 text-xs sm:text-sm text-slate-200 font-normal leading-relaxed bg-slate-950/80">
                       {faq.answer}
                     </div>
                   )}
@@ -2069,35 +2455,35 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       )}
 
       {/* SECTION 11: CAMPUS LOCATION & DIRECT CONTACT FOOTER */}
-      <section className="py-10 sm:py-12 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800 text-left">
-        <div className="bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center shadow-xl">
-          <div className="space-y-3">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-[1720px] 2xl:max-w-[1800px] mx-auto border-t border-slate-800/80 text-left">
+        <div className="edtech-card-glow rounded-3xl p-6 sm:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center shadow-xl">
+          <div className="space-y-4">
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
               <Building className="w-4 h-4" />
               <span>ক্যাম্পাস ভিজিট ও অফলাইন ভর্তি</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-black text-white">সরাসরি ক্যাম্পাসে এসে কথা বলুন</h3>
-            <div className="space-y-2.5 text-xs sm:text-sm text-slate-200 pt-1">
-              <p className="flex items-start space-x-2 font-medium">
+            <h3 className="text-2xl sm:text-3xl font-black text-white font-website-heading">সরাসরি ক্যাম্পাসে এসে কথা বলুন</h3>
+            <div className="space-y-3 text-xs sm:text-sm text-slate-300 pt-1">
+              <p className="flex items-start space-x-2.5 font-medium">
                 <MapPin className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                 <span>{campusAddress}</span>
               </p>
-              <p className="flex items-center space-x-2 font-medium">
+              <p className="flex items-center space-x-2.5 font-medium">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>হটলাইন: <strong className="text-white font-bold">{campusPhone}</strong></span>
               </p>
-              <p className="flex items-center space-x-2 font-medium">
+              <p className="flex items-center space-x-2.5 font-medium">
                 <Clock className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>সময়সূচী: {campusHours}</span>
               </p>
             </div>
           </div>
 
-          <div className="space-y-3 flex flex-col justify-center">
+          <div className="space-y-3.5 flex flex-col justify-center">
             <button
               type="button"
               onClick={() => setIsAdmissionOpen(true)}
-              className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+              className="w-full py-4 px-6 rounded-2xl edtech-gradient-cta text-white font-black text-sm sm:text-base flex items-center justify-center space-x-2 cursor-pointer"
             >
               <GraduationCap className="w-5 h-5" />
               <span>অনলাইনে সিট বুকিং সম্পন্ন করুন</span>
@@ -2108,7 +2494,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               target="_blank"
               rel="noreferrer"
               onClick={handleWhatsAppClick}
-              className="w-full py-3 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all active:scale-95"
+              className="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/25 flex items-center justify-center space-x-2 transition-all active:scale-95"
             >
               <MessageCircle className="w-4 h-4 fill-white" />
               <span>হোয়াটসঅ্যাপে তাৎক্ষণিক কথা বলুন ({cleanWhatsAppNumber(rawPhone)})</span>
@@ -2547,6 +2933,33 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           </div>
         </div>
       )}
+      {/* Desktop Floating Action Widget (WhatsApp & Direct Hotline) */}
+      <aside aria-label="Quick contact" className="hidden sm:flex fixed bottom-6 right-6 z-40 flex-col items-end space-y-2.5">
+        <a
+          href={whatsAppUrl}
+          target="_blank"
+          rel="noreferrer"
+          onClick={handleWhatsAppClick}
+          className="group flex items-center bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 rounded-full shadow-2xl hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+          title="WhatsApp-এ সরাসরি কথা বলুন"
+        >
+          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:pr-2.5 transition-all duration-300 text-xs font-black">
+            WhatsApp-এ কথা বলুন
+          </span>
+          <MessageCircle className="w-5 h-5 fill-white shrink-0" />
+        </a>
+
+        <a
+          href={`tel:${rawPhone}`}
+          className="group flex items-center bg-slate-900/95 hover:bg-slate-800 text-slate-100 hover:text-white p-3 rounded-full border border-slate-700 shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+          title={`সরাসরি কল করুন: ${rawPhone}`}
+        >
+          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:pr-2.5 transition-all duration-300 text-xs font-bold text-amber-300">
+            কল করুন: {rawPhone}
+          </span>
+          <Phone className="w-4 h-4 text-amber-400 shrink-0" />
+        </a>
+      </aside>
     </div>
   );
 };

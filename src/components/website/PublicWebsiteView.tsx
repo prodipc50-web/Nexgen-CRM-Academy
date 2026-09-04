@@ -53,10 +53,16 @@ import {
   Radio,
   PlaySquare,
   Filter,
-  Sparkle
+  Sparkle,
+  Navigation,
+  MessageSquare,
+  Compass,
+  Laptop,
+  Edit
 } from 'lucide-react';
 import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage } from '../../types';
 import { HeroBannerSlider } from './HeroBannerSlider';
+import { TopNoticeTickerModal } from './TopNoticeTickerModal';
 import { getTranslation } from '../../utils/translations';
 import {
   trackMetaPixelEvent,
@@ -117,6 +123,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const [activePolicyModal, setActivePolicyModal] = useState<'terms' | 'privacy' | 'refund' | 'conduct' | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showExitIntent, setShowExitIntent] = useState(false);
+  const [isTopNoticeModalOpen, setIsTopNoticeModalOpen] = useState(false);
 
   // Auto-apply dynamic Homepage SEO metadata, Canonical URL & JSON-LD Schemas
   React.useEffect(() => {
@@ -296,7 +303,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 1. TOP ANNOUNCEMENT BAR & MULTI-HOTLINES */}
       <div className="bg-slate-950 text-slate-300 text-xs border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-2 flex flex-col sm:flex-row items-center justify-between gap-2">
           {/* Ticker / Notice */}
           <div className="flex items-center space-x-2 overflow-hidden text-[11px] sm:text-xs">
             <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
@@ -305,6 +312,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <span className="truncate text-slate-300">
               {websiteCmsConfig.topNoticeTicker || 'Admission open for upcoming weekend & evening batches!'}
             </span>
+            <button
+              type="button"
+              onClick={() => setIsTopNoticeModalOpen(true)}
+              className="p-1 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded transition-colors shrink-0"
+              title="এডিট করুন: টপ নোটিশ ও প্রমো ব্যানার (Edit Notice Ticker & Promo Banner)"
+            >
+              <Edit className="w-3 h-3" />
+            </button>
           </div>
 
           {/* Quick Contact & Staff Access */}
@@ -371,7 +386,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 2. MAIN NAVIGATION HEADER */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3 sm:gap-4">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 h-20 flex items-center justify-between gap-3 sm:gap-4">
           {/* Logo & Institute Identity */}
           <div
             className="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer min-w-0 flex-1 sm:flex-initial"
@@ -481,7 +496,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 -left-24 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 space-y-8">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10 space-y-8">
           {/* Dynamic 16:9 Multi-Slide Carousel Banner */}
           <HeroBannerSlider
             slides={websiteCmsConfig.heroSlides || []}
@@ -655,7 +670,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="py-12 bg-white border-b border-slate-200"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {/* Card 1: Offline Course */}
             <div
@@ -799,7 +814,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="py-14 bg-slate-50 border-b border-slate-200"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-2">
             <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
               From Beginner to IT Professionals We Close That Gap.
@@ -851,7 +866,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 6. REDESIGNED COURSES SHOWCASE SECTION (MATCHING REFERENCE DESIGN) */}
       <section id="courses" className="py-16 sm:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-1">
@@ -1140,9 +1155,99 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         </div>
       </section>
 
+      {/* 5.5. ADMISSION & LEARNING JOURNEY ROADMAP (ভর্তি থেকে ক্লাস শুরুর ৪টি সহজ ধাপ) */}
+      <section className="py-16 sm:py-20 bg-white border-b border-slate-200 text-left">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-12">
+          <div className="text-center space-y-3 max-w-3xl mx-auto">
+            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200/80 rounded-full text-xs font-bold">
+              <Compass className="w-3.5 h-3.5 text-indigo-600" />
+              <span>{language === 'bn' ? 'ভর্তি ও ক্লাস শুরুর প্রক্রিয়া' : 'Admission & Learning Journey'}</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-website-heading">
+              {language === 'bn' ? 'সহজ ৪টি ধাপে শুরু করুন আপনার আইটি ক্যারিয়ার' : 'Start Your IT Career in 4 Simple Steps'}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+              {language === 'bn'
+                ? 'কোনো ঝামেলা ছাড়াই সম্পূর্ণ স্বচ্ছ প্রক্রিয়ায় কোর্স নির্বাচন, সরাসরি ল্যাব ওরিয়েন্টেশন এবং বাস্তব কাজ শেখা শুরু করুন।'
+                : 'A seamless, structured roadmap from counseling and seat reservation to hands-on practical labs and lifetime career guidance.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-slate-50 border border-slate-200/80 hover:border-indigo-500/50 p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-black text-indigo-600 font-mono">০১</span>
+                <div className="w-11 h-11 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+              </div>
+              <h3 className="font-black text-slate-900 text-base sm:text-lg group-hover:text-indigo-600 transition-colors">
+                {language === 'bn' ? 'কোর্স নির্বাচন ও কাউন্সেলিং' : 'Course Selection & Guidance'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                {language === 'bn'
+                  ? 'আপনার বর্তমান ক্যারিয়ার লক্ষ্য অনুযায়ী উপযুক্ত কোর্স বেছে নিন বা আমাদের এক্সপার্ট মেন্টরের সাথে কথা বলুন।'
+                  : 'Explore industry-curated curriculums and consult with career advisors to find your ideal learning path.'}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200/80 hover:border-emerald-500/50 p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-black text-emerald-600 font-mono">০২</span>
+                <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                  <Calendar className="w-5 h-5" />
+                </div>
+              </div>
+              <h3 className="font-black text-slate-900 text-base sm:text-lg group-hover:text-emerald-600 transition-colors">
+                {language === 'bn' ? 'অনলাইন আবেদন ও সিট বুকিং' : 'Online Application & Booking'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                {language === 'bn'
+                  ? 'পছন্দের ব্যাচ টাইম স্লট (সকাল, বিকাল বা উইকেন্ড) নির্বাচন করে সিট কনফার্ম করুন এবং রেজিস্ট্রেশন কপি বুঝে নিন।'
+                  : 'Select your preferred morning, evening, or weekend schedule and confirm your admission registration online.'}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200/80 hover:border-amber-500/50 p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-black text-amber-600 font-mono">০৩</span>
+                <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                  <Laptop className="w-5 h-5" />
+                </div>
+              </div>
+              <h3 className="font-black text-slate-900 text-base sm:text-lg group-hover:text-amber-600 transition-colors">
+                {language === 'bn' ? 'ল্যাব ওরিয়েন্টেশন ও সিঙ্গেল পিসি' : 'Orientation & Dedicated PC'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                {language === 'bn'
+                  ? 'প্রথম দিন ক্যাম্পাসে পরিচিতি এবং ক্লাসের প্রতিটি সেশনে ব্যক্তিগত হাই-কনফিগ কম্পিউটার বরাদ্দ বুঝে নিন।'
+                  : 'Get oriented with institute lab facilities and receive your dedicated personal workstation setup.'}
+              </p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200/80 hover:border-purple-500/50 p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-black text-purple-600 font-mono">০৪</span>
+                <div className="w-11 h-11 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                  <Award className="w-5 h-5" />
+                </div>
+              </div>
+              <h3 className="font-black text-slate-900 text-base sm:text-lg group-hover:text-purple-600 transition-colors">
+                {language === 'bn' ? 'রিয়েল প্রজেক্ট ও আজীবন সাপোর্ট' : 'Real Projects & Lifetime Support'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                {language === 'bn'
+                  ? 'বাস্তব প্রজেক্টে দক্ষতা অর্জন, সরকারি/ভেরিফায়েবল সার্টিফিকেট এবং আজীবন মেন্টরশিপ কমিউনিটি সহায়তা।'
+                  : 'Build real-world client-grade projects, achieve verifiable certificates, and access lifetime alumni support.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 6. ABOUT US & LEADERSHIP SECTION */}
       <section id="about" className="py-16 sm:py-20 bg-slate-50 border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-12">
           {/* Top Story Header */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-7 space-y-4">
@@ -1239,7 +1344,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 7. SOCIAL MEDIA, FACEBOOK COMMUNITY GROUP & YOUTUBE HUB */}
       <section id="community" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-10">
           <div className="text-center max-w-2xl mx-auto">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold mb-2">
               <Users className="w-3.5 h-3.5" />
@@ -1355,7 +1460,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 8. TECH BLOG & CAREER ARTICLES SECTION */}
       <section id="blog" className="py-16 sm:py-20 bg-slate-50 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-2">
@@ -1445,7 +1550,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 9. UPCOMING FREE SEMINARS & WORKSHOPS */}
       <section id="seminars" className="py-16 bg-slate-900 text-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-xs font-bold mb-2">
@@ -1496,6 +1601,35 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       <Users className="w-4 h-4 text-indigo-400 shrink-0" />
                       <span>Speaker: <strong>{s.speakerName}</strong></span>
                     </div>
+
+                    {(s.whatsappGroupUrl || s.googleMapsUrl) && (
+                      <div className="flex items-center space-x-2 pt-1">
+                        {s.whatsappGroupUrl && (
+                          <a
+                            href={s.whatsappGroupUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold hover:bg-emerald-900 transition-colors"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                            <span>WhatsApp Community</span>
+                          </a>
+                        )}
+                        {s.googleMapsUrl && (
+                          <a
+                            href={s.googleMapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-indigo-950 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold hover:bg-indigo-900 transition-colors"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <Navigation className="w-3 h-3" />
+                            <span>Venue Map</span>
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1515,7 +1649,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 10. STUDENT PHOTO & LAB ACTIVITY GALLERY */}
       <section id="gallery" className="py-16 sm:py-20 bg-slate-50 border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-2">
@@ -1588,7 +1722,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 11. VERIFIED STUDENT REVIEWS & SUCCESS STORIES */}
       <section id="reviews" className="py-16 sm:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-xs font-bold mb-2">
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
@@ -1698,11 +1832,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       </section>
 
       {/* 12. PUBLIC CERTIFICATE VERIFICATION ENGINE */}
-      <CertificateVerificationSection />
+      <CertificateVerificationSection onOpenStaffLogin={onOpenStaffLogin} />
 
       {/* 13. NOTICES & FREQUENTLY ASKED QUESTIONS */}
       <section id="notices" className="py-16 bg-slate-50 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* Left: Notice Board (5 cols) */}
             <div className="lg:col-span-5 space-y-4">
@@ -1775,7 +1909,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 14. CONTACT & MULTI-CHANNEL LOCATION SECTION */}
       <section id="contact" className="py-16 bg-white border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Visit Our Campus & Direct Helplines
@@ -1881,7 +2015,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 15. FOOTER & POLICIES */}
       <footer className="bg-slate-950 text-slate-400 text-xs border-t border-slate-800 pt-12 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="space-y-3">
               <NexgenLogo variant="horizontal" size={40} />
@@ -2166,30 +2300,49 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         </div>
       )}
 
-      {/* CRO TOOL 2: 1-CLICK FLOATING WHATSAPP QUICK CONNECT */}
-      {websiteCmsConfig?.marketing?.enableFloatingWhatsApp && (
-        <a
-          href={getWhatsAppDirectUrl(
-            websiteCmsConfig?.marketing?.floatingWhatsAppNumber || '01798444444',
-            websiteCmsConfig?.marketing?.floatingWhatsAppWelcomeText || 'Hello Nexgen Academy! I want to know about course admission & scholarship.'
+      {/* 1-CLICK FLOATING WHATSAPP & HOTLINE QUICK CONNECT (Matching Benchmark Reference) */}
+      {(websiteCmsConfig?.marketing?.enableFloatingWhatsApp !== false) && (
+        <aside aria-label="Quick contact" className="fixed bottom-6 right-6 z-40 flex flex-col items-end space-y-2.5">
+          <a
+            href={getWhatsAppDirectUrl(
+              websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings.primarySupportPhone || '01798444444',
+              websiteCmsConfig?.marketing?.floatingWhatsAppWelcomeText || 'Hello Nexgen Academy! I want to know about course admission & scholarship.'
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              trackMetaPixelEvent('Contact', {
+                channel: 'WhatsApp Floating Button',
+                phone: websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings.primarySupportPhone || '01798444444'
+              }, websiteCmsConfig?.marketing?.metaPixelId);
+            }}
+            className="group bg-emerald-500 hover:bg-emerald-600 text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl shadow-emerald-600/40 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2 border-2 border-white cursor-pointer"
+            title="WhatsApp Admission Help"
+          >
+            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+              <MessageCircle className="w-5 h-5 fill-white text-emerald-500" />
+            </div>
+            <span className="hidden sm:inline font-bold text-xs">WhatsApp Admission Help</span>
+          </a>
+
+          {(academySettings.primarySupportPhone || websiteCmsConfig?.marketing?.floatingWhatsAppNumber) && (
+            <a
+              href={`tel:${academySettings.primarySupportPhone || websiteCmsConfig?.marketing?.floatingWhatsAppNumber}`}
+              className="group hidden sm:flex items-center bg-slate-900/95 hover:bg-slate-900 text-white px-3.5 py-2 rounded-full shadow-lg border border-slate-700 hover:scale-105 active:scale-95 transition-all text-xs font-bold space-x-2 cursor-pointer"
+              title={`Call Hotline: ${academySettings.primarySupportPhone || websiteCmsConfig?.marketing?.floatingWhatsAppNumber}`}
+            >
+              <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="text-slate-200 group-hover:text-white">Hotline: {academySettings.primarySupportPhone || websiteCmsConfig?.marketing?.floatingWhatsAppNumber}</span>
+            </a>
           )}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => {
-            trackMetaPixelEvent('Contact', {
-              channel: 'WhatsApp Floating Button',
-              phone: websiteCmsConfig?.marketing?.floatingWhatsAppNumber || '01798444444'
-            }, websiteCmsConfig?.marketing?.metaPixelId);
-          }}
-          className="fixed bottom-6 right-6 z-40 bg-emerald-500 hover:bg-emerald-600 text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl shadow-emerald-600/40 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2 group border-2 border-white"
-          title="Direct WhatsApp Admission Help"
-        >
-          <div className="w-6 h-6 flex items-center justify-center font-black">
-            <MessageCircle className="w-6 h-6 fill-white text-emerald-500" />
-          </div>
-          <span className="hidden sm:inline font-bold text-xs">WhatsApp Admission Help</span>
-        </a>
+        </aside>
       )}
+
+      {/* TOP NOTICE & PROMO BANNER CMS EDIT MODAL */}
+      <TopNoticeTickerModal
+        isOpen={isTopNoticeModalOpen}
+        onClose={() => setIsTopNoticeModalOpen(false)}
+      />
     </div>
   );
 };

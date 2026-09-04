@@ -47,6 +47,7 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
     5: 0
   });
   const [cashierNotes, setCashierNotes] = useState('');
+  const [isCountingStarted, setIsCountingStarted] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
@@ -92,18 +93,33 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
     0
   );
 
-  const cashDiscrepancy = countedPhysicalCash > 0 ? countedPhysicalCash - expectedCashInDrawer : 0;
+  const cashDiscrepancy = isCountingStarted ? (countedPhysicalCash - expectedCashInDrawer) : 0;
 
   const handlePrint = () => {
     window.print();
   };
 
   const handleDenominationChange = (denom: number, val: string) => {
+    setIsCountingStarted(true);
     const num = Math.max(0, parseInt(val, 10) || 0);
     setNotesDenominations(prev => ({
       ...prev,
       [denom]: num
     }));
+  };
+
+  const handleResetCount = () => {
+    setNotesDenominations({
+      1000: 0,
+      500: 0,
+      200: 0,
+      100: 0,
+      50: 0,
+      20: 0,
+      10: 0,
+      5: 0
+    });
+    setIsCountingStarted(false);
   };
 
   return (
@@ -308,10 +324,10 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
                 <div className="flex justify-between py-1 border-b border-slate-200">
                   <span className="text-slate-600">Physical Counted Cash:</span>
                   <span className="font-mono font-bold text-slate-900">
-                    ৳{countedPhysicalCash > 0 ? countedPhysicalCash.toLocaleString() : '— (Not Counted)'}
+                    {isCountingStarted ? `৳${countedPhysicalCash.toLocaleString()}` : '— (Not Counted)'}
                   </span>
                 </div>
-                {countedPhysicalCash > 0 && (
+                {isCountingStarted && (
                   <div className={`flex justify-between py-1.5 px-2 rounded font-bold ${
                     cashDiscrepancy === 0
                       ? 'bg-emerald-100 text-emerald-900'
@@ -322,10 +338,10 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
                     <span>Variance (পার্থক্য / শর্ট বা বাড়তি):</span>
                     <span className="font-mono text-sm">
                       {cashDiscrepancy === 0
-                        ? '✓ Perfect (৳0)'
+                        ? '✓ Perfect Match (৳0)'
                         : cashDiscrepancy > 0
                         ? `+৳${cashDiscrepancy.toLocaleString()} (Surplus)`
-                        : `-৳${Math.abs(cashDiscrepancy).toLocaleString()} (Shortage)`}
+                        : `-৳${Math.abs(cashDiscrepancy).toLocaleString()} (Shortage Alert)`}
                     </span>
                   </div>
                 )}
@@ -343,9 +359,20 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
                 <Coins className="w-4 h-4 text-amber-600" />
                 <span>Physical Note Counter Tool (নোট গণনা ক্যালকুলেটর)</span>
               </h3>
-              <span className="text-xs font-black text-slate-900 bg-white border border-slate-300 px-2.5 py-1 rounded-lg">
-                Total Counted: ৳{countedPhysicalCash.toLocaleString()}
-              </span>
+              <div className="flex items-center space-x-2">
+                {isCountingStarted && (
+                  <button
+                    type="button"
+                    onClick={handleResetCount}
+                    className="text-[10px] text-rose-600 hover:text-rose-800 font-bold underline px-1.5 py-0.5"
+                  >
+                    Clear / Reset
+                  </button>
+                )}
+                <span className="text-xs font-black text-slate-900 bg-white border border-slate-300 px-2.5 py-1 rounded-lg">
+                  Total Counted: ৳{countedPhysicalCash.toLocaleString()}
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">

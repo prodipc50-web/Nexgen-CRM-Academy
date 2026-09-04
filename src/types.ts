@@ -37,6 +37,20 @@ export interface ThemeConfig {
   borderRadius?: 'rounded-lg' | 'rounded-xl' | 'rounded-2xl' | 'rounded-3xl';
 }
 
+export interface PaymentAccountConfig {
+  id: string;
+  method: 'bKash' | 'Nagad' | 'Rocket' | 'Bank' | 'Upay';
+  accountType: 'Merchant' | 'Personal' | 'Agent';
+  accountNumber: string;
+  accountName?: string;
+  bankName?: string;
+  branchName?: string;
+  routingNumber?: string;
+  qrCodeUrl?: string;
+  instructions?: string;
+  isActive: boolean;
+}
+
 export interface AcademySettings {
   instituteName: string;
   tagline: string;
@@ -59,6 +73,17 @@ export interface AcademySettings {
   taglineFontSize: number; // default 11
   customLogoUrl?: string;
   theme?: ThemeConfig;
+  
+  // Payment Accounts & Gateways
+  paymentAccounts?: PaymentAccountConfig[];
+  paymentQrCodeUrl?: string;
+  paymentInstructions?: string;
+  
+  // Official Seals, Signatures & Voucher Customization
+  institutionSealUrl?: string;
+  directorSignatureUrl?: string;
+  authorizedSignatureUrl?: string;
+  receiptNotes?: string;
 }
 
 export type LeadStatus =
@@ -776,6 +801,9 @@ export interface Course {
   // Dynamic Landing Page & Campaign Variant Customization
   landingConfig?: CourseLandingPageConfig;
 
+  // Full Syllabus PDF Download
+  syllabusPdfUrl?: string;
+
   createdAt?: string;
   updatedAt?: string;
 }
@@ -845,6 +873,17 @@ export interface Admission {
   nextDueDate?: string;
   installments?: InstallmentMilestone[];
   remarks?: string;
+
+  // Manual Ledger Fee Adjustments (Special Waiver / Discount / Late fee)
+  specialAdjustments?: {
+    id: string;
+    date: string;
+    amount: number;
+    type: 'Waiver/Discount' | 'Late Fee/Addon' | 'Manual Correction';
+    reason: string;
+    approvedBy: string;
+  }[];
+
   createdAt: string;
 }
 
@@ -934,6 +973,13 @@ export interface Certificate {
   verificationId: string; // Unique URL or verification key
   status: 'Issued' | 'Draft' | 'Revoked';
   instructorSignatureName: string;
+  // Manual / Scanned Certificate support
+  certificateImageUrl?: string;
+  studentName?: string;
+  courseName?: string;
+  batchName?: string;
+  remarks?: string;
+  isManualUpload?: boolean;
 }
 
 export type ExpenseCategory =
@@ -1165,6 +1211,9 @@ export interface SeminarWorkshop {
   convertedToAdmissionCount?: number;
   bannerUrl?: string;
   description?: string;
+  whatsappGroupUrl?: string;
+  googleMapsUrl?: string;
+  confirmationNote?: string;
   status: 'Upcoming' | 'Live Today' | 'Completed' | 'Cancelled';
 }
 
@@ -1553,6 +1602,25 @@ export interface WebsiteCmsConfig {
 
   // Legal & Policies
   policies: PoliciesConfig;
+
+  // Top Notice Marquee Controls
+  topNoticeTickerEnabled?: boolean;
+  topNoticeTickerLink?: string;
+
+  // Video Testimonials / Success Stories
+  videoTestimonials?: VideoTestimonial[];
+}
+
+export interface VideoTestimonial {
+  id: string;
+  studentName: string;
+  courseName: string;
+  videoUrl: string; // YouTube / Vimeo embed or watch URL
+  thumbnailUrl?: string;
+  studentAchievement?: string; // e.g. "Upwork Top Rated - $3,500/mo"
+  batchNumber?: string;
+  storyDescription?: string;
+  isActive: boolean;
 }
 
 

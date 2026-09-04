@@ -140,6 +140,8 @@ interface AcademyContextType {
   deleteAssignment: (id: string) => void;
   submitAssignment: (submission: Omit<AssignmentSubmission, 'id' | 'submittedAt'>) => AssignmentSubmission;
   gradeAssignmentSubmission: (id: string, marks: number, feedback: string) => void;
+  updateAssignmentSubmission: (id: string, updates: Partial<AssignmentSubmission>) => void;
+  deleteAssignmentSubmission: (id: string) => void;
 
   // Seminars & Workshops
   seminars: SeminarWorkshop[];
@@ -304,6 +306,12 @@ interface AcademyContextType {
 
   deleteAdmission: (admissionId: string) => void;
   waiveAdmissionDue: (admissionId: string, reason?: string) => void;
+  adjustAdmissionLedger: (params: {
+    admissionId: string;
+    adjustmentType: 'Waiver' | 'Debit_Fine' | 'Custom_FinalFee';
+    amount: number;
+    reason: string;
+  }) => void;
 
   updateStudent: (id: string, updates: Partial<Student>) => void;
   deleteStudent: (id: string) => void;
@@ -327,7 +335,23 @@ interface AcademyContextType {
   addExam: (exam: Omit<Exam, 'id' | 'examCode'>) => Exam;
   saveExamResult: (result: Omit<ExamResult, 'id'>) => void;
 
-  issueCertificate: (params: { studentId: string; courseId: string; batchId: string; grade: string; completionDate: string; certificateNumber?: string }) => Certificate;
+  issueCertificate: (params: {
+    studentId: string;
+    courseId?: string;
+    batchId?: string;
+    grade: string;
+    completionDate?: string;
+    certificateNumber?: string;
+    certificateImageUrl?: string;
+    studentName?: string;
+    courseName?: string;
+    batchName?: string;
+    remarks?: string;
+    isManualUpload?: boolean;
+    issueDate?: string;
+    instructorSignatureName?: string;
+    status?: 'Issued' | 'Draft' | 'Revoked';
+  }) => Certificate;
   updateCertificate: (id: string, updates: Partial<Certificate>) => void;
 
   addExpense: (expense: Omit<Expense, 'id' | 'expenseCode' | 'createdAt'>) => Expense;
@@ -1303,15 +1327,21 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const course = courses.find(crs => crs.id === c.courseId);
       const batch = batches.find(b => b.id === c.batchId);
       return {
-        certificateNumber: c.certificateNumber,
+        id: c.id,
+        certificateNumber: c.certificateNumber || c.certificateCode,
         certificateCode: c.certificateCode,
         studentId: c.studentId,
-        studentName: student?.name || 'Verified Student',
-        courseName: course?.name || 'Professional IT Course',
-        batchName: batch?.batchNumber || 'Official Batch',
+        studentName: c.studentName || student?.name || 'Verified Student',
+        courseName: c.courseName || course?.name || 'Professional IT Course',
+        batchName: c.batchName || batch?.batchNumber || 'Official Batch',
         issueDate: c.issueDate,
+        completionDate: c.completionDate,
         grade: c.grade,
-        status: c.status
+        status: c.status,
+        instructorSignatureName: c.instructorSignatureName,
+        certificateImageUrl: c.certificateImageUrl,
+        isManualUpload: Boolean(c.isManualUpload),
+        remarks: c.remarks
       };
     });
 
@@ -2336,7 +2366,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setPayments(prev => [newPayment, ...prev]);
 
     // Recalculate admission balance
-    const newTotalPaid = Math.min(targetAdm.finalFee, targetAdm.totalPaid + safeAmount);
+    const newTotalPaid = targetAdm.totalPaid + safeAmount;
     const newDue = Math.max(0, targetAdm.finalFee - newTotalPaid);
     const newStatus: Admission['paymentStatus'] = newDue === 0 ? 'Paid' : newTotalPaid > 0 ? 'Partially Paid' : 'Due';
 
@@ -2514,6 +2544,45 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return a;
     }));
     logAudit('Due Waived', 'Accounts / Due Management', admissionId, `Waived pending due for admission ${admissionId}`);
+  };
+
+  const adjustAdmissionLedger = (params: {
+    admissionId: string;
+    adjustmentType: 'Waiver' | 'Debit_Fine' | 'Custom_FinalFee';
+    amount: number;
+    reason: string;
+  }) => {
+    const { admissionId, adjustmentType, amount, reason } = params;
+    setAdmissions(prev => prev.map(a => {
+      if (a.id === admissionId) {
+        let newFinalFee = a.finalFee;
+        let newDiscount = a.discount;
+        if (adjustmentType === 'Waiver') {
+          const waiverAmt = Math.min(amount, a.due);
+          newFinalFee = Math.max(a.totalPaid, a.finalFee - waiverAmt);
+          newDiscount = a.discount + waiverAmt;
+        } else if (adjustmentType === 'Debit_Fine') {
+          newFinalFee = a.finalFee + Math.max(0, amount);
+        } else if (adjustmentType === 'Custom_FinalFee') {
+          newFinalFee = Math.max(a.totalPaid, amount);
+        }
+
+        const newDue = Math.max(0, newFinalFee - a.totalPaid);
+        const newStatus: Admission['paymentStatus'] = newDue === 0 ? 'Paid' : a.totalPaid > 0 ? 'Partially Paid' : 'Due';
+
+        return {
+          ...a,
+          finalFee: newFinalFee,
+          discount: newDiscount,
+          due: newDue,
+          paymentStatus: newStatus,
+          remarks: `${a.remarks ? a.remarks + ' | ' : ''}Ledger Adjustment [${adjustmentType}]: ৳${amount} (${reason})`
+        };
+      }
+      return a;
+    }));
+
+    logAudit('Ledger Adjusted', 'Accounts / Admissions', admissionId, `Adjusted admission ${admissionId} [${adjustmentType}]: ৳${amount} - Reason: ${reason}`);
   };
 
   const deleteStudent = (id: string) => {
@@ -2810,14 +2879,32 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     batchId,
     grade,
     completionDate,
-    certificateNumber
+    certificateNumber,
+    certificateImageUrl,
+    studentName,
+    courseName,
+    batchName,
+    remarks,
+    isManualUpload,
+    issueDate,
+    instructorSignatureName,
+    status
   }: {
     studentId: string;
-    courseId: string;
-    batchId: string;
+    courseId?: string;
+    batchId?: string;
     grade: string;
-    completionDate: string;
+    completionDate?: string;
     certificateNumber?: string;
+    certificateImageUrl?: string;
+    studentName?: string;
+    courseName?: string;
+    batchName?: string;
+    remarks?: string;
+    isManualUpload?: boolean;
+    issueDate?: string;
+    instructorSignatureName?: string;
+    status?: 'Issued' | 'Draft' | 'Revoked';
   }): Certificate => {
     const id = `crt-${Date.now()}`;
     const certNum = 8940 + certificates.length + 1;
@@ -2829,23 +2916,31 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       id,
       certificateCode,
       certificateNumber: certificateCode,
-      studentId,
-      courseId,
-      batchId,
-      issueDate: new Date().toISOString().split('T')[0],
-      completionDate,
-      grade,
+      studentId: studentId || `stu-manual-${Date.now().toString().slice(-4)}`,
+      courseId: courseId || '',
+      batchId: batchId || '',
+      issueDate: issueDate || new Date().toISOString().split('T')[0],
+      completionDate: completionDate || new Date().toISOString().split('T')[0],
+      grade: grade || 'Passed',
       verificationId,
-      status: 'Issued',
-      instructorSignatureName: `${trainer.name} (Lead Trainer)`
+      status: status || 'Issued',
+      instructorSignatureName: instructorSignatureName || `${trainer.name} (Lead Trainer)`,
+      certificateImageUrl,
+      studentName,
+      courseName,
+      batchName,
+      remarks,
+      isManualUpload: Boolean(isManualUpload)
     };
 
     setCertificates(prev => [newCertificate, ...prev]);
 
-    // Update student status to 'Completed' or 'Alumni'
-    updateStudent(studentId, { status: 'Completed' });
+    // Update student status to 'Completed' or 'Alumni' if student exists in database
+    if (studentId && students.some(s => s.id === studentId)) {
+      updateStudent(studentId, { status: 'Completed' });
+    }
 
-    logAudit('Certificate Issued', 'Certificates', id, `Issued official certificate #${certificateCode} to student ID: ${studentId}`);
+    logAudit('Certificate Issued', 'Certificates', id, `Issued certificate #${certificateCode} to: ${studentName || studentId}`);
     return newCertificate;
   };
 
@@ -3197,6 +3292,16 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       status: 'Graded'
     } : s)));
     logAudit('Assignment Graded', 'Academic / Assignments', id, `Graded submission #${id} with ${marks} marks`);
+  };
+
+  const updateAssignmentSubmission = (id: string, updates: Partial<AssignmentSubmission>) => {
+    setAssignmentSubmissions(prev => prev.map(s => (s.id === id ? { ...s, ...updates } : s)));
+    logAudit('Assignment Submission Updated', 'Academic / Assignments', id, `Updated assignment submission #${id}`);
+  };
+
+  const deleteAssignmentSubmission = (id: string) => {
+    setAssignmentSubmissions(prev => prev.filter(s => s.id !== id));
+    logAudit('Assignment Submission Deleted', 'Academic / Assignments', id, `Deleted submission #${id}`);
   };
 
   // --- SEMINARS & WORKSHOPS ---
@@ -3961,6 +4066,19 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (item.data?.admissions && Array.isArray(item.data.admissions)) {
         setAdmissions(prev => [...item.data.admissions, ...prev]);
       }
+      if (item.data?.payments && Array.isArray(item.data.payments)) {
+        setPayments(prev => [...item.data.payments, ...prev]);
+      }
+    }
+    else if (item.itemType === 'admission') {
+      if (item.data?.admission) {
+        setAdmissions(prev => [item.data.admission, ...prev]);
+        if (item.data.payments && Array.isArray(item.data.payments)) {
+          setPayments(prev => [...item.data.payments, ...prev]);
+        }
+      } else {
+        setAdmissions(prev => [item.data, ...prev]);
+      }
     }
     else if (item.itemType === 'course') setCourses(prev => [item.data, ...prev]);
     else if (item.itemType === 'batch') setBatches(prev => [item.data, ...prev]);
@@ -4034,6 +4152,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const exportDatabaseJson = () => {
     const fullDb = {
       staffList,
+      categories,
       courses,
       batches,
       rooms,
@@ -4051,11 +4170,28 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       expenses,
       assets,
       auditLogs,
+      trashItems,
       placements,
       assignments,
       assignmentSubmissions,
       seminars,
-      exportedAt: new Date().toISOString()
+      academySettings,
+      websiteCmsConfig,
+      websiteReviews,
+      websiteGallery,
+      websiteFaqs,
+      websiteBlogs,
+      leadSources,
+      expenseCategoriesList,
+      paymentMethodsList,
+      occupationsList,
+      educationLevelsList,
+      studentGoalsList,
+      studentStatusesList,
+      bloodGroupsList,
+      discountTypesList,
+      exportedAt: new Date().toISOString(),
+      version: '2.5'
     };
     const blob = new Blob([JSON.stringify(fullDb, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -4064,26 +4200,60 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     a.download = `NexgenAcademy_Backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    logAudit('Database Exported', 'Settings / Backup', 'full-backup', 'Exported full JSON database snapshot');
+    logAudit('Database Exported', 'Settings / Backup', 'full-backup', 'Exported full JSON database snapshot including settings and CMS');
   };
 
   const importDatabaseJson = (jsonString: string): boolean => {
     try {
       const data = JSON.parse(jsonString);
-      if (data.categories) setCategories(data.categories);
-      if (data.courses) setCourses(data.courses);
-      if (data.batches) setBatches(data.batches);
-      if (data.leads) setLeads(data.leads);
-      if (data.students) setStudents(data.students);
-      if (data.admissions) setAdmissions(data.admissions);
-      if (data.payments) setPayments(data.payments);
-      if (data.expenses) setExpenses(data.expenses);
-      if (data.staffList) setStaffList(data.staffList);
-      if (data.placements) setPlacements(data.placements);
-      if (data.assignments) setAssignments(data.assignments);
-      if (data.assignmentSubmissions) setAssignmentSubmissions(data.assignmentSubmissions);
-      if (data.seminars) setSeminars(data.seminars);
-      logAudit('Database Restored', 'Settings / Backup', 'restore', 'Imported and restored database snapshot from JSON');
+      if (data.categories && Array.isArray(data.categories)) setCategories(data.categories);
+      if (data.courses && Array.isArray(data.courses)) setCourses(data.courses);
+      if (data.batches && Array.isArray(data.batches)) setBatches(data.batches);
+      if (data.rooms && Array.isArray(data.rooms)) setRooms(data.rooms);
+      if (data.campaigns && Array.isArray(data.campaigns)) setCampaigns(data.campaigns);
+      if (data.leads && Array.isArray(data.leads)) setLeads(data.leads);
+      if (data.followUps && Array.isArray(data.followUps)) setFollowUps(data.followUps);
+      if (data.students && Array.isArray(data.students)) setStudents(data.students);
+      if (data.admissions && Array.isArray(data.admissions)) setAdmissions(data.admissions);
+      if (data.payments && Array.isArray(data.payments)) setPayments(data.payments);
+      if (data.attendance && Array.isArray(data.attendance)) setAttendance(data.attendance);
+      if (data.schedules && Array.isArray(data.schedules)) setSchedules(data.schedules);
+      if (data.exams && Array.isArray(data.exams)) setExams(data.exams);
+      if (data.examResults && Array.isArray(data.examResults)) setExamResults(data.examResults);
+      if (data.certificates && Array.isArray(data.certificates)) setCertificates(data.certificates);
+      if (data.expenses && Array.isArray(data.expenses)) setExpenses(data.expenses);
+      if (data.assets && Array.isArray(data.assets)) setAssets(data.assets);
+      if (data.staffList && Array.isArray(data.staffList)) setStaffList(data.staffList);
+      if (data.placements && Array.isArray(data.placements)) setPlacements(data.placements);
+      if (data.assignments && Array.isArray(data.assignments)) setAssignments(data.assignments);
+      if (data.assignmentSubmissions && Array.isArray(data.assignmentSubmissions)) setAssignmentSubmissions(data.assignmentSubmissions);
+      if (data.seminars && Array.isArray(data.seminars)) setSeminars(data.seminars);
+      if (data.trashItems && Array.isArray(data.trashItems)) setTrashItems(data.trashItems);
+      if (data.auditLogs && Array.isArray(data.auditLogs)) setAuditLogs(data.auditLogs);
+
+      // Restore system configurations
+      if (data.academySettings && typeof data.academySettings === 'object') {
+        setAcademySettings(prev => ({ ...prev, ...data.academySettings }));
+      }
+      if (data.websiteCmsConfig && typeof data.websiteCmsConfig === 'object') {
+        setWebsiteCmsConfig(prev => ({ ...prev, ...data.websiteCmsConfig }));
+      }
+      if (data.websiteReviews && Array.isArray(data.websiteReviews)) setWebsiteReviews(data.websiteReviews);
+      if (data.websiteGallery && Array.isArray(data.websiteGallery)) setWebsiteGallery(data.websiteGallery);
+      if (data.websiteFaqs && Array.isArray(data.websiteFaqs)) setWebsiteFaqs(data.websiteFaqs);
+      if (data.websiteBlogs && Array.isArray(data.websiteBlogs)) setWebsiteBlogs(data.websiteBlogs);
+
+      if (data.leadSources && Array.isArray(data.leadSources)) setLeadSources(data.leadSources);
+      if (data.expenseCategoriesList && Array.isArray(data.expenseCategoriesList)) setExpenseCategoriesList(data.expenseCategoriesList);
+      if (data.paymentMethodsList && Array.isArray(data.paymentMethodsList)) setPaymentMethodsList(data.paymentMethodsList);
+      if (data.occupationsList && Array.isArray(data.occupationsList)) setOccupationsList(data.occupationsList);
+      if (data.educationLevelsList && Array.isArray(data.educationLevelsList)) setEducationLevelsList(data.educationLevelsList);
+      if (data.studentGoalsList && Array.isArray(data.studentGoalsList)) setStudentGoalsList(data.studentGoalsList);
+      if (data.studentStatusesList && Array.isArray(data.studentStatusesList)) setStudentStatusesList(data.studentStatusesList);
+      if (data.bloodGroupsList && Array.isArray(data.bloodGroupsList)) setBloodGroupsList(data.bloodGroupsList);
+      if (data.discountTypesList && Array.isArray(data.discountTypesList)) setDiscountTypesList(data.discountTypesList);
+
+      logAudit('Database Restored', 'Settings / Backup', 'restore', 'Imported and restored complete database snapshot including settings and CMS');
       return true;
     } catch (e) {
       console.error('Failed to parse database backup', e);
@@ -4218,6 +4388,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         deleteAssignment,
         submitAssignment,
         gradeAssignmentSubmission,
+        updateAssignmentSubmission,
+        deleteAssignmentSubmission,
         seminars,
         addSeminar,
         updateSeminar,
@@ -4275,6 +4447,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         clearDemoPayments,
         deleteAdmission,
         waiveAdmissionDue,
+        adjustAdmissionLedger,
         updateStudent,
         deleteStudent,
         transferStudentBatch,
