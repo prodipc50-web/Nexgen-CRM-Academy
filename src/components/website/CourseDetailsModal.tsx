@@ -25,7 +25,9 @@ import {
   Image as ImageIcon,
   HelpCircle,
   Target,
-  Gift
+  Gift,
+  FileText,
+  Download
 } from 'lucide-react';
 import { Course, CoursePreferredScheduleOption, Lead } from '../../types';
 import { useAcademy } from '../../context/AcademyContext';
@@ -452,6 +454,35 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                   {displayModules.length} Modules
                 </span>
               </div>
+
+              {/* MANUAL CURRICULUM FILE DOWNLOAD BANNER */}
+              {(course.curriculumFileUrl || course.syllabusPdfUrl || course.landingConfig?.syllabusDownload?.fileUrl) && (
+                <div className="p-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs uppercase">
+                      {course.curriculumFileType || 'PDF'}
+                    </div>
+                    <div className="min-w-0">
+                      <h5 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                        {course.curriculumFileName || `${course.name} অফিসিয়াল কারিকুলাম ও সিলেবাস`}
+                      </h5>
+                      <p className="text-[11px] text-slate-500">
+                        সরাসরি অ্যাকাডেমি কর্তৃক হালনাগাদকৃত কারিকুলাম {course.curriculumFileSize ? `• ${course.curriculumFileSize}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={course.curriculumFileUrl || course.syllabusPdfUrl || course.landingConfig?.syllabusDownload?.fileUrl}
+                    download={course.curriculumFileName || `${course.name}_syllabus.pdf`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center space-x-1.5 shrink-0 self-stretch sm:self-auto justify-center"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>সিলেবাস ডাউনলোড করুন</span>
+                  </a>
+                </div>
+              )}
 
               <div className="space-y-3">
                 {displayModules.map((mod: any, idx: number) => {

@@ -19,7 +19,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   onClose,
   seminar
 }) => {
-  const { addLead, registerLeadToSeminar, websiteCmsConfig } = useAcademy();
+  const { addLead, submitPublicLead, registerLeadToSeminar, websiteCmsConfig } = useAcademy();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -44,6 +44,34 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
       const utms = getCapturedUtmParams();
       const device = getDeviceType();
 
+      const commentsText = `Free Seminar Registration: "${seminar.title}" on ${seminar.date} at ${seminar.time}. Occ: ${occupation}. Campaign: ${utms.utmCampaign || 'organic'}`;
+      const sourceStr = utms.utmSource ? `Ad: ${utms.utmSource} (Seminar)` : 'Campus Seminar / Workshop';
+
+      // 1. Submit to server authoritative persistence
+      submitPublicLead({
+        fullName: name.trim(),
+        studentName: name.trim(),
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim() || undefined,
+        courseId: seminar.courseId || '',
+        courseName: seminar.courseName || seminar.title,
+        status: 'Demo Scheduled',
+        leadSource: sourceStr,
+        source: sourceStr,
+        comments: commentsText,
+        occupation: occupation,
+        utmSource: utms.utmSource,
+        utmMedium: utms.utmMedium,
+        utmCampaign: utms.utmCampaign,
+        utmContent: utms.utmContent,
+        utmTerm: utms.utmTerm,
+        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined
+      }).catch(err => {
+        console.warn('Seminar server sync fallback handled:', err);
+      });
+
+      // 2. Client-side registration
       const newLead = addLead({
         name: name.trim(),
         phone: phone.trim(),
@@ -51,7 +79,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
         occupation: occupation as any,
         educationLevel: 'Graduate / Student',
         interestedCourseId: seminar.courseId || '',
-        leadSource: utms.utmSource ? `Ad: ${utms.utmSource}` : 'Campus Seminar / Workshop',
+        leadSource: sourceStr,
         campaignId: utms.utmCampaign,
         utmSource: utms.utmSource,
         utmMedium: utms.utmMedium,
@@ -60,12 +88,12 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
         utmTerm: utms.utmTerm,
         deviceType: device,
         locationCity: 'Dhaka',
-        counselorId: 'counselor-01',
-        counselorName: 'Seminar Coordinator',
+        counselorId: 'st-03',
+        counselorName: 'Admissions Desk (Tanvir Ahmed)',
         visitDate: seminar.date || todayDate,
         firstContactDate: todayDate,
-        status: 'Demo Attended',
-        comments: `Free Seminar Registration: "${seminar.title}" on ${seminar.date} at ${seminar.time}. Occ: ${occupation}. Campaign: ${utms.utmCampaign || 'organic'}`
+        status: 'Demo Scheduled',
+        comments: commentsText
       });
 
       registerLeadToSeminar(seminar.id, newLead.id);

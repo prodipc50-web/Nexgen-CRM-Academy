@@ -65,6 +65,7 @@ import {
 } from 'lucide-react';
 import { OnlineAdmissionModal } from './OnlineAdmissionModal';
 import { CourseLandingPageEditorModal } from '../courses/CourseLandingPageEditorModal';
+import { SyllabusDownloadModal } from '../modals/SyllabusDownloadModal';
 import {
   trackMetaPixelEvent,
   getCapturedUtmParams
@@ -264,6 +265,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
   const [openModuleIndex, setOpenModuleIndex] = useState<number | null>(0);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -691,8 +693,8 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       locationCity: addressText || 'Dhaka',
       occupation: 'Student',
       educationLevel: 'HSC / Graduate',
-      counselorId: 'counselor-01',
-      counselorName: 'Online Admission Cell',
+      counselorId: 'st-03',
+      counselorName: 'Admissions Desk (Tanvir Ahmed)',
       visitDate: today,
       firstContactDate: today,
       status: 'New',
@@ -1679,6 +1681,42 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           </p>
         </div>
 
+        {/* Syllabus Download Banner Card */}
+        {landingConfig.syllabusDownloadConfig?.enabled !== false && (
+          <div className="max-w-5xl mx-auto mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-950/90 via-slate-900 to-indigo-900/80 border border-indigo-500/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30">
+                <Download className="w-6 h-6 text-amber-300 animate-bounce" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-full font-sans">
+                    {landingConfig.syllabusDownloadConfig?.badgeText || 'ফ্রি সিলেবাস ও রোডম্যাপ'}
+                  </span>
+                  <span className="text-xs text-indigo-200 font-bold hidden sm:inline">
+                    PDF • সম্পূর্ণ কারিকুলাম ও প্রজেক্ট শিট
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-white mt-1">
+                  {landingConfig.syllabusDownloadConfig?.headline || 'কোর্সের বিস্তারিত সিলেবাস ও প্রজেক্ট কারিকুলাম সংগ্রহ করুন'}
+                </h3>
+                <p className="text-xs text-slate-300 font-normal">
+                  {landingConfig.syllabusDownloadConfig?.description || 'আপনার নাম ও মোবাইল নম্বর দিয়ে সাথে সাথে সিলেবাস ও রোডম্যাপ ডাউনলোড করুন।'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsSyllabusModalOpen(true)}
+              className="inline-flex items-center justify-center space-x-2 px-5 py-3 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-amber-500/20 active:scale-98 transition-all shrink-0 cursor-pointer"
+            >
+              <Download className="w-4 h-4 text-slate-950" />
+              <span>{landingConfig.syllabusDownloadConfig?.buttonText || 'সিলেবাস ডাউনলোড করুন (PDF)'}</span>
+            </button>
+          </div>
+        )}
+
         <div className="max-w-5xl mx-auto space-y-4">
           {editableModules.map((mod, idx) => {
             const isOpen = openModuleIndex === idx;
@@ -1751,6 +1789,19 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               </div>
             );
           })}
+
+          {landingConfig.syllabusDownloadConfig?.enabled !== false && (
+            <div className="pt-4 text-center">
+              <button
+                type="button"
+                onClick={() => setIsSyllabusModalOpen(true)}
+                className="inline-flex items-center space-x-2 px-6 py-3 rounded-2xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-sm hover:shadow-indigo-500/20"
+              >
+                <Download className="w-4 h-4 text-amber-300" />
+                <span>{landingConfig.syllabusDownloadConfig?.buttonText || 'পূর্ণাঙ্গ সিলেবাস ডাউনলোড করুন (PDF)'}</span>
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -2564,6 +2615,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           isOpen={isEditorOpen}
           onClose={() => setIsEditorOpen(false)}
           course={course}
+        />
+      )}
+
+      {/* Syllabus Download Lead Magnet Modal */}
+      {isSyllabusModalOpen && (
+        <SyllabusDownloadModal
+          isOpen={isSyllabusModalOpen}
+          onClose={() => setIsSyllabusModalOpen(false)}
+          course={course}
+          config={landingConfig.syllabusDownloadConfig}
         />
       )}
 

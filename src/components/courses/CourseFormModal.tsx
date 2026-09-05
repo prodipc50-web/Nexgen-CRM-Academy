@@ -19,7 +19,12 @@ import {
   AlertCircle,
   Image as ImageIcon,
   Tag,
-  Info
+  Info,
+  Upload,
+  FileText,
+  Eye,
+  RefreshCw,
+  Download
 } from 'lucide-react';
 
 interface CourseFormModalProps {
@@ -97,6 +102,45 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
   const [previousCourse, setPreviousCourse] = useState('');
   const [learningFeatures, setLearningFeatures] = useState<string[]>(['Live Class', 'Offline Class', 'Certificate']);
 
+  // Manual Curriculum Upload File State (PDF, JPG, PNG, WEBP)
+  const [curriculumFileUrl, setCurriculumFileUrl] = useState('');
+  const [curriculumFileName, setCurriculumFileName] = useState('');
+  const [curriculumFileType, setCurriculumFileType] = useState<'pdf' | 'image' | 'doc' | string>('pdf');
+  const [curriculumFileSize, setCurriculumFileSize] = useState('');
+  const [curriculumUploadedAt, setCurriculumUploadedAt] = useState('');
+  const [fileUploadError, setFileUploadError] = useState<string | null>(null);
+  const [showFilePreview, setShowFilePreview] = useState(false);
+
+  const handleCurriculumFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFileUploadError(null);
+    if (file.size > 25 * 1024 * 1024) {
+      setFileUploadError('ফাইলের সাইজ সর্বোচ্চ ২৫ মেগাবাইটের (25MB) মধ্যে হতে হবে।');
+      return;
+    }
+
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(file.name);
+    const sizeFormatted = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+    const uploadedTime = new Date().toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setCurriculumFileUrl(dataUrl);
+      setCurriculumFileName(file.name);
+      setCurriculumFileType(isPdf ? 'pdf' : isImage ? 'image' : 'doc');
+      setCurriculumFileSize(sizeFormatted);
+      setCurriculumUploadedAt(uploadedTime);
+    };
+    reader.onerror = () => {
+      setFileUploadError('ফাইল পড়তে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Reset or initialize form values
   useEffect(() => {
     if (initialCourse) {
@@ -127,6 +171,11 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       setRequiredSoftwareHardware(initialCourse.requiredSoftwareHardware || '');
       setPreviousCourse(initialCourse.previousCourse || '');
       setLearningFeatures(initialCourse.learningFeatures || ['Live Class', 'Offline Class', 'Certificate']);
+      setCurriculumFileUrl(initialCourse.curriculumFileUrl || initialCourse.syllabusPdfUrl || initialCourse.landingConfig?.syllabusDownload?.fileUrl || '');
+      setCurriculumFileName(initialCourse.curriculumFileName || initialCourse.landingConfig?.syllabusDownload?.fileName || '');
+      setCurriculumFileType(initialCourse.curriculumFileType || initialCourse.landingConfig?.syllabusDownload?.fileType || 'pdf');
+      setCurriculumFileSize(initialCourse.curriculumFileSize || initialCourse.landingConfig?.syllabusDownload?.fileSize || '');
+      setCurriculumUploadedAt(initialCourse.curriculumUploadedAt || initialCourse.landingConfig?.syllabusDownload?.uploadedAt || '');
     } else {
       // Auto generate placeholder code for new course
       const nextCode = `NCA-CRS-${String(courses.length + 1).padStart(2, '0')}`;
@@ -137,6 +186,11 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       setDescription('');
       setThumbnailUrl(PRESET_THUMBNAILS[0].url);
       setStatus('Active');
+      setCurriculumFileUrl('');
+      setCurriculumFileName('');
+      setCurriculumFileType('pdf');
+      setCurriculumFileSize('');
+      setCurriculumUploadedAt('');
       setDurationValue(3);
       setDurationUnit('Months');
       setTotalClasses(36);
@@ -389,7 +443,25 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       recommendedAge,
       requiredSoftwareHardware,
       previousCourse: previousCourse || undefined,
-      targetAudience
+      targetAudience,
+      curriculumFileUrl: curriculumFileUrl || undefined,
+      curriculumFileName: curriculumFileName || undefined,
+      curriculumFileType: curriculumFileType || undefined,
+      curriculumFileSize: curriculumFileSize || undefined,
+      curriculumUploadedAt: curriculumUploadedAt || undefined,
+      syllabusPdfUrl: curriculumFileUrl || undefined,
+      landingConfig: initialCourse?.landingConfig ? {
+        ...initialCourse.landingConfig,
+        syllabusDownload: {
+          ...initialCourse.landingConfig.syllabusDownload,
+          enabled: true,
+          fileUrl: curriculumFileUrl || initialCourse.landingConfig.syllabusDownload?.fileUrl,
+          fileName: curriculumFileName || initialCourse.landingConfig.syllabusDownload?.fileName,
+          fileType: (curriculumFileType as any) || initialCourse.landingConfig.syllabusDownload?.fileType,
+          fileSize: curriculumFileSize || initialCourse.landingConfig.syllabusDownload?.fileSize,
+          uploadedAt: curriculumUploadedAt || initialCourse.landingConfig.syllabusDownload?.uploadedAt
+        }
+      } : undefined
     };
 
     if (isEditing && initialCourse) {
@@ -860,6 +932,121 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
                   <Plus className="w-4 h-4" />
                   <span>Add Module</span>
                 </button>
+              </div>
+
+              {/* MANUAL CURRICULUM FILE UPLOAD BOX (PDF / JPG / PNG / WEBP) */}
+              <div className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/50 border border-indigo-200 rounded-2xl space-y-3.5 shadow-2xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-slate-900 text-xs sm:text-sm flex items-center space-x-1.5">
+                        <span>কারিকুলাম ও সিলেবাস ফাইল আপলোড (PDF / JPG / PNG)</span>
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 uppercase tracking-wide">
+                          ম্যানুয়াল আপডেট
+                        </span>
+                      </h5>
+                      <p className="text-[11px] text-slate-500">
+                        কারিকুলাম পরিবর্তন হলে যেকোনো সময় নতুন ফাইল আপলোড করে হালনাগাদ করতে পারবেন।
+                      </p>
+                    </div>
+                  </div>
+                  {curriculumFileUrl && (
+                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-300 inline-flex items-center space-x-1 self-start sm:self-auto">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>ফাইল সংরক্ষিত আছে</span>
+                    </span>
+                  )}
+                </div>
+
+                {fileUploadError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold flex items-center space-x-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{fileUploadError}</span>
+                  </div>
+                )}
+
+                {curriculumFileUrl ? (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white border border-indigo-200 rounded-xl gap-3 shadow-2xs">
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-700 font-black text-xs flex items-center justify-center shrink-0 uppercase border border-indigo-200">
+                        {curriculumFileType || 'FILE'}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 truncate max-w-xs sm:max-w-md" title={curriculumFileName}>
+                          {curriculumFileName || `${name || 'course'}_curriculum_syllabus`}
+                        </p>
+                        <div className="flex items-center space-x-2 text-[11px] text-slate-500 font-medium mt-0.5">
+                          {curriculumFileSize && <span>সাইজ: {curriculumFileSize}</span>}
+                          {curriculumUploadedAt && <span>• আপলোড: {curriculumUploadedAt}</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowFilePreview(true)}
+                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200 flex items-center space-x-1 transition-colors cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>প্রিভিউ</span>
+                      </button>
+
+                      <label className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg border border-blue-200 flex items-center space-x-1 cursor-pointer transition-colors">
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>ফাইল বদলান / আপডেট</span>
+                        <input
+                          type="file"
+                          accept=".pdf,image/png,image/jpeg,image/webp"
+                          onChange={handleCurriculumFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurriculumFileUrl('');
+                          setCurriculumFileName('');
+                          setCurriculumFileSize('');
+                          setCurriculumUploadedAt('');
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="ফাইল মুছে ফেলুন"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-indigo-200 hover:border-indigo-400 rounded-xl p-5 text-center bg-white/80 transition-colors">
+                    <label className="cursor-pointer flex flex-col items-center justify-center space-y-2">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-2xs">
+                        <Upload className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-bold text-slate-800">
+                          কারিকুলাম ফাইল আপলোড করতে এখানে ক্লিক করুন
+                        </p>
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          সাপোর্টেড ফরম্যাট: PDF, JPG, JPEG, PNG, WEBP (সর্বোচ্চ ২৫MB)
+                        </p>
+                      </div>
+                      <span className="mt-1 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors">
+                        ফাইল বাছুন
+                      </span>
+                      <input
+                        type="file"
+                        accept=".pdf,image/png,image/jpeg,image/webp"
+                        onChange={handleCurriculumFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* Modules List */}
@@ -1351,6 +1538,52 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
           </div>
         </form>
       </div>
+
+      {/* FILE PREVIEW MODAL */}
+      {showFilePreview && curriculumFileUrl && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs">
+          <div className="w-full max-w-4xl bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs font-bold truncate max-w-lg">{curriculumFileName || 'Curriculum Syllabus Preview'}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <a
+                  href={curriculumFileUrl}
+                  download={curriculumFileName || 'curriculum'}
+                  className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white transition-colors"
+                  title="ডাউনলোড"
+                >
+                  <Download className="w-4 h-4" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setShowFilePreview(false)}
+                  className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto p-4 bg-slate-100 flex items-center justify-center min-h-[400px]">
+              {curriculumFileType === 'pdf' || curriculumFileName.toLowerCase().endsWith('.pdf') ? (
+                <iframe
+                  src={curriculumFileUrl}
+                  title="PDF Preview"
+                  className="w-full h-[70vh] rounded-xl border border-slate-300 bg-white"
+                />
+              ) : (
+                <img
+                  src={curriculumFileUrl}
+                  alt="Curriculum Preview"
+                  className="max-h-[70vh] max-w-full object-contain rounded-xl shadow-md"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

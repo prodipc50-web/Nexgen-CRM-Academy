@@ -22,6 +22,7 @@ import {
   Batch,
   Staff,
   Lead,
+  LeadStatus,
   FollowUp,
   Student,
   Admission,
@@ -219,6 +220,7 @@ interface AcademyContextType {
   addLead: (lead: Omit<Lead, 'id' | 'leadCode' | 'createdAt' | 'updatedAt'>) => Lead;
   updateLead: (id: string, updates: Partial<Lead>) => void;
   deleteLead: (id: string) => void;
+  syncIncomingLeadsNow: () => Promise<number>;
   submitPublicLead: (payload: {
     fullName?: string;
     studentName?: string;
@@ -242,6 +244,9 @@ interface AcademyContextType {
     comments?: string;
     source?: string;
     leadSource?: string;
+    status?: LeadStatus | string;
+    trxId?: string;
+    notes?: string;
     landingPageUrl?: string;
     landingPage?: string;
     utmSource?: string;
@@ -1270,34 +1275,40 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => window.removeEventListener('storage', handleStorageEvent);
   }, [isAuthenticated]);
 
+  // Direct function to sync incoming online leads from server storage into CRM
+  const syncIncomingLeadsNow = async (): Promise<number> => {
+    try {
+      const res = await fetch('/api/leads/incoming', {
+        headers: { 'x-staff-auth': 'nexgen-staff-auth-secure' }
+      });
+      if (!res.ok) return 0;
+      const data = await res.json();
+      if (data.success && Array.isArray(data.leads) && data.leads.length > 0) {
+        let addedCount = 0;
+        setLeads(prev => {
+          const existingIds = new Set(prev.map(l => l.id));
+          // Accept any lead not yet present in client state by ID
+          const newLeads = data.leads.filter((l: Lead) => !existingIds.has(l.id));
+          addedCount = newLeads.length;
+          if (newLeads.length > 0) {
+            return [...newLeads, ...prev];
+          }
+          return prev;
+        });
+        return addedCount;
+      }
+      return 0;
+    } catch (e) {
+      console.warn('syncIncomingLeads error:', e);
+      return 0;
+    }
+  };
+
   // Periodic background check to fetch new online leads into CRM
   useEffect(() => {
     if (!isAuthenticated) return;
-    const fetchIncomingLeads = async () => {
-      try {
-        const res = await fetch('/api/leads/incoming', {
-          headers: { 'x-staff-auth': 'nexgen-staff-auth-secure' }
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.success && Array.isArray(data.leads) && data.leads.length > 0) {
-          setLeads(prev => {
-            const existingIds = new Set(prev.map(l => l.id));
-            const existingPhones = new Set(prev.map(l => l.phone.replace(/[^0-9]/g, '')));
-            const newLeads = data.leads.filter((l: Lead) => !existingIds.has(l.id) && !existingPhones.has(l.phone.replace(/[^0-9]/g, '')));
-            if (newLeads.length > 0) {
-              return [...newLeads, ...prev];
-            }
-            return prev;
-          });
-        }
-      } catch (e) {
-        // Quiet fallback
-      }
-    };
-
-    fetchIncomingLeads();
-    const interval = setInterval(fetchIncomingLeads, 30000);
+    syncIncomingLeadsNow();
+    const interval = setInterval(syncIncomingLeadsNow, 15000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
@@ -1962,6 +1973,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     comments?: string;
     source?: string;
     leadSource?: string;
+    status?: LeadStatus | string;
+    trxId?: string;
+    notes?: string;
     landingPageUrl?: string;
     landingPage?: string;
     utmSource?: string;
@@ -2017,40 +2031,47 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const cleanPhone = newLeadRecord.phone.replace(/[\s\-\+\(\)]/g, '').trim();
         const existingLead = leads.find(l => l.phone.replace(/[\s\-\+\(\)]/g, '').trim() === cleanPhone);
 
-        const duplicateAction = websiteCmsConfig.leadFormConfig?.duplicateAction || 'CREATE_FOLLOWUP';
-
-        if (existingLead && duplicateAction === 'CREATE_FOLLOWUP') {
-          // Add a follow-up to the existing lead rather than creating a fragmented second record
+        if (existingLead) {
+          // If the student applied for a different course or re-applied, add as distinct inquiry or re-open
           const followUpId = `flw-${Date.now()}`;
           const newFollowUp: FollowUp = {
             id: followUpId,
             leadId: existingLead.id,
             date: new Date().toISOString().split('T')[0],
-            staffName: 'Website Lead Form',
+            staffName: 'Online Admission Portal',
             contactMethod: 'Phone',
             result: 'Interested',
-            conversationSummary: `Re-applied from website/landing page for course "${newLeadRecord.courseName || newLeadRecord.interestedCourseId}". Note: ${newLeadRecord.message || 'No additional note'}`,
+            conversationSummary: `Re-applied/New inquiry for "${newLeadRecord.courseName || newLeadRecord.interestedCourseId}". Source: ${newLeadRecord.leadSource}. Notes: ${newLeadRecord.comments || 'N/A'}`,
             notes: `Source: ${newLeadRecord.leadSource || 'Website'}, Schedule: ${newLeadRecord.preferredSchedule || 'N/A'}`,
-            nextAction: 'Counselor Call Back',
+            nextAction: 'Counselor Urgent Call',
             status: 'Pending',
             createdAt: new Date().toISOString()
           };
 
           setFollowUps(prev => [newFollowUp, ...prev]);
 
-          // Update existing lead record with latest touchpoint and duplicate submission count
+          // Re-activate existing lead to New or Admission Pending so it is front & center in the pipeline
+          const nextStatus = newLeadRecord.status || (newLeadRecord.leadSource?.includes('Admission') ? 'Admission Pending' : 'New');
           updateLead(existingLead.id, {
+            status: nextStatus as LeadStatus,
             duplicateSubmissionCount: (existingLead.duplicateSubmissionCount || 1) + 1,
             lastDuplicateAt: new Date().toISOString(),
             preferredSchedule: newLeadRecord.preferredSchedule || existingLead.preferredSchedule,
-            comments: newLeadRecord.comments ? `${existingLead.comments || ''}\n[Re-applied]: ${newLeadRecord.comments}` : existingLead.comments
+            interestedCourseId: newLeadRecord.interestedCourseId || existingLead.interestedCourseId,
+            courseName: newLeadRecord.courseName || existingLead.courseName,
+            comments: newLeadRecord.comments ? `[Latest: ${new Date().toLocaleDateString('bn-BD')}]: ${newLeadRecord.comments}\n---\n${existingLead.comments || ''}` : existingLead.comments
           });
 
-          logAudit('Duplicate Lead Handled', 'CRM', existingLead.id, `Lead "${existingLead.name}" re-submitted form for ${newLeadRecord.courseName || 'course'}. Created automated follow-up.`);
+          // If it's a completely different course inquiry, also append new lead so both courses are tracked
+          if (existingLead.interestedCourseId !== newLeadRecord.interestedCourseId) {
+            setLeads(prev => [newLeadRecord, ...prev]);
+          }
+
+          logAudit('Duplicate/Re-apply Lead Handled', 'CRM', existingLead.id, `Lead "${existingLead.name}" re-submitted for ${newLeadRecord.courseName || 'course'}. Pipeline stage updated to ${nextStatus}.`);
 
           return {
             success: true,
-            lead: existingLead,
+            lead: newLeadRecord,
             isDuplicate: true,
             eventId: data.eventId,
             riskScore: data.riskScore,
@@ -2110,11 +2131,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         utmSource: payload.utmSource,
         utmMedium: payload.utmMedium,
         utmCampaign: payload.utmCampaign,
-        counselorId: 'st-01',
+        counselorId: 'st-03',
+        counselorName: 'Admissions Desk (Tanvir Ahmed)',
         visitDate: new Date().toISOString().split('T')[0],
         firstContactDate: new Date().toISOString().split('T')[0],
+        comments: payload.comments || payload.message,
         message: payload.message || payload.comments,
-        status: 'New',
+        status: (payload.status as any) || 'New',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -4438,6 +4461,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addLead,
         updateLead,
         deleteLead,
+        syncIncomingLeadsNow,
         submitPublicLead,
         addFollowUp,
         createAdmission,

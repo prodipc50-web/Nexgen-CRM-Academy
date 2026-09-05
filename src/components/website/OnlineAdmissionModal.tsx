@@ -19,7 +19,7 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
   onClose,
   preselectedCourse
 }) => {
-  const { courses, addLead, academySettings } = useAcademy();
+  const { courses, addLead, submitPublicLead, academySettings } = useAcademy();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -57,7 +57,41 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
       const utms = getCapturedUtmParams();
       const device = getDeviceType();
 
-      // Register lead into CRM directly with full attribution data
+      const commentsText = `Online Admission Application. Mode: ${formData.learningMode}, Schedule: ${formData.preferredSchedule}, Address: ${formData.address || 'N/A'}. bKash/TrxID: ${formData.trxId || 'Pending Desk Verification'}. Note: ${formData.notes || 'None'}. Campaign: ${utms.utmCampaign || 'organic'}`;
+      const leadSourceStr = utms.utmSource ? `Ad: ${utms.utmSource} (Online Admission)` : 'Website Online Admission';
+
+      // 1. Submit to authoritative server pipeline
+      submitPublicLead({
+        fullName: formData.name.trim(),
+        studentName: formData.name.trim(),
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim() || undefined,
+        address: formData.address.trim() || undefined,
+        courseId: formData.courseId,
+        courseName: selectedCourse?.name,
+        interestedCourseId: formData.courseId,
+        preferredSchedule: formData.preferredSchedule,
+        learningMode: formData.learningMode,
+        preferredLearningMode: formData.learningMode,
+        educationLevel: formData.educationLevel,
+        status: 'Admission Pending',
+        leadSource: leadSourceStr,
+        source: leadSourceStr,
+        comments: commentsText,
+        trxId: formData.trxId,
+        notes: formData.notes,
+        utmSource: utms.utmSource,
+        utmMedium: utms.utmMedium,
+        utmCampaign: utms.utmCampaign,
+        utmContent: utms.utmContent,
+        utmTerm: utms.utmTerm,
+        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined
+      }).catch(err => {
+        console.warn('Server submission fallback handled:', err);
+      });
+
+      // 2. Register lead into CRM directly with full attribution data
       addLead({
         name: formData.name.trim(),
         phone: formData.phone.trim(),
@@ -66,7 +100,7 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         educationLevel: formData.educationLevel,
         address: formData.address || undefined,
         interestedCourseId: formData.courseId,
-        leadSource: utms.utmSource ? `Ad: ${utms.utmSource}` : 'Website Online Admission',
+        leadSource: leadSourceStr,
         campaignId: utms.utmCampaign,
         utmSource: utms.utmSource,
         utmMedium: utms.utmMedium,
@@ -74,13 +108,13 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         utmContent: utms.utmContent,
         utmTerm: utms.utmTerm,
         deviceType: device,
-        locationCity: 'Dhaka',
-        counselorId: 'counselor-01',
-        counselorName: 'Online Admission Cell',
+        locationCity: formData.address || 'Dhaka',
+        counselorId: 'st-03',
+        counselorName: 'Admissions Desk (Tanvir Ahmed)',
         visitDate: todayDate,
         firstContactDate: todayDate,
         status: 'Admission Pending',
-        comments: `Online Admission Application. Mode: ${formData.learningMode}, Schedule: ${formData.preferredSchedule}, Address: ${formData.address || 'N/A'}. bKash/TrxID: ${formData.trxId || 'Pending Desk Verification'}. Note: ${formData.notes || 'None'}. Campaign: ${utms.utmCampaign || 'organic'}`
+        comments: commentsText
       });
 
       // Fire Meta Pixel CompleteRegistration & Lead Events

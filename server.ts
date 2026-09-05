@@ -633,12 +633,16 @@ app.post("/api/leads/submit", rateLimiter, (req, res) => {
     const createdAt = new Date().toISOString();
 
     let initialStatus: string = "New";
-    if (otpVerified || (serverOtpSessions.get(phone)?.isVerified)) {
-      initialStatus = "OTP Verified";
-    } else if (riskLevel === "HIGH" || riskLevel === "CRITICAL") {
-      initialStatus = "Suspicious";
-    } else if (isDuplicate) {
-      initialStatus = "Duplicate";
+    const reqStatus = req.body.status;
+    const srcLower = (source || req.body.leadSource || "").toLowerCase();
+    if (reqStatus && ["New", "Admission Pending", "Demo Scheduled", "Contacted", "Interested"].includes(reqStatus)) {
+      initialStatus = reqStatus;
+    } else if (srcLower.includes("admission")) {
+      initialStatus = "Admission Pending";
+    } else if (srcLower.includes("seminar") || srcLower.includes("workshop")) {
+      initialStatus = "Demo Scheduled";
+    } else {
+      initialStatus = "New";
     }
 
     const leadRecord = {
@@ -648,32 +652,32 @@ app.post("/api/leads/submit", rateLimiter, (req, res) => {
       studentName: fullName,
       phone,
       email: email || undefined,
-      address: address || undefined,
-      occupation: profession,
-      educationLevel: education || "HSC",
-      institution: institution || undefined,
-      interestedCourseId: courseId || "crs-01",
-      courseName: courseName || undefined,
-      preferredSchedule: preferredSchedule || undefined,
-      preferredTime: preferredSchedule || undefined,
-      preferredLearningMode: (learningMode as any) || "Offline",
-      learningMode: (learningMode as any) || "Offline",
-      leadSource: source,
-      source,
-      landingPage: landingPageUrl || undefined,
-      landingPageUrl: landingPageUrl || undefined,
+      address: address || req.body.address || undefined,
+      occupation: profession || req.body.occupation || "Student",
+      educationLevel: education || req.body.educationLevel || "HSC",
+      institution: institution || req.body.institution || undefined,
+      interestedCourseId: courseId || req.body.interestedCourseId || "crs-01",
+      courseName: courseName || req.body.courseName || undefined,
+      preferredSchedule: preferredSchedule || req.body.preferredSchedule || undefined,
+      preferredTime: preferredSchedule || req.body.preferredSchedule || undefined,
+      preferredLearningMode: (learningMode as any) || req.body.preferredLearningMode || "Offline",
+      learningMode: (learningMode as any) || req.body.preferredLearningMode || "Offline",
+      leadSource: source || req.body.leadSource || "Website Online Form",
+      source: source || req.body.source || "Website Online Form",
+      landingPage: landingPageUrl || req.body.landingPage || undefined,
+      landingPageUrl: landingPageUrl || req.body.landingPageUrl || undefined,
       utmSource: utmSource || undefined,
       utmMedium: utmMedium || undefined,
       utmCampaign: utmCampaign || undefined,
       utmContent: utmContent || undefined,
       utmTerm: utmTerm || undefined,
       fbclid: fbclid || undefined,
-      counselorId: "st-01",
-      counselorName: "Admission Desk",
+      counselorId: "st-03",
+      counselorName: "Admissions Desk (Tanvir Ahmed)",
       visitDate: createdAt.split("T")[0],
       firstContactDate: createdAt.split("T")[0],
-      comments: message || undefined,
-      message: message || undefined,
+      comments: message || req.body.comments || undefined,
+      message: message || req.body.comments || undefined,
       status: initialStatus,
       otpStatus: otpVerified ? "Verified" : (requiresOtp ? "Pending" : "Not Required"),
       fraudRiskScore: riskScore,

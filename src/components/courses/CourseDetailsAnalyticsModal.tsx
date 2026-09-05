@@ -21,7 +21,10 @@ import {
   BarChart3,
   Check,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  Download,
+  Eye
 } from 'lucide-react';
 
 interface CourseDetailsAnalyticsModalProps {
@@ -292,6 +295,42 @@ export const CourseDetailsAnalyticsModal: React.FC<CourseDetailsAnalyticsModalPr
                   {course.modules?.length || 0} Modules • {course.totalClasses} Total Lectures
                 </span>
               </div>
+
+              {/* MANUAL CURRICULUM FILE CARD */}
+              {(course.curriculumFileUrl || course.syllabusPdfUrl || course.landingConfig?.syllabusDownload?.fileUrl) && (
+                <div className="p-4 bg-gradient-to-r from-indigo-50/80 via-white to-purple-50/70 border border-indigo-200 rounded-xl flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 uppercase shadow-xs">
+                      {course.curriculumFileType || 'PDF'}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <h5 className="font-bold text-slate-900 text-xs truncate max-w-sm">
+                          {course.curriculumFileName || `${course.name} Curriculum Syllabus`}
+                        </h5>
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                          Active File
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        {course.curriculumFileSize ? `সাইজ: ${course.curriculumFileSize} • ` : ''}
+                        {course.curriculumUploadedAt ? `হালনাগাদ: ${course.curriculumUploadedAt}` : 'সংরক্ষিত কারিকুলাম'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <a
+                      href={course.curriculumFileUrl || course.syllabusPdfUrl || course.landingConfig?.syllabusDownload?.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg shadow-xs flex items-center space-x-1.5 transition-colors"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>প্রিভিউ / ডাউনলোড</span>
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {course.modules && course.modules.length > 0 ? (
                 <div className="space-y-3">

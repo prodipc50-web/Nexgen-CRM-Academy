@@ -24,8 +24,12 @@ import {
   X,
   AlertTriangle,
   MessageSquare,
+  MessageCircle,
+  MapPin,
   FileSpreadsheet,
-  Download
+  Download,
+  RefreshCw,
+  Globe
 } from 'lucide-react';
 
 interface CRMViewProps {
@@ -47,7 +51,8 @@ export const CRMView: React.FC<CRMViewProps> = ({
     staffList,
     followUps,
     leadSources,
-    occupationsList
+    occupationsList,
+    syncIncomingLeadsNow
   } = useAcademy();
 
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
@@ -55,6 +60,26 @@ export const CRMView: React.FC<CRMViewProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [courseFilter, setCourseFilter] = useState<string>('all');
   const [counselorFilter, setCounselorFilter] = useState<string>('all');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    setSyncFeedback(null);
+    try {
+      const added = await syncIncomingLeadsNow();
+      if (added > 0) {
+        setSyncFeedback(`সফলভাবে ${added}টি নতুন অনলাইন লিড পাওয়া গেছে!`);
+      } else {
+        setSyncFeedback('সকল অনলাইন লিড ইতিমধ্যে আপ-টু-ডেট আছে।');
+      }
+    } catch {
+      setSyncFeedback('সিঙ্ক করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setIsSyncing(false);
+      setTimeout(() => setSyncFeedback(null), 4000);
+    }
+  };
 
   // Edit Lead Modal State
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
@@ -64,6 +89,9 @@ export const CRMView: React.FC<CRMViewProps> = ({
   const [editEmail, setEditEmail] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [editOccupation, setEditOccupation] = useState('');
+  const [editInstitution, setEditInstitution] = useState('');
+  const [editPreferredSchedule, setEditPreferredSchedule] = useState('');
+  const [editLearningMode, setEditLearningMode] = useState<'Offline' | 'Online Live' | 'Hybrid'>('Offline');
   const [editCourseId, setEditCourseId] = useState('');
   const [editLeadSource, setEditLeadSource] = useState('');
   const [editCounselorId, setEditCounselorId] = useState('');
@@ -84,6 +112,9 @@ export const CRMView: React.FC<CRMViewProps> = ({
     setEditEmail(lead.email || '');
     setEditAddress(lead.address || '');
     setEditOccupation(lead.occupation || 'Student');
+    setEditInstitution(lead.institution || '');
+    setEditPreferredSchedule(lead.preferredSchedule || '');
+    setEditLearningMode(lead.preferredLearningMode || lead.learningMode || 'Offline');
     setEditCourseId(lead.interestedCourseId);
     setEditLeadSource(lead.leadSource);
     setEditCounselorId(lead.counselorId);
@@ -105,6 +136,10 @@ export const CRMView: React.FC<CRMViewProps> = ({
       email: editEmail.trim() || undefined,
       address: editAddress.trim() || undefined,
       occupation: editOccupation as any,
+      institution: editInstitution.trim() || undefined,
+      preferredSchedule: editPreferredSchedule.trim() || undefined,
+      preferredLearningMode: editLearningMode,
+      learningMode: editLearningMode,
       interestedCourseId: editCourseId,
       leadSource: editLeadSource,
       counselorId: editCounselorId,
@@ -124,13 +159,24 @@ export const CRMView: React.FC<CRMViewProps> = ({
     setDeletingLead(null);
   };
 
+  // Status Normalizer to ensure every lead maps to a valid pipeline column
+  const normalizeLeadStatus = (status?: string): LeadStatus => {
+    if (!status) return 'New';
+    if (status === 'OTP Verified' || status === 'Pending Verification' || status === 'Suspicious' || status === 'Duplicate') return 'New';
+    if (status === 'Demo Attended') return 'Demo Scheduled';
+    if (status === 'Enrolled' || status === 'Confirmed' || status === 'Paid') return 'Admitted';
+    return (status as LeadStatus) || 'New';
+  };
+
   // Filtered Leads
   const filteredLeads = leads.filter(lead => {
     const matchesSearch =
       lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.phone.includes(searchTerm) ||
-      lead.leadCode.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
+      lead.leadCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lead.comments && lead.comments.toLowerCase().includes(searchTerm.toLowerCase()));
+    const normStatus = normalizeLeadStatus(lead.status);
+    const matchesStatus = statusFilter === 'all' || lead.status === statusFilter || normStatus === statusFilter;
     const matchesCourse = courseFilter === 'all' || lead.interestedCourseId === courseFilter;
     const matchesCounselor = counselorFilter === 'all' || lead.counselorId === counselorFilter;
     return matchesSearch && matchesStatus && matchesCourse && matchesCounselor;
@@ -199,6 +245,17 @@ export const CRMView: React.FC<CRMViewProps> = ({
             </button>
           </div>
 
+          {/* Sync Online Leads Button */}
+          <button
+            onClick={handleManualSync}
+            disabled={isSyncing}
+            className="flex items-center space-x-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-300 text-xs font-bold px-3 py-2 rounded-xl shadow-2xs transition-colors cursor-pointer"
+            title="Website এবং Landing Page থেকে আগত নতুন অনলাইন ফর্ম লিড সিঙ্ক করুন"
+          >
+            <RefreshCw className={`w-4 h-4 text-blue-600 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'সিঙ্ক হচ্ছে...' : 'অনলাইন লিড সিঙ্ক'}</span>
+          </button>
+
           {/* Export Leads to Excel / Spreadsheet */}
           <button
             onClick={() => exportLeadsSpreadsheet(filteredLeads, courses, staffList, 'Nexgen_Customer_Leads')}
@@ -218,6 +275,19 @@ export const CRMView: React.FC<CRMViewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Sync Feedback Toast */}
+      {syncFeedback && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-900 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between shadow-xs animate-in fade-in duration-200">
+          <div className="flex items-center space-x-2">
+            <RefreshCw className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>{syncFeedback}</span>
+          </div>
+          <button onClick={() => setSyncFeedback(null)} className="text-blue-500 hover:text-blue-800 p-1">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Filter Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex flex-wrap items-center gap-3 text-sm">
@@ -279,7 +349,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
       {viewMode === 'kanban' && (
         <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-300 min-h-[560px]">
           {pipelineColumns.map(col => {
-            const columnLeads = filteredLeads.filter(l => l.status === col.status);
+            const columnLeads = filteredLeads.filter(l => normalizeLeadStatus(l.status) === col.status);
 
             return (
               <div
@@ -377,6 +447,61 @@ export const CRMView: React.FC<CRMViewProps> = ({
                               </span>
                             </div>
                           )}
+
+                          {/* Address & Preferred Schedule Tags */}
+                          {(lead.address || lead.preferredSchedule || lead.institution) && (
+                            <div className="pt-1.5 border-t border-slate-200/70 space-y-1">
+                              {lead.address && (
+                                <div className="text-[11px] font-semibold text-slate-700 flex items-center space-x-1 truncate" title={lead.address}>
+                                  <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
+                                  <span className="truncate">ঠিকানা: {lead.address}</span>
+                                </div>
+                              )}
+                              {lead.preferredSchedule && (
+                                <div className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 flex items-center space-x-1 truncate">
+                                  <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
+                                  <span className="truncate">শিডিউল: {lead.preferredSchedule}</span>
+                                </div>
+                              )}
+                              {lead.institution && (
+                                <div className="text-[10px] text-slate-500 truncate" title={lead.institution}>
+                                  🎓 {lead.institution}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {lead.leadSource?.toLowerCase().includes('syllabus') && (
+                            <div className="pt-0.5">
+                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 text-[10px] font-bold border border-purple-200">
+                                <Download className="w-2.5 h-2.5" />
+                                <span>সিলেবাস ডাউনলোড লিড</span>
+                              </span>
+                            </div>
+                          )}
+
+                          {lead.leadSource?.toLowerCase().includes('admission') && (
+                            <div className="pt-0.5 flex flex-wrap gap-1">
+                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-950 text-[10px] font-bold border border-orange-200">
+                                <Globe className="w-2.5 h-2.5 text-orange-600" />
+                                <span>অনলাইন ভর্তি আবেদন</span>
+                              </span>
+                              {(lead.comments?.includes('TrxID') || lead.comments?.includes('bKash')) && (
+                                <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-950 text-[10px] font-bold border border-emerald-200">
+                                  <span>💳 ফি তথ্য সংযোজিত</span>
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {lead.isDuplicate && (
+                            <div className="pt-0.5">
+                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold border border-amber-300">
+                                <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
+                                <span>পুনরায় আবেদন (Re-applied)</span>
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Visitor Comments / What Visitor Said */}
@@ -400,13 +525,25 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
                         {/* Card Actions */}
                         <div className="pt-1.5 flex items-center justify-between border-t border-slate-100 text-xs">
-                          <button
-                            onClick={() => onOpenFollowUp(lead.id)}
-                            className="text-slate-700 hover:text-indigo-600 font-bold flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
-                          >
-                            <PhoneCall className="w-3.5 h-3.5 shrink-0" />
-                            <span>Log ({leadFollowUps.length})</span>
-                          </button>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => onOpenFollowUp(lead.id)}
+                              className="text-slate-700 hover:text-indigo-600 font-bold flex items-center space-x-1 cursor-pointer whitespace-nowrap"
+                            >
+                              <PhoneCall className="w-3.5 h-3.5 shrink-0" />
+                              <span>Log ({leadFollowUps.length})</span>
+                            </button>
+
+                            <a
+                              href={`https://wa.me/88${lead.phone.replace(/[^0-9]/g, '').slice(-11)}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${lead.name}, ন্যাশনাল প্রফেশনাল অ্যাকাডেমি থেকে আপনার সাথে যোগাযোগ করছি...`)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors inline-flex items-center"
+                              title="WhatsApp-এ সরাসরি মেসেজ দিন"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
 
                           {lead.status !== 'Admitted' && (
                             <button
@@ -477,14 +614,41 @@ export const CRMView: React.FC<CRMViewProps> = ({
                         )}
                       </td>
                       <td className="py-3 px-4 text-slate-700">
-                        <div className="font-semibold">{lead.phone}</div>
-                        <div className="text-[10px] text-slate-400">{lead.email || '-'}</div>
+                        <div className="font-semibold flex items-center space-x-1.5">
+                          <span>{lead.phone}</span>
+                          <a
+                            href={`https://wa.me/88${lead.phone.replace(/[^0-9]/g, '').slice(-11)}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${lead.name}, ন্যাশনাল প্রফেশনাল অ্যাকাডেমি থেকে আপনার সাথে যোগাযোগ করছি...`)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-emerald-600 hover:text-emerald-700 p-0.5"
+                            title="WhatsApp মেসেজ পাঠান"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                        {lead.email && <div className="text-[10px] text-slate-400">{lead.email}</div>}
+                        {lead.address && (
+                          <div className="text-[10px] text-slate-600 flex items-center space-x-1 mt-0.5" title={lead.address}>
+                            <MapPin className="w-2.5 h-2.5 text-rose-500 shrink-0" />
+                            <span className="truncate max-w-[150px]">{lead.address}</span>
+                          </div>
+                        )}
                       </td>
                       <td className="py-3 px-4 font-medium text-slate-800">
-                        {crs?.name || 'General Inquiry'}
+                        <div className="font-bold text-slate-900">{crs?.name || 'General Inquiry'}</div>
+                        {lead.preferredSchedule && (
+                          <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200 mt-1 inline-block">
+                            ⏰ {lead.preferredSchedule}
+                          </div>
+                        )}
                       </td>
                       <td className="py-3 px-4 text-slate-600">
                         <div>{lead.leadSource}</div>
+                        {lead.leadSource?.toLowerCase().includes('syllabus') && (
+                          <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 font-semibold text-[9px] border border-purple-200">
+                            সিলেবাস লিড
+                          </span>
+                        )}
                         {lead.utmCampaign && (
                           <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono text-[9px] border border-indigo-200">
                             Ad: {lead.utmCampaign}
@@ -609,6 +773,62 @@ export const CRMView: React.FC<CRMViewProps> = ({
                     onChange={e => setEditEmail(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium outline-none focus:bg-white focus:ring-2 focus:ring-blue-500"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    বর্তমান বা স্থায়ী ঠিকানা (Address / Location)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: ফার্মগেট, মিরপুর-১০, ঢাকা"
+                    value={editAddress}
+                    onChange={e => setEditAddress(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium outline-none focus:bg-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    শিক্ষা প্রতিষ্ঠান বা কর্মস্থল (Institution / Workplace)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: ঢাকা কলেজ / সোনালী ব্যাংক / ফ্রিল্যান্সার"
+                    value={editInstitution}
+                    onChange={e => setEditInstitution(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium outline-none focus:bg-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    পছন্দের ব্যাচ / সময় (Preferred Schedule)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="যেমন: শুক্রবার ও শনিবার সকাল ১০টা, অথবা সান্ধ্যকালীন ব্যাচ"
+                    value={editPreferredSchedule}
+                    onChange={e => setEditPreferredSchedule(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-medium outline-none focus:bg-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    ক্লাসের মোড (Learning Mode)
+                  </label>
+                  <select
+                    value={editLearningMode}
+                    onChange={e => setEditLearningMode(e.target.value as any)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none"
+                  >
+                    <option value="Offline">অফলাইন ল্যাব ক্লাস (ফার্মগেট ক্যাম্পাস)</option>
+                    <option value="Online Live">অনলাইন লাইভ ক্লাস (Zoom/Meet)</option>
+                    <option value="Hybrid">হাইব্রিড (ল্যাব + অনলাইন উভয়ই)</option>
+                  </select>
                 </div>
               </div>
 

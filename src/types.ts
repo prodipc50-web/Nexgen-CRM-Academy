@@ -566,6 +566,22 @@ export interface CourseLandingGalleryImage {
   category?: string;
 }
 
+export interface SyllabusDownloadConfig {
+  enabled?: boolean;
+  buttonText?: string;
+  badgeText?: string;
+  headline?: string;
+  description?: string;
+  fileUrl?: string; // Data URL (base64) or direct download URL (PDF / JPG / PNG)
+  fileName?: string; // e.g. "Computer_Office_Mastery_Syllabus.pdf"
+  fileType?: 'pdf' | 'image' | 'doc' | 'other';
+  fileSize?: string; // e.g. "2.4 MB"
+  uploadedAt?: string;
+  requireAddress?: boolean;
+  requireOccupation?: boolean;
+  requireSchedule?: boolean;
+}
+
 export interface CourseLandingPageConfig {
   // Template Selection
   templateType?: LandingPageTemplateType; // 'online_course' | 'offline_course' | 'free_demo_class' | 'workshop_masterclass' | 'premium_course' | 'special_campaign_offer'
@@ -607,6 +623,8 @@ export interface CourseLandingPageConfig {
   curriculumHeadline?: string;
   curriculumSubheadline?: string;
   editableModules?: CourseLandingCurriculumModule[];
+  syllabusDownloadConfig?: SyllabusDownloadConfig;
+  syllabusDownload?: SyllabusDownloadConfig;
 
   // Target Audience & Who Is This For
   audienceHeadline?: string;
@@ -801,8 +819,13 @@ export interface Course {
   // Dynamic Landing Page & Campaign Variant Customization
   landingConfig?: CourseLandingPageConfig;
 
-  // Full Syllabus PDF Download
+  // Full Syllabus / Manual Curriculum File (PDF / JPG / PNG / WEBP)
   syllabusPdfUrl?: string;
+  curriculumFileUrl?: string;
+  curriculumFileName?: string;
+  curriculumFileType?: string;
+  curriculumFileSize?: string;
+  curriculumUploadedAt?: string;
 
   createdAt?: string;
   updatedAt?: string;

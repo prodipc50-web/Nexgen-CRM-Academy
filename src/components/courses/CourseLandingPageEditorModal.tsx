@@ -43,6 +43,8 @@ import {
   ShieldCheck,
   Laptop,
   Upload,
+  Download,
+  FileText,
   Image as ImageIcon,
   Camera,
   RefreshCw,
@@ -263,6 +265,38 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
         estimatedClasses: '২টি ক্লাস'
       }
     ]
+  );
+
+  // Syllabus & Curriculum File Download Lead Magnet States
+  const [syllabusEnabled, setSyllabusEnabled] = useState<boolean>(
+    existingConfig.syllabusDownloadConfig?.enabled ?? true
+  );
+  const [syllabusButtonText, setSyllabusButtonText] = useState<string>(
+    existingConfig.syllabusDownloadConfig?.buttonText || 'পূর্ণাঙ্গ সিলেবাস ডাউনলোড করুন (PDF)'
+  );
+  const [syllabusBadgeText, setSyllabusBadgeText] = useState<string>(
+    existingConfig.syllabusDownloadConfig?.badgeText || 'ফ্রি সিলেবাস ও রোডম্যাপ'
+  );
+  const [syllabusHeadline, setSyllabusHeadline] = useState<string>(
+    existingConfig.syllabusDownloadConfig?.headline || 'পূর্ণাঙ্গ কোর্স কারিকুলাম ও সিলেবাস সংগ্রহ করুন'
+  );
+  const [syllabusDescription, setSyllabusDescription] = useState<string>(
+    existingConfig.syllabusDownloadConfig?.description || 'আপনার তথ্য দিয়ে সাথে সাথে সিলেবাস ও রোডম্যাপ ডাউনলোড করুন।'
+  );
+  const [syllabusFileUrl, setSyllabusFileUrl] = useState<string>(
+    existingConfig.syllabusDownloadConfig?.fileUrl || ''
+  );
+  const [syllabusFileName, setSyllabusFileName] = useState<string>(
+    existingConfig.syllabusDownloadConfig?.fileName || ''
+  );
+  const [syllabusFileType, setSyllabusFileType] = useState<'pdf' | 'image' | 'doc' | 'other'>(
+    existingConfig.syllabusDownloadConfig?.fileType || 'pdf'
+  );
+  const [syllabusFileSize, setSyllabusFileSize] = useState<string>(
+    existingConfig.syllabusDownloadConfig?.fileSize || ''
+  );
+  const [syllabusUploadedAt, setSyllabusUploadedAt] = useState<string>(
+    existingConfig.syllabusDownloadConfig?.uploadedAt || ''
   );
 
   // Tab 4: Features & Target Audience
@@ -560,6 +594,33 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
     e.target.value = '';
   };
 
+  // Helper for syllabus manual file upload (PDF, JPG, PNG, DOC)
+  const handleSyllabusFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    let type: 'pdf' | 'image' | 'doc' | 'other' = 'other';
+    if (file.type.includes('pdf')) type = 'pdf';
+    else if (file.type.startsWith('image/')) type = 'image';
+    else if (file.type.includes('word') || file.type.includes('document')) type = 'doc';
+
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    const sizeStr = `${sizeInMB} MB`;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setSyllabusFileUrl(reader.result);
+        setSyllabusFileName(file.name);
+        setSyllabusFileType(type);
+        setSyllabusFileSize(sizeStr);
+        setSyllabusUploadedAt(new Date().toLocaleDateString());
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
   // Helper for multiple gallery files upload
   const handleMultipleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -684,6 +745,18 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
       curriculumHeadline: curriculumHeadline.trim(),
       curriculumSubheadline: curriculumSubheadline.trim(),
       editableModules,
+      syllabusDownloadConfig: {
+        enabled: syllabusEnabled,
+        buttonText: syllabusButtonText.trim(),
+        badgeText: syllabusBadgeText.trim(),
+        headline: syllabusHeadline.trim(),
+        description: syllabusDescription.trim(),
+        fileUrl: syllabusFileUrl.trim(),
+        fileName: syllabusFileName.trim(),
+        fileType: syllabusFileType,
+        fileSize: syllabusFileSize.trim(),
+        uploadedAt: syllabusUploadedAt || new Date().toISOString()
+      },
       preferredSchedulesTitle: preferredSchedulesTitle.trim(),
       preferredSchedules,
       whyChooseHeadline: whyChooseHeadline.trim(),
@@ -1344,6 +1417,184 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
                     className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
                   />
                 </div>
+              </div>
+
+              {/* Syllabus PDF/Image Upload & Lead Magnet Section */}
+              <div className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/90 via-slate-50 to-purple-50/70 border-2 border-indigo-200 rounded-2xl space-y-4 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100 pb-3">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-sm text-slate-900">
+                        সিলেবাস ফাইল আপলোড ও ডাউনলোড লিড ম্যাগনেট (PDF, JPG, PNG)
+                      </h4>
+                      <p className="text-xs text-slate-600 font-medium">
+                        কারিকুলাম পরিবর্তন হলে এখান থেকে নতুন PDF বা ইমেজ ফাইল আপলোড করে দিন।
+                      </p>
+                    </div>
+                  </div>
+
+                  <label className="inline-flex items-center space-x-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-indigo-200 shadow-2xs">
+                    <input
+                      type="checkbox"
+                      checked={syllabusEnabled}
+                      onChange={e => setSyllabusEnabled(e.target.checked)}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="text-xs font-bold text-slate-700">সিলেবাস ডাউনলোড সক্রিয়</span>
+                  </label>
+                </div>
+
+                {syllabusEnabled && (
+                  <div className="space-y-3.5">
+                    {/* Upload / File Status Box */}
+                    <div className="p-4 bg-white border border-indigo-100 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
+                          <Upload className="w-4 h-4 text-indigo-600" />
+                          <span>সিলেবাস ফাইল (PDF / JPG / PNG / WEBP)</span>
+                        </span>
+                        {syllabusFileUrl && (
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                            ✓ ফাইল আপলোড করা আছে
+                          </span>
+                        )}
+                      </div>
+
+                      {syllabusFileUrl ? (
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-xl gap-3">
+                          <div className="flex items-center space-x-3 overflow-hidden">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 font-black text-xs flex items-center justify-center shrink-0 uppercase border border-indigo-200">
+                              {syllabusFileType || 'FILE'}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-slate-900 truncate max-w-xs sm:max-w-md">
+                                {syllabusFileName || 'uploaded_curriculum_syllabus'}
+                              </p>
+                              <div className="flex items-center space-x-2 text-[11px] text-slate-500 font-medium">
+                                {syllabusFileSize && <span>সাইজ: {syllabusFileSize}</span>}
+                                {syllabusUploadedAt && <span>• আপলোড: {syllabusUploadedAt}</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const win = window.open();
+                                if (win) {
+                                  win.document.write(
+                                    `<iframe src="${syllabusFileUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`
+                                  );
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200 flex items-center space-x-1 transition-colors cursor-pointer"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>প্রিভিউ</span>
+                            </button>
+
+                            <label className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg border border-slate-300 flex items-center space-x-1 cursor-pointer transition-colors">
+                              <RefreshCw className="w-3.5 h-3.5" />
+                              <span>ফাইল বদলান</span>
+                              <input
+                                type="file"
+                                accept=".pdf,image/png,image/jpeg,image/webp,.doc,.docx"
+                                onChange={handleSyllabusFileUpload}
+                                className="hidden"
+                              />
+                            </label>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSyllabusFileUrl('');
+                                setSyllabusFileName('');
+                                setSyllabusFileSize('');
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              title="ফাইল মুছে ফেলুন"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-indigo-200 hover:border-indigo-400 rounded-xl p-5 text-center bg-slate-50/60 transition-colors">
+                          <label className="cursor-pointer flex flex-col items-center justify-center space-y-2">
+                            <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-xs">
+                              <Upload className="w-6 h-6" />
+                            </div>
+                            <span className="text-xs font-bold text-indigo-700 hover:text-indigo-800">
+                              কম্পিউটার থেকে সিলেবাস PDF, JPG বা PNG আপলোড করুন
+                            </span>
+                            <span className="text-[11px] text-slate-500">
+                              সর্বোচ্চ সাইজ: ১০ মেগাবাইট (PDF, PNG, JPG, WEBP)
+                            </span>
+                            <input
+                              type="file"
+                              accept=".pdf,image/png,image/jpeg,image/webp,.doc,.docx"
+                              onChange={handleSyllabusFileUpload}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      )}
+
+                      {/* Optional Direct URL Link Input */}
+                      <div className="pt-1">
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                          অথবা গুগল ড্রাইভ / ক্লাউড লিঙ্ক দিন (যদি সরাসরি লিংক থাকে):
+                        </label>
+                        <input
+                          type="url"
+                          placeholder="https://drive.google.com/file/d/.../view বা যেকোনো ক্লাউড লিংক"
+                          value={syllabusFileUrl.startsWith('data:') ? '' : syllabusFileUrl}
+                          onChange={e => {
+                            setSyllabusFileUrl(e.target.value);
+                            if (e.target.value) {
+                              setSyllabusFileName('Cloud Syllabus Document');
+                              setSyllabusFileType('doc');
+                            }
+                          }}
+                          className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Headline & Button Customizer */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          বাটন টেক্সট (CTA Button Label)
+                        </label>
+                        <input
+                          type="text"
+                          value={syllabusButtonText}
+                          onChange={e => setSyllabusButtonText(e.target.value)}
+                          placeholder="পূর্ণাঙ্গ সিলেবাস ডাউনলোড করুন (PDF)"
+                          className="w-full text-xs font-semibold px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          ব্যাজ টেক্সট
+                        </label>
+                        <input
+                          type="text"
+                          value={syllabusBadgeText}
+                          onChange={e => setSyllabusBadgeText(e.target.value)}
+                          placeholder="ফ্রি সিলেবাস ও রোডম্যাপ"
+                          className="w-full text-xs font-semibold px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Module Cards */}
