@@ -19,7 +19,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   onClose,
   seminar
 }) => {
-  const { addLead, submitPublicLead, registerLeadToSeminar, websiteCmsConfig } = useAcademy();
+  const { addLead, submitPublicLead, syncIncomingLeadsNow, registerLeadToSeminar, websiteCmsConfig } = useAcademy();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -97,6 +97,20 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
       });
 
       registerLeadToSeminar(seminar.id, newLead.id);
+
+      // Immediately notify and sync CRM across all tabs
+      if (typeof window !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('nexgen_leads_sync');
+          bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+          bc.close();
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+      }
+
+      if (syncIncomingLeadsNow) {
+        syncIncomingLeadsNow().catch(() => {});
+      }
 
       trackMetaPixelEvent('Lead', {
         content_name: seminar.title,

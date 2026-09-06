@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Lead, LeadStatus, FollowUpMethod } from '../../types';
 import { exportLeadsSpreadsheet } from '../../utils/spreadsheetExport';
@@ -80,6 +80,30 @@ export const CRMView: React.FC<CRMViewProps> = ({
       setTimeout(() => setSyncFeedback(null), 4000);
     }
   };
+
+  // Real-time automatic synchronization when leads are submitted anywhere
+  useEffect(() => {
+    const handleIncoming = () => {
+      syncIncomingLeadsNow().catch(() => {});
+    };
+
+    window.addEventListener('incoming-lead-submitted', handleIncoming);
+
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('nexgen_leads_sync');
+      bc.onmessage = (msg) => {
+        if (msg.data?.type === 'LEAD_SUBMITTED') {
+          syncIncomingLeadsNow().catch(() => {});
+        }
+      };
+    } catch {}
+
+    return () => {
+      window.removeEventListener('incoming-lead-submitted', handleIncoming);
+      if (bc) bc.close();
+    };
+  }, [syncIncomingLeadsNow]);
 
   // Edit Lead Modal State
   const [editingLead, setEditingLead] = useState<Lead | null>(null);

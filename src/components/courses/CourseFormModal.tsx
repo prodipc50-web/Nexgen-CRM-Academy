@@ -450,18 +450,27 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       curriculumFileSize: curriculumFileSize || undefined,
       curriculumUploadedAt: curriculumUploadedAt || undefined,
       syllabusPdfUrl: curriculumFileUrl || undefined,
-      landingConfig: initialCourse?.landingConfig ? {
-        ...initialCourse.landingConfig,
+      landingConfig: {
+        ...(initialCourse?.landingConfig || {}),
         syllabusDownload: {
-          ...initialCourse.landingConfig.syllabusDownload,
+          ...(initialCourse?.landingConfig?.syllabusDownload || {}),
           enabled: true,
-          fileUrl: curriculumFileUrl || initialCourse.landingConfig.syllabusDownload?.fileUrl,
-          fileName: curriculumFileName || initialCourse.landingConfig.syllabusDownload?.fileName,
-          fileType: (curriculumFileType as any) || initialCourse.landingConfig.syllabusDownload?.fileType,
-          fileSize: curriculumFileSize || initialCourse.landingConfig.syllabusDownload?.fileSize,
-          uploadedAt: curriculumUploadedAt || initialCourse.landingConfig.syllabusDownload?.uploadedAt
+          fileUrl: curriculumFileUrl || initialCourse?.landingConfig?.syllabusDownload?.fileUrl,
+          fileName: curriculumFileName || initialCourse?.landingConfig?.syllabusDownload?.fileName,
+          fileType: (curriculumFileType as any) || initialCourse?.landingConfig?.syllabusDownload?.fileType,
+          fileSize: curriculumFileSize || initialCourse?.landingConfig?.syllabusDownload?.fileSize,
+          uploadedAt: curriculumUploadedAt || initialCourse?.landingConfig?.syllabusDownload?.uploadedAt
+        },
+        syllabusDownloadConfig: {
+          ...(initialCourse?.landingConfig?.syllabusDownloadConfig || {}),
+          enabled: true,
+          fileUrl: curriculumFileUrl || initialCourse?.landingConfig?.syllabusDownloadConfig?.fileUrl,
+          fileName: curriculumFileName || initialCourse?.landingConfig?.syllabusDownloadConfig?.fileName,
+          fileType: (curriculumFileType as any) || initialCourse?.landingConfig?.syllabusDownloadConfig?.fileType,
+          fileSize: curriculumFileSize || initialCourse?.landingConfig?.syllabusDownloadConfig?.fileSize,
+          uploadedAt: curriculumUploadedAt || initialCourse?.landingConfig?.syllabusDownloadConfig?.uploadedAt
         }
-      } : undefined
+      }
     };
 
     if (isEditing && initialCourse) {

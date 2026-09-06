@@ -34,7 +34,7 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
   landingConfig,
   config
 }) => {
-  const { addLead, submitPublicLead, academySettings } = useAcademy();
+  const { addLead, submitPublicLead, syncIncomingLeadsNow, academySettings } = useAcademy();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -49,14 +49,11 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
   if (!isOpen) return null;
 
   const syllabusConfig = config || landingConfig?.syllabusDownloadConfig;
-  const rawFileUrl = syllabusConfig?.fileUrl || '';
+  const rawFileUrl = syllabusConfig?.fileUrl || (course as any).syllabusPdfUrl || (course as any).curriculumFileUrl || '';
   const fileName = syllabusConfig?.fileName || `${course.name.replace(/\s+/g, '_')}_Syllabus.pdf`;
 
   // Fallback printable syllabus HTML if no file uploaded
   const handleGeneratePrintableSyllabus = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
     const modules = landingConfig?.editableModules || [];
     const instituteName = academySettings.instituteName || 'Nexgen Computer Academy';
     const officialPhone = academySettings.primarySupportPhone || '01798444444';
@@ -87,53 +84,79 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
         </div>
       `;
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="bn">
-      <head>
-        <meta charset="utf-8">
-        <title>${course.name} - Course Curriculum</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", sans-serif; line-height: 1.5; color: #0f172a; margin: 24px; padding: 0; }
-          .header { text-align: center; border-bottom: 2px solid #4f46e5; padding-bottom: 16px; margin-bottom: 20px; }
-          .inst-name { font-size: 22px; font-weight: 800; color: #4338ca; margin: 0; }
-          .sub { font-size: 13px; color: #64748b; margin: 4px 0; }
-          .course-title { font-size: 18px; font-weight: 700; color: #0f172a; margin: 12px 0 4px 0; }
-          .meta-box { display: flex; justify-content: space-around; background: #f1f5f9; padding: 10px; border-radius: 6px; font-size: 13px; margin-bottom: 20px; font-weight: 600; }
-          .footer { text-align: center; margin-top: 30px; padding-top: 14px; border-top: 1px dashed #cbd5e1; font-size: 12px; color: #64748b; }
-          @media print {
-            body { margin: 12px; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1 class="inst-name">${instituteName}</h1>
-          <p class="sub">${officialAddress} • হটলাইন: ${officialPhone}</p>
-          <div class="course-title">কোর্স কারিকুলাম ও সিলেবাস: ${course.name}</div>
-        </div>
+    const fullHtml = `<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <title>${course.name} - Course Curriculum</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", sans-serif; line-height: 1.5; color: #0f172a; margin: 24px; padding: 0; }
+    .header { text-align: center; border-bottom: 2px solid #4f46e5; padding-bottom: 16px; margin-bottom: 20px; }
+    .inst-name { font-size: 22px; font-weight: 800; color: #4338ca; margin: 0; }
+    .sub { font-size: 13px; color: #64748b; margin: 4px 0; }
+    .course-title { font-size: 18px; font-weight: 700; color: #0f172a; margin: 12px 0 4px 0; }
+    .meta-box { display: flex; justify-content: space-around; background: #f1f5f9; padding: 10px; border-radius: 6px; font-size: 13px; margin-bottom: 20px; font-weight: 600; }
+    .footer { text-align: center; margin-top: 30px; padding-top: 14px; border-top: 1px dashed #cbd5e1; font-size: 12px; color: #64748b; }
+    @media print {
+      body { margin: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="inst-name">${instituteName}</h1>
+    <p class="sub">${officialAddress} • হটলাইন: ${officialPhone}</p>
+    <div class="course-title">কোর্স কারিকুলাম ও সিলেবাস: ${course.name}</div>
+  </div>
 
-        <div class="meta-box">
-          <span>মেয়াদ: ${course.duration || '৩ মাস'}</span>
-          <span>কোর্স ফি: ৳${(course.offerFee || course.regularFee || 3500).toLocaleString()}</span>
-          <span>ল্যাব সুবিধা: ১০০% ডেডিকেটেড পিসি</span>
-        </div>
+  <div class="meta-box">
+    <span>মেয়াদ: ${course.duration || '৩ মাস'}</span>
+    <span>কোর্স ফি: ৳${(course.offerFee || course.regularFee || 3500).toLocaleString()}</span>
+    <span>ল্যাব সুবিধা: ১০০% ডেডিকেটেড পিসি</span>
+  </div>
 
-        <div style="margin-bottom: 14px;">
-          <h3 style="font-size: 16px; margin: 0 0 10px 0; color: #1e293b;">কোর্স মডিউল ও প্র্যাকটিক্যাল ল্যাব বিবরণী:</h3>
-          ${modulesHtml}
-        </div>
+  <div style="margin-bottom: 14px;">
+    <h3 style="font-size: 16px; margin: 0 0 10px 0; color: #1e293b;">কোর্স মডিউল ও প্র্যাকটিক্যাল ল্যাব বিবরণী:</h3>
+    ${modulesHtml}
+  </div>
 
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} ${instituteName}। ভর্তি সংক্রান্ত তথ্যের জন্য যোগাযোগ করুন: ${officialPhone}</p>
-        </div>
-        <script>
-          window.onload = function() { window.print(); };
-        </script>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
+  <div class="footer">
+    <p>© ${new Date().getFullYear()} ${instituteName}। ভর্তি সংক্রান্ত তথ্যের জন্য যোগাযোগ করুন: ${officialPhone}</p>
+  </div>
+  <script>
+    window.onload = function() { window.print(); };
+  </script>
+</body>
+</html>`;
+
+    // Try popup print window
+    let opened = false;
+    try {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(fullHtml);
+        printWindow.document.close();
+        opened = true;
+      }
+    } catch {}
+
+    // Failsafe blob download if popup was blocked or mobile
+    if (!opened) {
+      try {
+        const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `${course.name.replace(/\s+/g, '_')}_Syllabus.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      } catch (err) {
+        console.warn('Fallback syllabus download error:', err);
+      }
+    }
   };
 
   const triggerDownloadAction = () => {
@@ -225,6 +248,20 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
       };
 
       addLead(newLeadData);
+
+      // Immediately notify and sync CRM across all tabs
+      if (typeof window !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('nexgen_leads_sync');
+          bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+          bc.close();
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+      }
+
+      if (syncIncomingLeadsNow) {
+        syncIncomingLeadsNow().catch(() => {});
+      }
 
       // 2. Track Meta Pixel event if available
       if (typeof window !== 'undefined' && (window as any).fbq) {

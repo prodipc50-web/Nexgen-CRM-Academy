@@ -179,11 +179,9 @@ const AcademyAppContent: React.FC = () => {
 
   // Synchronously compute active course from courses list & redirects
   const matchedCourse = useMemo(() => {
-    if (landingCourse && !currentCourseSlug) return landingCourse;
-    if (!currentCourseSlug || !courses.length) return landingCourse;
-    
+    // 1. If we have a target slug or query, look it up in courses
     let target = currentCourseSlug;
-    if (websiteCmsConfig?.seo?.courseRedirects?.length) {
+    if (target && websiteCmsConfig?.seo?.courseRedirects?.length) {
       const matchingRedirect = websiteCmsConfig.seo.courseRedirects.find(
         r => (r.fromSlug || r.oldSlug || '').toLowerCase().replace(/[^a-z0-9]/g, '') === target.toLowerCase().replace(/[^a-z0-9]/g, '')
       );
@@ -192,8 +190,19 @@ const AcademyAppContent: React.FC = () => {
         target = destinationSlug;
       }
     }
-    const found = findCourseBySlugOrQuery(courses, target);
-    return found || landingCourse;
+    if (target && courses.length > 0) {
+      const found = findCourseBySlugOrQuery(courses, target);
+      if (found) return found;
+    }
+
+    // 2. If landingCourse is set, find its freshest version in courses by id/code
+    if (landingCourse && courses.length > 0) {
+      const fresh = courses.find(c => c.id === landingCourse.id || c.code === landingCourse.code);
+      if (fresh) return fresh;
+      return landingCourse;
+    }
+
+    return landingCourse;
   }, [courses, currentCourseSlug, landingCourse, websiteCmsConfig?.seo?.courseRedirects]);
 
   // Auto-detect course parameter from URL or path on load with redirect support
@@ -265,6 +274,7 @@ const AcademyAppContent: React.FC = () => {
       const course = e.detail?.course;
       if (course) {
         setLandingCourse(course);
+        setCurrentCourseSlug(course.slug || course.id);
         setViewMode('course_landing');
       }
     };

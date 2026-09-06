@@ -1,50 +1,13 @@
 {
   "courses": [
     {
-      "id": "crs-01",
-      "code": "NCA-OFC-01",
-      "name": "Computer Office Application with AI",
-      "shortName": "Office & AI Apps",
-      "category": "Computer & Office",
-      "courseType": "Offline",
-      "projectsCount": 8,
-      "studentsJoined": 480,
-      "rating": 4.9,
-      "reviewsCount": 310,
-      "badgeText": "NCA-OFC-01",
-      "durationValue": 3,
-      "durationUnit": "Months",
-      "duration": "3 Months",
-      "durationMonths": 3,
-      "durationWeeks": 12,
-      "totalClasses": 36,
-      "classDuration": "1.5 Hours",
-      "totalHours": 54,
-      "regularFee": 8000,
-      "offerFee": 6500,
-      "discount": 1500,
-      "scholarshipAvailable": true,
-      "maxScholarship": 2000,
-      "minInstallmentAmount": 2500,
-      "description": "Master MS Word, Excel, PowerPoint, Google Workspace, Bangla/English typing, combined with modern AI productivity workflows (ChatGPT, Gemini, Copilot).",
-      "trainerId": "st-05",
-      "trainerIds": [
-        "st-05",
-        "st-07"
-      ],
-      "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80",
-      "requiredSkillLevel": "No Prior Knowledge",
-      "minimumEducation": "SSC / Equivalent",
-      "recommendedAge": "14+ Years",
       "requiredSoftwareHardware": "Basic Laptop / Desktop with Windows 10/11 & Internet",
-      "targetAudience": [
-        "School Student",
-        "College Student",
-        "Job Seeker",
-        "Housewife",
-        "Beginner"
-      ],
+      "durationValue": 3,
+      "durationWeeks": 12,
+      "classDuration": "1.5 Hours",
+      "duration": "3 Months",
+      "requiredSkillLevel": "No Prior Knowledge",
+      "studentsJoined": 480,
       "learningFeatures": [
         "Live Class",
         "Offline Class",
@@ -55,285 +18,28 @@
         "Final Exam",
         "Certificate"
       ],
-      "modules": [
-        {
-          "id": "mod-101",
-          "moduleNumber": 1,
-          "moduleName": "Computer Fundamentals & OS Navigation",
-          "moduleDescription": "Introduction to hardware architecture, Windows file systems, keyboard shortcuts, and fast touch typing in English & Bangla (Bijoy/Avro).",
-          "topics": [
-            "PC Hardware & Peripherals",
-            "Windows 11 Setup & Shortcuts",
-            "Touch Typing Mastery",
-            "Cloud Storage & Google Drive"
-          ],
-          "estimatedClasses": 6,
-          "learningOutcomes": [
-            "35+ WPM typing speed",
-            "Master file organization and cloud backups"
-          ]
-        },
-        {
-          "id": "mod-102",
-          "moduleNumber": 2,
-          "moduleName": "Advanced Microsoft Word & Document Automation",
-          "moduleDescription": "Professional formatting, official letters, thesis formatting, mail merge, tables, and AI document drafting.",
-          "topics": [
-            "Executive Typography & Layouts",
-            "Automated Tables & Indexes",
-            "Mail Merge for Mass Dispatch",
-            "AI Prompts for Report Drafting"
-          ],
-          "estimatedClasses": 10,
-          "learningOutcomes": [
-            "Create commercial reports and institutional publications",
-            "Integrate ChatGPT for copywriting"
-          ]
-        },
-        {
-          "id": "mod-103",
-          "moduleNumber": 3,
-          "moduleName": "Microsoft Excel, Financial Formulas & Dashboards",
-          "moduleDescription": "Formulas (VLOOKUP, XLOOKUP, INDEX-MATCH, IF-IFS), Pivot Tables, conditional formatting, dynamic charts, and financial statements.",
-          "topics": [
-            "Modern Formulas (XLOOKUP, SUMIFS)",
-            "Pivot Tables & Slicers",
-            "Automated Payroll & Invoice Templates",
-            "Data Visualization Dashboards"
-          ],
-          "estimatedClasses": 12,
-          "learningOutcomes": [
-            "Build end-to-end accounting sheets and executive summary dashboards"
-          ]
-        },
-        {
-          "id": "mod-104",
-          "moduleNumber": 4,
-          "moduleName": "PowerPoint Presentations, Google Suite & AI Productivity",
-          "moduleDescription": "Designing pitch decks, slide transitions, Google Docs/Sheets collaboration, and automated presentation generators.",
-          "topics": [
-            "Slide Design & Visual Hierarchy",
-            "AI Presentation Generators (Gamma, Copilot)",
-            "Google Sheets Multi-User Collaboration",
-            "Final Assessment & Mock Exam"
-          ],
-          "estimatedClasses": 8,
-          "learningOutcomes": [
-            "Deliver corporate presentations and pass Government certification tests"
-          ]
-        }
-      ],
-      "curriculumHighlights": [
-        "Advanced Excel & Financial Modeling",
-        "AI-assisted Document & Report Generation",
-        "Typing Speed & Bangla Bijoy/Avro",
-        "Office Networking & Hardware Basics"
-      ],
-      "syllabusHighlights": [
-        "Computer Fundamentals",
-        "MS Word Pro",
-        "Excel Dashboards",
-        "PowerPoint & AI Automation"
-      ],
+      "recommendedAge": "14+ Years",
       "landingConfig": {
-        "headline": "Computer Office Application with AI (2026 Updated Module)",
-        "subheadline": "শুধু MS Word, Excel, PowerPoint জানলেই কি এখন Job-Ready হওয়া যায়? ২০২৩-২০২৬ এ অফিস এনভায়রনমেন্ট বদলে গেছে। ডেটা অ্যানালাইসিস, ড্যাশবোর্ড ও ChatGPT/AI প্রম্পটিং দিয়ে নিজেকে রিয়েল অফিস রেডি করুন।",
-        "heroBadge": "🔥 ২০২৬ জব-রেডি আপডেটেড মডিউল • ১০০% প্র্যাকটিক্যাল ল্যাব",
-        "customBannerUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80",
-        "customDiscountBadge": "৫০% স্পেশাল মেগা স্কলারশিপ",
-        "ctaMode": "both",
-        "customWhatsAppNumber": "01798444444",
-        "customWhatsAppMessage": "Hello Nexgen Academy! আমি Computer Office Application with AI কোর্সে ভর্তি হতে চাই ও অফার জানতে চাই।",
-        "customMessengerUrl": "https://m.me/nexgenacademy",
-        "showBatchCountdown": true,
-        "nextBatchStartDate": "১৫ মে, ২০২৬",
-        "availableSeats": 8,
-        "guaranteeText": "১০০% প্র্যাকটিক্যাল ল্যাব ট্রেনিং, ওয়ান-টু-ওয়ান গাইডেন্স ও সরকারি ভেরিফায়েবল সার্টিফিকেট নিশ্চয়তা",
-        "painPointsHeadline": "একসময় Computer Office Application মানে ছিল শুধু Word, Excel, PowerPoint—কিন্তু ২০২৬-এর অফিস বদলে গেছে!",
-        "painPointsSubheadline": "আজকের চাকরির বাজারে সাধারণ টাইপিং যথেষ্ট নয়, প্র্যাকটিক্যাল অটোমেশন ও AI স্কিল ছাড়া প্রতিযোগিতা অনেক কঠিন।",
-        "painPointsList": [
+        "customReviews": [
           {
-            "problem": "পুরোনো ধাঁচে ঘণ্টার পর ঘণ্টা কপি-পেস্ট ও ম্যানুয়াল টাইপিং করতে হয়",
-            "solution": "ChatGPT ও Copilot দিয়ে কয়েক সেকেন্ডে নির্ভুল প্রফেশনাল ইমেইল, ড্রাফট ও রিপোর্ট তৈরি"
+            "text": "একদম প্র্যাকটিক্যাল ল্যাব ট্রেনিং। বিশেষ করে এক্সেল ও ChatGPT দিয়ে অফিস অটোমেশন শেখার পর আমার অফিসের কাজের স্পিড দ্বিগুণ হয়ে গেছে!",
+            "name": "তানভীর আহমেদ",
+            "roleOrBatch": "অফিস এক্সিকিউটিভ • ব্যাচ-১২",
+            "rating": 5
           },
           {
-            "problem": "অফিসে বড় ডেটাসেট আসলে হিসাব করতে হিমশিম খাওয়া ও ফর্মুলা ভুলে যাওয়া",
-            "solution": "Excel VLOOKUP, XLOOKUP, Pivot Table ও অটোমেটেড ফর্মুলা দিয়ে যেকোনো হিসাব মুহূর্তেই সম্পন্ন"
+            "name": "সাদিয়া আক্তার",
+            "text": "আমার টাইপিং স্পিড ১৫ WPM থেকে এখন ৪৮ WPM এ পৌঁছেছে। মেন্টরদের আন্তরিকতা ও ধৈর্য সত্যিই প্রশংসনীয়।",
+            "roleOrBatch": "বিবিএ শিক্ষার্থী • ব্যাচ-১৫",
+            "rating": 5
           },
           {
-            "problem": "সাধারণ সাদামাটা স্লাইড দেখে ক্লায়েন্ট বা বসের বিরক্তি প্রকাশ",
-            "solution": "PowerPoint ও AI টুলস দিয়ে দৃষ্টিনন্দন কর্পোরেট প্রেজেন্টেশন ও অ্যানিমেশন ডিজাইন"
-          },
-          {
-            "problem": "ফাইলিং ও ডকুমেন্টস হারিয়ে যাওয়া এবং টিমের সাথে কাজ না মেলা",
-            "solution": "Google Docs, Sheets, Drive ও ক্লাউড কোলাবোরেশনে স্মার্ট টিমওয়ার্ক"
+            "roleOrBatch": "অ্যাকাউন্টিং অফিসার • ব্যাচ-০৮",
+            "name": "মোঃ জাহিদ হাসান",
+            "text": "VLOOKUP, XLOOKUP এবং Pivot Table দিয়ে এখন যেকোনো ব্যালান্স শিট ও স্যালারি শিট এক নিমিষে বানিয়ে ফেলতে পারি।",
+            "rating": 5
           }
         ],
-        "whyChooseHeadline": "আমাদের কোর্সের বিশেষত্ব যা আপনাকে অন্যদের চেয়ে এগিয়ে রাখবে",
-        "featureCards": [
-          {
-            "iconName": "laptop",
-            "title": "১০০% হ্যান্ডস-অন ল্যাব প্র্যাকটিস",
-            "description": "ক্লাসরুমেই প্রতিটি শিক্ষার্থীর জন্য আলাদা পার্সোনাল কম্পিউটার ও রিয়েল-লাইফ অ্যাসাইনমেন্ট।"
-          },
-          {
-            "iconName": "zap",
-            "title": "AI ইন্টিগ্রেশন ও স্মার্ট প্রম্পটিং",
-            "description": "অফিসের কাজ ৫ গুণ দ্রুত করতে ChatGPT, Gemini ও Microsoft Copilot-এর বাস্তব ব্যবহার।"
-          },
-          {
-            "iconName": "award",
-            "title": "ভেরিফায়েবল সরকারি ও আইটি সার্টিফিকেট",
-            "description": "কোর্স শেষে অনলাইন কিউআর কোড ভেরিফিকেশন সহ প্রফেশনাল সার্টিফিকেট প্রদান।"
-          },
-          {
-            "iconName": "briefcase",
-            "title": "জব-রেডি রিয়েল অফিস প্রজেক্ট",
-            "description": "অফিসিয়াল চিঠি, ক্যাশবুক, ইনভয়েস, স্যালারি শিট ও পে-রোল ম্যানেজমেন্ট প্রজেক্ট।"
-          },
-          {
-            "iconName": "shield",
-            "title": "লাইফটাইম মেন্টর ও ল্যাব সাপোর্ট",
-            "description": "কোর্স শেষ হলেও যেকোনো সময়ে ল্যাব ব্যবহার ও মেন্টরদের কাছ থেকে ফ্রি সলিউশন সুবিধা।"
-          },
-          {
-            "iconName": "users",
-            "title": "ক্যারিয়ার ও সিভি মেকিং গাইডলাইন",
-            "description": "স্ট্যান্ডার্ড সিভি ও ইন্টারভিউ প্রিপারেশন এবং করপোরেট কমিউনিকেশন টিপস।"
-          }
-        ],
-        "curriculumHeadline": "আমাদের ২০২৬ আপডেটেড সম্পূর্ণ কোর্স কারিকুলাম",
-        "curriculumSubheadline": "বেসিক কম্পিউটার থেকে শুরু করে প্রফেশনাল ডেটা অ্যানালাইসিস ও AI অফিস অটোমেশন—সবকিছু একটি কমপ্লিট কোর্সে",
-        "editableModules": [
-          {
-            "id": "emod-1",
-            "moduleNumber": 1,
-            "moduleName": "Computer Fundamentals & Fast Typing Mastery",
-            "subtitle": "কম্পিউটার পরিচালনা ও দ্রুতগতির বাংলা-ইংরেজি টাইপিং",
-            "description": "কম্পিউটার হার্ডওয়্যার পরিচিতি, উইন্ডোজ অপারেটিং সিস্টেম, ফাইল-ফোল্ডার ম্যানেজমেন্ট ও শর্টকাট কি।",
-            "topics": [
-              "উইন্ডোজ ফাইল সিস্টেম ও সিকিউরিটি ব্যাকআপ",
-              "ইংরেজি টাচ টাইপিং (লক্ষ্য: ৩০-৪০ WPM)",
-              "বাংলা ইউনিকোড ও অভ্র / বিজয় টাইপিং কৌশল",
-              "ইন্টারনেট ব্রাউজিং, সাইবার সিকিউরিটি ও ক্লাউড ড্রাইভ"
-            ],
-            "tools": [
-              "Windows 11",
-              "Bijoy Bayanno",
-              "Avro Keyboard",
-              "Google Drive"
-            ],
-            "estimatedClasses": "৬টি ক্লাস"
-          },
-          {
-            "id": "emod-2",
-            "moduleNumber": 2,
-            "moduleName": "Advanced MS Word & Smart Official Document Drafting",
-            "subtitle": "প্রফেশনাল ডকুমেন্ট, অফিশিয়াল চিঠি ও নোটিশ ডিজাইন",
-            "description": "করপোরেট চিঠি, লিগ্যাল ডকুমেন্টস, ইনভয়েস, ক্যাটালগ ও AI দিয়ে দ্রুত ড্রাফটিং তৈরির টেকনিক।",
-            "topics": [
-              "করপোরেট লেটারহেড, অ্যাপ্লিকেশন ও মেমো ফরম্যাটিং",
-              "টেবিল ডিজাইন, হেডার/ফুটার ও ওয়াটারমার্ক",
-              "মেইল মার্জ (Mail Merge) দিয়ে এক ক্লিকে শত শত চিঠি প্রেরণ",
-              "ChatGPT দিয়ে অফিশিয়াল ড্রাফট, নোটিশ ও প্রপোজাল রাইটিং"
-            ],
-            "tools": [
-              "MS Word",
-              "ChatGPT Prompts",
-              "Grammar AI Tools"
-            ],
-            "estimatedClasses": "১০টি ক্লাস"
-          },
-          {
-            "id": "emod-3",
-            "moduleNumber": 3,
-            "moduleName": "Microsoft Excel, Financial Formulas & Interactive Dashboards",
-            "subtitle": "ডেটা অ্যানালাইসিস, হিসাব-নিকাশ ও ড্যাশবোর্ড মাস্টারি",
-            "description": "অফিসের যাবতীয় হিসাব, স্যালারি শিট, ইনভেন্টরি ও এক্সেলের অত্যাধুনিক ফর্মুলার হাতে-কলমে প্র্যাকটিস।",
-            "topics": [
-              "বেসিক টু অ্যাডভান্সড ফর্মুলা (SUMIFS, COUNTIFS, IF, AND, OR)",
-              "লুকআপ ফাংশন (VLOOKUP, HLOOKUP, XLOOKUP, INDEX-MATCH)",
-              "Pivot Table, Pivot Chart ও স্লাইসার দিয়ে ডাইনামিক ডেটা ফিল্টারিং",
-              "অটোমেটেড স্যালারি শিট, ইনভয়েস জেনারেটর ও ক্যাশবুক তৈরি",
-              "Excel-এ AI ফর্মুলা জেনারেটর প্রম্পটিং টেকনিক"
-            ],
-            "tools": [
-              "MS Excel",
-              "Formula AI",
-              "Pivot Dashboards"
-            ],
-            "estimatedClasses": "১২টি ক্লাস"
-          },
-          {
-            "id": "emod-4",
-            "moduleNumber": 4,
-            "moduleName": "MS PowerPoint & AI-Powered Dynamic Presentations",
-            "subtitle": "দৃষ্টিনন্দন প্রেজেন্টেশন ও স্লাইড ডেক ডিজাইন",
-            "description": "করপোরেট মিটিং, পিচ ডেক ও বিজনেস প্রেজেন্টেশন আকর্ষণীয়ভাবে তৈরির পূর্ণাঙ্গ গাইডলাইন।",
-            "topics": [
-              "স্লাইড লেআউট, কালার থিওরি ও ইনফোগ্রাফিক ডিজাইন",
-              "মর্ফ (Morph) ট্রানজিশন ও আধুনিক অ্যানিমেশন ইফেক্টস",
-              "AI দিয়ে কনটেন্ট ও প্রেজেন্টেশন জেনারেশন (Gamma, Copilot)",
-              "পাবলিক স্পিকিং ও প্রফেশনাল স্লাইড প্রেজেন্টেশন টিপস"
-            ],
-            "tools": [
-              "PowerPoint",
-              "Gamma App",
-              "Canva Pro Tools"
-            ],
-            "estimatedClasses": "৬টি ক্লাস"
-          },
-          {
-            "id": "emod-5",
-            "moduleNumber": 5,
-            "moduleName": "Google Workspace, Cloud Collaboration & Career Workshop",
-            "subtitle": "ক্লাউড অফিস ও ক্যারিয়ার প্লেসমেন্ট প্রিপারেশন",
-            "description": "যেকোনো স্থান থেকে অনলাইনে টিমওয়ার্ক ও সফলভাবে চাকরি নিশ্চিতকরণের প্রস্তুতি।",
-            "topics": [
-              "Google Docs, Google Sheets ও Google Forms রিয়েল-টাইম কোলাবোরেশন",
-              "পেশাদার ইমেইল শিষ্টাচার (Email Etiquette) ও ক্যালেন্ডার শিডিউলিং",
-              "AI-অপ্টিমাইজড প্রফেশনাল এটিএস (ATS) ফ্রেন্ডলি সিভি তৈরি",
-              "মক ইন্টারভিউ ও ফাইনাল প্র্যাকটিক্যাল অ্যাসেসমেন্ট"
-            ],
-            "tools": [
-              "Google Suite",
-              "LinkedIn",
-              "Resume AI"
-            ],
-            "estimatedClasses": "২টি ক্লাস"
-          }
-        ],
-        "audienceHeadline": "এই কোর্সটি কাদের জন্য বিশেষভাবে তৈরি?",
-        "audienceList": [
-          {
-            "group": "👨‍🎓 শিক্ষার্থী ও ফ্রেশার (SSC / HSC / অনার্স)",
-            "benefit": "চাকরির বাজারে প্রবেশের আগেই নিজেকে স্কিলড ও কম্পিউটার এক্সপার্ট হিসেবে প্রস্তুত করতে।"
-          },
-          {
-            "group": "💼 চাকরিপ্রত্যাশী ও তরুণ-তরুণী",
-            "benefit": "প্র্যাকটিক্যাল স্কিল ও ভেরিফায়েবল সার্টিফিকেটের মাধ্যমে ভালো জবের ইন্টারভিউতে এগিয়ে থাকতে।"
-          },
-          {
-            "group": "👔 কর্মরত চাকুরিজীবী ও এক্সিকিউটিভ",
-            "benefit": "অফিসের প্রতিদিনের কাজের গতি বাড়াতে, ভুল কমাতে ও পদোন্নতির জন্য AI টুলস আয়ত্ত করতে।"
-          },
-          {
-            "group": "👩‍💼 গৃহিণী ও ফ্রিল্যান্সিং করতে আগ্রহী যে কেউ",
-            "benefit": "ডাটা এন্ট্রি, ভার্চুয়াল অ্যাসিস্ট্যান্ট ও ক্লাউড অফিস ম্যানেজমেন্ট শিখে ঘরে বসে ক্যারিয়ার গড়তে।"
-          }
-        ],
-        "campusAddress": "১৪/বি, গার্ডেন রোড, কাজী নজরুল ইসলাম সরণি, ফার্মগেট, ঢাকা-১২১৫",
-        "campusPhone": "০১৭৯৮-৪৪৪৪৪৪",
-        "campusHours": "সকাল ৯:০০ টা থেকে রাত ৮:০০ টা (প্রতিদিন খোলা)",
-        "bonusHeadline": "🎁 এই ব্যাচে ভর্তি হলে সম্পূর্ণ ফ্রি পাচ্ছেন:",
-        "bonusItems": [
-          "ChatGPT & AI Office Productivity প্রম্পট গাইড বুক (PDF ফ্রি)",
-          "৫০+ রেডিমেড করপোরেট এক্সেল ও ওয়ার্ড টেমপ্লেট লাইব্রেরি",
-          "ফুল স্পিড টাইপিং সফটওয়্যার ফুল লাইসেন্স",
-          "প্রফেশনাল সিভি মেকিং ফরম্যাট ও ইন্টারভিউ প্রশ্ন ব্যাংক",
-          "লাইফটাইম ক্লাস রিসোর্স ও ভিডিও ব্যাকআপ সাপোর্ট"
-        ],
-        "faqsHeadline": "সচরাচর জিজ্ঞাসিত কিছু গুরুত্বপূর্ণ প্রশ্ন ও উত্তর (FAQs)",
         "faqs": [
           {
             "question": "এই কোর্সে ভর্তি হতে কি কোনো পূর্ব অভিজ্ঞতার প্রয়োজন আছে?",
@@ -352,70 +58,347 @@
             "answer": "হ্যাঁ, কোর্স সমাপ্তির পর সফল শিক্ষার্থীদের সরকারি ও বেসরকারি প্রতিষ্ঠানে গ্রহণযোগ্য ভেরিফায়েবল সার্টিফিকেট প্রদান করা হবে।"
           },
           {
-            "question": "ভর্তি ফি কি কিস্তিতে (Installment) পরিশোধ করা যাবে?",
-            "answer": "হ্যাঁ, প্রাথমিক মাত্র ৳২,৫০০ দিয়ে সিট বুকিং করে বাকি কোর্স ফি সহজ ২টি কিস্তিতে পরিশোধের সুযোগ রয়েছে।"
+            "answer": "হ্যাঁ, প্রাথমিক মাত্র ৳২,৫০০ দিয়ে সিট বুকিং করে বাকি কোর্স ফি সহজ ২টি কিস্তিতে পরিশোধের সুযোগ রয়েছে।",
+            "question": "ভর্তি ফি কি কিস্তিতে (Installment) পরিশোধ করা যাবে?"
           }
         ],
-        "customReviews": [
+        "painPointsSubheadline": "আজকের চাকরির বাজারে সাধারণ টাইপিং যথেষ্ট নয়, প্র্যাকটিক্যাল অটোমেশন ও AI স্কিল ছাড়া প্রতিযোগিতা অনেক কঠিন।",
+        "customBannerUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80",
+        "customMessengerUrl": "https://m.me/nexgenacademy",
+        "heroBadge": "🔥 ২০২৬ জব-রেডি আপডেটেড মডিউল • ১০০% প্র্যাকটিক্যাল ল্যাব",
+        "curriculumSubheadline": "বেসিক কম্পিউটার থেকে শুরু করে প্রফেশনাল ডেটা অ্যানালাইসিস ও AI অফিস অটোমেশন—সবকিছু একটি কমপ্লিট কোর্সে",
+        "customDiscountBadge": "৫০% স্পেশাল মেগা স্কলারশিপ",
+        "editableModules": [
           {
-            "name": "তানভীর আহমেদ",
-            "roleOrBatch": "অফিস এক্সিকিউটিভ • ব্যাচ-১২",
-            "rating": 5,
-            "text": "একদম প্র্যাকটিক্যাল ল্যাব ট্রেনিং। বিশেষ করে এক্সেল ও ChatGPT দিয়ে অফিস অটোমেশন শেখার পর আমার অফিসের কাজের স্পিড দ্বিগুণ হয়ে গেছে!"
+            "topics": [
+              "উইন্ডোজ ফাইল সিস্টেম ও সিকিউরিটি ব্যাকআপ",
+              "ইংরেজি টাচ টাইপিং (লক্ষ্য: ৩০-৪০ WPM)",
+              "বাংলা ইউনিকোড ও অভ্র / বিজয় টাইপিং কৌশল",
+              "ইন্টারনেট ব্রাউজিং, সাইবার সিকিউরিটি ও ক্লাউড ড্রাইভ"
+            ],
+            "moduleNumber": 1,
+            "description": "কম্পিউটার হার্ডওয়্যার পরিচিতি, উইন্ডোজ অপারেটিং সিস্টেম, ফাইল-ফোল্ডার ম্যানেজমেন্ট ও শর্টকাট কি।",
+            "estimatedClasses": "৬টি ক্লাস",
+            "tools": [
+              "Windows 11",
+              "Bijoy Bayanno",
+              "Avro Keyboard",
+              "Google Drive"
+            ],
+            "id": "emod-1",
+            "moduleName": "Computer Fundamentals & Fast Typing Mastery",
+            "subtitle": "কম্পিউটার পরিচালনা ও দ্রুতগতির বাংলা-ইংরেজি টাইপিং"
           },
           {
-            "name": "সাদিয়া আক্তার",
-            "roleOrBatch": "বিবিএ শিক্ষার্থী • ব্যাচ-১৫",
-            "rating": 5,
-            "text": "আমার টাইপিং স্পিড ১৫ WPM থেকে এখন ৪৮ WPM এ পৌঁছেছে। মেন্টরদের আন্তরিকতা ও ধৈর্য সত্যিই প্রশংসনীয়।"
+            "moduleNumber": 2,
+            "id": "emod-2",
+            "subtitle": "প্রফেশনাল ডকুমেন্ট, অফিশিয়াল চিঠি ও নোটিশ ডিজাইন",
+            "description": "করপোরেট চিঠি, লিগ্যাল ডকুমেন্টস, ইনভয়েস, ক্যাটালগ ও AI দিয়ে দ্রুত ড্রাফটিং তৈরির টেকনিক।",
+            "estimatedClasses": "১০টি ক্লাস",
+            "moduleName": "Advanced MS Word & Smart Official Document Drafting",
+            "topics": [
+              "করপোরেট লেটারহেড, অ্যাপ্লিকেশন ও মেমো ফরম্যাটিং",
+              "টেবিল ডিজাইন, হেডার/ফুটার ও ওয়াটারমার্ক",
+              "মেইল মার্জ (Mail Merge) দিয়ে এক ক্লিকে শত শত চিঠি প্রেরণ",
+              "ChatGPT দিয়ে অফিশিয়াল ড্রাফট, নোটিশ ও প্রপোজাল রাইটিং"
+            ],
+            "tools": [
+              "MS Word",
+              "ChatGPT Prompts",
+              "Grammar AI Tools"
+            ]
           },
           {
-            "name": "মোঃ জাহিদ হাসান",
-            "roleOrBatch": "অ্যাকাউন্টিং অফিসার • ব্যাচ-০৮",
-            "rating": 5,
-            "text": "VLOOKUP, XLOOKUP এবং Pivot Table দিয়ে এখন যেকোনো ব্যালান্স শিট ও স্যালারি শিট এক নিমিষে বানিয়ে ফেলতে পারি।"
+            "estimatedClasses": "১২টি ক্লাস",
+            "topics": [
+              "বেসিক টু অ্যাডভান্সড ফর্মুলা (SUMIFS, COUNTIFS, IF, AND, OR)",
+              "লুকআপ ফাংশন (VLOOKUP, HLOOKUP, XLOOKUP, INDEX-MATCH)",
+              "Pivot Table, Pivot Chart ও স্লাইসার দিয়ে ডাইনামিক ডেটা ফিল্টারিং",
+              "অটোমেটেড স্যালারি শিট, ইনভয়েস জেনারেটর ও ক্যাশবুক তৈরি",
+              "Excel-এ AI ফর্মুলা জেনারেটর প্রম্পটিং টেকনিক"
+            ],
+            "tools": [
+              "MS Excel",
+              "Formula AI",
+              "Pivot Dashboards"
+            ],
+            "moduleNumber": 3,
+            "subtitle": "ডেটা অ্যানালাইসিস, হিসাব-নিকাশ ও ড্যাশবোর্ড মাস্টারি",
+            "moduleName": "Microsoft Excel, Financial Formulas & Interactive Dashboards",
+            "id": "emod-3",
+            "description": "অফিসের যাবতীয় হিসাব, স্যালারি শিট, ইনভেন্টরি ও এক্সেলের অত্যাধুনিক ফর্মুলার হাতে-কলমে প্র্যাকটিস।"
+          },
+          {
+            "subtitle": "দৃষ্টিনন্দন প্রেজেন্টেশন ও স্লাইড ডেক ডিজাইন",
+            "id": "emod-4",
+            "estimatedClasses": "৬টি ক্লাস",
+            "moduleName": "MS PowerPoint & AI-Powered Dynamic Presentations",
+            "description": "করপোরেট মিটিং, পিচ ডেক ও বিজনেস প্রেজেন্টেশন আকর্ষণীয়ভাবে তৈরির পূর্ণাঙ্গ গাইডলাইন।",
+            "topics": [
+              "স্লাইড লেআউট, কালার থিওরি ও ইনফোগ্রাফিক ডিজাইন",
+              "মর্ফ (Morph) ট্রানজিশন ও আধুনিক অ্যানিমেশন ইফেক্টস",
+              "AI দিয়ে কনটেন্ট ও প্রেজেন্টেশন জেনারেশন (Gamma, Copilot)",
+              "পাবলিক স্পিকিং ও প্রফেশনাল স্লাইড প্রেজেন্টেশন টিপস"
+            ],
+            "moduleNumber": 4,
+            "tools": [
+              "PowerPoint",
+              "Gamma App",
+              "Canva Pro Tools"
+            ]
+          },
+          {
+            "topics": [
+              "Google Docs, Google Sheets ও Google Forms রিয়েল-টাইম কোলাবোরেশন",
+              "পেশাদার ইমেইল শিষ্টাচার (Email Etiquette) ও ক্যালেন্ডার শিডিউলিং",
+              "AI-অপ্টিমাইজড প্রফেশনাল এটিএস (ATS) ফ্রেন্ডলি সিভি তৈরি",
+              "মক ইন্টারভিউ ও ফাইনাল প্র্যাকটিক্যাল অ্যাসেসমেন্ট"
+            ],
+            "moduleName": "Google Workspace, Cloud Collaboration & Career Workshop",
+            "description": "যেকোনো স্থান থেকে অনলাইনে টিমওয়ার্ক ও সফলভাবে চাকরি নিশ্চিতকরণের প্রস্তুতি।",
+            "moduleNumber": 5,
+            "subtitle": "ক্লাউড অফিস ও ক্যারিয়ার প্লেসমেন্ট প্রিপারেশন",
+            "estimatedClasses": "২টি ক্লাস",
+            "tools": [
+              "Google Suite",
+              "LinkedIn",
+              "Resume AI"
+            ],
+            "id": "emod-5"
           }
-        ]
+        ],
+        "headline": "Computer Office Application with AI (2026 Updated Module)",
+        "customWhatsAppNumber": "01798444444",
+        "availableSeats": 8,
+        "guaranteeText": "১০০% প্র্যাকটিক্যাল ল্যাব ট্রেনিং, ওয়ান-টু-ওয়ান গাইডেন্স ও সরকারি ভেরিফায়েবল সার্টিফিকেট নিশ্চয়তা",
+        "audienceHeadline": "এই কোর্সটি কাদের জন্য বিশেষভাবে তৈরি?",
+        "nextBatchStartDate": "১৫ মে, ২০২৬",
+        "featureCards": [
+          {
+            "iconName": "laptop",
+            "description": "ক্লাসরুমেই প্রতিটি শিক্ষার্থীর জন্য আলাদা পার্সোনাল কম্পিউটার ও রিয়েল-লাইফ অ্যাসাইনমেন্ট।",
+            "title": "১০০% হ্যান্ডস-অন ল্যাব প্র্যাকটিস"
+          },
+          {
+            "iconName": "zap",
+            "description": "অফিসের কাজ ৫ গুণ দ্রুত করতে ChatGPT, Gemini ও Microsoft Copilot-এর বাস্তব ব্যবহার।",
+            "title": "AI ইন্টিগ্রেশন ও স্মার্ট প্রম্পটিং"
+          },
+          {
+            "iconName": "award",
+            "title": "ভেরিফায়েবল সরকারি ও আইটি সার্টিফিকেট",
+            "description": "কোর্স শেষে অনলাইন কিউআর কোড ভেরিফিকেশন সহ প্রফেশনাল সার্টিফিকেট প্রদান।"
+          },
+          {
+            "description": "অফিসিয়াল চিঠি, ক্যাশবুক, ইনভয়েস, স্যালারি শিট ও পে-রোল ম্যানেজমেন্ট প্রজেক্ট।",
+            "title": "জব-রেডি রিয়েল অফিস প্রজেক্ট",
+            "iconName": "briefcase"
+          },
+          {
+            "title": "লাইফটাইম মেন্টর ও ল্যাব সাপোর্ট",
+            "iconName": "shield",
+            "description": "কোর্স শেষ হলেও যেকোনো সময়ে ল্যাব ব্যবহার ও মেন্টরদের কাছ থেকে ফ্রি সলিউশন সুবিধা।"
+          },
+          {
+            "description": "স্ট্যান্ডার্ড সিভি ও ইন্টারভিউ প্রিপারেশন এবং করপোরেট কমিউনিকেশন টিপস।",
+            "title": "ক্যারিয়ার ও সিভি মেকিং গাইডলাইন",
+            "iconName": "users"
+          }
+        ],
+        "audienceList": [
+          {
+            "benefit": "চাকরির বাজারে প্রবেশের আগেই নিজেকে স্কিলড ও কম্পিউটার এক্সপার্ট হিসেবে প্রস্তুত করতে।",
+            "group": "👨‍🎓 শিক্ষার্থী ও ফ্রেশার (SSC / HSC / অনার্স)"
+          },
+          {
+            "group": "💼 চাকরিপ্রত্যাশী ও তরুণ-তরুণী",
+            "benefit": "প্র্যাকটিক্যাল স্কিল ও ভেরিফায়েবল সার্টিফিকেটের মাধ্যমে ভালো জবের ইন্টারভিউতে এগিয়ে থাকতে।"
+          },
+          {
+            "benefit": "অফিসের প্রতিদিনের কাজের গতি বাড়াতে, ভুল কমাতে ও পদোন্নতির জন্য AI টুলস আয়ত্ত করতে।",
+            "group": "👔 কর্মরত চাকুরিজীবী ও এক্সিকিউটিভ"
+          },
+          {
+            "group": "👩‍💼 গৃহিণী ও ফ্রিল্যান্সিং করতে আগ্রহী যে কেউ",
+            "benefit": "ডাটা এন্ট্রি, ভার্চুয়াল অ্যাসিস্ট্যান্ট ও ক্লাউড অফিস ম্যানেজমেন্ট শিখে ঘরে বসে ক্যারিয়ার গড়তে।"
+          }
+        ],
+        "customWhatsAppMessage": "Hello Nexgen Academy! আমি Computer Office Application with AI কোর্সে ভর্তি হতে চাই ও অফার জানতে চাই।",
+        "bonusItems": [
+          "ChatGPT & AI Office Productivity প্রম্পট গাইড বুক (PDF ফ্রি)",
+          "৫০+ রেডিমেড করপোরেট এক্সেল ও ওয়ার্ড টেমপ্লেট লাইব্রেরি",
+          "ফুল স্পিড টাইপিং সফটওয়্যার ফুল লাইসেন্স",
+          "প্রফেশনাল সিভি মেকিং ফরম্যাট ও ইন্টারভিউ প্রশ্ন ব্যাংক",
+          "লাইফটাইম ক্লাস রিসোর্স ও ভিডিও ব্যাকআপ সাপোর্ট"
+        ],
+        "showBatchCountdown": true,
+        "bonusHeadline": "🎁 এই ব্যাচে ভর্তি হলে সম্পূর্ণ ফ্রি পাচ্ছেন:",
+        "ctaMode": "both",
+        "campusAddress": "১৪/বি, গার্ডেন রোড, কাজী নজরুল ইসলাম সরণি, ফার্মগেট, ঢাকা-১২১৫",
+        "campusHours": "সকাল ৯:০০ টা থেকে রাত ৮:০০ টা (প্রতিদিন খোলা)",
+        "curriculumHeadline": "আমাদের ২০২৬ আপডেটেড সম্পূর্ণ কোর্স কারিকুলাম",
+        "painPointsHeadline": "একসময় Computer Office Application মানে ছিল শুধু Word, Excel, PowerPoint—কিন্তু ২০২৬-এর অফিস বদলে গেছে!",
+        "subheadline": "শুধু MS Word, Excel, PowerPoint জানলেই কি এখন Job-Ready হওয়া যায়? ২০২৩-২০২৬ এ অফিস এনভায়রনমেন্ট বদলে গেছে। ডেটা অ্যানালাইসিস, ড্যাশবোর্ড ও ChatGPT/AI প্রম্পটিং দিয়ে নিজেকে রিয়েল অফিস রেডি করুন।",
+        "painPointsList": [
+          {
+            "problem": "পুরোনো ধাঁচে ঘণ্টার পর ঘণ্টা কপি-পেস্ট ও ম্যানুয়াল টাইপিং করতে হয়",
+            "solution": "ChatGPT ও Copilot দিয়ে কয়েক সেকেন্ডে নির্ভুল প্রফেশনাল ইমেইল, ড্রাফট ও রিপোর্ট তৈরি"
+          },
+          {
+            "problem": "অফিসে বড় ডেটাসেট আসলে হিসাব করতে হিমশিম খাওয়া ও ফর্মুলা ভুলে যাওয়া",
+            "solution": "Excel VLOOKUP, XLOOKUP, Pivot Table ও অটোমেটেড ফর্মুলা দিয়ে যেকোনো হিসাব মুহূর্তেই সম্পন্ন"
+          },
+          {
+            "problem": "সাধারণ সাদামাটা স্লাইড দেখে ক্লায়েন্ট বা বসের বিরক্তি প্রকাশ",
+            "solution": "PowerPoint ও AI টুলস দিয়ে দৃষ্টিনন্দন কর্পোরেট প্রেজেন্টেশন ও অ্যানিমেশন ডিজাইন"
+          },
+          {
+            "solution": "Google Docs, Sheets, Drive ও ক্লাউড কোলাবোরেশনে স্মার্ট টিমওয়ার্ক",
+            "problem": "ফাইলিং ও ডকুমেন্টস হারিয়ে যাওয়া এবং টিমের সাথে কাজ না মেলা"
+          }
+        ],
+        "whyChooseHeadline": "আমাদের কোর্সের বিশেষত্ব যা আপনাকে অন্যদের চেয়ে এগিয়ে রাখবে",
+        "campusPhone": "০১৭৯৮-৪৪৪৪৪৪",
+        "faqsHeadline": "সচরাচর জিজ্ঞাসিত কিছু গুরুত্বপূর্ণ প্রশ্ন ও উত্তর (FAQs)"
       },
-      "createdAt": "2026-01-05T10:00:00.000Z"
-    },
-    {
-      "id": "crs-02",
-      "code": "UITB-GD-202",
-      "name": "Professional Graphic Design with AI & Branding",
-      "shortName": "Graphic Design AI",
-      "category": "Graphic Design",
-      "courseType": "Offline",
-      "projectsCount": 15,
-      "studentsJoined": 620,
-      "rating": 4.9,
-      "reviewsCount": 540,
-      "badgeText": "UITB-GD-202",
-      "durationValue": 4,
-      "durationUnit": "Months",
-      "duration": "4 Months",
-      "durationMonths": 4,
-      "durationWeeks": 16,
-      "totalClasses": 48,
-      "classDuration": "2 Hours",
-      "totalHours": 96,
-      "regularFee": 16000,
-      "offerFee": 12500,
-      "discount": 3500,
-      "scholarshipAvailable": true,
-      "maxScholarship": 3000,
-      "minInstallmentAmount": 4000,
-      "description": "Professional Adobe Photoshop, Illustrator, InDesign paired with AI generative tools (Midjourney, Firefly, Stable Diffusion) for branding, social media, and packaging.",
+      "maxScholarship": 2000,
+      "name": "Computer Office Application with AI",
+      "durationMonths": 3,
+      "projectsCount": 8,
+      "badgeText": "NCA-OFC-01",
+      "id": "crs-01",
+      "minimumEducation": "SSC / Equivalent",
+      "category": "Computer & Office",
+      "targetAudience": [
+        "School Student",
+        "College Student",
+        "Job Seeker",
+        "Housewife",
+        "Beginner"
+      ],
       "trainerId": "st-05",
       "trainerIds": [
-        "st-05"
+        "st-05",
+        "st-07"
       ],
+      "discount": 1500,
+      "durationUnit": "Months",
+      "code": "NCA-OFC-01",
+      "totalClasses": 36,
+      "scholarshipAvailable": true,
+      "curriculumHighlights": [
+        "Advanced Excel & Financial Modeling",
+        "AI-assisted Document & Report Generation",
+        "Typing Speed & Bangla Bijoy/Avro",
+        "Office Networking & Hardware Basics"
+      ],
+      "syllabusHighlights": [
+        "Computer Fundamentals",
+        "MS Word Pro",
+        "Excel Dashboards",
+        "PowerPoint & AI Automation"
+      ],
+      "description": "Master MS Word, Excel, PowerPoint, Google Workspace, Bangla/English typing, combined with modern AI productivity workflows (ChatGPT, Gemini, Copilot).",
+      "rating": 4.9,
+      "offerFee": 6200,
+      "reviewsCount": 310,
+      "totalHours": 54,
+      "regularFee": 8500,
       "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&auto=format&fit=crop&q=80",
+      "createdAt": "2026-01-05T10:00:00.000Z",
+      "minInstallmentAmount": 2500,
+      "modules": [
+        {
+          "topics": [
+            "PC Hardware & Peripherals",
+            "Windows 11 Setup & Shortcuts",
+            "Touch Typing Mastery",
+            "Cloud Storage & Google Drive"
+          ],
+          "learningOutcomes": [
+            "35+ WPM typing speed",
+            "Master file organization and cloud backups"
+          ],
+          "estimatedClasses": 6,
+          "moduleDescription": "Introduction to hardware architecture, Windows file systems, keyboard shortcuts, and fast touch typing in English & Bangla (Bijoy/Avro).",
+          "moduleNumber": 1,
+          "id": "mod-101",
+          "moduleName": "Computer Fundamentals & OS Navigation"
+        },
+        {
+          "topics": [
+            "Executive Typography & Layouts",
+            "Automated Tables & Indexes",
+            "Mail Merge for Mass Dispatch",
+            "AI Prompts for Report Drafting"
+          ],
+          "id": "mod-102",
+          "moduleDescription": "Professional formatting, official letters, thesis formatting, mail merge, tables, and AI document drafting.",
+          "moduleName": "Advanced Microsoft Word & Document Automation",
+          "learningOutcomes": [
+            "Create commercial reports and institutional publications",
+            "Integrate ChatGPT for copywriting"
+          ],
+          "estimatedClasses": 10,
+          "moduleNumber": 2
+        },
+        {
+          "moduleDescription": "Formulas (VLOOKUP, XLOOKUP, INDEX-MATCH, IF-IFS), Pivot Tables, conditional formatting, dynamic charts, and financial statements.",
+          "topics": [
+            "Modern Formulas (XLOOKUP, SUMIFS)",
+            "Pivot Tables & Slicers",
+            "Automated Payroll & Invoice Templates",
+            "Data Visualization Dashboards"
+          ],
+          "moduleNumber": 3,
+          "estimatedClasses": 12,
+          "learningOutcomes": [
+            "Build end-to-end accounting sheets and executive summary dashboards"
+          ],
+          "moduleName": "Microsoft Excel, Financial Formulas & Dashboards",
+          "id": "mod-103"
+        },
+        {
+          "topics": [
+            "Slide Design & Visual Hierarchy",
+            "AI Presentation Generators (Gamma, Copilot)",
+            "Google Sheets Multi-User Collaboration",
+            "Final Assessment & Mock Exam"
+          ],
+          "moduleName": "PowerPoint Presentations, Google Suite & AI Productivity",
+          "moduleNumber": 4,
+          "estimatedClasses": 8,
+          "learningOutcomes": [
+            "Deliver corporate presentations and pass Government certification tests"
+          ],
+          "moduleDescription": "Designing pitch decks, slide transitions, Google Docs/Sheets collaboration, and automated presentation generators.",
+          "id": "mod-104"
+        }
+      ],
+      "thumbnailUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80",
+      "shortName": "Office & AI Apps",
+      "courseType": "Offline"
+    },
+    {
+      "rating": 4.9,
       "requiredSkillLevel": "Beginner",
-      "minimumEducation": "HSC / Equivalent",
-      "recommendedAge": "16+ Years",
+      "createdAt": "2026-01-08T10:00:00.000Z",
+      "projectsCount": 15,
+      "status": "Active",
+      "scholarshipAvailable": true,
+      "curriculumHighlights": [
+        "Photoshop & Illustrator Mastery",
+        "AI Vector Art & Generative Fill",
+        "Freelance Portfolio (Behance, Dribbble)",
+        "Print & Press Ready Outputs"
+      ],
+      "code": "UITB-GD-202",
       "requiredSoftwareHardware": "Dedicated GPU 4GB+, 16GB RAM, Photoshop & Illustrator CC",
+      "durationUnit": "Months",
+      "shortName": "Graphic Design AI",
+      "totalClasses": 48,
+      "discount": 3500,
+      "category": "Graphic Design",
       "targetAudience": [
         "College Student",
         "University Student",
@@ -423,56 +406,51 @@
         "Freelancer",
         "Career Changer"
       ],
-      "learningFeatures": [
-        "Live Class",
-        "Offline Class",
-        "Recorded Class",
-        "PDF Materials",
-        "Assignment",
-        "Project",
-        "Final Exam",
-        "Certificate",
-        "Freelancing Practice",
-        "Real Project"
-      ],
+      "reviewsCount": 540,
+      "durationValue": 4,
+      "trainerId": "st-05",
+      "classDuration": "2 Hours",
+      "durationWeeks": 16,
+      "minInstallmentAmount": 4000,
+      "thumbnailUrl": "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&auto=format&fit=crop&q=80",
+      "offerFee": 12500,
+      "durationMonths": 4,
       "modules": [
         {
           "id": "mod-201",
-          "moduleNumber": 1,
+          "estimatedClasses": 14,
+          "learningOutcomes": [
+            "Create commercial advertisements and composite digital posters"
+          ],
           "moduleName": "Visual Design Theory & Adobe Photoshop Mastery",
-          "moduleDescription": "Color theory, composition, pen tool mastery, photo retouching, masking, and AI generative fill techniques.",
           "topics": [
             "Color Psychology & Typography",
             "Layers, Masks & Selection Tools",
             "High-End Portrait Retouching",
             "AI Generative Expand & Firefly Tools"
           ],
-          "estimatedClasses": 14,
-          "learningOutcomes": [
-            "Create commercial advertisements and composite digital posters"
-          ]
+          "moduleNumber": 1,
+          "moduleDescription": "Color theory, composition, pen tool mastery, photo retouching, masking, and AI generative fill techniques."
         },
         {
-          "id": "mod-202",
           "moduleNumber": 2,
-          "moduleName": "Adobe Illustrator & Corporate Vector Branding",
-          "moduleDescription": "Logo design, vector illustrations, brand identity guides, stationery, vector icons, and typography design.",
+          "estimatedClasses": 16,
+          "learningOutcomes": [
+            "Design international client identity kits and print-ready deliverables"
+          ],
           "topics": [
             "Vector Geometry & Shape Builder",
             "Logo Design Process & Golden Ratio",
             "Business Stationery & Brand Guidelines",
             "Packaging & Die-cut Printing Setup"
           ],
-          "estimatedClasses": 16,
-          "learningOutcomes": [
-            "Design international client identity kits and print-ready deliverables"
-          ]
+          "moduleDescription": "Logo design, vector illustrations, brand identity guides, stationery, vector icons, and typography design.",
+          "id": "mod-202",
+          "moduleName": "Adobe Illustrator & Corporate Vector Branding"
         },
         {
-          "id": "mod-203",
-          "moduleNumber": 3,
           "moduleName": "AI Generative Tools, Midjourney & Social Media Marketing",
-          "moduleDescription": "Prompt crafting in Midjourney v6, Leonardo.ai, social media carousel layouts, ad banners, and e-commerce product staging.",
+          "id": "mod-203",
           "topics": [
             "Midjourney Commercial Prompting",
             "Consistent Character & Product Rendering",
@@ -482,150 +460,42 @@
           "estimatedClasses": 10,
           "learningOutcomes": [
             "Boost creative throughput by 10x using generative AI workflows"
-          ]
+          ],
+          "moduleNumber": 3,
+          "moduleDescription": "Prompt crafting in Midjourney v6, Leonardo.ai, social media carousel layouts, ad banners, and e-commerce product staging."
         },
         {
-          "id": "mod-204",
-          "moduleNumber": 4,
+          "estimatedClasses": 8,
+          "learningOutcomes": [
+            "Complete 5 portfolio case studies and publish Fiverr gigs"
+          ],
           "moduleName": "Freelancing Platforms & Professional Portfolio",
           "moduleDescription": "Behance case study presentation, Dribbble account setup, Fiverr gig creation, Upwork proposals, and client communication.",
+          "id": "mod-204",
           "topics": [
             "Behance Multi-Page Case Studies",
             "Fiverr SEO & Gig Video Creation",
             "Upwork Bidding Strategy",
             "Direct Client Contracts & Invoicing"
           ],
-          "estimatedClasses": 8,
-          "learningOutcomes": [
-            "Complete 5 portfolio case studies and publish Fiverr gigs"
-          ]
+          "moduleNumber": 4
         }
       ],
-      "curriculumHighlights": [
-        "Photoshop & Illustrator Mastery",
-        "AI Vector Art & Generative Fill",
-        "Freelance Portfolio (Behance, Dribbble)",
-        "Print & Press Ready Outputs"
-      ],
+      "minimumEducation": "HSC / Equivalent",
+      "courseType": "Offline",
+      "duration": "4 Months",
+      "regularFee": 16000,
+      "totalHours": 96,
+      "badgeText": "UITB-GD-202",
+      "description": "Professional Adobe Photoshop, Illustrator, InDesign paired with AI generative tools (Midjourney, Firefly, Stable Diffusion) for branding, social media, and packaging.",
       "syllabusHighlights": [
         "Design Theory & Photoshop",
         "Vector & Logo Branding",
         "Generative AI Art",
         "Freelancing Masterclass"
       ],
-      "createdAt": "2026-01-08T10:00:00.000Z"
-    },
-    {
-      "id": "crs-03",
-      "code": "UITB-VE-109",
-      "name": "Professional Video Editing & Motion Graphics Course",
-      "shortName": "Video Editing & VFX",
-      "category": "Video & Audio",
-      "courseType": "Online",
-      "projectsCount": 10,
-      "studentsJoined": 450,
-      "rating": 4.9,
-      "reviewsCount": 431,
-      "badgeText": "UITB-VE-109",
-      "durationValue": 3.5,
-      "durationUnit": "Months",
-      "duration": "3.5 Months",
-      "durationMonths": 3.5,
-      "durationWeeks": 14,
-      "totalClasses": 24,
-      "classDuration": "2 Hours",
-      "totalHours": 48,
-      "regularFee": 22500,
-      "offerFee": 18000,
-      "discount": 4500,
-      "scholarshipAvailable": true,
-      "maxScholarship": 4500,
-      "minInstallmentAmount": 5000,
-      "description": "Adobe Premiere Pro, After Effects, DaVinci Resolve, sound mixing, Color Grading, YouTube Content Creation, and AI auto-captioning tools.",
-      "trainerId": "st-08",
-      "trainerIds": [
-        "st-08"
-      ],
-      "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&auto=format&fit=crop&q=80",
-      "requiredSkillLevel": "Beginner",
-      "minimumEducation": "HSC / Equivalent",
-      "recommendedAge": "16+ Years",
-      "requiredSoftwareHardware": "Core i7 / Ryzen 7, 16GB RAM, RTX 3060 or higher GPU",
-      "targetAudience": [
-        "University Student",
-        "Job Seeker",
-        "Freelancer",
-        "Career Changer"
-      ],
-      "learningFeatures": [
-        "Live Class",
-        "Offline Class",
-        "Recorded Class",
-        "Assignment",
-        "Project",
-        "Final Exam",
-        "Certificate",
-        "Real Project"
-      ],
-      "curriculumHighlights": [
-        "Multi-cam Editing & Narrative Pacing",
-        "After Effects VFX & Motion Graphics",
-        "Audio Restoration & Sound Design",
-        "YouTube & Reels Virality Strategies"
-      ],
-      "syllabusHighlights": [
-        "Premiere Pro Narrative",
-        "After Effects Motion Graphics",
-        "Color Grading in DaVinci",
-        "Commercial Client Deliverables"
-      ],
-      "createdAt": "2026-01-12T10:00:00.000Z"
-    },
-    {
-      "id": "crs-04",
-      "code": "NCA-DMA-05",
-      "name": "Digital Marketing, Meta Ads & AI Growth Strategies",
-      "shortName": "Digital Marketing AI",
-      "category": "Digital Marketing",
-      "courseType": "Online",
-      "projectsCount": 12,
-      "studentsJoined": 390,
-      "rating": 4.8,
-      "reviewsCount": 295,
-      "badgeText": "NCA-DMA-05",
-      "durationValue": 3.5,
-      "durationUnit": "Months",
-      "duration": "3.5 Months",
-      "durationMonths": 3.5,
-      "durationWeeks": 14,
-      "totalClasses": 42,
-      "classDuration": "2 Hours",
-      "totalHours": 84,
-      "regularFee": 15000,
-      "offerFee": 11500,
-      "discount": 3500,
-      "scholarshipAvailable": true,
-      "maxScholarship": 3000,
-      "minInstallmentAmount": 4000,
-      "description": "Facebook & Instagram Meta Ads, Google Ads (SEM), SEO, Content Strategy, AI Copywriting, Sales Funnels, and International Dropshipping marketing.",
-      "trainerId": "st-07",
-      "trainerIds": [
-        "st-07"
-      ],
-      "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop&q=80",
-      "requiredSkillLevel": "No Prior Knowledge",
-      "minimumEducation": "HSC / Graduation",
-      "recommendedAge": "18+ Years",
-      "requiredSoftwareHardware": "Computer with broadband internet & credit/prepaid card for live ad run",
-      "targetAudience": [
-        "University Student",
-        "Job Seeker",
-        "Job Holder",
-        "Business Owner",
-        "Freelancer"
-      ],
+      "name": "Professional Graphic Design with AI & Branding",
+      "studentsJoined": 620,
       "learningFeatures": [
         "Live Class",
         "Offline Class",
@@ -638,65 +508,25 @@
         "Freelancing Practice",
         "Real Project"
       ],
-      "curriculumHighlights": [
-        "Meta Pixel & CAPI Tracking",
-        "Google Search & YouTube Ads",
-        "AI SEO & Organic Keyword Research",
-        "Fiverr & Upwork Freelancing Blueprint"
+      "id": "crs-02",
+      "recommendedAge": "16+ Years",
+      "trainerIds": [
+        "st-05"
       ],
-      "syllabusHighlights": [
-        "Meta Ads Funnels",
-        "Google Search Ads & Analytics",
-        "Technical & AI SEO",
-        "E-Commerce Growth Hacking"
-      ],
-      "createdAt": "2026-01-15T10:00:00.000Z"
+      "maxScholarship": 3000
     },
     {
-      "id": "crs-05",
-      "code": "NCA-UIX-06",
-      "name": "UI/UX Design Masterclass with Figma & Design Systems",
-      "shortName": "UI/UX Design",
-      "category": "UI/UX Design",
-      "courseType": "Online",
-      "projectsCount": 14,
-      "studentsJoined": 510,
-      "rating": 4.9,
-      "reviewsCount": 410,
-      "badgeText": "NCA-UIX-06",
-      "durationValue": 4,
-      "durationUnit": "Months",
-      "duration": "4 Months",
-      "durationMonths": 4,
-      "durationWeeks": 16,
-      "totalClasses": 48,
-      "classDuration": "2 Hours",
-      "totalHours": 96,
-      "regularFee": 18000,
-      "offerFee": 13500,
-      "discount": 4500,
-      "scholarshipAvailable": true,
-      "maxScholarship": 4000,
-      "minInstallmentAmount": 4500,
-      "description": "Figma wireframing, interactive prototyping, user research, responsive design systems, micro-interactions, and AI design assistants.",
-      "trainerId": "st-05",
+      "shortName": "Video Editing & VFX",
       "trainerIds": [
-        "st-05",
-        "st-06"
+        "st-08"
       ],
-      "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&auto=format&fit=crop&q=80",
+      "minInstallmentAmount": 5000,
+      "thumbnailUrl": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&auto=format&fit=crop&q=80",
+      "minimumEducation": "HSC / Equivalent",
+      "createdAt": "2026-01-12T10:00:00.000Z",
       "requiredSkillLevel": "Beginner",
-      "minimumEducation": "HSC / Diploma / Graduate",
-      "recommendedAge": "17+ Years",
-      "requiredSoftwareHardware": "Laptop or Desktop with modern browser & Figma desktop client",
-      "targetAudience": [
-        "University Student",
-        "Job Seeker",
-        "Freelancer",
-        "Career Changer",
-        "Professional"
-      ],
+      "reviewsCount": 431,
+      "duration": "3.5 Months",
       "learningFeatures": [
         "Live Class",
         "Offline Class",
@@ -707,64 +537,219 @@
         "Certificate",
         "Real Project"
       ],
+      "totalClasses": 24,
+      "name": "Professional Video Editing & Motion Graphics Course",
+      "id": "crs-03",
+      "durationUnit": "Months",
+      "regularFee": 22500,
+      "totalHours": 48,
+      "requiredSoftwareHardware": "Core i7 / Ryzen 7, 16GB RAM, RTX 3060 or higher GPU",
+      "trainerId": "st-08",
+      "courseType": "Online",
+      "scholarshipAvailable": true,
       "curriculumHighlights": [
-        "Design Thinking & User Journeys",
-        "Figma Auto-Layout & Design Systems",
-        "Mobile App & SaaS UI Projects",
-        "Client Presentation & Hand-off"
+        "Multi-cam Editing & Narrative Pacing",
+        "After Effects VFX & Motion Graphics",
+        "Audio Restoration & Sound Design",
+        "YouTube & Reels Virality Strategies"
       ],
+      "targetAudience": [
+        "University Student",
+        "Job Seeker",
+        "Freelancer",
+        "Career Changer"
+      ],
+      "syllabusHighlights": [
+        "Premiere Pro Narrative",
+        "After Effects Motion Graphics",
+        "Color Grading in DaVinci",
+        "Commercial Client Deliverables"
+      ],
+      "durationWeeks": 14,
+      "classDuration": "2 Hours",
+      "badgeText": "UITB-VE-109",
+      "description": "Adobe Premiere Pro, After Effects, DaVinci Resolve, sound mixing, Color Grading, YouTube Content Creation, and AI auto-captioning tools.",
+      "durationValue": 3.5,
+      "category": "Video & Audio",
+      "discount": 4500,
+      "durationMonths": 3.5,
+      "code": "UITB-VE-109",
+      "maxScholarship": 4500,
+      "projectsCount": 10,
+      "recommendedAge": "16+ Years",
+      "status": "Active",
+      "offerFee": 18000,
+      "studentsJoined": 450,
+      "rating": 4.9
+    },
+    {
+      "durationMonths": 3.5,
+      "durationUnit": "Months",
+      "totalClasses": 42,
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "syllabusHighlights": [
+        "Meta Ads Funnels",
+        "Google Search Ads & Analytics",
+        "Technical & AI SEO",
+        "E-Commerce Growth Hacking"
+      ],
+      "name": "Digital Marketing, Meta Ads & AI Growth Strategies",
+      "trainerIds": [
+        "st-07"
+      ],
+      "classDuration": "2 Hours",
+      "durationWeeks": 14,
+      "shortName": "Digital Marketing AI",
+      "durationValue": 3.5,
+      "trainerId": "st-07",
+      "totalHours": 84,
+      "regularFee": 15000,
+      "thumbnailUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&auto=format&fit=crop&q=80",
+      "studentsJoined": 390,
+      "requiredSoftwareHardware": "Computer with broadband internet & credit/prepaid card for live ad run",
+      "projectsCount": 12,
+      "reviewsCount": 295,
+      "duration": "3.5 Months",
+      "id": "crs-04",
+      "recommendedAge": "18+ Years",
+      "courseType": "Online",
+      "maxScholarship": 3000,
+      "minInstallmentAmount": 4000,
+      "code": "NCA-DMA-05",
+      "description": "Facebook & Instagram Meta Ads, Google Ads (SEM), SEO, Content Strategy, AI Copywriting, Sales Funnels, and International Dropshipping marketing.",
+      "requiredSkillLevel": "No Prior Knowledge",
+      "status": "Active",
+      "learningFeatures": [
+        "Live Class",
+        "Offline Class",
+        "Recorded Class",
+        "PDF Materials",
+        "Assignment",
+        "Project",
+        "Final Exam",
+        "Certificate",
+        "Freelancing Practice",
+        "Real Project"
+      ],
+      "badgeText": "NCA-DMA-05",
+      "rating": 4.8,
+      "offerFee": 11500,
+      "targetAudience": [
+        "University Student",
+        "Job Seeker",
+        "Job Holder",
+        "Business Owner",
+        "Freelancer"
+      ],
+      "discount": 3500,
+      "minimumEducation": "HSC / Graduation",
+      "scholarshipAvailable": true,
+      "curriculumHighlights": [
+        "Meta Pixel & CAPI Tracking",
+        "Google Search & YouTube Ads",
+        "AI SEO & Organic Keyword Research",
+        "Fiverr & Upwork Freelancing Blueprint"
+      ],
+      "category": "Digital Marketing"
+    },
+    {
+      "discount": 4500,
+      "id": "crs-05",
+      "category": "UI/UX Design",
+      "description": "Figma wireframing, interactive prototyping, user research, responsive design systems, micro-interactions, and AI design assistants.",
+      "code": "NCA-UIX-06",
+      "requiredSoftwareHardware": "Laptop or Desktop with modern browser & Figma desktop client",
+      "offerFee": 13500,
+      "badgeText": "NCA-UIX-06",
+      "targetAudience": [
+        "University Student",
+        "Job Seeker",
+        "Freelancer",
+        "Career Changer",
+        "Professional"
+      ],
+      "requiredSkillLevel": "Beginner",
+      "minimumEducation": "HSC / Diploma / Graduate",
+      "reviewsCount": 410,
+      "minInstallmentAmount": 4500,
+      "duration": "4 Months",
+      "durationMonths": 4,
+      "status": "Active",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=600&auto=format&fit=crop&q=80",
+      "durationValue": 4,
+      "trainerIds": [
+        "st-05",
+        "st-06"
+      ],
+      "name": "UI/UX Design Masterclass with Figma & Design Systems",
+      "rating": 4.9,
+      "durationWeeks": 16,
+      "classDuration": "2 Hours",
+      "trainerId": "st-05",
       "syllabusHighlights": [
         "UX Research & Wireframing",
         "Figma Advanced Components",
         "Interactive Prototyping",
         "Product Case Study Building"
       ],
+      "recommendedAge": "17+ Years",
+      "courseType": "Online",
+      "learningFeatures": [
+        "Live Class",
+        "Offline Class",
+        "Recorded Class",
+        "Assignment",
+        "Project",
+        "Final Exam",
+        "Certificate",
+        "Real Project"
+      ],
+      "maxScholarship": 4000,
+      "shortName": "UI/UX Design",
+      "totalClasses": 48,
+      "regularFee": 18000,
+      "totalHours": 96,
+      "durationUnit": "Months",
+      "scholarshipAvailable": true,
+      "curriculumHighlights": [
+        "Design Thinking & User Journeys",
+        "Figma Auto-Layout & Design Systems",
+        "Mobile App & SaaS UI Projects",
+        "Client Presentation & Hand-off"
+      ],
+      "projectsCount": 14,
+      "studentsJoined": 510,
       "createdAt": "2026-01-20T10:00:00.000Z"
     },
     {
-      "id": "crs-06",
-      "code": "NCA-WDD-07",
-      "name": "Full-Stack Web Design & Development (MERN & Next.js)",
-      "shortName": "MERN FullStack Web",
-      "category": "Web & Development",
       "courseType": "Offline",
-      "projectsCount": 18,
+      "thumbnailUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&auto=format&fit=crop&q=80",
+      "requiredSkillLevel": "No Prior Knowledge",
       "studentsJoined": 580,
-      "rating": 4.9,
-      "reviewsCount": 460,
-      "badgeText": "NCA-WDD-07",
-      "durationValue": 6,
-      "durationUnit": "Months",
-      "duration": "6 Months",
-      "durationMonths": 6,
-      "durationWeeks": 24,
-      "totalClasses": 72,
-      "classDuration": "2 Hours",
-      "totalHours": 144,
-      "regularFee": 24000,
-      "offerFee": 18500,
-      "discount": 5500,
-      "scholarshipAvailable": true,
-      "maxScholarship": 5000,
+      "recommendedAge": "17+ Years",
+      "minimumEducation": "HSC / Diploma / Graduate",
       "minInstallmentAmount": 5000,
-      "description": "HTML5, CSS3, Tailwind CSS, JavaScript ES6+, React, Node.js, Express, MongoDB, Git/GitHub, and full real-world SaaS project building.",
-      "trainerId": "st-06",
+      "requiredSoftwareHardware": "Laptop with Core i5/Ryzen 5, 8GB+ RAM, VS Code, Node.js",
+      "reviewsCount": 460,
+      "regularFee": 24000,
+      "totalHours": 144,
+      "maxScholarship": 5000,
+      "totalClasses": 72,
+      "duration": "6 Months",
+      "durationUnit": "Months",
+      "durationMonths": 6,
+      "curriculumHighlights": [
+        "Responsive Frontend with React & Tailwind",
+        "REST APIs & Node.js Backend",
+        "Database Architecture & Security",
+        "Deploying to Cloud Servers"
+      ],
+      "scholarshipAvailable": true,
+      "badgeText": "NCA-WDD-07",
       "trainerIds": [
         "st-06"
       ],
-      "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&auto=format&fit=crop&q=80",
-      "requiredSkillLevel": "No Prior Knowledge",
-      "minimumEducation": "HSC / Diploma / Graduate",
-      "recommendedAge": "17+ Years",
-      "requiredSoftwareHardware": "Laptop with Core i5/Ryzen 5, 8GB+ RAM, VS Code, Node.js",
-      "targetAudience": [
-        "University Student",
-        "Job Seeker",
-        "Career Changer",
-        "Beginner",
-        "Professional"
-      ],
+      "code": "NCA-WDD-07",
       "learningFeatures": [
         "Live Class",
         "Offline Class",
@@ -777,57 +762,36 @@
         "Certificate",
         "Real Project"
       ],
-      "curriculumHighlights": [
-        "Responsive Frontend with React & Tailwind",
-        "REST APIs & Node.js Backend",
-        "Database Architecture & Security",
-        "Deploying to Cloud Servers"
+      "id": "crs-06",
+      "targetAudience": [
+        "University Student",
+        "Job Seeker",
+        "Career Changer",
+        "Beginner",
+        "Professional"
       ],
+      "projectsCount": 18,
+      "offerFee": 18500,
       "syllabusHighlights": [
         "HTML, Tailwind & JS ES6+",
         "React Hooks & State",
         "Node/Express & MongoDB",
         "Full-Stack Capstone Project"
       ],
+      "rating": 4.9,
+      "description": "HTML5, CSS3, Tailwind CSS, JavaScript ES6+, React, Node.js, Express, MongoDB, Git/GitHub, and full real-world SaaS project building.",
+      "status": "Active",
+      "trainerId": "st-06",
+      "discount": 5500,
+      "durationValue": 6,
+      "durationWeeks": 24,
+      "classDuration": "2 Hours",
+      "category": "Web & Development",
+      "shortName": "MERN FullStack Web",
+      "name": "Full-Stack Web Design & Development (MERN & Next.js)",
       "createdAt": "2026-01-22T10:00:00.000Z"
     },
     {
-      "id": "crs-07",
-      "code": "NCA-AIP-08",
-      "name": "Artificial Intelligence (AI) & Productivity Automations",
-      "shortName": "AI Executive Pro",
-      "category": "AI & Productivity",
-      "courseType": "Pre Recorded",
-      "projectsCount": 8,
-      "studentsJoined": 850,
-      "rating": 4.9,
-      "reviewsCount": 620,
-      "badgeText": "NCA-AIP-08",
-      "durationValue": 2,
-      "durationUnit": "Months",
-      "duration": "2 Months",
-      "durationMonths": 2,
-      "durationWeeks": 8,
-      "totalClasses": 24,
-      "classDuration": "1.5 Hours",
-      "totalHours": 36,
-      "regularFee": 10000,
-      "offerFee": 6500,
-      "discount": 3500,
-      "scholarshipAvailable": false,
-      "minInstallmentAmount": 3500,
-      "description": "Fast-track practical masterclass on ChatGPT, Claude, Gemini, Make.com automations, Notion AI, AI presentation builders, and workflow automation.",
-      "trainerId": "st-07",
-      "trainerIds": [
-        "st-07",
-        "st-06"
-      ],
-      "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&auto=format&fit=crop&q=80",
-      "requiredSkillLevel": "No Prior Knowledge",
-      "minimumEducation": "Any",
-      "recommendedAge": "16+ Years",
-      "requiredSoftwareHardware": "Laptop/Desktop with internet browser",
       "targetAudience": [
         "Business Owner",
         "Job Holder",
@@ -835,6 +799,23 @@
         "Professional",
         "Beginner"
       ],
+      "courseType": "Pre Recorded",
+      "totalHours": 36,
+      "regularFee": 10000,
+      "duration": "2 Months",
+      "requiredSkillLevel": "No Prior Knowledge",
+      "name": "Artificial Intelligence (AI) & Productivity Automations",
+      "badgeText": "NCA-AIP-08",
+      "trainerIds": [
+        "st-07",
+        "st-06"
+      ],
+      "trainerId": "st-07",
+      "durationValue": 2,
+      "studentsJoined": 850,
+      "description": "Fast-track practical masterclass on ChatGPT, Claude, Gemini, Make.com automations, Notion AI, AI presentation builders, and workflow automation.",
+      "durationWeeks": 8,
+      "classDuration": "1.5 Hours",
       "learningFeatures": [
         "Live Class",
         "Offline Class",
@@ -844,60 +825,60 @@
         "Project",
         "Certificate"
       ],
+      "category": "AI & Productivity",
+      "discount": 3500,
+      "recommendedAge": "16+ Years",
+      "durationUnit": "Months",
+      "minInstallmentAmount": 3500,
+      "totalClasses": 24,
+      "requiredSoftwareHardware": "Laptop/Desktop with internet browser",
+      "createdAt": "2026-01-25T10:00:00.000Z",
+      "scholarshipAvailable": false,
       "curriculumHighlights": [
         "Prompt Engineering Masterclass",
         "Automated Office Workflows (Make/Zapier)",
         "AI for Data Analysis & Spreadsheets",
         "AI for Video & Image Generation"
       ],
+      "code": "NCA-AIP-08",
+      "reviewsCount": 620,
+      "durationMonths": 2,
+      "projectsCount": 8,
+      "shortName": "AI Executive Pro",
+      "id": "crs-07",
+      "offerFee": 6500,
+      "rating": 4.9,
+      "minimumEducation": "Any",
       "syllabusHighlights": [
         "LLM Prompt Engineering",
         "No-Code AI Automation",
         "AI for Media & Presentations",
         "Executive Workflow Project"
       ],
-      "createdAt": "2026-01-25T10:00:00.000Z"
+      "status": "Active",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&auto=format&fit=crop&q=80"
     },
     {
-      "id": "crs-08",
-      "code": "NCA-CAD-108",
-      "name": "AutoCAD 2D & 3D Architectural Design & Drafting",
-      "shortName": "AutoCAD 2D/3D",
-      "category": "Other",
-      "courseType": "Offline",
-      "projectsCount": 12,
-      "studentsJoined": 340,
-      "rating": 4.8,
       "reviewsCount": 220,
-      "badgeText": "NCA-CAD-108",
-      "durationValue": 3,
-      "durationUnit": "Months",
-      "duration": "3 Months",
-      "durationMonths": 3,
-      "durationWeeks": 12,
-      "totalClasses": 36,
-      "classDuration": "2 Hours",
-      "totalHours": 72,
-      "regularFee": 15000,
-      "offerFee": 11000,
-      "discount": 4000,
-      "scholarshipAvailable": true,
-      "maxScholarship": 3000,
-      "minInstallmentAmount": 4000,
-      "description": "Master civil, electrical, and architectural drafting, floor plans, 3D elevations, rendering, and Rajuk approval sheet standard drawings.",
-      "trainerId": "st-05",
-      "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&auto=format&fit=crop&q=80",
-      "requiredSkillLevel": "Beginner",
-      "minimumEducation": "SSC / Diploma / B.Sc",
-      "recommendedAge": "16+ Years",
-      "requiredSoftwareHardware": "Core i5 Workstation with AutoCAD installed",
-      "targetAudience": [
-        "Diploma Engineer",
-        "Civil Student",
-        "Architect",
-        "Job Seeker"
+      "curriculumHighlights": [
+        "2D Floor Plans & Sections",
+        "3D Modeling & Materials",
+        "Structural Drafting Standards",
+        "Print Layout & Scale Setup"
       ],
+      "scholarshipAvailable": true,
+      "syllabusHighlights": [
+        "AutoCAD 2D Drafting",
+        "3D Elevation & Modeling",
+        "Rajuk Sheet Guidelines",
+        "Commercial Project Submission"
+      ],
+      "trainerId": "st-05",
+      "rating": 4.8,
+      "duration": "3 Months",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&auto=format&fit=crop&q=80",
+      "status": "Active",
+      "name": "AutoCAD 2D & 3D Architectural Design & Drafting",
       "learningFeatures": [
         "Live Class",
         "Offline Class",
@@ -905,59 +886,62 @@
         "Project",
         "Certificate"
       ],
-      "curriculumHighlights": [
-        "2D Floor Plans & Sections",
-        "3D Modeling & Materials",
-        "Structural Drafting Standards",
-        "Print Layout & Scale Setup"
+      "createdAt": "2026-01-28T10:00:00.000Z",
+      "id": "crs-08",
+      "courseType": "Offline",
+      "durationUnit": "Months",
+      "minimumEducation": "SSC / Diploma / B.Sc",
+      "targetAudience": [
+        "Diploma Engineer",
+        "Civil Student",
+        "Architect",
+        "Job Seeker"
       ],
-      "syllabusHighlights": [
-        "AutoCAD 2D Drafting",
-        "3D Elevation & Modeling",
-        "Rajuk Sheet Guidelines",
-        "Commercial Project Submission"
-      ],
-      "createdAt": "2026-01-28T10:00:00.000Z"
+      "regularFee": 15000,
+      "totalHours": 72,
+      "totalClasses": 36,
+      "shortName": "AutoCAD 2D/3D",
+      "minInstallmentAmount": 4000,
+      "discount": 4000,
+      "code": "NCA-CAD-108",
+      "classDuration": "2 Hours",
+      "durationWeeks": 12,
+      "durationMonths": 3,
+      "category": "Other",
+      "durationValue": 3,
+      "requiredSkillLevel": "Beginner",
+      "recommendedAge": "16+ Years",
+      "maxScholarship": 3000,
+      "projectsCount": 12,
+      "description": "Master civil, electrical, and architectural drafting, floor plans, 3D elevations, rendering, and Rajuk approval sheet standard drawings.",
+      "badgeText": "NCA-CAD-108",
+      "studentsJoined": 340,
+      "offerFee": 11000,
+      "requiredSoftwareHardware": "Core i5 Workstation with AutoCAD installed"
     },
     {
-      "id": "crs-09",
-      "code": "NCA-FL-209",
-      "name": "Freelancing & Outsourcing Masterclass with Lead Generation",
-      "shortName": "Freelancing Pro",
-      "category": "Freelancing",
-      "courseType": "Pre Recorded",
+      "durationMonths": 2,
+      "offerFee": 4500,
       "projectsCount": 10,
-      "studentsJoined": 1250,
-      "rating": 4.9,
       "reviewsCount": 910,
       "badgeText": "NCA-FL-209",
-      "durationValue": 2,
-      "durationUnit": "Months",
-      "duration": "2 Months",
-      "durationMonths": 2,
-      "durationWeeks": 8,
-      "totalClasses": 20,
-      "classDuration": "1.5 Hours",
-      "totalHours": 30,
-      "regularFee": 8500,
-      "offerFee": 4500,
-      "discount": 4000,
-      "scholarshipAvailable": false,
-      "minInstallmentAmount": 2500,
       "description": "Self-paced complete guide to Fiverr gig ranking, Upwork proposal writing, B2B lead generation with LinkedIn Sales Navigator, and international client invoicing.",
-      "trainerId": "st-07",
-      "status": "Active",
-      "thumbnailUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80",
-      "requiredSkillLevel": "No Prior Knowledge",
       "minimumEducation": "Any",
-      "recommendedAge": "16+ Years",
-      "requiredSoftwareHardware": "Laptop/Desktop with internet",
-      "targetAudience": [
-        "Student",
-        "Job Seeker",
-        "Housewife",
-        "Freelancer"
+      "name": "Freelancing & Outsourcing Masterclass with Lead Generation",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80",
+      "classDuration": "1.5 Hours",
+      "durationWeeks": 8,
+      "category": "Freelancing",
+      "syllabusHighlights": [
+        "Marketplace Account Setup",
+        "Gig SEO & Keyword Optimization",
+        "Client Communication & Negotiation",
+        "Payment Withdrawal (Payoneer/Bank)"
       ],
+      "durationValue": 2,
+      "discount": 4000,
+      "studentsJoined": 1250,
+      "recommendedAge": "16+ Years",
       "learningFeatures": [
         "Recorded Class",
         "PDF Materials",
@@ -965,20 +949,1089 @@
         "Certificate",
         "Freelancing Practice"
       ],
+      "durationUnit": "Months",
+      "totalClasses": 20,
+      "minInstallmentAmount": 2500,
+      "regularFee": 8500,
+      "totalHours": 30,
+      "shortName": "Freelancing Pro",
+      "code": "NCA-FL-209",
+      "courseType": "Pre Recorded",
+      "createdAt": "2026-01-30T10:00:00.000Z",
+      "requiredSoftwareHardware": "Laptop/Desktop with internet",
+      "targetAudience": [
+        "Student",
+        "Job Seeker",
+        "Housewife",
+        "Freelancer"
+      ],
+      "duration": "2 Months",
+      "id": "crs-09",
+      "rating": 4.9,
       "curriculumHighlights": [
         "Fiverr Algorithm Mastery",
         "Upwork High-Converting Proposals",
         "B2B Lead Generation (Apollo/LinkedIn)",
         "Direct Client Payment Setup"
       ],
-      "syllabusHighlights": [
-        "Marketplace Account Setup",
-        "Gig SEO & Keyword Optimization",
-        "Client Communication & Negotiation",
-        "Payment Withdrawal (Payoneer/Bank)"
-      ],
-      "createdAt": "2026-01-30T10:00:00.000Z"
+      "scholarshipAvailable": false,
+      "status": "Active",
+      "trainerId": "st-07",
+      "requiredSkillLevel": "No Prior Knowledge"
     }
   ],
-  "updatedAt": "2026-09-02T02:43:07.157Z"
+  "updatedAt": "2026-09-06T08:53:42.022Z",
+  "categories": [
+    "Computer & Office",
+    "Graphic Design",
+    "Video & Audio",
+    "Digital Marketing",
+    "Web & Development",
+    "UI/UX Design",
+    "AI & Productivity",
+    "Freelancing",
+    "Language",
+    "Other"
+  ],
+  "seminars": [
+    {
+      "id": "sem-01",
+      "title": "Future of AI in Web Development & Freelancing 2026",
+      "topic": "How to build SaaS & Full-Stack Apps 5x Faster using AI & Next.js",
+      "courseId": "crs-02",
+      "category": "Web Development",
+      "speakerName": "Prodip Chowdhury",
+      "speakerDesignation": "Managing Director & Lead Technology Specialist",
+      "date": "2026-08-22",
+      "time": "4:00 PM - 6:00 PM",
+      "type": "Free Career Seminar",
+      "roomOrPlatform": "Nexgen Main Auditorium / Lab-1",
+      "capacity": 60,
+      "registeredLeads": [
+        "ld-01",
+        "ld-03",
+        "ld-04"
+      ],
+      "registeredCount": 48,
+      "attendedCount": 0,
+      "convertedAdmissionsCount": 0,
+      "bannerUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600",
+      "description": "A 2-hour free interactive session for students and beginners to explore modern career roadmaps in MERN stack, AI prompting, and direct client acquisition.",
+      "status": "Upcoming"
+    },
+    {
+      "id": "sem-02",
+      "title": "UI/UX Design Masterclass: From Wireframe to High-Fidelity Prototype",
+      "topic": "Figma Auto-layout, Design Systems & Real Client Case Studies",
+      "courseId": "crs-01",
+      "category": "Graphic & UI/UX Design",
+      "speakerName": "Kamrul Hasan",
+      "speakerDesignation": "Senior UI/UX Specialist & Design Mentor",
+      "date": "2026-08-29",
+      "time": "3:30 PM - 5:30 PM",
+      "type": "Live Masterclass Workshop",
+      "roomOrPlatform": "Nexgen Computer Lab-2",
+      "capacity": 35,
+      "registeredLeads": [
+        "ld-02",
+        "ld-05"
+      ],
+      "registeredCount": 29,
+      "attendedCount": 0,
+      "convertedAdmissionsCount": 0,
+      "bannerUrl": "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600",
+      "description": "Hands-on practical workshop where attendees will build a complete mobile app prototype and receive a participation certificate.",
+      "status": "Upcoming"
+    },
+    {
+      "id": "sem-03",
+      "title": "Meta Ads & E-Commerce Sales Scaling Bootcamp",
+      "topic": "Budget Optimization, High ROAS Funnels & Brand Growth",
+      "courseId": "crs-04",
+      "category": "Digital Marketing",
+      "speakerName": "Nusrat Jahan",
+      "speakerDesignation": "Senior Digital Marketing Strategist",
+      "date": "2026-08-10",
+      "time": "5:00 PM - 7:00 PM",
+      "type": "Hands-on Bootcamp",
+      "roomOrPlatform": "Conference Hall A",
+      "capacity": 50,
+      "registeredLeads": [
+        "ld-03"
+      ],
+      "registeredCount": 52,
+      "attendedCount": 44,
+      "convertedAdmissionsCount": 14,
+      "bannerUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600",
+      "description": "Intensive workshop that generated 14 immediate spot admissions for Digital Marketing Batch DM-008.",
+      "status": "Completed"
+    }
+  ],
+  "publicCertificates": [
+    {
+      "id": "crt-1786995555179",
+      "certificateNumber": "NCA-CERT-2026-5172",
+      "certificateCode": "NCA-CERT-2026-5172",
+      "studentId": "stu-01",
+      "studentName": "Verified Student",
+      "courseName": "Computer Office Application with AI",
+      "batchName": "GD-006",
+      "issueDate": "2026-08-17",
+      "completionDate": "2026-08-17",
+      "grade": "A+",
+      "status": "Issued",
+      "instructorSignatureName": "Rashedul Karim (Lead Trainer)",
+      "isManualUpload": false
+    },
+    {
+      "id": "crt-01",
+      "certificateNumber": "NCA-CERT-2026-8941",
+      "certificateCode": "NCA-CERT-2026-8941",
+      "studentId": "stu-06",
+      "studentName": "Verified Student",
+      "courseName": "Professional Graphic Design with AI & Branding",
+      "batchName": "GD-005",
+      "issueDate": "2026-06-05",
+      "completionDate": "2026-06-01",
+      "grade": "A+ with Distinction",
+      "status": "Issued",
+      "instructorSignatureName": "Rashedul Karim (Lead Trainer)",
+      "isManualUpload": false
+    }
+  ],
+  "websiteCmsConfig": {
+    "heroHeadline": "Build Your Tech Career with Hands-on Industry Training",
+    "heroSubtitle": "Master in-demand IT skills from top industry practitioners. 100% practical lab sessions, live freelance mentorship & verified corporate job placement assistance in Dhaka.",
+    "heroBadgeText": "Govt. Recognized IT Training Institute • Dhaka, Bangladesh",
+    "heroCtaText": "Explore Courses & Get Free Counseling",
+    "heroStats": {
+      "totalTrained": "8,500+",
+      "successRate": "96.4%",
+      "expertTrainers": "28+",
+      "jobPlacementRatio": "89.2%"
+    },
+    "topNoticeTicker": "⚡ New Admission Open: Special 40% Scholarship Discount on Web Development, Graphics Design, Python AI & Cyber Security batches! Limited Seats!",
+    "heroSlides": [
+      {
+        "id": "slide-1",
+        "title": "Build Your Tech Career with Hands-on Industry Training",
+        "subtitle": "Master in-demand IT skills from top industry practitioners. 100% practical lab sessions, live freelance mentorship & verified corporate job placement assistance in Dhaka.",
+        "badgeText": "Govt. Recognized IT Training Institute • Dhaka, Bangladesh",
+        "ctaText": "Explore Courses & Get Free Counseling",
+        "ctaLink": "#courses",
+        "secondaryCtaText": "Free Career Counseling",
+        "secondaryCtaLink": "#seminars",
+        "imageUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1280&q=80",
+        "overlayGradient": "from-slate-950/90 via-slate-900/80 to-slate-950/90",
+        "isActive": true
+      },
+      {
+        "id": "slide-2",
+        "title": "Master Full Stack Web & Software Engineering",
+        "subtitle": "Learn React, Node.js, Express, MongoDB, Next.js, and TypeScript with real-world industry project architecture and portfolio deployment.",
+        "badgeText": "MERN & Full-Stack Career Track • Batch 2026",
+        "ctaText": "View Course Syllabus",
+        "ctaLink": "#courses",
+        "secondaryCtaText": "Upcoming Lab Batches",
+        "secondaryCtaLink": "#batches",
+        "imageUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1280&q=80",
+        "overlayGradient": "from-indigo-950/90 via-slate-900/85 to-slate-950/90",
+        "isActive": true
+      },
+      {
+        "id": "slide-3",
+        "title": "Creative UI/UX, Graphic Design & Freelance Mastery",
+        "subtitle": "Build an international Behance & Dribbble portfolio. Master Figma, Adobe Photoshop, Illustrator, and Upwork/Fiverr client acquisition secrets.",
+        "badgeText": "Creative Design & Freelancing Cell • 100% Mentorship",
+        "ctaText": "Join Next Free Masterclass",
+        "ctaLink": "#seminars",
+        "secondaryCtaText": "Enroll with 40% Scholarship",
+        "secondaryCtaLink": "#admission",
+        "imageUrl": "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=1280&q=80",
+        "overlayGradient": "from-purple-950/90 via-slate-900/85 to-slate-950/90",
+        "isActive": true
+      }
+    ],
+    "promoBanner": {
+      "enabled": true,
+      "title": "Up to 45% Early Bird Discount!",
+      "description": "Enroll in upcoming weekend or evening batches and get lifetime lab access with certified career placement.",
+      "discountCode": "NEXGEN2026",
+      "expiresAt": "2026-09-30"
+    },
+    "studentPortal": {
+      "isPortalEnabled": true,
+      "allowSelfRegistration": true,
+      "allowOnlineFeePayment": true,
+      "allowIdCardDownload": true,
+      "allowCertificateDownload": true,
+      "allowClassRecordingAccess": true,
+      "portalNotice": "Welcome to Nexgen Student Portal! Mid-term practical lab evaluations for all 2026 batches will commence from next week.",
+      "portalNoticeUrgent": false
+    },
+    "notificationTemplates": [
+      {
+        "id": "tpl-1",
+        "type": "ADMISSION_WELCOME",
+        "title": "Admission Welcome & Student ID SMS/WhatsApp",
+        "smsBody": "Dear {student_name}, Congratulations! Your admission for {course_name} at {institute_name} is confirmed. Student ID: {student_id}, Batch: {batch_number}. Portal: {portal_url}. Helpline: {helpline}.",
+        "whatsappBody": "🎉 *Congratulations {student_name}!* Welcome to *{institute_name}*!\n\nYour admission is confirmed for *{course_name}*.\n\n📌 *Student ID:* {student_id}\n📌 *Batch:* {batch_number}\n📌 *Learning Mode:* Practical Lab & Online\n📌 *Helpline:* {helpline}\n\n📲 Access your student portal for class schedules, digital ID card & receipts: {portal_url}\n\n_We look forward to accelerating your tech career!_",
+        "variables": [
+          "student_name",
+          "student_id",
+          "course_name",
+          "batch_number",
+          "institute_name",
+          "helpline",
+          "portal_url"
+        ],
+        "isActive": true
+      },
+      {
+        "id": "tpl-2",
+        "type": "PAYMENT_RECEIPT",
+        "title": "Money Receipt & Payment Confirmation",
+        "smsBody": "Dear {student_name}, Received BDT {paid_amount} for {course_name}. Receipt No: {receipt_no}. Outstanding Due: BDT {due_amount}. Thank you, {institute_name}. Helpline: {helpline}.",
+        "whatsappBody": "🧾 *Official Payment Receipt - {institute_name}*\n\nDear *{student_name}*,\nWe have successfully received your course fee payment.\n\n💵 *Amount Paid:* BDT {paid_amount}\n📄 *Money Receipt No:* {receipt_no}\n📚 *Course:* {course_name}\n⏳ *Remaining Due:* BDT {due_amount}\n\n📥 Download/Print your digital money receipt anytime from the Student Portal: {portal_url}\n\nHelpline: {helpline}",
+        "variables": [
+          "student_name",
+          "paid_amount",
+          "receipt_no",
+          "course_name",
+          "due_amount",
+          "portal_url",
+          "helpline",
+          "institute_name"
+        ],
+        "isActive": true
+      },
+      {
+        "id": "tpl-3",
+        "type": "DUE_REMINDER",
+        "title": "Course Fee Due Reminder",
+        "smsBody": "Dear {student_name}, Friendly reminder from {institute_name}: Outstanding installment fee for {course_name} is BDT {due_amount}. Please clear by due date. Helpline: {helpline}.",
+        "whatsappBody": "⚠️ *Course Fee Installment Reminder*\n\nDear *{student_name}* (ID: {student_id}),\n\nThis is a gentle reminder that your scheduled installment fee of *BDT {due_amount}* for *{course_name}* is pending.\n\nPlease clear the balance at the academy accounts desk or via bKash/Nagad merchant to avoid any disruption to your exam admit card.\n\n📞 Accounts Desk: {helpline}\n🌐 Student Portal: {portal_url}",
+        "variables": [
+          "student_name",
+          "student_id",
+          "due_amount",
+          "course_name",
+          "helpline",
+          "portal_url",
+          "institute_name"
+        ],
+        "isActive": true
+      },
+      {
+        "id": "tpl-4",
+        "type": "CLASS_SCHEDULE_NOTICE",
+        "title": "Batch Class Schedule & Live Meeting Link",
+        "smsBody": "Dear {student_name}, Next class for {course_name} ({batch_number}) is on {class_time} at Room/Lab {room_no}. Live link: {meeting_url}. {institute_name}.",
+        "whatsappBody": "📢 *Class Schedule & Meeting Alert*\n\nDear *{student_name}*,\n\nYour upcoming class for *{course_name}* (*{batch_number}*) is scheduled:\n\n⏰ *Time:* {class_time}\n🏢 *Room/Lab:* {room_no}\n🔗 *Live Meeting Link:* {meeting_url}\n\nPlease join 5 minutes early with your lab assignments ready.\n\n_{institute_name}_",
+        "variables": [
+          "student_name",
+          "course_name",
+          "batch_number",
+          "class_time",
+          "room_no",
+          "meeting_url",
+          "institute_name"
+        ],
+        "isActive": true
+      },
+      {
+        "id": "tpl-5",
+        "type": "SEMINAR_INVITE",
+        "title": "Free Seminar & Career Workshop Invitation",
+        "smsBody": "Dear {lead_name}, You are invited to Free Workshop on {seminar_title} on {seminar_date} at {institute_name}, Farmgate. Seats limited! Helpline: {helpline}.",
+        "whatsappBody": "🚀 *Invitation to Free IT Career Masterclass!*\n\nDear *{lead_name}*,\n\nYou have successfully reserved your seat for:\n🎯 *{seminar_title}*\n📅 *Date & Time:* {seminar_date}\n📍 *Venue:* {institute_name}, Farmgate Campus, Dhaka\n\nSeats are allocated on first-come-first-served basis. Please arrive 15 minutes before the session starts.\n\nHelpline: {helpline}",
+        "variables": [
+          "lead_name",
+          "seminar_title",
+          "seminar_date",
+          "institute_name",
+          "helpline"
+        ],
+        "isActive": true
+      }
+    ],
+    "whyChoosePoints": [
+      {
+        "title": "100% Lab-Centric Hands-on Training",
+        "description": "Dedicated high-spec PC per student with high-speed internet and real-world project simulations.",
+        "icon": "Monitor"
+      },
+      {
+        "title": "Industry Veteran Mentors",
+        "description": "Trainers with 7+ years of real corporate development and top-rated freelance track record.",
+        "icon": "Award"
+      },
+      {
+        "title": "Lifetime Project & Career Support",
+        "description": "Free lab access even after course completion, client meeting guidance, and CV preparation.",
+        "icon": "LifeBuoy"
+      },
+      {
+        "title": "Job Placement & Freelancing Cell",
+        "description": "Direct recruitment partnerships with 45+ software houses and agency referral network.",
+        "icon": "Briefcase"
+      }
+    ],
+    "onlineAdmissionActive": true,
+    "multiplePhones": [
+      {
+        "label": "Hotline Helpline",
+        "number": "01798444444",
+        "isHotline": true,
+        "isWhatsapp": true,
+        "id": "phone-0-1787557022261"
+      }
+    ],
+    "multipleEmails": [
+      {
+        "label": "Official General Info",
+        "email": "nxglearner@gmail.com",
+        "id": "email-0-1787557022261"
+      }
+    ],
+    "officeAddress": "ঠিকানা: ১৪/বি, গার্ডেন রোড, কাজীপাড়া, ফার্মগেট, ঢাকা–১২১৫ (বসুন্ধরা সিটি শপিং মলের পিছনের রোড), ",
+    "campusDirections": " (বসুন্ধরা সিটি শপিং মলের পিছনের রোড), ",
+    "officeHours": "Saturday to Friday: 9:00 AM – 8:00 PM (7 Days Open)",
+    "googleMapEmbedUrl": "https://share.google/bvmkTYLuxb1cOW63b",
+    "whatsappSupportNumber": "01798444444",
+    "facebookPageUrl": "https://facebook.com/nexgenacademybd",
+    "youtubeChannelUrl": "https://youtube.com/@nexgenacademybd",
+    "socialLinks": {
+      "facebookPageUrl": "https://www.facebook.com/nexgencomputeracademy/",
+      "facebookGroupUrl": "https://www.facebook.com/groups/1606509644429911",
+      "facebookGroupName": "Nexgen IT & Freelancers Community BD",
+      "facebookGroupMembersCount": "32,500+ Active Members",
+      "youtubeChannelUrl": "https://www.youtube.com/@nexgen-learner",
+      "youtubeFeaturedVideoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      "youtubeVideoTitle": "Campus Tour & Student Success Stories at Nexgen Computer Academy",
+      "whatsappSupportNumber": "01798444444",
+      "whatsappCommunityUrl": "https://chat.whatsapp.com/invite/nexgenacademy",
+      "linkedinUrl": "https://linkedin.com/company/nexgen-academy-bd",
+      "instagramUrl": "https://instagram.com/nexgenacademybd",
+      "telegramUrl": "https://t.me/nexgenacademybd",
+      "tiktokUrl": "https://tiktok.com/@nexgenacademybd"
+    },
+    "aboutUs": {
+      "storyTitle": "Empowering Next-Generation IT Professionals Since 2018",
+      "storyDescription": "Nexgen Computer Academy was founded with a single mission: to eliminate the gap between conventional textbook education and modern corporate tech requirements. Over the last 8+ years, we have nurtured more than 8,500+ young individuals across Bangladesh, turning non-coders into industry-ready software engineers, creative brand designers, data analysts, and top-tier freelancers on global marketplaces.",
+      "mission": "To provide world-class, affordable, and practical technology education that enables every student to achieve financial independence through freelancing, remote jobs, and corporate IT careers.",
+      "vision": "To be the leading IT center of excellence in South Asia by developing skilled manpower, fostering innovation, and bridging global tech talent demands.",
+      "directorName": "Prodip Chowdhury",
+      "directorTitle": "Managing Director & Lead Technology Specialist",
+      "directorPhotoUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+      "directorMessage": "Technology is the great equalizer of our era. When you have genuine, practical problem-solving skills, geographic boundaries disappear. At Nexgen, our promise is not just teaching software, but providing an end-to-end mentorship ecosystem until you secure your first client or corporate job. Welcome to your future.",
+      "establishedYear": "2018",
+      "affiliations": [
+        "Bangladesh Technical Education Board (BTEB) Registered Partner",
+        "ISO 9001:2015 Certified Curriculum Standard",
+        "BASIS (Bangladesh Association of Software and Information Services) Member Network",
+        "National Youth Development ICT Skill Collaborator"
+      ],
+      "facilityHighlights": [
+        {
+          "title": "Air-Conditioned Workstation Labs",
+          "desc": "50+ High-end Intel Core i7 & Ryzen workstations with dual monitors and GPU rendering.",
+          "icon": "Monitor"
+        },
+        {
+          "title": "Gigabit Fiber Internet & Backup Power",
+          "desc": "Redundant high-speed dedicated broadband and uninterrupted online UPS system.",
+          "icon": "Zap"
+        },
+        {
+          "title": "Interactive Smart Seminar Hall",
+          "desc": "Digital projector, surround acoustic sound, and live recording studio for masterclasses.",
+          "icon": "Award"
+        },
+        {
+          "title": "Student Innovation Lounge",
+          "desc": "Dedicated breakout space with high-speed Wi-Fi, coffee station, and group discussion tables.",
+          "icon": "Users"
+        }
+      ]
+    },
+    "seo": {
+      "metaTitle": "Nexgen Computer Academy - Best Computer Training Center in Farmgate, Dhaka",
+      "metaDescription": "Govt recognized top IT training institute in Farmgate, Dhaka. Practical Computer Office Application, Advanced Excel, Web Dev, Graphic Design, Digital Marketing & AI courses with 100% lab practice & job placement.",
+      "keywords": [
+        "Computer Course in Farmgate",
+        "Computer Training Center in Farmgate",
+        "Computer Course in Dhaka",
+        "Computer Office Application Course",
+        "Advanced Excel Course in Farmgate",
+        "Best IT Training Institute in Farmgate",
+        "Computer Training in Farmgate",
+        "Graphic Design Course Farmgate",
+        "Web Development Course Farmgate",
+        "AI Computer Course Dhaka",
+        "Practical Computer Training Dhaka",
+        "Govt Certified Computer Course Farmgate"
+      ],
+      "canonicalBaseUrl": "https://nexgenacademy.edu.bd",
+      "ogTitle": "Nexgen Computer Academy | #1 Practical IT Training Center in Farmgate, Dhaka",
+      "ogDescription": "Master Office Application, Excel, MERN Web Dev, UI/UX Design & Digital Marketing with 1-on-1 practical lab guidance & verifiable certificates.",
+      "ogImageUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&auto=format&fit=crop&q=80",
+      "twitterHandle": "@nexgenacademybd",
+      "geoRegion": "BD-13",
+      "geoPlacename": "Farmgate, Dhaka, Bangladesh",
+      "geoPosition": "23.7527;90.3887",
+      "googleSiteVerification": "google-site-verification-nexgen2026",
+      "bingSiteVerification": "bing-site-verification-nexgen2026",
+      "sitemapEnabled": true,
+      "robotsTxtEnabled": true,
+      "enableLocalBusinessSchema": true,
+      "enableCourseSchema": true,
+      "enableFaqSchema": true,
+      "enableBreadcrumbSchema": true,
+      "targetKeywordThemes": [
+        "Computer Course in Farmgate",
+        "Computer Training Center in Farmgate",
+        "Computer Course in Dhaka",
+        "Computer Office Application Course",
+        "Advanced Excel Course in Farmgate",
+        "Computer Training in Farmgate",
+        "AI Computer Course",
+        "Practical Computer Training"
+      ],
+      "serviceAreas": [
+        "Farmgate",
+        "Panthapath",
+        "Tejgaon",
+        "Dhanmondi",
+        "Bijoy Sarani",
+        "Indira Road",
+        "Green Road",
+        "Kawran Bazar",
+        "Dhaka Division",
+        "All Bangladesh (Online)"
+      ],
+      "faqItems": [
+        {
+          "question": "Why choose Nexgen Computer Academy in Farmgate for IT courses?",
+          "answer": "Nexgen Computer Academy offers 100% lab-centric practical training with dedicated high-spec PC per student, industry-expert mentors, government verifiable certificates, lifetime lab access, and job placement assistance in Dhaka."
+        },
+        {
+          "question": "Where is Nexgen Computer Academy located?",
+          "answer": "Nexgen Computer Academy is located at 14/B, Garden Road, Kazipara, Farmgate, Dhaka–1215, Bangladesh (Behind Bashundhara City Market, easily accessible from Farmgate Metro & Panthapath)."
+        },
+        {
+          "question": "Do you offer both Offline Classroom and Online Live courses?",
+          "answer": "Yes! Students from Farmgate, Tejgaon, Dhanmondi, and Dhaka can join our AC practical lab batches, while students from across Bangladesh can join our interactive Live Online batches with class recording access."
+        }
+      ]
+    },
+    "marketing": {
+      "metaPixelId": "3044343639090431",
+      "metaPixelEnabled": true,
+      "googleAnalyticsId": "G-VYNS03M91Z",
+      "googleAnalyticsEnabled": true,
+      "googleTagManagerId": "GTM-NEXGEN99",
+      "googleTagManagerEnabled": false,
+      "conversionApiToken": "EAAGNO4...MOCK_OR_ENV_TOKEN",
+      "enableAutoUtmCapture": true,
+      "enableExitIntentPopup": true,
+      "exitIntentTitle": "🎁 Wait! Special 45% Scholarship Voucher",
+      "exitIntentSubtitle": "Claim your exclusive student fee discount voucher before leaving. Valid for next 24 hours!",
+      "exitIntentDiscountCode": "NEXGEN-SPECIAL45",
+      "enableFloatingWhatsApp": true,
+      "floatingWhatsAppNumber": "01798444444",
+      "floatingWhatsAppWelcomeText": "Hello Nexgen Academy! I want to know about course admission & scholarship discount."
+    },
+    "fraudProtection": {
+      "enableRateLimiting": true,
+      "rateLimitMaxRequestsPerMinute": 5,
+      "enableDuplicateDetection": true,
+      "enableHoneypot": true,
+      "minSubmissionTimeSeconds": 3,
+      "captchaMode": "HIGH_RISK_ONLY",
+      "enableRiskScoring": true,
+      "highRiskThreshold": 60,
+      "suspiciousThreshold": 30,
+      "autoBlockHighRisk": false
+    },
+    "leadFormConfig": {
+      "isEnabled": true,
+      "formTitle": "কোর্স ভর্তি ও স্কলারশিপ আবেদন ফরম",
+      "formSubtitle": "আপনার প্রয়োজনীয় তথ্য দিয়ে আবেদন করুন। আমাদের অভিজ্ঞ ক্যারিয়ার কাউন্সেলর আপনাকে সঠিক দিকনির্দেশনা প্রদান করবেন।",
+      "submitButtonText": "আবেদন নিশ্চিত করুন",
+      "successMessage": "আপনার তথ্য সফলভাবে গ্রহণ করা হয়েছে। আমাদের টিম শিগগিরই আপনার সাথে যোগাযোগ করবে।",
+      "defaultLearningMode": "Offline",
+      "enableCaptcha": false,
+      "captchaMode": "HIGH_RISK_ONLY",
+      "enableOtp": false,
+      "otpMode": "OFF",
+      "duplicateAction": "CREATE_FOLLOWUP",
+      "fields": [
+        {
+          "id": "f-name",
+          "fieldKey": "studentName",
+          "label": "আপনার নাম (Student Full Name)",
+          "placeholder": "যেমন: মো: সাইফুল ইসলাম",
+          "enabled": true,
+          "required": true,
+          "sortOrder": 1
+        },
+        {
+          "id": "f-phone",
+          "fieldKey": "phone",
+          "label": "মোবাইল নম্বর (Active WhatsApp / Phone)",
+          "placeholder": "017XXXXXXXX",
+          "enabled": true,
+          "required": true,
+          "sortOrder": 2
+        },
+        {
+          "id": "f-course",
+          "fieldKey": "courseId",
+          "label": "পছন্দের কোর্স (Selected Course)",
+          "placeholder": "কোর্স নির্বাচন করুন",
+          "enabled": true,
+          "required": true,
+          "sortOrder": 3
+        },
+        {
+          "id": "f-schedule",
+          "fieldKey": "preferredSchedule",
+          "label": "সুবিধাজনক সময় (Preferred Schedule / Batch Time)",
+          "placeholder": "যেমন: শুক্রবার ও শনিবার (সকাল ১০:০০ - ১২:০০)",
+          "enabled": true,
+          "required": true,
+          "sortOrder": 4
+        },
+        {
+          "id": "f-mode",
+          "fieldKey": "learningMode",
+          "label": "শেখার মাধ্যম (Learning Mode)",
+          "placeholder": "অফলাইন ল্যাব / অনলাইন লাইভ",
+          "enabled": true,
+          "required": false,
+          "sortOrder": 5
+        },
+        {
+          "id": "f-email",
+          "fieldKey": "email",
+          "label": "ইমেইল অ্যাড্রেস (Email Address)",
+          "placeholder": "example@gmail.com",
+          "enabled": true,
+          "required": false,
+          "sortOrder": 6
+        },
+        {
+          "id": "f-education",
+          "fieldKey": "education",
+          "label": "সর্বশেষ শিক্ষাগত যোগ্যতা (Education)",
+          "placeholder": "যেমন: HSC / Diploma / B.Sc / Masters",
+          "enabled": true,
+          "required": false,
+          "sortOrder": 7
+        },
+        {
+          "id": "f-institution",
+          "fieldKey": "institution",
+          "label": "প্রতিষ্ঠান / কলেজ / বিশ্ববিদ্যালয় (Institution)",
+          "placeholder": "যেমন: ঢাকা কলেজ / পলিটেকনিক",
+          "enabled": true,
+          "required": false,
+          "sortOrder": 8
+        },
+        {
+          "id": "f-profession",
+          "fieldKey": "profession",
+          "label": "বর্তমান পেশা (Profession / Occupation)",
+          "placeholder": "যেমন: Student / Job Holder / Freelancer",
+          "enabled": true,
+          "required": false,
+          "sortOrder": 9
+        },
+        {
+          "id": "f-address",
+          "fieldKey": "address",
+          "label": "বর্তমান ঠিকানা / এলাকা (Address / City)",
+          "placeholder": "যেমন: ফার্মগেট, ঢাকা",
+          "enabled": true,
+          "required": false,
+          "sortOrder": 10
+        },
+        {
+          "id": "f-message",
+          "fieldKey": "message",
+          "label": "আপনার কোনো প্রশ্ন বা মন্তব্য থাকলে লিখুন (Message / Note)",
+          "placeholder": "কোর্স সম্পর্কে আপনার কোনো প্রশ্ন থাকলে লিখুন...",
+          "enabled": true,
+          "required": false,
+          "sortOrder": 11
+        }
+      ]
+    },
+    "otpConfig": {
+      "mode": "OFF",
+      "provider": "SIMULATED",
+      "otpExpiryMinutes": 5,
+      "maxAttempts": 3,
+      "resendCooldownSeconds": 60,
+      "maxResendsPerSession": 3,
+      "lockoutMinutes": 15
+    },
+    "offlineMarketing": {
+      "centerName": "Nexgen Computer Academy - Farmgate Center",
+      "primaryArea": "Farmgate",
+      "radiusKm": 4,
+      "surroundingAreas": [
+        "Farmgate",
+        "Panthapath",
+        "Tejgaon",
+        "Dhanmondi",
+        "Bijoy Sarani",
+        "Indira Road",
+        "Green Road",
+        "Monipuripara",
+        "Khamarbari",
+        "Karwan Bazar",
+        "Mohakhali",
+        "Mirpur 10 / Kazipara"
+      ],
+      "targetAudienceTypes": [
+        "SSC & HSC Passed Students",
+        "University Undergrads & Diploma Students",
+        "Job Seekers & Fresh Graduates",
+        "Working Professionals seeking Upskilling",
+        "Aspiring Freelancers & Agency Builders"
+      ]
+    },
+    "onlineMarketing": {
+      "targetCountry": "Bangladesh",
+      "supportedCities": [
+        "Dhaka",
+        "Chattogram",
+        "Sylhet",
+        "Rajshahi",
+        "Khulna",
+        "Barishal",
+        "Rangpur",
+        "Mymensingh",
+        "Cumilla",
+        "Gazipur",
+        "Narayanganj",
+        "Bogura",
+        "Cox's Bazar"
+      ]
+    },
+    "trainersList": [
+      {
+        "id": "trainer-01",
+        "name": "Prodip Chowdhury",
+        "designation": "Lead Full Stack & Cloud Architect",
+        "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+        "phone": "01798444444",
+        "email": "prodip@nexgenacademy.edu.bd",
+        "shortBio": "8+ Years Industry Experience in Web Architecture, MERN Stack & Cloud Engineering. Trained 3,500+ successful developers.",
+        "detailedBio": "Prodip has led software engineering teams for top international startups. At Nexgen, he directs curriculum architecture ensuring 100% alignment with current Silicon Valley and EU developer job standards.",
+        "experienceYears": 8,
+        "industryExperience": "8+ Years (Former Senior Architect at DevSphere EU, BASIS Certified Trainer)",
+        "companyOrOrg": "Nexgen Academy / Ex-DevSphere EU",
+        "certifications": [
+          "AWS Certified Solutions Architect",
+          "Google Cloud Professional Cloud Architect",
+          "BTEB Master Assessor"
+        ],
+        "skills": [
+          "React",
+          "Next.js",
+          "Node.js",
+          "TypeScript",
+          "PostgreSQL",
+          "Docker",
+          "AWS"
+        ],
+        "socialLinks": {
+          "linkedin": "https://linkedin.com/in/prodip-chowdhury",
+          "github": "https://github.com/prodip-nexgen",
+          "facebook": "https://facebook.com/prodip.nexgen"
+        },
+        "isActive": true,
+        "coursesAssigned": [
+          "crs-01",
+          "crs-03"
+        ]
+      },
+      {
+        "id": "trainer-02",
+        "name": "Nusrat Jahan Mim",
+        "designation": "Senior UI/UX & Product Design Specialist",
+        "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
+        "phone": "01811223344",
+        "email": "nusrat@nexgenacademy.edu.bd",
+        "shortBio": "Top Rated Plus Upwork Designer with $120k+ earned. Expert in Figma, Design Systems, Mobile Apps & Micro-interactions.",
+        "detailedBio": "Nusrat specializes in converting raw business ideas into slick, award-winning user interfaces. Her students work in leading fintech, SaaS, and creative design agencies across Bangladesh and globally.",
+        "experienceYears": 6,
+        "industryExperience": "6+ Years (Top Rated Plus Freelancer & Product Design Consultant)",
+        "companyOrOrg": "Nexgen Academy / Freelance Top-Rated",
+        "certifications": [
+          "Google Certified UX Designer",
+          "Adobe Certified Professional Illustrator & Photoshop"
+        ],
+        "skills": [
+          "Figma",
+          "Adobe XD",
+          "Photoshop",
+          "Illustrator",
+          "Design Systems",
+          "Micro-interactions",
+          "Upwork Strategy"
+        ],
+        "socialLinks": {
+          "linkedin": "https://linkedin.com/in/nusrat-jahan-mim",
+          "facebook": "https://facebook.com/nusrat.design"
+        },
+        "isActive": true,
+        "coursesAssigned": [
+          "crs-02"
+        ]
+      },
+      {
+        "id": "trainer-03",
+        "name": "Tanvir Hossain",
+        "designation": "Senior Office Automation & Corporate Excel Trainer",
+        "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
+        "phone": "01912334455",
+        "email": "tanvir@nexgenacademy.edu.bd",
+        "shortBio": "Corporate IT Consultant with 7+ years of experience training banking, corporate and government executives.",
+        "detailedBio": "Tanvir has trained over 2,000 corporate staff in Advanced Excel, MIS Reporting, Financial Modeling, PowerPoint presentations, and AI-powered office workflows.",
+        "experienceYears": 7,
+        "industryExperience": "7+ Years in Corporate Training & MIS Consultancy",
+        "companyOrOrg": "Nexgen Academy / Corporate MIS Consultant",
+        "certifications": [
+          "Microsoft Certified: Excel Expert",
+          "BTEB Certified Computer Office Application Instructor"
+        ],
+        "skills": [
+          "Advanced Excel",
+          "MS Word",
+          "PowerPoint",
+          "VBA & Macros",
+          "MIS Reporting",
+          "ChatGPT Prompting",
+          "Typing Mastery"
+        ],
+        "socialLinks": {
+          "facebook": "https://facebook.com/tanvir.office.trainer"
+        },
+        "isActive": true,
+        "coursesAssigned": [
+          "crs-01",
+          "crs-04"
+        ]
+      }
+    ],
+    "studentCourseReviews": [
+      {
+        "id": "rev-01",
+        "courseId": "crs-01",
+        "studentName": "মেহেদী হাসান রনি",
+        "studentPhoto": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80",
+        "rating": 5,
+        "reviewText": "অফিস অ্যাপ্লিকেশন ও এক্সেল শেখার পর আমার কর্পোরেট জবে রিপোর্টিংয়ের স্পিড অনেক বেড়েছে। প্রদীপ স্যারের গাইডেন্স ও ল্যাব সাপোর্ট অসাধারণ ছিল!",
+        "reviewType": "Text",
+        "location": "ফার্মগেট, ঢাকা",
+        "profession": "জুনিয়র এক্সিকিউটিভ, প্রাইভেট ব্যাংক",
+        "batchNumber": "ব্যাচ ০৪",
+        "reviewDate": "২০২৬-০৮-১০",
+        "isVerified": true,
+        "isFeatured": true,
+        "sortOrder": 1,
+        "isActive": true
+      },
+      {
+        "id": "rev-02",
+        "courseId": "crs-02",
+        "studentName": "সাদিয়া আক্তার রিমা",
+        "studentPhoto": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80",
+        "rating": 5,
+        "reviewText": "নুসরাত ম্যামের গ্রাফিক্স ও UI ডিজাইনের ক্লাস একদম জিরো থেকে অ্যাডভান্সড পর্যন্ত করানো হয়। কোর্স শেষেই আমি ফাইভারে ১ম অর্ডার সম্পন্ন করেছি ($120)!",
+        "reviewType": "Text",
+        "location": "ধানমন্ডি, ঢাকা",
+        "profession": "ফ্রিল্যান্সার ও গ্রাফিক ডিজাইনার",
+        "batchNumber": "ব্যাচ ০২",
+        "reviewDate": "২০২৬-০৮-১৫",
+        "isVerified": true,
+        "isFeatured": true,
+        "sortOrder": 2,
+        "isActive": true
+      },
+      {
+        "id": "rev-03",
+        "courseId": "crs-03",
+        "studentName": "আরিফুল ইসলাম সাকিব",
+        "studentPhoto": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop&q=80",
+        "rating": 5,
+        "reviewText": "ফুলস্ট্যাক ওয়েব ডেভেলপমেন্টের রিয়েল লাইফ প্রজেক্ট ও এপিআই আর্কিটেকচার এখানে যেভাবে শেখানো হয়েছে, তা কোনো সাধারণ অনলাইন কোর্সে পাওয়া সম্ভব নয়।",
+        "reviewType": "Text",
+        "location": "মিরপুর, ঢাকা",
+        "profession": "জুনিয়র রিঅ্যাক্ট ডেভেলপার, সফটওয়্যার ফার্ম",
+        "batchNumber": "ব্যাচ ০১",
+        "reviewDate": "২০২৬-০৮-২০",
+        "isVerified": true,
+        "isFeatured": true,
+        "sortOrder": 3,
+        "isActive": true
+      }
+    ],
+    "classroomGalleryPhotos": [
+      {
+        "id": "photo-01",
+        "title": "মডার্ন হাই-স্পেক কম্পিউটার ল্যাব ও প্র্যাকটিক্যাল সেশন",
+        "caption": "প্রতিটি শিক্ষার্থীর জন্য ডেডিকেটেড হাই-কনফিগ পিসি, ডুয়েল ডিসপ্লে ও ফাইবার ইন্টারনেট সাপোর্ট।",
+        "imageUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80",
+        "category": "Classroom & Labs",
+        "batchNumber": "ব্যাচ ২০২৬",
+        "date": "২০২৬-০৮-১২",
+        "sortOrder": 1,
+        "isActive": true
+      },
+      {
+        "id": "photo-02",
+        "title": "সার্টিফিকেট প্রদান ও গ্র্যাজুয়েশন সেরেমনি",
+        "caption": "কোর্স ও প্রজেক্ট সফলভাবে সম্পন্নকারীদের ভেরিফায়েবল সার্টিফিকেট ও অ্যাওয়ার্ড প্রদান।",
+        "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
+        "category": "Ceremony & Certification",
+        "batchNumber": "গ্র্যাজুয়েশন ফেস্ট",
+        "date": "২০২৬-০৭-৩০",
+        "sortOrder": 2,
+        "isActive": true
+      },
+      {
+        "id": "photo-03",
+        "title": "লাইভ প্রজেক্ট সলভিং ও মেন্টরশিপ ডিসকাশন",
+        "caption": "সরাসরি ট্রেইনারের তত্ত্বাবধানে কোডিং ও ডিজাইন বাগ ফিক্সিং সেশন।",
+        "imageUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80",
+        "category": "Practical Session",
+        "batchNumber": "ব্যাচ ০৫",
+        "date": "২০২৬-০৮-১৮",
+        "sortOrder": 3,
+        "isActive": true
+      },
+      {
+        "id": "photo-04",
+        "title": "ফ্রি ক্যারিয়ার সেমিনার ও ফ্রিল্যান্সিং গাইডলাইন",
+        "caption": "ফার্মগেট ক্যাম্পাসে অনুষ্ঠিত ক্যারিয়ার ও মার্কেটপ্লেস ওরিয়েন্টেশন সেশন।",
+        "imageUrl": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80",
+        "category": "Workshop",
+        "date": "২০২৬-০৮-২৫",
+        "sortOrder": 4,
+        "isActive": true
+      }
+    ],
+    "policies": {
+      "termsAndConditions": "### 1. Admission & Seat Confirmation\nEnrollment in any course at Nexgen Computer Academy is confirmed only after the payment of the initial registration fee or installment. Seats are allocated on a strictly first-come, first-served basis.\n\n### 2. Class Attendance & Discipline\nStudents must maintain at least 75% attendance to qualify for the final certification exam and portfolio review. Proper decorum, respect toward trainers and peers, and adherence to lab safety guidelines are mandatory.\n\n### 3. Fee Payment Policy\nCourse fees paid in installments must be cleared before the scheduled due dates. The Academy reserves the right to withhold exam admit cards and certificate release if dues remain unsettled.\n\n### 4. Lab Equipment Usage\nAll computer hardware and software resources are provided for educational purposes. Any intentional physical damage or tampering with system configurations will incur replacement penalties.\n\n### 5. Certification Eligibility\nTo receive the official, digitally verifiable certificate, students must complete all mandatory projects, pass the written/practical evaluation, and achieve at least Grade 'C' (50%+ marks).",
+      "privacyPolicy": "### 1. Information We Collect\nWe collect personal information such as full name, contact numbers, email address, educational background, and payment details purely for student registration, academic recordkeeping, and certificate verification.\n\n### 2. Data Security & Storage\nAll student information is stored securely in our encrypted database system. We implement industry-standard encryption and strict access controls to prevent unauthorized access.\n\n### 3. Communication & Updates\nWe may send SMS, WhatsApp, or email notifications regarding class schedules, exam dates, fee reminders, holiday notices, and career seminar invitations. You may opt out of promotional updates anytime.\n\n### 4. No Third-Party Sharing\nNexgen Computer Academy strictly pledges never to sell, rent, or trade your personal data with third-party advertisers or marketing agencies. Data is only shared with official certification boards upon student consent.",
+      "refundPolicy": "### 1. Refund Requests\nStudents may request a refund in writing within 3 calendar days of the official batch orientation. A nominal administrative processing fee of 10% will be deducted.\n\n### 2. Post-Commencement Policy\nNo refund requests will be accepted once regular classroom curriculum sessions (Class 2 onwards) have commenced. However, students may request a batch transfer or course pause for valid medical or personal emergencies.",
+      "codeOfConduct": "### 1. Respect & Inclusivity\nWe foster a welcoming, respectful, and harassment-free learning atmosphere for all students regardless of gender, background, or skill level.\n\n### 2. Academic Integrity\nPlagiarism, submitting another student's work as your own, or illicit sharing of academy course materials without authorization is strictly prohibited."
+    }
+  },
+  "websiteReviews": [
+    {
+      "id": "rev-1",
+      "studentName": "Tanvir Hossain",
+      "studentPhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "courseName": "Full Stack Web Development (MERN)",
+      "batchName": "NCA-WEB-2026-B1",
+      "rating": 5,
+      "reviewText": "Nexgen Academy helped me transition from a non-CS background to a remote Frontend Developer at an agency in Singapore. The project-based assignments and mentor support were phenomenal!",
+      "earningsOrSuccess": "Frontend Developer @ SoftTech ($750/month)",
+      "workplaceOrRole": "Junior Developer",
+      "date": "2026-06-15",
+      "isFeatured": true
+    },
+    {
+      "id": "rev-2",
+      "studentName": "Nusrat Jahan Mim",
+      "studentPhoto": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      "courseName": "UI/UX Design & Figma Mastery",
+      "batchName": "NCA-UI-2026-B1",
+      "rating": 5,
+      "reviewText": "The UI/UX course curriculum is completely modern. Within 3 months of completing the course, I got 2 direct client projects through the Academy’s freelance workshop.",
+      "earningsOrSuccess": "Fiverr Level 2 Seller ($1,200+ monthly)",
+      "workplaceOrRole": "Product Designer",
+      "date": "2026-07-02",
+      "isFeatured": true
+    },
+    {
+      "id": "rev-3",
+      "studentName": "Ariful Islam Chowdhury",
+      "studentPhoto": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "courseName": "Professional Graphics Design & Branding",
+      "batchName": "NCA-GD-2025-B4",
+      "rating": 5,
+      "reviewText": "Best IT academy in Farmgate area! Air-conditioned labs, personal high-speed PCs, and very friendly teachers who guide every single student individually until concepts are clear.",
+      "earningsOrSuccess": "Brand Designer @ CreativeHive Dhaka",
+      "workplaceOrRole": "Brand Designer",
+      "date": "2026-05-20",
+      "isFeatured": true
+    },
+    {
+      "id": "rev-4",
+      "studentName": "Sabbir Ahmed Khan",
+      "studentPhoto": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+      "courseName": "Digital Marketing & Growth Hacking",
+      "batchName": "NCA-DM-2026-B2",
+      "rating": 5,
+      "reviewText": "Their live ad campaigns and SEO practical audits gave me the confidence to handle high-budget client campaigns. Nexgen’s certificate is highly respected in the industry.",
+      "earningsOrSuccess": "Marketing Lead @ EduZone BD",
+      "workplaceOrRole": "Marketing Specialist",
+      "date": "2026-08-01",
+      "isFeatured": true
+    }
+  ],
+  "websiteGallery": [
+    {
+      "id": "gal-1",
+      "title": "Modern High-Performance Lab 101 Session",
+      "category": "Classroom & Labs",
+      "imageUrl": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80",
+      "caption": "Students practicing live React & Node.js backend coding in our Farmgate high-speed workstation lab.",
+      "date": "2026-07-10",
+      "isFeatured": true
+    },
+    {
+      "id": "gal-2",
+      "title": "Batch 28 Convocation & Certificate Award Ceremony",
+      "category": "Certification Ceremony",
+      "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
+      "caption": "Our graduated students receiving verified government-accredited IT certificates with our honorable chief guest.",
+      "date": "2026-06-25",
+      "isFeatured": true
+    },
+    {
+      "id": "gal-3",
+      "title": "Free Career Seminar on AI Tools & Modern Freelancing",
+      "category": "Workshops & Events",
+      "imageUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80",
+      "caption": "Over 120 aspiring youths participating in our interactive tech workshop at the seminar hall.",
+      "date": "2026-08-05",
+      "isFeatured": true
+    },
+    {
+      "id": "gal-4",
+      "title": "UI/UX Design Studio & Wireframing Jam",
+      "category": "Classroom & Labs",
+      "imageUrl": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=800&auto=format&fit=crop&q=80",
+      "caption": "Designers presenting micro-interaction prototypes and user-journey maps in team review.",
+      "date": "2026-07-18",
+      "isFeatured": true
+    },
+    {
+      "id": "gal-5",
+      "title": "Student Success Celebration: Hired at Top Software House",
+      "category": "Success Stories",
+      "imageUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80",
+      "caption": "Celebrating our alumni team landing their first international developer contracts.",
+      "date": "2026-08-12",
+      "isFeatured": true
+    }
+  ],
+  "websiteFaqs": [
+    {
+      "id": "faq-1",
+      "question": "How do I enroll in a course at Nexgen Computer Academy?",
+      "answer": "You can register online directly through our website by clicking the \"Enroll Now\" or \"Online Admission\" button, or visit our Farmgate campus in person for direct on-desk admission with our counselors.",
+      "category": "Admission"
+    },
+    {
+      "id": "faq-2",
+      "question": "Are the course certificates government recognized and verifiable?",
+      "answer": "Yes! All students who successfully complete their coursework and capstone exams receive an official certificate with a unique QR code and Registration ID that can be instantly verified on our website.",
+      "category": "Certification"
+    },
+    {
+      "id": "faq-3",
+      "question": "Can non-science / non-technical students learn programming or design here?",
+      "answer": "Absolutely! Our courses start from absolute ground zero. We provide step-by-step beginner-friendly guidance, individual mentor reviews, and extra support classes so anyone can master the skills.",
+      "category": "Academics"
+    },
+    {
+      "id": "faq-4",
+      "question": "Do you provide installment payment facilities for student course fees?",
+      "answer": "Yes, we offer flexible 2-to-3 installment payment plans for all long-term courses, making professional IT education affordable for everyone.",
+      "category": "Payments"
+    },
+    {
+      "id": "faq-5",
+      "question": "What kind of freelance and job placement support do you provide?",
+      "answer": "Our dedicated Career Cell conducts weekly client communication workshops, Fiverr/Upwork profile optimization sessions, mock technical interviews, and directly connects top graduates with partnering tech firms.",
+      "category": "Career"
+    }
+  ],
+  "websiteBlogs": [
+    {
+      "id": "blog-1",
+      "title": "How to Land High-Paying Remote Web Development Jobs from Bangladesh in 2026",
+      "slug": "land-remote-web-development-jobs-2026",
+      "category": "Web Development",
+      "coverImage": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop&q=80",
+      "summary": "A step-by-step roadmap for mastering modern React, TypeScript, and Full-Stack Node.js to secure $1,500+ monthly international remote contracts.",
+      "content": "International companies are hiring talented developers from Bangladesh more than ever before. However, generic tutorials are no longer enough. Here are the 4 key pillars you need:\n\n1. **Master Modern Stack Fundamentals:** Focus on TypeScript, React 19, Next.js, and scalable REST/GraphQL APIs.\n2. **Build Verifiable Production-Grade Projects:** Instead of simple clones, create functional SaaS applications with payment gateways, authentication, and live cloud deployment.\n3. **Optimize Your GitHub & LinkedIn:** Maintain clean commit histories, well-documented READMEs, and showcase your live demo URLs.\n4. **Client Communication & English Skills:** Practice explaining technical architecture concisely. This is often the deciding factor in remote salary negotiations.",
+      "authorName": "Prodip Chowdhury",
+      "authorRole": "Managing Director & Lead Tech Mentor",
+      "authorPhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+      "publishedDate": "2026-08-18",
+      "readTime": "5 min read",
+      "tags": [
+        "Web Development",
+        "Career Guide",
+        "Freelancing",
+        "Remote Jobs"
+      ],
+      "isPublished": true,
+      "viewsCount": 1420
+    },
+    {
+      "id": "blog-2",
+      "title": "Top 7 UI/UX Design Trends Dominating Global Marketplaces This Year",
+      "slug": "ui-ux-design-trends-2026",
+      "category": "UI/UX Design",
+      "coverImage": "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&auto=format&fit=crop&q=80",
+      "summary": "Discover how spatial interfaces, micro-interactions, and design systems in Figma are creating unprecedented freelance demand.",
+      "content": "Product design is evolving rapidly. Clients on Upwork and direct agencies in Europe and the USA are paying premium rates for UI/UX designers who understand user psychology.\n\n- **Design Systems & Tokenization:** Auto-layout mastery and reusable component libraries are must-have skills.\n- **Data-Driven UX Wireframing:** Learn how to conduct user interviews, heatmaps, and usability testing.\n- **Micro-Interactions & Prototyping:** Bringing static designs to life with smart animations creates instant client delight.\n- **Accessibility (WCAG AA):** High-contrast, clean typography, and mobile-first ergonomics.",
+      "authorName": "Nusrat Jahan Mim",
+      "authorRole": "Senior UI/UX Specialist",
+      "authorPhoto": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80",
+      "publishedDate": "2026-08-12",
+      "readTime": "4 min read",
+      "tags": [
+        "UI/UX",
+        "Figma",
+        "Product Design",
+        "Freelancing"
+      ],
+      "isPublished": true,
+      "viewsCount": 980
+    },
+    {
+      "id": "blog-3",
+      "title": "Starting Freelancing from Scratch: The Complete Beginner’s Roadmap",
+      "slug": "starting-freelancing-roadmap-beginners",
+      "category": "Freelancing",
+      "coverImage": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80",
+      "summary": "Avoid common beginner mistakes on Upwork and Fiverr with our tried-and-tested profile optimization strategies.",
+      "content": "Many beginners make the mistake of opening freelancer accounts before acquiring solid skills. Follow this structured roadmap to succeed:\n\n1. **Pick One In-Demand Niche:** Specialize in a focused domain like Brand Identity, React Frontend, or Digital Ad Optimization.\n2. **Build 5 Solid Portfolio Items:** Create realistic client case studies showcasing problem, process, and final deliverable.\n3. **Craft Winning Cover Letters:** Never use generic copy-pasted templates. Mention the client's specific problem in the very first sentence.\n4. **Deliver Exceptional Customer Service:** Over-communicate, meet deadlines early, and ask for 5-star reviews to boost your algorithm ranking.",
+      "authorName": "Ariful Islam",
+      "authorRole": "Freelance Marketplace Strategist",
+      "authorPhoto": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+      "publishedDate": "2026-08-04",
+      "readTime": "6 min read",
+      "tags": [
+        "Freelancing",
+        "Upwork",
+        "Fiverr",
+        "Career Tips"
+      ],
+      "isPublished": true,
+      "viewsCount": 2310
+    }
+  ]
 }

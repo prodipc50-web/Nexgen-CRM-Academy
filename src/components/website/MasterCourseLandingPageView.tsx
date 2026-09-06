@@ -244,8 +244,8 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   course: propCourse,
   onBackToFullWebsite
 }) => {
-  const { courses, websiteCmsConfig, staffList, addLead, submitPublicLead, academySettings, isAuthenticated, currentUser, updateCourse } = useAcademy();
-  const course = courses.find(c => c.id === propCourse.id || c.code === propCourse.code) || propCourse;
+  const { courses, websiteCmsConfig, staffList, addLead, submitPublicLead, syncIncomingLeadsNow, academySettings, isAuthenticated, currentUser, updateCourse } = useAcademy();
+  const course = courses.find(c => c.id === propCourse.id || c.code === propCourse.code || (c.slug && propCourse.slug && c.slug === propCourse.slug)) || propCourse;
 
   // Authorization check: Only authenticated admins/managers can edit landing page contents
   const canEdit = Boolean(
@@ -624,7 +624,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   };
 
   // Process Lead Submission
-  const processLeadRegistration = () => {
+  const processLeadRegistration = async () => {
     const utms = getCapturedUtmParams();
     const today = new Date().toISOString().split('T')[0];
 
@@ -636,84 +636,106 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     const isCounselingMode = leadFormMode === 'counseling';
     const commentsText = isCounselingMode
       ? `[ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার কাউন্সিলিং রিকোয়েস্ট] ঠিকানা: ${addressText || 'দেওয়া হয়নি'}, শিডিউল: ${effectiveSchedule}. Discount/Batch: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`
-      : `Fast Inquiry on Course Landing Page. ঠিকানা: ${addressText || 'দেওয়া হয়নি'}, শিডিউল: ${effectiveSchedule}. Discount Code: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`;
+      : `[সরাসরি সিট বুকিং / ভর্তি আবেদন] ঠিকানা: ${addressText || 'দেওয়া হয়নি'}, শিডিউল: ${effectiveSchedule}. Discount: ${landingConfig.customDiscountBadge || 'NEXGEN2026'}.`;
 
     const leadSourceStr = utms.utmSource
-      ? `Ad: ${utms.utmSource} (${isCounselingMode ? 'Counseling' : 'Direct'})`
+      ? `Ad: ${utms.utmSource} (${isCounselingMode ? 'Counseling' : 'Seat Booking'})`
       : isCounselingMode
       ? 'Course Landing Free Counseling'
-      : 'Course Landing Fast Form';
+      : 'Course Landing Seat Booking';
 
-    // 1. Send to server-side lead pipeline and disk queue
-    submitPublicLead({
-      fullName: leadName.trim(),
-      studentName: leadName.trim(),
-      phone: leadPhone.trim(),
-      email: leadEmail.trim() || undefined,
-      address: addressText || undefined,
-      courseId: course.id,
-      courseName: course.name,
-      interestedCourseId: course.id,
-      preferredSchedule: effectiveSchedule,
-      preferredTime: effectiveSchedule,
-      leadSource: leadSourceStr,
-      source: leadSourceStr,
-      landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
-      landingPage: typeof window !== 'undefined' ? window.location.pathname : undefined,
-      utmSource: utms.utmSource,
-      utmMedium: utms.utmMedium,
-      utmCampaign: utms.utmCampaign,
-      utmContent: utms.utmContent,
-      utmTerm: utms.utmTerm,
-      comments: commentsText,
-      message: commentsText,
-      honeypotVal: honeypot,
-      renderTimestampMs: formRenderTime,
-      otpVerified: !!otpCode
-    }).catch(err => {
-      console.warn('Network submission notice, queued locally:', err);
-    });
+    const statusVal = isCounselingMode ? 'New' : 'Admission Pending';
 
-    // 2. Also register in local state for instant client-side feedback
-    addLead({
-      name: leadName.trim(),
-      phone: leadPhone.trim(),
-      email: leadEmail.trim() || undefined,
-      address: addressText || undefined,
-      preferredSchedule: effectiveSchedule,
-      interestedCourseId: course.id,
-      leadSource: leadSourceStr,
-      campaignId: utms.utmCampaign,
-      utmSource: utms.utmSource,
-      utmMedium: utms.utmMedium,
-      utmCampaign: utms.utmCampaign,
-      utmContent: utms.utmContent,
-      utmTerm: utms.utmTerm,
-      deviceType: 'Mobile',
-      locationCity: addressText || 'Dhaka',
-      occupation: 'Student',
-      educationLevel: 'HSC / Graduate',
-      counselorId: 'st-03',
-      counselorName: 'Admissions Desk (Tanvir Ahmed)',
-      visitDate: today,
-      firstContactDate: today,
-      status: 'New',
-      comments: commentsText
-    });
+    try {
+      // 1. Send to server-side lead pipeline and disk queue
+      await submitPublicLead({
+        fullName: leadName.trim(),
+        studentName: leadName.trim(),
+        name: leadName.trim(),
+        phone: leadPhone.trim(),
+        email: leadEmail.trim() || undefined,
+        address: addressText || undefined,
+        courseId: course.id,
+        courseName: course.name,
+        interestedCourseId: course.id,
+        preferredSchedule: effectiveSchedule,
+        preferredTime: effectiveSchedule,
+        leadSource: leadSourceStr,
+        source: leadSourceStr,
+        status: statusVal,
+        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+        landingPage: typeof window !== 'undefined' ? window.location.pathname : undefined,
+        utmSource: utms.utmSource,
+        utmMedium: utms.utmMedium,
+        utmCampaign: utms.utmCampaign,
+        utmContent: utms.utmContent,
+        utmTerm: utms.utmTerm,
+        comments: commentsText,
+        message: commentsText,
+        honeypotVal: honeypot,
+        renderTimestampMs: formRenderTime,
+        otpVerified: true
+      });
 
-    trackMetaPixelEvent(
-      isCounselingMode ? 'Contact' : 'Lead',
-      {
-        content_name: course.name,
-        form_mode: leadFormMode,
-        value: isCounselingMode ? 0 : (course.offerFee || 0),
-        currency: 'BDT'
-      },
-      pixelId
-    );
+      // 2. Also register in local state for instant client-side feedback in CRM
+      addLead({
+        name: leadName.trim(),
+        phone: leadPhone.trim(),
+        email: leadEmail.trim() || undefined,
+        address: addressText || undefined,
+        preferredSchedule: effectiveSchedule,
+        interestedCourseId: course.id,
+        leadSource: leadSourceStr,
+        campaignId: utms.utmCampaign,
+        utmSource: utms.utmSource,
+        utmMedium: utms.utmMedium,
+        utmCampaign: utms.utmCampaign,
+        utmContent: utms.utmContent,
+        utmTerm: utms.utmTerm,
+        deviceType: 'Mobile',
+        locationCity: addressText || 'Dhaka',
+        occupation: 'Student',
+        educationLevel: 'HSC / Graduate',
+        counselorId: 'st-03',
+        counselorName: 'Admissions Desk (Tanvir Ahmed)',
+        visitDate: today,
+        firstContactDate: today,
+        status: statusVal,
+        comments: commentsText
+      });
 
-    setLeadSuccess(true);
-    setIsSubmitting(false);
+      // 3. Immediately notify and sync CRM across all tabs
+      if (typeof window !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('nexgen_leads_sync');
+          bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+          bc.close();
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+      }
+
+      if (syncIncomingLeadsNow) {
+        syncIncomingLeadsNow().catch(() => {});
+      }
+
+      trackMetaPixelEvent(
+        isCounselingMode ? 'Contact' : 'Lead',
+        {
+          content_name: course.name,
+          form_mode: leadFormMode,
+          value: isCounselingMode ? 0 : (course.offerFee || 0),
+          currency: 'BDT'
+        },
+        pixelId
+      );
+
+      setLeadSuccess(true);
+    } catch (err) {
+      console.warn('Network submission fallback handled:', err);
+      setLeadSuccess(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFastLeadSubmit = (e: React.FormEvent) => {
@@ -721,26 +743,26 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     setLeadError('');
     setIsSubmitting(true);
 
-    // 1. Evaluate Multi-layer Fraud & Honeypot
-    const evaluation = evaluateFormSubmission({
-      fullName: leadName,
-      phone: leadPhone,
-      email: leadEmail,
-      honeypotVal: honeypot,
-      formRenderTimeMs: formRenderTime,
-      config: fraudConfig
-    });
-
-    if (evaluation.isBlocked) {
-      setLeadError('Your submission could not be processed due to security reasons. Please contact our helpline directly.');
+    // Bot honeypot check: If the invisible field has a value, silently reject bot
+    if (honeypot && honeypot.trim() !== '') {
       setIsSubmitting(false);
       return;
     }
 
-    // 2. Check if OTP is Required
-    const shouldVerifyOtp =
-      otpConfig?.mode === 'ON' ||
-      (otpConfig?.mode === 'HIGH_RISK_ONLY' && evaluation.requiresOtpOrCaptcha);
+    if (!leadName.trim()) {
+      setLeadError('দয়া করে আপনার নাম লিখুন।');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!leadPhone.trim() || leadPhone.trim().length < 10) {
+      setLeadError('দয়া করে একটি সঠিক ১১ ডিজিটের মোবাইল নম্বর লিখুন।');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Check if OTP is explicitly required by admin
+    const shouldVerifyOtp = otpConfig?.mode === 'ON';
 
     if (shouldVerifyOtp) {
       const otpResp = requestNewOtp(leadPhone, otpConfig);

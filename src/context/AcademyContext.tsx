@@ -1045,6 +1045,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const isRemoteUpdate = useRef(false);
   const lastSavedPayloadString = useRef<string>('');
   const lastLocalMutationTimestamp = useRef<number>(0);
+  const latestCoursesRef = useRef<Course[]>(courses);
+
+  useEffect(() => {
+    latestCoursesRef.current = courses;
+  }, [courses]);
 
   // 1. PUBLIC WEBSITE CATALOG REAL-TIME LISTENER
   // Subscribes ONLY to /academy_data/public_catalog (contains NO private students, leads, payments, staff accounts, or audit logs)
@@ -1258,6 +1263,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setIsAuthenticated(true);
         }
       }
+      if (e.key === `${STORAGE_KEY}_courses` && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCourses(parsed);
+            latestCoursesRef.current = parsed;
+          }
+        } catch {}
+      }
       if (e.key === `${STORAGE_KEY}_current_user` && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
@@ -1291,7 +1305,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           const newLeads = data.leads.filter((l: Lead) => !existingIds.has(l.id));
           addedCount = newLeads.length;
           if (newLeads.length > 0) {
-            return [...newLeads, ...prev];
+            const merged = [...newLeads, ...prev];
+            try {
+              localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged));
+            } catch {}
+            return merged;
           }
           return prev;
         });
@@ -1304,13 +1322,84 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Periodic background check to fetch new online leads into CRM
+  // Real-time multi-tab & cross-window communication for courses & leads
+  useEffect(() => {
+    // 1. Cross-tab course catalog sync
+    let coursesBc: BroadcastChannel | null = null;
+    try {
+      coursesBc = new BroadcastChannel('nexgen_course_catalog_sync');
+      coursesBc.onmessage = (event) => {
+        if (event.data?.type === 'COURSES_UPDATED' && Array.isArray(event.data.courses)) {
+          setCourses(event.data.courses);
+          latestCoursesRef.current = event.data.courses;
+        }
+      };
+    } catch {}
+
+    const handleCoursesUpdated = (e: any) => {
+      if (Array.isArray(e.detail)) {
+        setCourses(e.detail);
+        latestCoursesRef.current = e.detail;
+      }
+    };
+    window.addEventListener('courses-updated', handleCoursesUpdated);
+
+    // 2. Cross-tab lead submission sync
+    const triggerLeadSync = () => {
+      if (isAuthenticated) {
+        syncIncomingLeadsNow();
+      }
+    };
+    window.addEventListener('incoming-lead-submitted', triggerLeadSync);
+    window.addEventListener('focus', triggerLeadSync);
+
+    let leadsBc: BroadcastChannel | null = null;
+    try {
+      leadsBc = new BroadcastChannel('nexgen_leads_sync');
+      leadsBc.onmessage = () => {
+        triggerLeadSync();
+      };
+    } catch {}
+
+    return () => {
+      if (coursesBc) coursesBc.close();
+      if (leadsBc) leadsBc.close();
+      window.removeEventListener('courses-updated', handleCoursesUpdated);
+      window.removeEventListener('incoming-lead-submitted', triggerLeadSync);
+      window.removeEventListener('focus', triggerLeadSync);
+    };
+  }, [isAuthenticated]);
+
+  // Periodic background check to fetch new online leads into CRM (every 4 seconds)
   useEffect(() => {
     if (!isAuthenticated) return;
     syncIncomingLeadsNow();
-    const interval = setInterval(syncIncomingLeadsNow, 15000);
+    const interval = setInterval(syncIncomingLeadsNow, 4000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
+
+  // Periodic background check to ensure public website & landing pages always have freshest course prices
+  useEffect(() => {
+    const refreshCatalog = async () => {
+      try {
+        const res = await fetch('/api/catalog', { cache: 'no-store' });
+        if (!res.ok) return;
+        const cat = await res.json();
+        if (cat && Array.isArray(cat.courses) && cat.courses.length > 0) {
+          if (Date.now() - lastLocalMutationTimestamp.current < 4000) return;
+          setCourses(cat.courses);
+          latestCoursesRef.current = cat.courses;
+        }
+      } catch {}
+    };
+
+    const interval = setInterval(refreshCatalog, 6000);
+    window.addEventListener('focus', refreshCatalog);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', refreshCatalog);
+    };
+  }, []);
 
   // Dynamically initialize Google Analytics 4 (Real GA4 Measurement ID: G-VYNS03M91Z)
   useEffect(() => {
@@ -1358,7 +1447,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const publicCatalogPayload = {
       categories,
-      courses,
+      courses: latestCoursesRef.current,
       seminars,
       publicCertificates: publicCertificatesPayload,
       websiteCmsConfig,
@@ -1920,13 +2009,25 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       createdAt: now,
       updatedAt: now
     };
-    setLeads(prev => [newLead, ...prev]);
+    setLeads(prev => {
+      const next = [newLead, ...prev];
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     logAudit('Lead Created', 'CRM', id, `Added new lead "${newLead.name}" (${newLead.phone})`);
     return newLead;
   };
 
   const updateLead = (id: string, updates: Partial<Lead>) => {
-    setLeads(prev => prev.map(l => (l.id === id ? { ...l, ...updates, updatedAt: new Date().toISOString() } : l)));
+    setLeads(prev => {
+      const next = prev.map(l => (l.id === id ? { ...l, ...updates, updatedAt: new Date().toISOString() } : l));
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     logAudit('Lead Updated', 'CRM', id, `Updated details for lead ID: ${id}`);
   };
 
@@ -1945,7 +2046,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       },
       ...prev
     ]);
-    setLeads(prev => prev.filter(l => l.id !== id));
+    setLeads(prev => {
+      const next = prev.filter(l => l.id !== id);
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     logAudit('Lead Moved to Trash', 'CRM', id, `Moved lead "${target.name}" to trash`);
   };
 
@@ -2064,7 +2171,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
           // If it's a completely different course inquiry, also append new lead so both courses are tracked
           if (existingLead.interestedCourseId !== newLeadRecord.interestedCourseId) {
-            setLeads(prev => [newLeadRecord, ...prev]);
+            setLeads(prev => {
+              const next = [newLeadRecord, ...prev];
+              try {
+                localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
+              } catch {}
+              return next;
+            });
           }
 
           logAudit('Duplicate/Re-apply Lead Handled', 'CRM', existingLead.id, `Lead "${existingLead.name}" re-submitted for ${newLeadRecord.courseName || 'course'}. Pipeline stage updated to ${nextStatus}.`);
@@ -2081,7 +2194,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           };
         } else {
           // Insert new verified lead
-          setLeads(prev => [newLeadRecord, ...prev]);
+          setLeads(prev => {
+            const next = [newLeadRecord, ...prev];
+            try {
+              localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
+            } catch {}
+            return next;
+          });
           logAudit(
             newLeadRecord.status === 'OTP Verified' ? 'Lead Verified & Created' : 'Lead Created (Web)',
             'CRM',
@@ -2142,7 +2261,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updatedAt: new Date().toISOString()
       };
 
-      setLeads(prev => [fallbackLead, ...prev]);
+      setLeads(prev => {
+        const next = [fallbackLead, ...prev];
+        try {
+          localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
+        } catch {}
+        return next;
+      });
       logAudit('Lead Created (Local Fallback)', 'CRM', fallbackId, `Saved lead locally: ${fallbackLead.name} (${fallbackLead.phone})`);
 
       return {
@@ -2705,14 +2830,45 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updatedAt: new Date().toISOString()
     };
 
-    setCourses(prev => [newCourse, ...prev]);
+    setCourses(prev => {
+      const next = [newCourse, ...prev];
+      latestCoursesRef.current = next;
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('courses-updated', { detail: [newCourse, ...courses] }));
+      try {
+        const bc = new BroadcastChannel('nexgen_course_catalog_sync');
+        bc.postMessage({ type: 'COURSES_UPDATED', courses: [newCourse, ...courses], timestamp: Date.now() });
+        bc.close();
+      } catch {}
+    }
+
+    fetch('/api/catalog', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-staff-auth': 'nexgen-staff-auth-secure'
+      },
+      body: JSON.stringify({
+        courses: [newCourse, ...courses],
+        updatedAt: new Date().toISOString()
+      })
+    }).catch(() => {});
+
     logAudit('Course Created', 'Courses', id, `Added course: ${newCourse.name} (${newCourse.code})`);
     return newCourse;
   };
 
   const updateCourse = (id: string, updates: Partial<Course>) => {
-    setCourses(prev =>
-      prev.map(c =>
+    lastLocalMutationTimestamp.current = Date.now();
+    let nextCourses: Course[] = [];
+    setCourses(prev => {
+      nextCourses = prev.map(c =>
         c.id === id
           ? {
               ...c,
@@ -2720,8 +2876,37 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
               updatedAt: new Date().toISOString()
             }
           : c
-      )
-    );
+      );
+      latestCoursesRef.current = nextCourses;
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(nextCourses));
+      } catch {}
+      return nextCourses;
+    });
+
+    // Immediate cross-tab and cross-component broadcast
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('courses-updated', { detail: nextCourses }));
+      try {
+        const bc = new BroadcastChannel('nexgen_course_catalog_sync');
+        bc.postMessage({ type: 'COURSES_UPDATED', courses: nextCourses, timestamp: Date.now() });
+        bc.close();
+      } catch {}
+    }
+
+    // Direct push to /api/catalog without waiting
+    fetch('/api/catalog', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-staff-auth': 'nexgen-staff-auth-secure'
+      },
+      body: JSON.stringify({
+        courses: nextCourses,
+        updatedAt: new Date().toISOString()
+      })
+    }).catch(e => console.warn('Direct catalog push notice:', e));
+
     logAudit('Course Updated', 'Courses', id, `Updated course details for ID: ${id}`);
     setTimeout(() => {
       syncToCloudNow(true);
@@ -2784,9 +2969,27 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     if (hasDependencies) {
       // Archive instead to preserve academic and revenue records!
-      setCourses(prev =>
-        prev.map(c => (c.id === id ? { ...c, status: 'Archived', updatedAt: new Date().toISOString() } : c))
-      );
+      let nextCourses: Course[] = [];
+      setCourses(prev => {
+        nextCourses = prev.map(c => (c.id === id ? { ...c, status: 'Archived', updatedAt: new Date().toISOString() } : c));
+        latestCoursesRef.current = nextCourses;
+        try {
+          localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(nextCourses));
+        } catch {}
+        return nextCourses;
+      });
+      fetch('/api/catalog', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-staff-auth': 'nexgen-staff-auth-secure'
+        },
+        body: JSON.stringify({
+          courses: nextCourses,
+          updatedAt: new Date().toISOString()
+        })
+      }).catch(() => {});
+
       const reasonMsg = `Course "${target.name}" has ${connectedAdmissions.length} student admissions, ${connectedBatches.length} batches, and linked academic records. To preserve historical and financial integrity, the course was safely Archived instead of deleted.`;
       logAudit('Course Archived (Protected)', 'Courses', id, reasonMsg);
       return {
@@ -2809,7 +3012,26 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       },
       ...prev
     ]);
-    setCourses(prev => prev.filter(c => c.id !== id));
+    let nextCourses: Course[] = [];
+    setCourses(prev => {
+      nextCourses = prev.filter(c => c.id !== id);
+      latestCoursesRef.current = nextCourses;
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(nextCourses));
+      } catch {}
+      return nextCourses;
+    });
+    fetch('/api/catalog', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-staff-auth': 'nexgen-staff-auth-secure'
+      },
+      body: JSON.stringify({
+        courses: nextCourses,
+        updatedAt: new Date().toISOString()
+      })
+    }).catch(() => {});
     logAudit('Course Moved to Trash', 'Courses', id, `Deleted unlinked course ${target.name}`);
     return { success: true, archivedInstead: false };
   };

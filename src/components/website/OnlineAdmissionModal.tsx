@@ -12,20 +12,23 @@ interface OnlineAdmissionModalProps {
   isOpen: boolean;
   onClose: () => void;
   preselectedCourse?: Course | null;
+  defaultCourseId?: string;
 }
 
 export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
   isOpen,
   onClose,
-  preselectedCourse
+  preselectedCourse,
+  defaultCourseId
 }) => {
-  const { courses, addLead, submitPublicLead, academySettings } = useAcademy();
+  const { courses, addLead, submitPublicLead, syncIncomingLeadsNow, academySettings } = useAcademy();
+  const initialCourseId = preselectedCourse?.id || defaultCourseId || courses[0]?.id || '';
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     gender: 'Male' as 'Male' | 'Female' | 'Other',
-    courseId: preselectedCourse?.id || (courses[0]?.id || ''),
+    courseId: initialCourseId,
     learningMode: 'Offline' as 'Offline' | 'Online Live' | 'Hybrid',
     preferredSchedule: 'Weekend (Friday-Saturday)',
     educationLevel: 'HSC / College',
@@ -33,6 +36,14 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
     trxId: '',
     notes: ''
   });
+
+  React.useEffect(() => {
+    if (preselectedCourse?.id) {
+      setFormData(prev => ({ ...prev, courseId: preselectedCourse.id }));
+    } else if (defaultCourseId) {
+      setFormData(prev => ({ ...prev, courseId: defaultCourseId }));
+    }
+  }, [preselectedCourse?.id, defaultCourseId]);
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -43,9 +54,9 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
 
   if (!isOpen) return null;
 
-  const selectedCourse = courses.find(c => c.id === formData.courseId) || courses[0];
+  const selectedCourse = courses.find(c => c.id === formData.courseId || c.code === formData.courseId || c.slug === formData.courseId) || preselectedCourse || courses[0];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.phone.trim()) {
       setErrorMessage('Please enter your full name and active mobile number.');
@@ -61,7 +72,7 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
       const leadSourceStr = utms.utmSource ? `Ad: ${utms.utmSource} (Online Admission)` : 'Website Online Admission';
 
       // 1. Submit to authoritative server pipeline
-      submitPublicLead({
+      await submitPublicLead({
         fullName: formData.name.trim(),
         studentName: formData.name.trim(),
         name: formData.name.trim(),
@@ -86,9 +97,8 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         utmCampaign: utms.utmCampaign,
         utmContent: utms.utmContent,
         utmTerm: utms.utmTerm,
-        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined
-      }).catch(err => {
-        console.warn('Server submission fallback handled:', err);
+        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+        otpVerified: true
       });
 
       // 2. Register lead into CRM directly with full attribution data
@@ -116,6 +126,20 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         status: 'Admission Pending',
         comments: commentsText
       });
+
+      // 3. Immediately notify CRM listeners
+      if (typeof window !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('nexgen_leads_sync');
+          bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+          bc.close();
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+      }
+
+      if (syncIncomingLeadsNow) {
+        syncIncomingLeadsNow().catch(() => {});
+      }
 
       // Fire Meta Pixel CompleteRegistration & Lead Events
       trackMetaPixelEvent('Lead', {

@@ -49,7 +49,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
   onSuccess,
   className = ''
 }) => {
-  const { courses, websiteCmsConfig, submitPublicLead } = useAcademy();
+  const { courses, websiteCmsConfig, submitPublicLead, syncIncomingLeadsNow } = useAcademy();
   const formConfig = websiteCmsConfig.leadFormConfig;
   const fraudConfig = websiteCmsConfig.fraudProtection;
   const otpConfig = websiteCmsConfig.otpConfig;
@@ -350,6 +350,20 @@ export const LeadForm: React.FC<LeadFormProps> = ({
             },
             triggerCapi: true
           });
+        }
+
+        // Immediately notify and sync CRM across all tabs
+        if (typeof window !== 'undefined') {
+          try {
+            const bc = new BroadcastChannel('nexgen_leads_sync');
+            bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+            bc.close();
+          } catch (e) {}
+          window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+        }
+
+        if (syncIncomingLeadsNow) {
+          syncIncomingLeadsNow().catch(() => {});
         }
 
         if (onSuccess) {

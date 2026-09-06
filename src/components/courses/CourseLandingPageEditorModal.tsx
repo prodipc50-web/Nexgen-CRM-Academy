@@ -284,10 +284,10 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
     existingConfig.syllabusDownloadConfig?.description || 'আপনার তথ্য দিয়ে সাথে সাথে সিলেবাস ও রোডম্যাপ ডাউনলোড করুন।'
   );
   const [syllabusFileUrl, setSyllabusFileUrl] = useState<string>(
-    existingConfig.syllabusDownloadConfig?.fileUrl || ''
+    existingConfig.syllabusDownloadConfig?.fileUrl || (course as any).syllabusPdfUrl || (course as any).curriculumFileUrl || ''
   );
   const [syllabusFileName, setSyllabusFileName] = useState<string>(
-    existingConfig.syllabusDownloadConfig?.fileName || ''
+    existingConfig.syllabusDownloadConfig?.fileName || (course as any).curriculumFileName || ''
   );
   const [syllabusFileType, setSyllabusFileType] = useState<'pdf' | 'image' | 'doc' | 'other'>(
     existingConfig.syllabusDownloadConfig?.fileType || 'pdf'
@@ -808,7 +808,10 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
       thumbnailUrl: customBannerUrl.trim() || course.thumbnailUrl,
       landingConfig: updatedLandingConfig,
       seo: updatedSeo,
-      slug: slug.trim() || course.slug
+      slug: slug.trim() || course.slug,
+      syllabusPdfUrl: syllabusFileUrl.trim() || (course as any).syllabusPdfUrl,
+      curriculumFileUrl: syllabusFileUrl.trim() || (course as any).curriculumFileUrl,
+      curriculumFileName: syllabusFileName.trim() || (course as any).curriculumFileName
     });
 
     syncToCloudNow(true);
