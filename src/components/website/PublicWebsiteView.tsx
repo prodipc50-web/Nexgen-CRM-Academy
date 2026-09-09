@@ -58,7 +58,8 @@ import {
   MessageSquare,
   Compass,
   Laptop,
-  Edit
+  Edit,
+  ChevronRight
 } from 'lucide-react';
 import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage } from '../../types';
 import { HeroBannerSlider } from './HeroBannerSlider';
@@ -501,6 +502,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           <HeroBannerSlider
             slides={websiteCmsConfig.heroSlides || []}
             language={language}
+            fallbackHeadline={websiteCmsConfig.heroHeadline}
+            fallbackSubtitle={websiteCmsConfig.heroSubtitle}
             onOpenAdmission={() => {
               setSelectedCourseForAdmission(null);
               setIsAdmissionOpen(true);
@@ -1051,6 +1054,20 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                           {deliveryMode}
                         </span>
                       </div>
+
+                      {/* Course Landing Page Direct Pill (Top Left) */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }));
+                        }}
+                        className="absolute top-3 left-3 flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-slate-900/85 hover:bg-indigo-600 text-white backdrop-blur-xs border border-white/20 shadow-md transition-all cursor-pointer z-10"
+                        title="সম্পূর্ণ ডেডিকেটেড ল্যান্ডিং পেজ দেখুন"
+                      >
+                        <ExternalLink className="w-3 h-3 text-amber-300" />
+                        <span>Course Page</span>
+                      </button>
                     </div>
 
                     {/* Card Body */}
@@ -1127,23 +1144,35 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       </div>
 
                       {/* Dual Action Buttons */}
-                      <div className="grid grid-cols-2 gap-2.5 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedCourseForDetails(c)}
-                          className="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-colors text-center flex items-center justify-center space-x-1"
-                        >
-                          <BookOpen className="w-3.5 h-3.5 text-slate-600" />
-                          <span>View Details</span>
-                        </button>
+                      <div className="space-y-2 pt-1">
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCourseForDetails(c)}
+                            className="px-2.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-colors text-center flex items-center justify-center space-x-1 cursor-pointer"
+                          >
+                            <BookOpen className="w-3.5 h-3.5 text-slate-600" />
+                            <span>View Details</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEnroll(c)}
+                            className="px-2.5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-98 text-white font-black text-xs rounded-xl shadow-md transition-all text-center flex items-center justify-center space-x-1 cursor-pointer"
+                          >
+                            <Zap className="w-3.5 h-3.5 text-amber-300" />
+                            <span>Enroll Now</span>
+                          </button>
+                        </div>
 
                         <button
                           type="button"
-                          onClick={() => handleOpenEnroll(c)}
-                          className="px-3 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-98 text-white font-black text-xs rounded-xl shadow-md transition-all text-center flex items-center justify-center space-x-1"
+                          onClick={() => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }))}
+                          className="w-full py-2 px-3 bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-blue-500/10 hover:from-amber-500/20 hover:to-indigo-500/20 text-indigo-900 border border-indigo-200/80 rounded-xl text-xs font-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-2xs"
                         >
-                          <Zap className="w-3.5 h-3.5 text-amber-300" />
-                          <span>Enroll Now</span>
+                          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                          <span>ল্যান্ডিং পেজ ও অফার দেখুন</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-indigo-600" />
                         </button>
                       </div>
                     </div>
@@ -2130,31 +2159,6 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         </div>
       </footer>
 
-      {/* FLOATING WHATSAPP & QUICK CALL BUTTONS */}
-      <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end space-y-2.5">
-        <a
-          href={getWhatsAppDirectUrl(
-            socials.whatsappSupportNumber || academySettings.primarySupportPhone || '01798444444',
-            'Hello Nexgen Academy! I want to talk to an admission counselor.'
-          )}
-          target="_blank"
-          rel="noreferrer"
-          className="p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-2xl flex items-center space-x-2 transition-transform hover:scale-105"
-          title="Chat with Counselor on WhatsApp"
-        >
-          <MessageCircle className="w-5 h-5" />
-          <span className="text-xs font-bold hidden sm:inline pr-1">WhatsApp Chat</span>
-        </a>
-
-        <a
-          href={`tel:${multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}`}
-          className="p-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl flex items-center space-x-2 transition-transform hover:scale-105 sm:hidden"
-          title="Direct Call Helpline"
-        >
-          <Phone className="w-5 h-5" />
-        </a>
-      </div>
-
       {/* POPUP MODALS */}
       <OnlineAdmissionModal
         isOpen={isAdmissionOpen}
@@ -2300,43 +2304,66 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         </div>
       )}
 
-      {/* 1-CLICK FLOATING WHATSAPP & HOTLINE QUICK CONNECT (Matching Benchmark Reference) */}
-      {(websiteCmsConfig?.marketing?.enableFloatingWhatsApp !== false) && (
-        <aside aria-label="Quick contact" className="fixed bottom-6 right-6 z-40 flex flex-col items-end space-y-2.5">
-          <a
-            href={getWhatsAppDirectUrl(
-              websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings.primarySupportPhone || '01798444444',
-              websiteCmsConfig?.marketing?.floatingWhatsAppWelcomeText || 'Hello Nexgen Academy! I want to know about course admission & scholarship.'
-            )}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              trackMetaPixelEvent('Contact', {
-                channel: 'WhatsApp Floating Button',
-                phone: websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings.primarySupportPhone || '01798444444'
-              }, websiteCmsConfig?.marketing?.metaPixelId);
-            }}
-            className="group bg-emerald-500 hover:bg-emerald-600 text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl shadow-emerald-600/40 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2 border-2 border-white cursor-pointer"
-            title="WhatsApp Admission Help"
-          >
-            <div className="w-5 h-5 flex items-center justify-center shrink-0">
-              <MessageCircle className="w-5 h-5 fill-white text-emerald-500" />
-            </div>
-            <span className="hidden sm:inline font-bold text-xs">WhatsApp Admission Help</span>
-          </a>
+      {/* 1-CLICK FLOATING WHATSAPP & HOTLINE QUICK CONNECT (Unified & CMS-Controlled) */}
+      {(websiteCmsConfig?.marketing?.enableFloatingWhatsApp !== false) && (() => {
+        const floatingWhatsAppNum =
+          websiteCmsConfig?.marketing?.floatingWhatsAppNumber ||
+          socials.whatsappSupportNumber ||
+          academySettings.primarySupportPhone ||
+          multiplePhones.find(p => p.isWhatsapp)?.number ||
+          '01798444444';
+        const floatingHotlineNum =
+          academySettings.primarySupportPhone ||
+          websiteCmsConfig?.marketing?.floatingWhatsAppNumber ||
+          multiplePhones.find(p => p.isHotline)?.number ||
+          multiplePhones[0]?.number ||
+          '01798444444';
+        const welcomeText =
+          websiteCmsConfig?.marketing?.floatingWhatsAppWelcomeText ||
+          (language === 'bn'
+            ? 'হ্যালো Nexgen Academy! আমি কোর্স ভর্তি ও স্কলারশিপ সম্পর্কে জানতে চাই।'
+            : 'Hello Nexgen Academy! I want to know about course admission & scholarship.');
 
-          {(academySettings.primarySupportPhone || websiteCmsConfig?.marketing?.floatingWhatsAppNumber) && (
+        return (
+          <aside aria-label="Quick contact" className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end space-y-2.5">
+            {/* WhatsApp Floating Button (Icon on mobile, full pill on desktop) */}
             <a
-              href={`tel:${academySettings.primarySupportPhone || websiteCmsConfig?.marketing?.floatingWhatsAppNumber}`}
-              className="group hidden sm:flex items-center bg-slate-900/95 hover:bg-slate-900 text-white px-3.5 py-2 rounded-full shadow-lg border border-slate-700 hover:scale-105 active:scale-95 transition-all text-xs font-bold space-x-2 cursor-pointer"
-              title={`Call Hotline: ${academySettings.primarySupportPhone || websiteCmsConfig?.marketing?.floatingWhatsAppNumber}`}
+              href={getWhatsAppDirectUrl(floatingWhatsAppNum, welcomeText)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                trackMetaPixelEvent('Contact', {
+                  channel: 'WhatsApp Floating Button',
+                  phone: floatingWhatsAppNum
+                }, websiteCmsConfig?.marketing?.metaPixelId);
+              }}
+              className="group bg-emerald-500 hover:bg-emerald-600 text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl shadow-emerald-600/40 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2 border-2 border-white cursor-pointer"
+              title="WhatsApp Admission Help"
             >
-              <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="text-slate-200 group-hover:text-white">Hotline: {academySettings.primarySupportPhone || websiteCmsConfig?.marketing?.floatingWhatsAppNumber}</span>
+              <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                <MessageCircle className="w-5 h-5 fill-white text-emerald-500" />
+              </div>
+              <span className="hidden sm:inline font-bold text-xs">
+                {language === 'bn' ? 'হোয়াটসঅ্যাপ ভর্তি সহায়তা' : 'WhatsApp Admission Help'}
+              </span>
             </a>
-          )}
-        </aside>
-      )}
+
+            {/* Direct Call Hotline (Phone icon on mobile, full pill with number on desktop) */}
+            {floatingHotlineNum && (
+              <a
+                href={`tel:${floatingHotlineNum}`}
+                className="group flex items-center bg-slate-900/95 hover:bg-slate-900 text-white p-3 sm:px-3.5 sm:py-2 rounded-full shadow-lg border border-slate-700 hover:scale-105 active:scale-95 transition-all text-xs font-bold space-x-2 cursor-pointer"
+                title={`Call Hotline: ${floatingHotlineNum}`}
+              >
+                <Phone className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
+                <span className="hidden sm:inline text-slate-200 group-hover:text-white">
+                  Hotline: {floatingHotlineNum}
+                </span>
+              </a>
+            )}
+          </aside>
+        );
+      })()}
 
       {/* TOP NOTICE & PROMO BANNER CMS EDIT MODAL */}
       <TopNoticeTickerModal

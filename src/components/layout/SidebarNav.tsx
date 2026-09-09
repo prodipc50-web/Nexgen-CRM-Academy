@@ -46,7 +46,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
   onCloseMobile,
   onViewPublicWebsite
 }) => {
-  const { currentUser, stats, trashItems } = useAcademy();
+  const { currentUser, stats, trashItems, isBackupOverdue } = useAcademy();
 
   // Define navigation sections with role permissions
   const navSections = [
@@ -94,7 +94,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
     {
       title: 'SYSTEM',
       items: [
-        { id: 'settings', label: 'Settings & Audit', icon: Settings, roles: ['SUPER_ADMIN', 'MANAGER'] },
+        { id: 'settings', label: 'Settings & Audit', icon: Settings, badge: isBackupOverdue ? 'Backup Due' : undefined, badgeColor: 'bg-amber-600', roles: ['SUPER_ADMIN', 'MANAGER'] },
         { id: 'recycle-bin', label: 'Recycle Bin', icon: Trash2, badge: trashItems.length > 0 ? `${trashItems.length}` : undefined, badgeColor: 'bg-rose-600', roles: ['SUPER_ADMIN', 'MANAGER', 'ACCOUNTS_STAFF', 'COUNSELOR', 'TRAINER'] }
       ]
     }

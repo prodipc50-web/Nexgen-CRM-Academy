@@ -16,6 +16,11 @@ import {
   Trash2,
   AlertTriangle,
   ShieldCheck,
+  ShieldAlert,
+  Lock,
+  Flame,
+  Clock,
+  BellRing,
   CheckCircle2,
   FileSpreadsheet,
   Download
@@ -30,11 +35,11 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
   onOpenCollectPayment,
   onSelectStudent
 }) => {
-  const { admissions, students, courses, batches, stats, deleteStudent, deleteAdmission, waiveAdmissionDue } = useAcademy();
+  const { admissions, students, courses, batches, stats, deleteStudent, deleteAdmission, waiveAdmissionDue, addFollowUp } = useAcademy();
 
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
-  const [filterDueStatus, setFilterDueStatus] = useState<'all' | 'overdue' | 'upcoming'>('all');
+  const [filterDueStatus, setFilterDueStatus] = useState<'all' | 'critical' | 'overdue' | 'due_this_week' | 'high_value'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deletingDue, setDeletingDue] = useState<{
@@ -54,6 +59,20 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
 
   const todayStr = new Date().toISOString().split('T')[0];
 
+  const getOverdueDays = (dueDate?: string) => {
+    if (!dueDate) return 0;
+    const diff = new Date(todayStr).getTime() - new Date(dueDate).getTime();
+    return Math.max(0, Math.floor(diff / (1000 * 3600 * 24)));
+  };
+
+  // Critical overdue (>7 days)
+  const criticalOverdueAdmissions = admissions.filter(adm => {
+    if (adm.due <= 0) return false;
+    const dueDate = adm.nextPaymentDate || adm.nextDueDate;
+    return dueDate && getOverdueDays(dueDate) >= 7;
+  });
+  const criticalOverdueTotal = criticalOverdueAdmissions.reduce((sum, a) => sum + a.due, 0);
+
   const dueAdmissions = admissions.filter(adm => {
     if (adm.due <= 0) return false;
     const stu = students.find(s => s.id === adm.studentId);
@@ -63,15 +82,40 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
 
     const dueDate = adm.nextPaymentDate || adm.nextDueDate;
     const isOverdue = dueDate && dueDate < todayStr;
+    const daysOverdue = getOverdueDays(dueDate);
+
     const matchesFilter =
       filterDueStatus === 'all' ||
+      (filterDueStatus === 'critical' && daysOverdue >= 7) ||
       (filterDueStatus === 'overdue' && isOverdue) ||
-      (filterDueStatus === 'upcoming' && !isOverdue);
+      (filterDueStatus === 'due_this_week' && !isOverdue && dueDate && daysOverdue <= 0) ||
+      (filterDueStatus === 'high_value' && adm.due >= 5000);
 
     return matchesSearch && matchesFilter;
   });
 
   const totalOutstandingDue = dueAdmissions.reduce((sum, a) => sum + a.due, 0);
+
+  const handleScheduleUrgentCall = (stuId: string, stuName: string, courseName: string, dueAmount: number) => {
+    try {
+      addFollowUp({
+        leadId: stuId,
+        date: todayStr,
+        method: 'Phone Call',
+        contactMethod: 'Phone Call',
+        conversationSummary: `🚨 Urgent Fee Due Follow-up (${courseName})`,
+        notes: `Urgent recovery call scheduled for ${stuName}. Pending due balance: ৳${dueAmount.toLocaleString()}. Follow-up with guardian or candidate for immediate settlement.`,
+        result: 'Payment Issue',
+        nextAction: 'Recover pending course fee installment',
+        nextFollowUpDate: todayStr,
+        status: 'Pending',
+        staffName: 'Accounts / Recovery Desk'
+      });
+      showToast(`Urgent follow-up call task added to CRM for ${stuName}`);
+    } catch (e) {
+      showToast(`Logged call reminder for ${stuName}`);
+    }
+  };
 
   const handleCopyReminder = (admId: string, stuName: string, courseName: string, dueAmount: number, dueDate?: string) => {
     const text = `Dear ${stuName}, this is a gentle reminder from Nexgen Computer Academy regarding your course "${courseName}". Your outstanding course fee due balance is ৳${dueAmount.toLocaleString()} (Due Date: ${dueDate || 'Immediate'}). Please clear your dues at the academy office or via bKash/Nagad Merchant to avoid batch deactivation. Help desk: +8801700-000000.`;
@@ -139,6 +183,44 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
         </div>
       </div>
 
+      {/* Red Alert Overdue Collection Engine Banner */}
+      {criticalOverdueAdmissions.length > 0 && (
+        <div className="bg-gradient-to-r from-rose-950 via-rose-900 to-slate-900 text-white p-5 rounded-3xl border border-rose-700/60 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3.5">
+            <div className="p-3 bg-rose-800/80 text-rose-200 rounded-2xl shrink-0 border border-rose-700 shadow-inner">
+              <ShieldAlert className="w-6 h-6 animate-pulse text-rose-300" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white px-2 py-0.5 rounded-full">
+                  Red Alert Collection Engine
+                </span>
+                <span className="text-xs text-rose-200">
+                  {criticalOverdueAdmissions.length} accounts overdue by 7+ days
+                </span>
+              </div>
+              <h3 className="text-lg font-black tracking-tight text-white mt-0.5">
+                ৳{criticalOverdueTotal.toLocaleString()} Pending in Critical Overdue Dues
+              </h3>
+              <p className="text-xs text-rose-200/90 mt-0.5 flex items-center space-x-1.5">
+                <Lock className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <span>Certificate issuance, final exams, and batch credentials auto-flagged on hold until dues settled.</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0">
+            <button
+              onClick={() => setFilterDueStatus('critical')}
+              className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center space-x-1.5"
+            >
+              <Flame className="w-4 h-4 text-amber-300" />
+              <span>Review {criticalOverdueAdmissions.length} Critical Accounts</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
         <div className="bg-rose-50 border border-rose-200 p-4 rounded-2xl">
@@ -182,7 +264,7 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
           />
         </div>
 
-        <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl">
+        <div className="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-xl">
           <button
             onClick={() => setFilterDueStatus('all')}
             className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
@@ -192,20 +274,37 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
             All Dues
           </button>
           <button
-            onClick={() => setFilterDueStatus('overdue')}
-            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
-              filterDueStatus === 'overdue' ? 'bg-rose-600 text-white shadow-2xs' : 'text-rose-700 hover:bg-rose-50'
+            onClick={() => setFilterDueStatus('critical')}
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center space-x-1 ${
+              filterDueStatus === 'critical' ? 'bg-rose-600 text-white shadow-2xs' : 'text-rose-700 hover:bg-rose-50'
             }`}
           >
-            Overdue Only
+            <Flame className="w-3.5 h-3.5" />
+            <span>Critical (&gt;7 Days)</span>
           </button>
           <button
-            onClick={() => setFilterDueStatus('upcoming')}
+            onClick={() => setFilterDueStatus('overdue')}
             className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
-              filterDueStatus === 'upcoming' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-indigo-700 hover:bg-indigo-50'
+              filterDueStatus === 'overdue' ? 'bg-amber-600 text-white shadow-2xs' : 'text-amber-800 hover:bg-amber-50'
             }`}
           >
-            Upcoming Due
+            Overdue Past
+          </button>
+          <button
+            onClick={() => setFilterDueStatus('due_this_week')}
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+              filterDueStatus === 'due_this_week' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-indigo-700 hover:bg-indigo-50'
+            }`}
+          >
+            Due Soon
+          </button>
+          <button
+            onClick={() => setFilterDueStatus('high_value')}
+            className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+              filterDueStatus === 'high_value' ? 'bg-purple-600 text-white shadow-2xs' : 'text-purple-700 hover:bg-purple-50'
+            }`}
+          >
+            ৳5,000+ High Due
           </button>
         </div>
       </div>
@@ -219,7 +318,8 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
             const crs = courses.find(c => c.id === adm.courseId);
             const batch = batches.find(b => b.id === adm.batchId);
             const dueDate = adm.nextPaymentDate || adm.nextDueDate;
-            const isOverdue = dueDate && dueDate < todayStr;
+            const isOverdue = !!(dueDate && dueDate < todayStr);
+            const daysOverdue = isOverdue && dueDate ? Math.max(0, Math.floor((new Date(todayStr).getTime() - new Date(dueDate).getTime()) / (1000 * 60 * 60 * 24))) : 0;
             const waUrl = getDueReminderWhatsAppUrl({
               phone: stu?.phone,
               studentName: stu?.name || 'Student',
@@ -257,22 +357,45 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                 </div>
 
                 {/* Deadline */}
-                <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-slate-400 text-[11px]">Deadline:</span>
-                    {dueDate ? (
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        isOverdue ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {dueDate} {isOverdue && '(OVERDUE)'}
-                      </span>
-                    ) : (
-                      <span className="text-slate-400">-</span>
-                    )}
+                <div className="flex flex-col gap-2 pt-1 border-t border-slate-100 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1.5 flex-wrap gap-1">
+                      <span className="text-slate-400 text-[11px]">Deadline:</span>
+                      {dueDate ? (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          isOverdue ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {dueDate}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                      {daysOverdue > 0 && (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
+                          daysOverdue >= 7 ? 'bg-rose-600 text-white' : 'bg-amber-500 text-white'
+                        }`}>
+                          {daysOverdue}d Overdue
+                        </span>
+                      )}
+                    </div>
+
+                    <span title="Certificate delivery locked until fee clearance" className="inline-flex items-center space-x-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded shrink-0">
+                      <Lock className="w-2.5 h-2.5" />
+                      <span>Cert Locked</span>
+                    </span>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center space-x-1.5">
+                  <div className="flex items-center justify-end space-x-1.5 flex-wrap gap-1">
+                    <button
+                      onClick={() => handleScheduleUrgentCall(adm.studentId, stu?.name || 'Student', crs?.name || 'Course', adm.due)}
+                      className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-semibold inline-flex items-center space-x-1"
+                      title="Schedule Urgent Recovery Call in CRM"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-amber-700" />
+                      <span className="text-[10px]">CRM Call</span>
+                    </button>
+
                     <a
                       href={waUrl}
                       target="_blank"
@@ -359,7 +482,8 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                 const crs = courses.find(c => c.id === adm.courseId);
                 const batch = batches.find(b => b.id === adm.batchId);
                 const dueDate = adm.nextPaymentDate || adm.nextDueDate;
-                const isOverdue = dueDate && dueDate < todayStr;
+                const isOverdue = !!(dueDate && dueDate < todayStr);
+                const daysOverdue = isOverdue && dueDate ? Math.max(0, Math.floor((new Date(todayStr).getTime() - new Date(dueDate).getTime()) / (1000 * 60 * 60 * 24))) : 0;
                 const waUrl = getDueReminderWhatsAppUrl({
                   phone: stu?.phone,
                   studentName: stu?.name || 'Student',
@@ -403,24 +527,48 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
 
                     <td className="py-3 px-4">
                       {dueDate ? (
-                        <div className="flex items-center space-x-1.5">
+                        <div className="flex flex-col gap-1 items-start">
+                          <div className="flex items-center space-x-1.5 flex-wrap">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                isOverdue ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-slate-100 text-slate-700'
+                              }`}
+                            >
+                              {dueDate}
+                            </span>
+                            {daysOverdue > 0 && (
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-black ${
+                                  daysOverdue >= 7 ? 'bg-rose-600 text-white animate-pulse' : 'bg-amber-500 text-white'
+                                }`}
+                              >
+                                {daysOverdue}d Late
+                              </span>
+                            )}
+                          </div>
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              isOverdue ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-slate-100 text-slate-700'
-                            }`}
+                            title="Certificates on hold until fee clearance"
+                            className="inline-flex items-center space-x-1 text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1 py-0.2 rounded"
                           >
-                            {dueDate}
+                            <Lock className="w-2.5 h-2.5" />
+                            <span>Cert Locked</span>
                           </span>
-                          {isOverdue && (
-                            <span className="text-[10px] text-rose-600 font-black">OVERDUE</span>
-                          )}
                         </div>
                       ) : (
                         <span className="text-slate-400 text-[11px]">-</span>
                       )}
                     </td>
 
-                    <td className="py-3 px-4 text-right space-x-1.5">
+                    <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                      <button
+                        onClick={() => handleScheduleUrgentCall(adm.studentId, stu?.name || 'Student', crs?.name || 'Course', adm.due)}
+                        className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded text-xs font-bold transition-all inline-flex items-center space-x-1"
+                        title="Schedule Urgent Recovery Call in CRM"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-amber-700" />
+                        <span>CRM Call</span>
+                      </button>
+
                       <a
                         href={waUrl}
                         target="_blank"

@@ -35,6 +35,7 @@ import { ThemeEditor } from '../settings/ThemeEditor';
 import { MarketingAnalyticsDashboard } from '../marketing/MarketingAnalyticsDashboard';
 import { FraudAndSecuritySettings } from '../settings/FraudAndSecuritySettings';
 import { PaymentGatewaysSettings } from '../settings/PaymentGatewaysSettings';
+import { AutoBackupAndArchiveManager } from '../settings/AutoBackupAndArchiveManager';
 import { CreditCard } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -86,6 +87,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     deleteDiscountType,
     exportDatabaseJson,
     importDatabaseJson,
+    systemSnapshots,
+    createSafeSnapshot,
+    restoreSafeSnapshot,
+    deleteSafeSnapshot,
     cloudSyncStatus,
     lastCloudSyncTime,
     syncToCloudNow,
@@ -109,6 +114,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
   const [integrityMessage, setIntegrityMessage] = useState<string | null>(null);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
   const [isLogoCropModalOpen, setIsLogoCropModalOpen] = useState(false);
+  const [restoringSnapshotId, setRestoringSnapshotId] = useState<string | null>(null);
+  const [isCreatingSnapshot, setIsCreatingSnapshot] = useState(false);
+  const [snapshotNotice, setSnapshotNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Local state for Academy Profile & Logo editing
   const [profileForm, setProfileForm] = useState({
@@ -850,6 +858,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
               </button>
             </div>
           )}
+
+          {/* Automated Backup Scheduler, Storage Analyzer & Archive Vault */}
+          <AutoBackupAndArchiveManager />
 
           {/* 2-Column Grid: Backup & Restore Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

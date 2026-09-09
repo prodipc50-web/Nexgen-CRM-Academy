@@ -21,6 +21,7 @@ import {
   FileText
 } from 'lucide-react';
 import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
+import { numberToWordsEnglish } from '../../utils/numberToWords';
 
 interface MoneyReceiptModalProps {
   isOpen: boolean;
@@ -145,7 +146,17 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
   }
 
   const handlePrint = () => {
-    window.print();
+    const originalTitle = document.title;
+    try {
+      document.title = `Official_Receipt_${receiptData.receiptNumber}_${(receiptData.studentName || 'Student').replace(/\s+/g, '_')}`;
+      window.print();
+    } catch (e) {
+      window.print();
+    } finally {
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
+    }
   };
 
   const handleSendWhatsAppReceipt = () => {
@@ -300,9 +311,10 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
             <button
               onClick={handlePrint}
               className="flex items-center space-x-1 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs transition-colors"
+              title="Official PDF / Print Receipt"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print ({printFormat === 'pos80' ? '80mm' : 'A4'})</span>
+              <Download className="w-3.5 h-3.5" />
+              <span>PDF / Print</span>
             </button>
 
             <button
@@ -676,6 +688,22 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
 
               <div className="border-t border-dashed border-slate-400 my-1" />
 
+              <div className="text-[9.5px] text-slate-700 italic text-center leading-tight">
+                In Words: {numberToWordsEnglish(receiptData.paidAmount)}
+              </div>
+
+              <div className="flex justify-center py-1">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=65x65&margin=0&data=${encodeURIComponent(
+                    `RECEIPT:${receiptData.receiptNumber}|BDT:${receiptData.paidAmount}|${receiptData.studentCode}|${receiptData.date}`
+                  )}`}
+                  alt="Receipt POS QR"
+                  className="w-14 h-14 mx-auto"
+                />
+              </div>
+
+              <div className="border-t border-dashed border-slate-400 my-1" />
+
               {/* Barcode Simulation & Footer */}
               <div className="text-center space-y-1 pt-1">
                 <div className="font-mono text-[9px] tracking-widest text-slate-600 select-none">
@@ -691,31 +719,31 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
             </div>
           </div>
         ) : (
-          <div className="overflow-y-auto flex-1 p-4 sm:p-8 bg-white text-slate-900 font-sans space-y-6 print:p-0 print:m-0 print-page-a4" id="money-receipt-printable">
+          <div className="overflow-y-auto flex-1 p-4 sm:p-7 bg-white text-slate-900 font-sans space-y-4 print:space-y-2 print:p-0 print:m-0 print-page-a4" id="money-receipt-printable">
             {/* Header Banner */}
-            <div className="flex items-start justify-between border-b-2 border-indigo-900 pb-4">
+            <div className="flex items-start justify-between border-b-2 border-indigo-900 pb-3 print:pb-1.5">
               <div>
                 <div className="flex items-center space-x-3">
-                  <NexgenLogo variant="crest" size={54} />
+                  <NexgenLogo variant="crest" size={50} />
                   <div>
-                    <h2 className="text-xl font-black text-indigo-950 uppercase tracking-tight">
+                    <h2 className="text-xl font-black text-indigo-950 uppercase tracking-tight print:text-lg">
                       {receiptData.instituteName}
                     </h2>
-                    <p className="text-[11px] text-slate-600 font-bold tracking-wide">
+                    <p className="text-[11px] text-slate-600 font-bold tracking-wide print:text-[10px]">
                       {receiptData.tagline}
                     </p>
                   </div>
                 </div>
-                <p className="text-[10px] text-slate-600 mt-2 font-medium">
+                <p className="text-[10px] text-slate-600 mt-1.5 print:mt-1 font-medium print:text-[9px]">
                   <strong className="text-indigo-950">{receiptData.campusName}</strong>: {receiptData.address} | Hotline: <strong className="text-slate-900 font-mono">{receiptData.hotlinePhone}</strong> | <span className="font-mono text-indigo-700">{receiptData.website}</span>
                 </p>
               </div>
 
               <div className="text-right">
-                <span className="inline-block bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider">
+                <span className="inline-block bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider print:py-0.5">
                   Money Receipt
                 </span>
-                <div className="text-[11px] text-slate-600 mt-2 space-y-0.5">
+                <div className="text-[11px] text-slate-600 mt-1.5 print:mt-1 space-y-0.5 print:text-[10px]">
                   <div>
                     <span className="font-semibold text-slate-500">Receipt No: </span>
                     <span className="font-mono font-bold text-slate-900">{receiptData.receiptNumber}</span>
@@ -729,63 +757,63 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
             </div>
 
             {/* Student & Course Details */}
-            <div className="grid grid-cols-2 gap-4 bg-slate-50/80 p-4 rounded-xl border border-slate-200 text-xs">
-              <div className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-4 print:gap-2 bg-slate-50/80 p-3.5 print:p-2 rounded-xl print:rounded-lg border border-slate-200 text-xs print:text-[10.5px]">
+              <div className="space-y-1">
                 <div>
-                  <span className="text-slate-500 text-[11px]">Student Name:</span>
-                  <div className="font-bold text-slate-900 text-sm">{receiptData.studentName || 'Student Name'}</div>
+                  <span className="text-slate-500 text-[11px] print:text-[10px]">Student Name:</span>
+                  <div className="font-bold text-slate-900 text-sm print:text-xs">{receiptData.studentName || 'Student Name'}</div>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[11px]">Student ID / Code:</span>
+                  <span className="text-slate-500 text-[11px] print:text-[10px]">Student ID / Code:</span>
                   <div className="font-mono font-bold text-indigo-700">{receiptData.studentCode || 'NCA-STU-001'}</div>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[11px]">Contact Phone:</span>
+                  <span className="text-slate-500 text-[11px] print:text-[10px]">Contact Phone:</span>
                   <div className="font-medium text-slate-800 font-mono">{receiptData.studentPhone || 'N/A'}</div>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div>
-                  <span className="text-slate-500 text-[11px]">Enrolled Course:</span>
+                  <span className="text-slate-500 text-[11px] print:text-[10px]">Enrolled Course:</span>
                   <div className="font-bold text-slate-900">{receiptData.courseName || 'Professional Course'}</div>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[11px]">Batch & Timing:</span>
+                  <span className="text-slate-500 text-[11px] print:text-[10px]">Batch & Timing:</span>
                   <div className="font-bold text-slate-800">{receiptData.batchNumber || 'Batch-01'}</div>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[11px]">Admission No:</span>
+                  <span className="text-slate-500 text-[11px] print:text-[10px]">Admission No:</span>
                   <div className="font-mono text-slate-700">{receiptData.admissionCode || 'ADM-001'}</div>
                 </div>
               </div>
             </div>
 
             {/* Payment Item Table */}
-            <div className="border border-slate-300 rounded-xl overflow-hidden text-xs">
+            <div className="border border-slate-300 rounded-xl print:rounded-lg overflow-hidden text-xs print:text-[11px]">
               <table className="w-full text-left">
                 <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
                   <tr>
-                    <th className="py-2.5 px-4">Description</th>
-                    <th className="py-2.5 px-4">Method & Ref</th>
-                    <th className="py-2.5 px-4 text-right">Paid Amount (৳)</th>
+                    <th className="py-2 print:py-1 px-4 print:px-3">Description</th>
+                    <th className="py-2 print:py-1 px-4 print:px-3">Method & Ref</th>
+                    <th className="py-2 print:py-1 px-4 print:px-3 text-right">Paid Amount (৳)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   <tr>
-                    <td className="py-3 px-4">
+                    <td className="py-2.5 print:py-1.5 px-4 print:px-3">
                       <div className="font-bold text-slate-900">
                         {receiptData.paymentDescription}
                       </div>
-                      <div className="text-[11px] text-slate-500">{receiptData.paymentNote}</div>
+                      <div className="text-[11px] print:text-[10px] text-slate-500">{receiptData.paymentNote}</div>
                     </td>
-                    <td className="py-3 px-4 text-slate-700">
+                    <td className="py-2.5 print:py-1.5 px-4 print:px-3 text-slate-700">
                       <div className="font-semibold">{receiptData.paymentMethod}</div>
                       {receiptData.transactionId && (
                         <div className="font-mono text-[10px] text-slate-500">Trx: {receiptData.transactionId}</div>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-right font-black text-sm text-slate-900">
+                    <td className="py-2.5 print:py-1.5 px-4 print:px-3 text-right font-black text-sm print:text-xs text-slate-900">
                       ৳{receiptData.paidAmount.toLocaleString()}
                     </td>
                   </tr>
@@ -793,9 +821,36 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
               </table>
             </div>
 
-            {/* Financial Breakdown & Summary */}
-            <div className="flex justify-end">
-              <div className="w-72 bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1.5 text-xs">
+            {/* In Words & Financial Breakdown */}
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 print:gap-3">
+              <div className="space-y-2 print:space-y-1.5 flex-1 w-full">
+                <div className="text-xs print:text-[10.5px] bg-slate-50 p-2.5 print:p-2 rounded-xl print:rounded-lg border border-slate-200">
+                  <span className="font-bold text-slate-700">Amount in Words (কথায়): </span>
+                  <span className="font-semibold text-indigo-950 italic">
+                    {numberToWordsEnglish(receiptData.paidAmount)}
+                  </span>
+                </div>
+
+                <div className="flex items-center space-x-3 p-2 print:p-1.5 bg-slate-50/60 rounded-xl print:rounded-lg border border-slate-200/80">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=0&data=${encodeURIComponent(
+                      `VERIFIED_OFFICIAL_RECEIPT|${receiptData.receiptNumber}|Student:${receiptData.studentName}|BDT ${receiptData.paidAmount}|Date:${receiptData.date}|${receiptData.instituteName}`
+                    )}`}
+                    alt="Receipt Verification QR"
+                    className="w-12 h-12 print:w-11 print:h-11 rounded-lg border border-slate-300 p-0.5 bg-white shrink-0 shadow-2xs"
+                  />
+                  <div className="text-[10px] print:text-[9px] text-slate-500 space-y-0.5">
+                    <div className="font-bold text-emerald-800 flex items-center space-x-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Official Receipt QR Token</span>
+                    </div>
+                    <div className="text-slate-600">Scan QR to instantly verify institutional fee record authenticity.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Financial Breakdown & Summary */}
+              <div className="w-full sm:w-72 bg-slate-50 border border-slate-200 rounded-xl print:rounded-lg p-3 print:p-2 space-y-1 print:space-y-0.5 text-xs print:text-[10.5px] shrink-0">
                 <div className="flex justify-between text-slate-600">
                   <span>Total Course Agreed Fee:</span>
                   <span className="font-semibold text-slate-900">৳{receiptData.totalFee.toLocaleString()}</span>
@@ -804,14 +859,14 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
                   <span>Total Paid (Cumulative):</span>
                   <span className="font-bold text-emerald-700">৳{receiptData.totalPaid.toLocaleString()}</span>
                 </div>
-                <div className="border-t border-slate-300 pt-1.5 flex justify-between font-bold text-slate-900">
+                <div className="border-t border-slate-300 pt-1 flex justify-between font-bold text-slate-900">
                   <span>Outstanding Due Balance:</span>
                   <span className={`font-black ${receiptData.dueBalance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                     ৳{receiptData.dueBalance.toLocaleString()}
                   </span>
                 </div>
                 {receiptData.dueBalance > 0 && receiptData.nextDueDate && (
-                  <div className="text-[10px] text-amber-800 bg-amber-50 p-1.5 rounded border border-amber-200 text-center font-medium">
+                  <div className="text-[9.5px] text-amber-800 bg-amber-50 p-1 rounded border border-amber-200 text-center font-medium mt-0.5">
                     Next Due Date: {receiptData.nextDueDate}
                   </div>
                 )}
@@ -820,28 +875,28 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
 
             {/* Custom Printable Receipt Terms / Notes */}
             {academySettings.receiptNotes && (
-              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-[10px] text-slate-600 space-y-0.5">
+              <div className="bg-slate-50 p-2 print:p-1.5 rounded-lg border border-slate-200 text-[10px] print:text-[9px] text-slate-600 space-y-0.5">
                 <div className="font-bold text-slate-800">শর্তাবলী ও নির্দেশিকা (Terms & Instructions):</div>
                 <div className="whitespace-pre-line leading-relaxed">{academySettings.receiptNotes}</div>
               </div>
             )}
 
             {/* Footer & Signature Stamps */}
-            <div className="pt-6 border-t border-slate-200 grid grid-cols-2 gap-8 items-end text-xs">
+            <div className="pt-4 print:pt-2 border-t border-slate-200 grid grid-cols-2 gap-8 items-end text-xs print:text-[10px]">
               <div>
-                <div className="flex items-center space-x-1.5 text-emerald-700 font-bold text-[11px] mb-1">
-                  <ShieldCheck className="w-4 h-4" />
+                <div className="flex items-center space-x-1.5 text-emerald-700 font-bold text-[11px] print:text-[10px] mb-0.5">
+                  <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Digitally Verified & System Generated</span>
                 </div>
-                <p className="text-[10px] text-slate-400">
-                  Printed on: {new Date().toLocaleString()} | Cashier: {receiptData.collectedBy}
+                <p className="text-[9.5px] print:text-[8.5px] text-slate-400">
+                  Printed on: {new Date().toLocaleDateString()} | Cashier: {receiptData.collectedBy}
                 </p>
                 {academySettings.institutionSealUrl && (
-                  <div className="mt-2">
+                  <div className="mt-1">
                     <img
                       src={academySettings.institutionSealUrl}
                       alt="Official Seal"
-                      className="w-16 h-16 object-contain mix-blend-multiply opacity-90"
+                      className="w-12 h-12 print:w-10 print:h-10 object-contain mix-blend-multiply opacity-90"
                       referrerPolicy="no-referrer"
                     />
                   </div>
@@ -854,19 +909,19 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
                     <img
                       src={academySettings.directorSignatureUrl}
                       alt="Signature"
-                      className="h-10 mx-auto object-contain mix-blend-multiply mb-1"
+                      className="h-8 print:h-7 mx-auto object-contain mix-blend-multiply mb-0.5"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="border-t border-slate-400 pt-1 font-semibold text-slate-700">
+                    <div className="border-t border-slate-400 pt-0.5 font-semibold text-slate-700 text-xs print:text-[10px]">
                       {receiptData.signatoryTitle}
                     </div>
                   </div>
                 ) : (
-                  <div className="inline-block border-b border-slate-400 w-48 text-center pb-1 font-semibold text-slate-700">
+                  <div className="inline-block border-b border-slate-400 w-48 text-center pb-0.5 font-semibold text-slate-700 text-xs print:text-[10px]">
                     {receiptData.signatoryTitle}
                   </div>
                 )}
-                <div className="text-[10px] text-slate-400 mt-1">{receiptData.instituteName}</div>
+                <div className="text-[9.5px] print:text-[8.5px] text-slate-400 mt-0.5">{receiptData.instituteName}</div>
               </div>
             </div>
           </div>
@@ -896,8 +951,8 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
               onClick={handlePrint}
               className="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors"
             >
-              <Printer className="w-4 h-4" />
-              <span>Print {printFormat === 'pos80' ? 'POS 80mm' : 'A4 Receipt'}</span>
+              <Download className="w-4 h-4" />
+              <span>Download PDF / Print {printFormat === 'pos80' ? '(80mm)' : '(A4)'}</span>
             </button>
           </div>
         </div>

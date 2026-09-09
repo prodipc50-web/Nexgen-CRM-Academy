@@ -300,7 +300,17 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
 
   // Robust Print Handler
   const handlePrint = () => {
-    window.print();
+    const originalTitle = document.title;
+    try {
+      document.title = `Certificate_${certData.certificateSerial}_${(certData.studentName || 'Student').replace(/\s+/g, '_')}`;
+      window.print();
+    } catch (e) {
+      window.print();
+    } finally {
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
+    }
   };
 
   // Theme Styling Configuration
@@ -369,11 +379,11 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-xs overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[96vh] animate-in zoom-in-95 duration-150"
+        className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[96vh] animate-in zoom-in-95 duration-150 print:max-w-none print:w-full print:h-auto print:max-h-none print:shadow-none print:border-none print:rounded-none print:overflow-visible"
         onClick={e => e.stopPropagation()}
       >
         {/* Sticky Top Control Bar */}
@@ -969,10 +979,10 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
         )}
 
         {/* Scrollable Content Area */}
-        <div className="overflow-y-auto flex-1 p-2 sm:p-6 bg-slate-100/70">
+        <div className="overflow-y-auto flex-1 p-2 sm:p-6 bg-slate-100/70 print:bg-white print:p-0 print:m-0 print:overflow-visible">
           {/* Certificate Canvas */}
           <div
-            className={`p-6 sm:p-12 ${themeStyles.bg} text-slate-900 font-serif border-[10px] sm:border-[14px] border-double ${themeStyles.border} rounded-xl relative overflow-hidden bg-white shadow-md print:shadow-none print:m-0 print:border-8 print:p-8 transition-colors duration-200 print-landscape-page print-page-a4-landscape`}
+            className={`p-6 sm:p-12 ${themeStyles.bg} text-slate-900 font-serif border-[10px] sm:border-[14px] border-double ${themeStyles.border} rounded-xl relative overflow-hidden bg-white shadow-md print:shadow-none print:m-0 print:border-8 print:p-6 transition-colors duration-200 print-landscape-page print-page-a4-landscape`}
             id="certificate-printable"
           >
             {/* Subtle Background Watermark */}

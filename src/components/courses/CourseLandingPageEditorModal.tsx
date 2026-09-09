@@ -850,6 +850,13 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
 
           <div className="flex items-center space-x-2">
             <button
+              onClick={() => handleSave()}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-black transition-all flex items-center space-x-1.5 shadow-md shadow-emerald-500/20 active:scale-95 cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>সেভ ও পাবলিশ (Save)</span>
+            </button>
+            <button
               onClick={() => {
                 window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course } }));
                 onClose();

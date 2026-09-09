@@ -29,13 +29,15 @@ import {
   Smartphone,
   Tablet,
   Palette,
-  Sliders
+  Sliders,
+  Save
 } from 'lucide-react';
 
 interface HeroBannerEditorProps {
   slides: HeroBannerSlide[];
   onChangeSlides: (slides: HeroBannerSlide[]) => void;
   onSuccessToast: (msg: string) => void;
+  onSave?: () => void;
 }
 
 const HD_BANNER_PRESETS: ImagePresetItem[] = [
@@ -121,12 +123,25 @@ const TEMPLATES = [
 export const HeroBannerEditor: React.FC<HeroBannerEditorProps> = ({
   slides,
   onChangeSlides,
-  onSuccessToast
+  onSuccessToast,
+  onSave
 }) => {
   const [selectedSlideIndex, setSelectedSlideIndex] = useState(0);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSaveAll = () => {
+    if (onSave) {
+      onSave();
+    } else {
+      onChangeSlides(slides);
+    }
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 2500);
+    onSuccessToast('হিরো ব্যানার সফলভাবে সংরক্ষিত ও লাইভ করা হয়েছে!');
+  };
 
   const activeSlide = slides[selectedSlideIndex] || slides[0] || {
     id: 'default',
@@ -252,10 +267,22 @@ export const HeroBannerEditor: React.FC<HeroBannerEditorProps> = ({
             <button
               type="button"
               onClick={handleAddSlide}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-md flex items-center space-x-1.5 transition-all hover:scale-105 active:scale-95"
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all hover:text-white"
             >
               <Plus className="w-4 h-4" />
               <span>Add Slide</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveAll}
+              className={`px-4 py-2 font-black text-xs rounded-xl shadow-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                justSaved
+                  ? 'bg-emerald-600 text-white shadow-emerald-600/30'
+                  : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/20 active:scale-95'
+              }`}
+            >
+              {justSaved ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
+              <span>{justSaved ? 'সংরক্ষিত হয়েছে (Saved!)' : 'Save Banner Changes (ব্যানার সংরক্ষণ করুন)'}</span>
             </button>
           </div>
         </div>
@@ -580,6 +607,31 @@ export const HeroBannerEditor: React.FC<HeroBannerEditorProps> = ({
                 />
               </div>
             </div>
+          </div>
+
+          {/* Quick Save Card for This Slide */}
+          <div className="p-4 bg-gradient-to-r from-indigo-50/80 via-white to-emerald-50/80 rounded-2xl border border-indigo-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+            <div>
+              <h6 className="font-black text-xs text-slate-900 flex items-center space-x-1.5">
+                <Sparkles className="w-4 h-4 text-indigo-600" />
+                <span>স্লাইড পরিবর্তন লাইভ করুন (Save & Publish Slide)</span>
+              </h6>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Slide #{selectedSlideIndex + 1}-এর হেডলাইন, টেক্সট বা ছবি পরিবর্তন করে ওয়েবসাইটে লাইভ করতে সেভ করুন।
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSaveAll}
+              className={`w-full sm:w-auto px-5 py-2.5 font-black text-xs rounded-xl shadow-md flex items-center justify-center space-x-2 transition-all cursor-pointer ${
+                justSaved
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-95 shadow-indigo-600/20'
+              }`}
+            >
+              {justSaved ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
+              <span>{justSaved ? 'সফলভাবে সংরক্ষিত (Saved)!' : 'Save Slide Changes'}</span>
+            </button>
           </div>
         </div>
 

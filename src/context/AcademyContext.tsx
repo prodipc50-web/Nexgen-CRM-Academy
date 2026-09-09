@@ -53,7 +53,13 @@ import {
   WebsiteBlogPost,
   TrainerProfile,
   StudentCourseReview,
-  ClassroomGalleryPhoto
+  ClassroomGalleryPhoto,
+  SystemSnapshotMetadata,
+  AutoBackupConfig,
+  DataCleanupPolicy,
+  ArchivedItem,
+  StorageUsageBreakdown,
+  OptimizationReport
 } from '../types';
 import {
   INITIAL_STAFF,
@@ -445,6 +451,26 @@ interface AcademyContextType {
 
   exportDatabaseJson: () => void;
   importDatabaseJson: (jsonString: string) => boolean;
+  systemSnapshots: SystemSnapshotMetadata[];
+  createSafeSnapshot: (type?: 'auto_daily' | 'manual', note?: string) => SystemSnapshotMetadata;
+  restoreSafeSnapshot: (snapshotId: string) => boolean;
+  deleteSafeSnapshot: (snapshotId: string) => void;
+  downloadSingleSnapshotJson: (snapshotId: string) => boolean;
+  exportAllSnapshotsJson: () => void;
+  autoBackupConfig: AutoBackupConfig;
+  updateAutoBackupConfig: (updates: Partial<AutoBackupConfig>) => void;
+  isBackupOverdue: boolean;
+  daysSinceLastBackup: number;
+
+  // Archiving & Storage Optimization
+  archivedItems: ArchivedItem[];
+  archiveRecord: (entityType: 'lead' | 'batch' | 'audit_log' | 'student', originalId: string, payload: any, reason?: string) => ArchivedItem;
+  unarchiveRecord: (archiveId: string) => boolean;
+  deleteArchivedItem: (archiveId: string) => void;
+  clearAllArchivedItems: () => void;
+  getStorageUsageBreakdown: () => StorageUsageBreakdown;
+  runDatabaseOptimization: (options?: { pruneAuditLogsOlderThanDays?: number; archiveLostLeadsOlderThanDays?: number; purgeTrashOlderThanDays?: number }) => OptimizationReport;
+
   resetToSampleData: () => void;
   resetToSeedData: () => void;
   cloudSyncStatus: 'synced' | 'syncing' | 'offline' | 'error';
@@ -1061,7 +1087,25 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (cat && Array.isArray(cat.courses) && cat.courses.length > 0) {
           if (!isInitialCloudLoadDone.current) {
             isRemoteUpdate.current = true;
-            setCourses(cat.courses);
+            setCourses(prev => {
+              const merged = cat.courses.map((remoteC: Course) => {
+                const localC = prev.find(p => p.id === remoteC.id || p.code === remoteC.code);
+                if (!localC) return remoteC;
+                const remoteT = new Date(remoteC.updatedAt || 0).getTime();
+                const localT = new Date(localC.updatedAt || 0).getTime();
+                return localT >= remoteT ? localC : remoteC;
+              });
+              for (const lc of prev) {
+                if (!merged.some(m => m.id === lc.id || m.code === lc.code)) {
+                  merged.push(lc);
+                }
+              }
+              latestCoursesRef.current = merged;
+              try {
+                localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(merged));
+              } catch {}
+              return merged;
+            });
             if (Array.isArray(cat.categories) && cat.categories.length > 0) setCategories(cat.categories);
             if (cat.websiteCmsConfig && typeof cat.websiteCmsConfig === 'object') {
               setWebsiteCmsConfig(prev => ({ ...prev, ...cat.websiteCmsConfig }));
@@ -1111,7 +1155,27 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
             isRemoteUpdate.current = true;
             if (Array.isArray(data.categories) && data.categories.length > 0) setCategories(data.categories);
-            if (Array.isArray(data.courses) && data.courses.length > 0) setCourses(data.courses);
+            if (Array.isArray(data.courses) && data.courses.length > 0) {
+              setCourses(prev => {
+                const merged = data.courses.map((remoteC: Course) => {
+                  const localC = prev.find(p => p.id === remoteC.id || p.code === remoteC.code);
+                  if (!localC) return remoteC;
+                  const remoteT = new Date(remoteC.updatedAt || 0).getTime();
+                  const localT = new Date(localC.updatedAt || 0).getTime();
+                  return localT >= remoteT ? localC : remoteC;
+                });
+                for (const lc of prev) {
+                  if (!merged.some(m => m.id === lc.id || m.code === lc.code)) {
+                    merged.push(lc);
+                  }
+                }
+                latestCoursesRef.current = merged;
+                try {
+                  localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(merged));
+                } catch {}
+                return merged;
+              });
+            }
             if (data.websiteCmsConfig && typeof data.websiteCmsConfig === 'object') {
               const remoteMarketing = data.websiteCmsConfig.marketing || {};
               const normalizedMarketing = {
@@ -1387,8 +1451,36 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const cat = await res.json();
         if (cat && Array.isArray(cat.courses) && cat.courses.length > 0) {
           if (Date.now() - lastLocalMutationTimestamp.current < 4000) return;
-          setCourses(cat.courses);
-          latestCoursesRef.current = cat.courses;
+          setCourses(prev => {
+            let hasNewer = false;
+            const merged = cat.courses.map((remoteC: Course) => {
+              const localC = prev.find(p => p.id === remoteC.id || p.code === remoteC.code);
+              if (!localC) {
+                hasNewer = true;
+                return remoteC;
+              }
+              const remoteT = new Date(remoteC.updatedAt || 0).getTime();
+              const localT = new Date(localC.updatedAt || 0).getTime();
+              if (remoteT > localT) {
+                hasNewer = true;
+                return remoteC;
+              }
+              return localC;
+            });
+            for (const lc of prev) {
+              if (!merged.some(m => m.id === lc.id || m.code === lc.code)) {
+                merged.push(lc);
+              }
+            }
+            if (hasNewer) {
+              latestCoursesRef.current = merged;
+              try {
+                localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(merged));
+              } catch {}
+              return merged;
+            }
+            return prev;
+          });
         }
       } catch {}
     };
@@ -2139,7 +2231,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const existingLead = leads.find(l => l.phone.replace(/[\s\-\+\(\)]/g, '').trim() === cleanPhone);
 
         if (existingLead) {
-          // If the student applied for a different course or re-applied, add as distinct inquiry or re-open
+          // If the student applied for a different course or re-applied, add follow-up log and move to top of New Inquiries
           const followUpId = `flw-${Date.now()}`;
           const newFollowUp: FollowUp = {
             id: followUpId,
@@ -2148,7 +2240,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             staffName: 'Online Admission Portal',
             contactMethod: 'Phone',
             result: 'Interested',
-            conversationSummary: `Re-applied/New inquiry for "${newLeadRecord.courseName || newLeadRecord.interestedCourseId}". Source: ${newLeadRecord.leadSource}. Notes: ${newLeadRecord.comments || 'N/A'}`,
+            conversationSummary: `নতুন আবেদন/ইনকোয়ারি: "${newLeadRecord.courseName || newLeadRecord.interestedCourseId}". Source: ${newLeadRecord.leadSource}. Notes: ${newLeadRecord.comments || 'N/A'}`,
             notes: `Source: ${newLeadRecord.leadSource || 'Website'}, Schedule: ${newLeadRecord.preferredSchedule || 'N/A'}`,
             nextAction: 'Counselor Urgent Call',
             status: 'Pending',
@@ -2157,34 +2249,40 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
           setFollowUps(prev => [newFollowUp, ...prev]);
 
-          // Re-activate existing lead to New or Admission Pending so it is front & center in the pipeline
-          const nextStatus = newLeadRecord.status || (newLeadRecord.leadSource?.includes('Admission') ? 'Admission Pending' : 'New');
-          updateLead(existingLead.id, {
-            status: nextStatus as LeadStatus,
+          // Re-activate existing lead to 'New' and move to front of pipeline
+          const updatedLead: Lead = {
+            ...existingLead,
+            ...newLeadRecord,
+            id: existingLead.id,
+            leadCode: existingLead.leadCode,
+            status: 'New',
             duplicateSubmissionCount: (existingLead.duplicateSubmissionCount || 1) + 1,
             lastDuplicateAt: new Date().toISOString(),
             preferredSchedule: newLeadRecord.preferredSchedule || existingLead.preferredSchedule,
+            preferredTime: newLeadRecord.preferredSchedule || existingLead.preferredSchedule,
             interestedCourseId: newLeadRecord.interestedCourseId || existingLead.interestedCourseId,
             courseName: newLeadRecord.courseName || existingLead.courseName,
-            comments: newLeadRecord.comments ? `[Latest: ${new Date().toLocaleDateString('bn-BD')}]: ${newLeadRecord.comments}\n---\n${existingLead.comments || ''}` : existingLead.comments
+            leadSource: newLeadRecord.leadSource || existingLead.leadSource,
+            comments: newLeadRecord.comments
+              ? `${newLeadRecord.comments}\n---\n[পূর্ববর্তী নোট]: ${existingLead.comments || ''}`
+              : existingLead.comments,
+            updatedAt: new Date().toISOString()
+          };
+
+          setLeads(prev => {
+            const others = prev.filter(l => l.id !== existingLead.id);
+            const next = [updatedLead, ...others];
+            try {
+              localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
+            } catch {}
+            return next;
           });
 
-          // If it's a completely different course inquiry, also append new lead so both courses are tracked
-          if (existingLead.interestedCourseId !== newLeadRecord.interestedCourseId) {
-            setLeads(prev => {
-              const next = [newLeadRecord, ...prev];
-              try {
-                localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
-              } catch {}
-              return next;
-            });
-          }
-
-          logAudit('Duplicate/Re-apply Lead Handled', 'CRM', existingLead.id, `Lead "${existingLead.name}" re-submitted for ${newLeadRecord.courseName || 'course'}. Pipeline stage updated to ${nextStatus}.`);
+          logAudit('Lead Re-submitted/Updated', 'CRM', existingLead.id, `Lead "${existingLead.name}" re-submitted for ${newLeadRecord.courseName || 'course'}. Moved to top of New Inquiries.`);
 
           return {
             success: true,
-            lead: newLeadRecord,
+            lead: updatedLead,
             isDuplicate: true,
             eventId: data.eventId,
             riskScore: data.riskScore,
@@ -2193,9 +2291,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             message: websiteCmsConfig.leadFormConfig?.successMessage || data.message
           };
         } else {
-          // Insert new verified lead
+          // Insert new verified lead at the very top of New Inquiries
+          const verifiedLead: Lead = {
+            ...newLeadRecord,
+            status: 'New'
+          };
           setLeads(prev => {
-            const next = [newLeadRecord, ...prev];
+            const next = [verifiedLead, ...prev];
             try {
               localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
             } catch {}
@@ -2866,17 +2968,28 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const updateCourse = (id: string, updates: Partial<Course>) => {
     lastLocalMutationTimestamp.current = Date.now();
+    const nowIso = new Date().toISOString();
     let nextCourses: Course[] = [];
     setCourses(prev => {
-      nextCourses = prev.map(c =>
-        c.id === id
-          ? {
-              ...c,
-              ...updates,
-              updatedAt: new Date().toISOString()
-            }
-          : c
-      );
+      nextCourses = prev.map(c => {
+        if (c.id === id || c.code === id) {
+          const regularFee = updates.regularFee !== undefined ? Number(updates.regularFee) : c.regularFee;
+          const offerFee = updates.offerFee !== undefined ? Number(updates.offerFee) : c.offerFee;
+          const discount = updates.discount !== undefined
+            ? Number(updates.discount)
+            : Math.max(0, regularFee - offerFee);
+
+          return {
+            ...c,
+            ...updates,
+            regularFee,
+            offerFee,
+            discount,
+            updatedAt: nowIso
+          };
+        }
+        return c;
+      });
       latestCoursesRef.current = nextCourses;
       try {
         localStorage.setItem(`${STORAGE_KEY}_courses`, JSON.stringify(nextCourses));
@@ -2903,11 +3016,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       },
       body: JSON.stringify({
         courses: nextCourses,
-        updatedAt: new Date().toISOString()
+        updatedAt: nowIso
       })
     }).catch(e => console.warn('Direct catalog push notice:', e));
 
-    logAudit('Course Updated', 'Courses', id, `Updated course details for ID: ${id}`);
+    logAudit('Course Updated', 'Courses', id, `Updated course details & fees for ID: ${id}`);
     setTimeout(() => {
       syncToCloudNow(true);
     }, 60);
@@ -4393,51 +4506,492 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     logAudit('Trash Emptied', 'System / Trash', 'all', 'Permanently purged all items from trash');
   };
 
-  // --- BACKUP & RESTORE ---
-  const exportDatabaseJson = () => {
-    const fullDb = {
-      staffList,
-      categories,
-      courses,
-      batches,
-      rooms,
-      campaigns,
-      leads,
-      followUps,
-      students,
-      admissions,
-      payments,
-      attendance,
-      schedules,
-      exams,
-      examResults,
-      certificates,
-      expenses,
-      assets,
-      auditLogs,
-      trashItems,
-      placements,
-      assignments,
-      assignmentSubmissions,
-      seminars,
-      academySettings,
-      websiteCmsConfig,
-      websiteReviews,
-      websiteGallery,
-      websiteFaqs,
-      websiteBlogs,
-      leadSources,
-      expenseCategoriesList,
-      paymentMethodsList,
-      occupationsList,
-      educationLevelsList,
-      studentGoalsList,
-      studentStatusesList,
-      bloodGroupsList,
-      discountTypesList,
-      exportedAt: new Date().toISOString(),
-      version: '2.5'
+  // --- BACKUP & RESTORE & 1-CLICK SYSTEM SNAPSHOTS ---
+  const SNAPSHOTS_STORAGE_KEY = 'NEXGEN_POINT_IN_TIME_SNAPSHOTS_V1';
+
+  const [systemSnapshots, setSystemSnapshots] = useState<SystemSnapshotMetadata[]>(() => {
+    try {
+      const saved = localStorage.getItem(SNAPSHOTS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((item: any) => item.metadata || item).filter(Boolean);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse system snapshots from localStorage', e);
+    }
+    return [];
+  });
+
+  const getFullDatabaseObject = () => ({
+    staffList,
+    categories,
+    courses,
+    batches,
+    rooms,
+    campaigns,
+    leads,
+    followUps,
+    students,
+    admissions,
+    payments,
+    attendance,
+    schedules,
+    exams,
+    examResults,
+    certificates,
+    expenses,
+    assets,
+    auditLogs,
+    trashItems,
+    placements,
+    assignments,
+    assignmentSubmissions,
+    seminars,
+    academySettings,
+    websiteCmsConfig,
+    websiteReviews,
+    websiteGallery,
+    websiteFaqs,
+    websiteBlogs,
+    leadSources,
+    expenseCategoriesList,
+    paymentMethodsList,
+    occupationsList,
+    educationLevelsList,
+    studentGoalsList,
+    studentStatusesList,
+    bloodGroupsList,
+    discountTypesList,
+    exportedAt: new Date().toISOString(),
+    version: '2.5'
+  });
+
+  const createSafeSnapshot = (type: 'auto_daily' | 'manual' = 'manual', note?: string): SystemSnapshotMetadata => {
+    const fullDb = getFullDatabaseObject();
+    const jsonStr = JSON.stringify(fullDb);
+    const sizeKb = Math.max(1, Math.round(jsonStr.length / 1024));
+    const now = new Date();
+    const id = `snap-${now.getTime()}-${Math.random().toString(36).substring(2, 6)}`;
+    const dateLabel =
+      now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+      ' ' +
+      now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const metadata: SystemSnapshotMetadata = {
+      id,
+      timestamp: now.toISOString(),
+      dateLabel,
+      type,
+      note: note || (type === 'auto_daily' ? 'Automatic System Daily Backup' : 'Manual Point-in-Time Snapshot'),
+      studentCount: students.length,
+      admissionCount: admissions.length,
+      paymentCount: payments.length,
+      leadCount: leads.length,
+      courseCount: courses.length,
+      batchCount: batches.length,
+      sizeKb
     };
+
+    try {
+      let existing: Array<{ metadata: SystemSnapshotMetadata; payload: any }> = [];
+      const saved = localStorage.getItem(SNAPSHOTS_STORAGE_KEY);
+      if (saved) {
+        existing = JSON.parse(saved);
+        if (!Array.isArray(existing)) existing = [];
+      }
+      const maxKeep = autoBackupConfig?.maxSnapshotsToKeep || 10;
+      const updated = [{ metadata, payload: fullDb }, ...existing].slice(0, maxKeep);
+      localStorage.setItem(SNAPSHOTS_STORAGE_KEY, JSON.stringify(updated));
+      setSystemSnapshots(updated.map(u => u.metadata));
+      logAudit(
+        'System Snapshot Created',
+        'Backup / Restore',
+        id,
+        `${type === 'auto_daily' ? 'Auto Daily' : 'Manual'} snapshot created (${sizeKb} KB, ${students.length} students)`
+      );
+    } catch (err) {
+      console.warn('Could not persist full snapshot to localStorage', err);
+    }
+
+    return metadata;
+  };
+
+  const restoreSafeSnapshot = (snapshotId: string): boolean => {
+    try {
+      const saved = localStorage.getItem(SNAPSHOTS_STORAGE_KEY);
+      if (!saved) return false;
+      const parsed: Array<{ metadata: SystemSnapshotMetadata; payload: any }> = JSON.parse(saved);
+      const target = parsed.find(item => item.metadata?.id === snapshotId);
+      if (!target || !target.payload) return false;
+
+      const success = importDatabaseJson(JSON.stringify(target.payload));
+      if (success) {
+        logAudit(
+          '1-Click Restore',
+          'Backup / Restore',
+          snapshotId,
+          `Restored database to point-in-time snapshot: ${target.metadata.dateLabel}`
+        );
+        syncToCloudNow(true).catch(console.warn);
+      }
+      return success;
+    } catch (e) {
+      console.error('Failed to restore snapshot', e);
+      return false;
+    }
+  };
+
+  const deleteSafeSnapshot = (snapshotId: string) => {
+    try {
+      const saved = localStorage.getItem(SNAPSHOTS_STORAGE_KEY);
+      if (!saved) return;
+      const parsed: Array<{ metadata: SystemSnapshotMetadata; payload: any }> = JSON.parse(saved);
+      const updated = parsed.filter(item => item.metadata?.id !== snapshotId);
+      localStorage.setItem(SNAPSHOTS_STORAGE_KEY, JSON.stringify(updated));
+      setSystemSnapshots(updated.map(u => u.metadata));
+      logAudit('Snapshot Deleted', 'Backup / Restore', snapshotId, 'Deleted historical snapshot');
+    } catch (e) {
+      console.error('Failed to delete snapshot', e);
+    }
+  };
+
+  // --- ARCHIVE VAULT & STORAGE OPTIMIZATION ENGINE ---
+  const ARCHIVE_STORAGE_KEY = 'NEXGEN_ARCHIVED_VAULT_V1';
+
+  const [archivedItems, setArchivedItems] = useState<ArchivedItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(ARCHIVE_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse archived items from localStorage', e);
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(archivedItems));
+    } catch (e) {
+      console.warn('Failed to persist archived items', e);
+    }
+  }, [archivedItems]);
+
+  const archiveRecord = (
+    entityType: 'lead' | 'batch' | 'audit_log' | 'student',
+    originalId: string,
+    payload: any,
+    reason?: string
+  ): ArchivedItem => {
+    const newItem: ArchivedItem = {
+      id: `arch-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      originalId,
+      entityType,
+      title: payload?.name || payload?.fullName || payload?.batchNumber || `Archived ${entityType}`,
+      subtitle: reason || `Archived on ${new Date().toLocaleDateString()}`,
+      archivedAt: new Date().toISOString(),
+      archivedBy: currentUser?.name || 'Administrator',
+      payload
+    };
+    setArchivedItems(prev => [newItem, ...prev]);
+    return newItem;
+  };
+
+  const unarchiveRecord = (archiveId: string): boolean => {
+    const item = archivedItems.find(a => a.id === archiveId);
+    if (!item || !item.payload) return false;
+    if (item.entityType === 'lead') {
+      setLeads(prev => [item.payload, ...prev]);
+    } else if (item.entityType === 'batch') {
+      setBatches(prev => [item.payload, ...prev]);
+    } else if (item.entityType === 'student') {
+      setStudents(prev => [item.payload, ...prev]);
+    }
+    setArchivedItems(prev => prev.filter(a => a.id !== archiveId));
+    logAudit('Record Unarchived', 'System / Archive', archiveId, `Restored ${item.title} to active database`);
+    return true;
+  };
+
+  const deleteArchivedItem = (archiveId: string) => {
+    setArchivedItems(prev => prev.filter(a => a.id !== archiveId));
+  };
+
+  const clearAllArchivedItems = () => {
+    setArchivedItems([]);
+  };
+
+  const downloadSingleSnapshotJson = (snapshotId: string): boolean => {
+    try {
+      const saved = localStorage.getItem(SNAPSHOTS_STORAGE_KEY);
+      if (!saved) return false;
+      const parsed: Array<{ metadata: SystemSnapshotMetadata; payload: any }> = JSON.parse(saved);
+      const target = parsed.find(item => item.metadata?.id === snapshotId);
+      if (!target || !target.payload) return false;
+
+      const dateSlug = (target.metadata.dateLabel || 'snapshot').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const blob = new Blob([JSON.stringify(target.payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Nexgen_Snapshot_${dateSlug}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      logAudit('Snapshot Downloaded', 'Backup / Restore', snapshotId, `Downloaded offline snapshot file: ${target.metadata.dateLabel}`);
+      return true;
+    } catch (e) {
+      console.error('Failed to download snapshot', e);
+      return false;
+    }
+  };
+
+  const exportAllSnapshotsJson = () => {
+    try {
+      const saved = localStorage.getItem(SNAPSHOTS_STORAGE_KEY);
+      const parsed = saved ? JSON.parse(saved) : [];
+      const blob = new Blob([JSON.stringify(parsed, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Nexgen_Historical_Snapshots_Bundle_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      logAudit('All Snapshots Exported', 'Backup / Restore', 'bundle', 'Exported bundle of all system snapshots');
+    } catch (e) {
+      console.error('Failed to export snapshots', e);
+    }
+  };
+
+  const autoBackupConfig: AutoBackupConfig = useMemo(() => {
+    return {
+      enabled: academySettings.autoBackupConfig?.enabled ?? true,
+      frequency: academySettings.autoBackupConfig?.frequency ?? 'daily',
+      maxSnapshotsToKeep: academySettings.autoBackupConfig?.maxSnapshotsToKeep ?? 10,
+      lastExportedDate: academySettings.autoBackupConfig?.lastExportedDate,
+      reminderDaysThreshold: academySettings.autoBackupConfig?.reminderDaysThreshold ?? 7,
+      autoDownloadOnSchedule: academySettings.autoBackupConfig?.autoDownloadOnSchedule ?? false
+    };
+  }, [academySettings.autoBackupConfig]);
+
+  const updateAutoBackupConfig = (updates: Partial<AutoBackupConfig>) => {
+    updateAcademySettings({
+      autoBackupConfig: {
+        ...autoBackupConfig,
+        ...updates
+      }
+    });
+  };
+
+  const lastBackupTimestamp = useMemo(() => {
+    const dates: number[] = [];
+    if (systemSnapshots[0]?.timestamp) {
+      const t = new Date(systemSnapshots[0].timestamp).getTime();
+      if (!isNaN(t)) dates.push(t);
+    }
+    if (autoBackupConfig.lastExportedDate) {
+      const t = new Date(autoBackupConfig.lastExportedDate).getTime();
+      if (!isNaN(t)) dates.push(t);
+    }
+    return dates.length > 0 ? Math.max(...dates) : null;
+  }, [systemSnapshots, autoBackupConfig.lastExportedDate]);
+
+  const daysSinceLastBackup = useMemo(() => {
+    if (!lastBackupTimestamp) return 999;
+    const diffMs = Date.now() - lastBackupTimestamp;
+    return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+  }, [lastBackupTimestamp]);
+
+  const isBackupOverdue = useMemo(() => {
+    if (!autoBackupConfig.enabled) return false;
+    return daysSinceLastBackup >= autoBackupConfig.reminderDaysThreshold;
+  }, [autoBackupConfig.enabled, daysSinceLastBackup, autoBackupConfig.reminderDaysThreshold]);
+
+  const getStorageUsageBreakdown = (): StorageUsageBreakdown => {
+    const calcKb = (obj: any) => {
+      try {
+        return Math.round(JSON.stringify(obj || '').length / 1024);
+      } catch {
+        return 0;
+      }
+    };
+    const studentsKb = calcKb(students);
+    const admissionsKb = calcKb(admissions);
+    const paymentsKb = calcKb(payments);
+    const leadsKb = calcKb(leads);
+    const auditLogsKb = calcKb(auditLogs);
+    const snapshotsKb = calcKb(systemSnapshots);
+    const trashKb = calcKb(trashItems);
+    const archivedKb = calcKb(archivedItems);
+
+    let totalUsedKb = 0;
+    try {
+      let totalChars = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          totalChars += key.length + (localStorage.getItem(key)?.length || 0);
+        }
+      }
+      totalUsedKb = Math.round((totalChars * 2) / 1024);
+    } catch {
+      totalUsedKb = studentsKb + admissionsKb + paymentsKb + leadsKb + auditLogsKb + snapshotsKb + trashKb + archivedKb;
+    }
+
+    const estimatedQuotaKb = 5120;
+    const percentageUsed = Math.min(100, Math.round((totalUsedKb / estimatedQuotaKb) * 100));
+
+    return {
+      studentsKb,
+      admissionsKb,
+      paymentsKb,
+      leadsKb,
+      auditLogsKb,
+      snapshotsKb,
+      trashKb,
+      archivedKb,
+      totalUsedKb,
+      estimatedQuotaKb,
+      percentageUsed
+    };
+  };
+
+  const runDatabaseOptimization = (options?: {
+    pruneAuditLogsOlderThanDays?: number;
+    archiveLostLeadsOlderThanDays?: number;
+    purgeTrashOlderThanDays?: number;
+  }): OptimizationReport => {
+    const beforeBreakdown = getStorageUsageBreakdown();
+    const nowMs = Date.now();
+    let archivedLogsCount = 0;
+    let archivedLeadsCount = 0;
+    let purgedTrashCount = 0;
+
+    const auditRetentionDays = options?.pruneAuditLogsOlderThanDays ?? (academySettings.dataCleanupPolicy?.auditLogRetentionDays || 60);
+    const auditCutoffMs = nowMs - (auditRetentionDays * 24 * 60 * 60 * 1000);
+
+    // 1. Audit logs pruning & archiving
+    const keptAudit: AuditLog[] = [];
+    const archivedAudit: AuditLog[] = [];
+    auditLogs.forEach(log => {
+      const t = new Date(log.timestamp).getTime();
+      if (!isNaN(t) && t < auditCutoffMs) {
+        archivedAudit.push(log);
+      } else {
+        keptAudit.push(log);
+      }
+    });
+
+    if (archivedAudit.length > 0) {
+      archivedLogsCount = archivedAudit.length;
+      setAuditLogs(keptAudit.slice(0, 300));
+      archiveRecord(
+        'audit_log',
+        `batch-audit-${Date.now()}`,
+        archivedAudit,
+        `Auto-archived ${archivedAudit.length} audit logs older than ${auditRetentionDays} days`
+      );
+    }
+
+    // 2. Closed / Lost leads archiving
+    const leadArchiveDays = options?.archiveLostLeadsOlderThanDays ?? (academySettings.dataCleanupPolicy?.leadArchiveDays || 90);
+    const leadCutoffMs = nowMs - (leadArchiveDays * 24 * 60 * 60 * 1000);
+    const keptLeads: Lead[] = [];
+    leads.forEach(ld => {
+      const t = new Date(ld.createdAt || ld.visitDate || ld.firstContactDate || '').getTime();
+      const isClosed = ld.status === 'Lost' || ld.status === 'Duplicate' || ld.status === 'Suspicious';
+      if (isClosed && !isNaN(t) && t < leadCutoffMs) {
+        archiveRecord('lead', ld.id, ld, `Archived closed lead (${ld.name}, status: ${ld.status})`);
+        archivedLeadsCount++;
+      } else {
+        keptLeads.push(ld);
+      }
+    });
+
+    if (archivedLeadsCount > 0) {
+      setLeads(keptLeads);
+    }
+
+    // 3. Purge expired trash
+    const trashPurgeDays = options?.purgeTrashOlderThanDays ?? (academySettings.dataCleanupPolicy?.autoPurgeTrashDays || 30);
+    const trashCutoffMs = nowMs - (trashPurgeDays * 24 * 60 * 60 * 1000);
+    const keptTrash: TrashItem[] = [];
+    trashItems.forEach(item => {
+      const t = new Date(item.deletedAt).getTime();
+      if (!isNaN(t) && t < trashCutoffMs) {
+        purgedTrashCount++;
+      } else {
+        keptTrash.push(item);
+      }
+    });
+
+    if (purgedTrashCount > 0) {
+      setTrashItems(keptTrash);
+    }
+
+    const afterBreakdown = getStorageUsageBreakdown();
+    const freedKb = Math.max(0, beforeBreakdown.totalUsedKb - afterBreakdown.totalUsedKb);
+
+    const report: OptimizationReport = {
+      timestamp: new Date().toISOString(),
+      freedKb,
+      archivedLogsCount,
+      archivedLeadsCount,
+      purgedTrashCount,
+      summary: `Cleaned database: Freed ~${freedKb} KB storage. Archived ${archivedLogsCount} old audit entries, ${archivedLeadsCount} closed leads, and purged ${purgedTrashCount} expired trash items.`
+    };
+
+    logAudit('Database Optimized', 'Settings / Maintenance', 'optimization', report.summary);
+    return report;
+  };
+
+  // Auto-backup check on startup (runs once per calendar day or frequency)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        if (!autoBackupConfig.enabled) return;
+
+        const now = new Date();
+        const todayDate = now.toISOString().split('T')[0];
+        const saved = localStorage.getItem(SNAPSHOTS_STORAGE_KEY);
+        let shouldTakeSnapshot = true;
+
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const lastAuto = parsed.find((item: any) => item.metadata?.type === 'auto_daily');
+            if (lastAuto && lastAuto.metadata?.timestamp) {
+              const lastMs = new Date(lastAuto.metadata.timestamp).getTime();
+              const diffHours = (now.getTime() - lastMs) / (1000 * 60 * 60);
+
+              if (autoBackupConfig.frequency === 'daily' && diffHours < 22) {
+                shouldTakeSnapshot = false;
+              } else if (autoBackupConfig.frequency === 'weekly' && diffHours < 150) {
+                shouldTakeSnapshot = false;
+              } else if (autoBackupConfig.frequency === 'monthly' && diffHours < 650) {
+                shouldTakeSnapshot = false;
+              }
+            }
+          }
+        }
+
+        if (shouldTakeSnapshot && students.length > 0) {
+          const newSnap = createSafeSnapshot('auto_daily', `Automated Scheduled Backup (${autoBackupConfig.frequency})`);
+          if (autoBackupConfig.autoDownloadOnSchedule) {
+            downloadSingleSnapshotJson(newSnap.id);
+          }
+        }
+      } catch (err) {
+        console.warn('Auto scheduled snapshot check skipped', err);
+      }
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [autoBackupConfig.enabled, autoBackupConfig.frequency, autoBackupConfig.autoDownloadOnSchedule, students.length]);
+
+  const exportDatabaseJson = () => {
+    const fullDb = getFullDatabaseObject();
     const blob = new Blob([JSON.stringify(fullDb, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -4445,6 +4999,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     a.download = `NexgenAcademy_Backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+
+    const nowIso = new Date().toISOString();
+    updateAcademySettings({
+      autoBackupConfig: {
+        ...autoBackupConfig,
+        lastExportedDate: nowIso
+      }
+    });
+
     logAudit('Database Exported', 'Settings / Backup', 'full-backup', 'Exported full JSON database snapshot including settings and CMS');
   };
 
@@ -4780,6 +5343,23 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         emptyTrash,
         exportDatabaseJson,
         importDatabaseJson,
+        systemSnapshots,
+        createSafeSnapshot,
+        restoreSafeSnapshot,
+        deleteSafeSnapshot,
+        downloadSingleSnapshotJson,
+        exportAllSnapshotsJson,
+        autoBackupConfig,
+        updateAutoBackupConfig,
+        isBackupOverdue,
+        daysSinceLastBackup,
+        archivedItems,
+        archiveRecord,
+        unarchiveRecord,
+        deleteArchivedItem,
+        clearAllArchivedItems,
+        getStorageUsageBreakdown,
+        runDatabaseOptimization,
         resetToSampleData,
         resetToSeedData: resetToSampleData,
         cloudSyncStatus,

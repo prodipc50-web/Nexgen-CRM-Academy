@@ -115,7 +115,7 @@ body {
   /* Default A4 Portrait Page Setup */
   @page {
     size: A4 portrait;
-    margin: 8mm 6mm;
+    margin: 6mm 6mm;
   }
 
   /* Explicit Landscape Page for Certificates */
@@ -133,24 +133,38 @@ body {
     height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: transparent !important;
-    color: #000 !important;
-    font-size: 12px;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11px;
+    overflow: visible !important;
   }
   
-  /* Hide non-printable elements when printing */
-  nav, aside, header, .print\:hidden, [class*="print:hidden"] {
+  /* Universal Non-Printable Elements Hiding */
+  nav, 
+  aside, 
+  header, 
+  .print\:hidden, 
+  [class*="print:hidden"],
+  body > div > div.flex-1.flex,
+  #app-workspace-body,
+  .erp-workspace-container {
     display: none !important;
   }
 
   /* Reset modal overlays so only the printable document shows cleanly */
-  .fixed.inset-0 {
+  .fixed.inset-0,
+  .fixed.inset-0 > div {
     position: static !important;
     background: transparent !important;
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
     display: block !important;
+    max-height: none !important;
+    height: auto !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 
   /* Force exact background colors, gradients, and borders to print */
@@ -166,8 +180,10 @@ body {
     margin: 0 auto !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    page-break-after: avoid !important;
     box-shadow: none !important;
     border-color: #cbd5e1 !important;
+    overflow: visible !important;
   }
 
   .print-page-a4-landscape {
@@ -176,21 +192,24 @@ body {
     margin: 0 auto !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    page-break-after: avoid !important;
     box-shadow: none !important;
+    overflow: visible !important;
   }
 
   /* 80mm POS Thermal Receipt Page Setup */
   .print-page-pos80 {
-    width: 78mm !important;
-    max-width: 80mm !important;
+    width: 76mm !important;
+    max-width: 78mm !important;
     margin: 0 auto !important;
-    padding: 2mm 1mm !important;
+    padding: 1mm 1mm !important;
     font-size: 11px !important;
-    line-height: 1.35 !important;
+    line-height: 1.3 !important;
     color: #000000 !important;
     background: #ffffff !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    page-break-after: avoid !important;
     box-shadow: none !important;
   }
 
@@ -201,12 +220,15 @@ body {
 
   /* Never break cards or tables across pages */
   .page-break-avoid,
+  .printable-card-item,
   #id-card-printable,
   #admit-card-printable,
   #money-receipt-printable,
   #pos-receipt-printable,
   #admission-form-printable,
-  #certificate-printable {
+  #certificate-printable,
+  #eod-report-printable,
+  #bulk-id-printable {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     page-break-after: avoid !important;

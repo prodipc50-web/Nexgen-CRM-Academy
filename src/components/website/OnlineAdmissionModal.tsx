@@ -46,6 +46,7 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
   }, [preselectedCourse?.id, defaultCourseId]);
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeQrModal, setActiveQrModal] = useState<{ name: string; url: string } | null>(null);
 
@@ -58,10 +59,22 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.phone.trim()) {
-      setErrorMessage('Please enter your full name and active mobile number.');
+    if (isSubmitting) return;
+
+    if (!formData.name.trim()) {
+      setErrorMessage('অনুগ্রহ করে আপনার পুরো নাম লিখুন।');
       return;
     }
+
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+    const isBdPhone = /^01[3-9]\d{8}$/.test(cleanPhone) || (/^8801[3-9]\d{8}$/.test(cleanPhone));
+    if (!isBdPhone) {
+      setErrorMessage('অনুগ্রহ করে সঠিক ১১ ডিজিটের সচল মোবাইল নম্বর লিখুন (যেমন: 01712345678)।');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
       const todayDate = new Date().toISOString().split('T')[0];
@@ -71,38 +84,8 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
       const commentsText = `Online Admission Application. Mode: ${formData.learningMode}, Schedule: ${formData.preferredSchedule}, Address: ${formData.address || 'N/A'}. bKash/TrxID: ${formData.trxId || 'Pending Desk Verification'}. Note: ${formData.notes || 'None'}. Campaign: ${utms.utmCampaign || 'organic'}`;
       const leadSourceStr = utms.utmSource ? `Ad: ${utms.utmSource} (Online Admission)` : 'Website Online Admission';
 
-      // 1. Submit to authoritative server pipeline
-      await submitPublicLead({
-        fullName: formData.name.trim(),
-        studentName: formData.name.trim(),
-        name: formData.name.trim(),
-        phone: formData.phone.trim(),
-        email: formData.email.trim() || undefined,
-        address: formData.address.trim() || undefined,
-        courseId: formData.courseId,
-        courseName: selectedCourse?.name,
-        interestedCourseId: formData.courseId,
-        preferredSchedule: formData.preferredSchedule,
-        learningMode: formData.learningMode,
-        preferredLearningMode: formData.learningMode,
-        educationLevel: formData.educationLevel,
-        status: 'Admission Pending',
-        leadSource: leadSourceStr,
-        source: leadSourceStr,
-        comments: commentsText,
-        trxId: formData.trxId,
-        notes: formData.notes,
-        utmSource: utms.utmSource,
-        utmMedium: utms.utmMedium,
-        utmCampaign: utms.utmCampaign,
-        utmContent: utms.utmContent,
-        utmTerm: utms.utmTerm,
-        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
-        otpVerified: true
-      });
-
-      // 2. Register lead into CRM directly with full attribution data
-      addLead({
+      // 1. Immediately register lead into CRM directly with status 'New' and full course & attribution data
+      const leadEntry = addLead({
         name: formData.name.trim(),
         phone: formData.phone.trim(),
         email: formData.email.trim() || undefined,
@@ -110,7 +93,14 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         educationLevel: formData.educationLevel,
         address: formData.address || undefined,
         interestedCourseId: formData.courseId,
+        courseId: formData.courseId,
+        courseName: selectedCourse?.name || formData.courseId,
+        preferredSchedule: formData.preferredSchedule,
+        preferredTime: formData.preferredSchedule,
+        learningMode: formData.learningMode,
+        preferredLearningMode: formData.learningMode,
         leadSource: leadSourceStr,
+        source: leadSourceStr,
         campaignId: utms.utmCampaign,
         utmSource: utms.utmSource,
         utmMedium: utms.utmMedium,
@@ -123,8 +113,41 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         counselorName: 'Admissions Desk (Tanvir Ahmed)',
         visitDate: todayDate,
         firstContactDate: todayDate,
-        status: 'Admission Pending',
-        comments: commentsText
+        status: 'New',
+        comments: `[সরাসরি সিট বুকিং ফরম] ${commentsText}`
+      });
+
+      // 2. Submit to authoritative server pipeline in background without blocking
+      submitPublicLead({
+        fullName: formData.name.trim(),
+        studentName: formData.name.trim(),
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim() || undefined,
+        address: formData.address.trim() || undefined,
+        courseId: formData.courseId,
+        courseName: selectedCourse?.name || formData.courseId,
+        interestedCourseId: formData.courseId,
+        preferredSchedule: formData.preferredSchedule,
+        preferredTime: formData.preferredSchedule,
+        learningMode: formData.learningMode,
+        preferredLearningMode: formData.learningMode,
+        educationLevel: formData.educationLevel,
+        status: 'New',
+        leadSource: leadSourceStr,
+        source: leadSourceStr,
+        comments: `[সরাসরি সিট বুকিং ফরম] ${commentsText}`,
+        trxId: formData.trxId,
+        notes: formData.notes,
+        utmSource: utms.utmSource,
+        utmMedium: utms.utmMedium,
+        utmCampaign: utms.utmCampaign,
+        utmContent: utms.utmContent,
+        utmTerm: utms.utmTerm,
+        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+        otpVerified: true
+      }).catch(err => {
+        console.warn('Online admission public lead server sync notice:', err);
       });
 
       // 3. Immediately notify CRM listeners
@@ -162,6 +185,8 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
       setErrorMessage('');
     } catch (err: any) {
       setErrorMessage('Submission failed. Please call our hotline at 01798444444.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -425,10 +450,13 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
 
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow-md inline-flex items-center space-x-1.5 transition-all"
+                  disabled={isSubmitting}
+                  className={`px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow-md inline-flex items-center space-x-1.5 transition-all ${
+                    isSubmitting ? 'opacity-60 cursor-not-allowed' : ''
+                  }`}
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Submit Admission Request (আবেদন জমা দিন)</span>
+                  <Send className={`w-3.5 h-3.5 ${isSubmitting ? 'animate-spin' : ''}`} />
+                  <span>{isSubmitting ? 'প্রসেসিং হচ্ছে...' : 'Submit Admission Request (আবেদন জমা দিন)'}</span>
                 </button>
               </div>
             </form>

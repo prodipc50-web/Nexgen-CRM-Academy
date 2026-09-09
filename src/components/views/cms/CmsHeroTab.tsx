@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { HeroBannerSlide } from '../../../types';
 import {
@@ -9,53 +9,15 @@ import {
   Sliders,
   Crop,
   Image as ImageIcon,
-  CheckCircle2,
-  Plus,
-  Trash2,
-  Edit2,
-  Layers,
-  Eye,
-  EyeOff,
-  Upload,
-  ArrowRight,
-  ExternalLink
+  CheckCircle2
 } from 'lucide-react';
 import { LogoCropResizeModal } from '../../common/LogoCropResizeModal';
-import { ImageUploadCropModal, ImagePresetItem } from '../../common/ImageUploadCropModal';
 import { NexgenLogo } from '../../common/NexgenLogo';
 import { HeroBannerEditor } from '../../cms/HeroBannerEditor';
 
 interface CmsHeroTabProps {
   onSuccessToast: (msg: string) => void;
 }
-
-const HERO_BANNER_PRESETS: ImagePresetItem[] = [
-  {
-    label: 'Modern Tech Lab & Students',
-    category: 'Hero Banner',
-    url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1280&q=80'
-  },
-  {
-    label: 'Software Engineering & Coding Team',
-    category: 'Hero Banner',
-    url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1280&q=80'
-  },
-  {
-    label: 'Creative UI/UX & Graphics Workspace',
-    category: 'Hero Banner',
-    url: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=1280&q=80'
-  },
-  {
-    label: 'Cyber Security & Network Operations',
-    category: 'Hero Banner',
-    url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1280&q=80'
-  },
-  {
-    label: 'AI & Data Science Analytics',
-    category: 'Hero Banner',
-    url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1280&q=80'
-  }
-];
 
 export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings, updateAcademySettings } = useAcademy();
@@ -97,120 +59,95 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   );
 
   const [isLogoCropModalOpen, setIsLogoCropModalOpen] = useState(false);
-  const [editingSlideId, setEditingSlideId] = useState<string | null>(null);
-  const [isAddingSlide, setIsAddingSlide] = useState(false);
+  const [saveFeedback, setSaveFeedback] = useState(false);
 
-  // Slide Crop Modal State
-  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
-  const [activeSlideCropTarget, setActiveSlideCropTarget] = useState<'form' | { id: string }>('form');
-  const slideFileInputRef = useRef<HTMLInputElement>(null);
-
-  const [slideFormData, setSlideFormData] = useState<Omit<HeroBannerSlide, 'id'>>({
-    title: '',
-    subtitle: '',
-    badgeText: 'Featured Admission 2026',
-    ctaText: 'Enroll Now',
-    ctaLink: '#courses',
-    secondaryCtaText: 'Free Workshop',
-    secondaryCtaLink: '#seminars',
-    imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1280&q=80',
-    isActive: true
-  });
-
-  const handleStartAddSlide = () => {
-    setEditingSlideId(null);
-    setIsAddingSlide(true);
-    setSlideFormData({
-      title: 'New Program or Admission Offer',
-      subtitle: 'Describe the core learning outcomes, real client projects, and career opportunities.',
-      badgeText: 'New 2026 Batch Starting Soon',
-      ctaText: 'Apply For Admission',
-      ctaLink: '#courses',
-      secondaryCtaText: 'Free Counseling',
-      secondaryCtaLink: '#seminars',
-      imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1280&q=80',
-      isActive: true
-    });
-  };
-
-  const handleStartEditSlide = (slide: HeroBannerSlide) => {
-    setEditingSlideId(slide.id);
-    setIsAddingSlide(false);
-    setSlideFormData({
-      title: slide.title,
-      subtitle: slide.subtitle,
-      badgeText: slide.badgeText || '',
-      ctaText: slide.ctaText || 'Enroll Now',
-      ctaLink: slide.ctaLink || '#courses',
-      secondaryCtaText: slide.secondaryCtaText || '',
-      secondaryCtaLink: slide.secondaryCtaLink || '#seminars',
-      imageUrl: slide.imageUrl || '',
-      isActive: slide.isActive
-    });
-  };
-
-  const handleSaveSlide = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!slideFormData.title) return;
-
-    let updatedList: HeroBannerSlide[];
-    if (editingSlideId) {
-      updatedList = slides.map(s => (s.id === editingSlideId ? { ...slideFormData, id: s.id } : s));
-      onSuccessToast('Hero banner slide updated!');
-    } else {
-      const newSlide: HeroBannerSlide = {
-        ...slideFormData,
-        id: `slide-${Date.now()}`
-      };
-      updatedList = [...slides, newSlide];
-      onSuccessToast('New hero banner slide added!');
+  // Two-way sync: When slides update from HeroBannerEditor
+  const handleUpdateSlides = (newSlides: HeroBannerSlide[]) => {
+    setSlides(newSlides);
+    if (newSlides.length > 0 && newSlides[0]) {
+      const s0 = newSlides[0];
+      setFormData(prev => ({
+        ...prev,
+        heroHeadline: s0.title || prev.heroHeadline,
+        heroSubtitle: s0.subtitle || prev.heroSubtitle,
+        heroBadgeText: s0.badgeText || prev.heroBadgeText,
+        heroCtaText: s0.ctaText || prev.heroCtaText
+      }));
     }
-
-    setSlides(updatedList);
-    updateWebsiteCmsConfig({ heroSlides: updatedList });
-    setIsAddingSlide(false);
-    setEditingSlideId(null);
-  };
-
-  const handleDeleteSlide = (id: string) => {
-    if (slides.length <= 1) {
-      alert('You must keep at least 1 hero banner slide.');
-      return;
-    }
-    const updated = slides.filter(s => s.id !== id);
-    setSlides(updated);
-    updateWebsiteCmsConfig({ heroSlides: updated });
-    onSuccessToast('Slide removed.');
-  };
-
-  const handleToggleSlideActive = (id: string) => {
-    const updated = slides.map(s => (s.id === id ? { ...s, isActive: !s.isActive } : s));
-    setSlides(updated);
-    updateWebsiteCmsConfig({ heroSlides: updated });
-    onSuccessToast('Slide visibility updated.');
-  };
-
-  const handleSlideFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      setSlideFormData(prev => ({ ...prev, imageUrl: dataUrl }));
-      onSuccessToast('Slide image uploaded! You can crop/resize now.');
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
     updateWebsiteCmsConfig({
-      heroHeadline: formData.heroHeadline,
-      heroSubtitle: formData.heroSubtitle,
-      heroBadgeText: formData.heroBadgeText,
-      heroCtaText: formData.heroCtaText,
+      heroSlides: newSlides,
+      ...(newSlides[0] ? {
+        heroHeadline: newSlides[0].title,
+        heroSubtitle: newSlides[0].subtitle,
+        heroBadgeText: newSlides[0].badgeText,
+        heroCtaText: newSlides[0].ctaText
+      } : {})
+    });
+  };
+
+  // Two-way sync: When user types in fallback inputs, reflect to slide[0]
+  const handleHeadlineChange = (val: string) => {
+    setFormData(prev => ({ ...prev, heroHeadline: val }));
+    setSlides(prev => {
+      if (!prev || prev.length === 0) return prev;
+      const copy = [...prev];
+      copy[0] = { ...copy[0], title: val };
+      return copy;
+    });
+  };
+
+  const handleSubtitleChange = (val: string) => {
+    setFormData(prev => ({ ...prev, heroSubtitle: val }));
+    setSlides(prev => {
+      if (!prev || prev.length === 0) return prev;
+      const copy = [...prev];
+      copy[0] = { ...copy[0], subtitle: val };
+      return copy;
+    });
+  };
+
+  const handleBadgeChange = (val: string) => {
+    setFormData(prev => ({ ...prev, heroBadgeText: val }));
+    setSlides(prev => {
+      if (!prev || prev.length === 0) return prev;
+      const copy = [...prev];
+      copy[0] = { ...copy[0], badgeText: val };
+      return copy;
+    });
+  };
+
+  const handleCtaChange = (val: string) => {
+    setFormData(prev => ({ ...prev, heroCtaText: val }));
+    setSlides(prev => {
+      if (!prev || prev.length === 0) return prev;
+      const copy = [...prev];
+      copy[0] = { ...copy[0], ctaText: val };
+      return copy;
+    });
+  };
+
+  // Unified Save Function (triggered by top sticky button, banner studio save button, or bottom submit)
+  const handleSaveAllHero = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    const syncedSlides = slides.length > 0 ? [
+      {
+        ...slides[0],
+        title: formData.heroHeadline || slides[0].title,
+        subtitle: formData.heroSubtitle || slides[0].subtitle,
+        badgeText: formData.heroBadgeText || slides[0].badgeText,
+        ctaText: formData.heroCtaText || slides[0].ctaText
+      },
+      ...slides.slice(1)
+    ] : slides;
+
+    updateWebsiteCmsConfig({
+      heroHeadline: formData.heroHeadline || (syncedSlides[0]?.title || ''),
+      heroSubtitle: formData.heroSubtitle || (syncedSlides[0]?.subtitle || ''),
+      heroBadgeText: formData.heroBadgeText || (syncedSlides[0]?.badgeText || ''),
+      heroCtaText: formData.heroCtaText || (syncedSlides[0]?.ctaText || ''),
       topNoticeTicker: formData.topNoticeTicker,
-      heroSlides: slides,
+      heroSlides: syncedSlides,
       heroStats: {
         totalTrained: formData.totalTrained,
         successRate: formData.successRate,
@@ -225,11 +162,54 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         expiresAt: formData.promoExpiresAt
       }
     });
-    onSuccessToast('Hero section, banner slider & announcement ticker updated!');
+
+    setSlides(syncedSlides);
+    setSaveFeedback(true);
+    setTimeout(() => setSaveFeedback(false), 3000);
+    onSuccessToast('হিরো সেকশন, ব্যানার স্লাইডার ও অ্যানাউন্সমেন্ট সফলভাবে সংরক্ষিত ও লাইভ হয়েছে!');
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    handleSaveAllHero(e);
   };
 
   return (
     <div className="space-y-8">
+      {/* Top Sticky Quick Save Action Bar */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 sm:p-5 rounded-3xl border border-indigo-900/50 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center font-black shadow-lg shadow-indigo-600/40 text-white shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-black text-white text-sm sm:text-base flex items-center space-x-2">
+              <span>Hero & Banner Slider Settings (হিরো ব্যানার হাব)</span>
+              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] uppercase font-bold">
+                Live Auto-Sync
+              </span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              ব্যানার স্লাইডার, হেডলাইন ও অ্যানাউন্সমেন্ট এডিট করে যেকোনো বাটন থেকে সেভ করুন।
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <button
+            type="button"
+            onClick={() => handleSaveAllHero()}
+            className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-black text-xs shadow-lg flex items-center justify-center space-x-2 transition-all cursor-pointer ${
+              saveFeedback
+                ? 'bg-emerald-600 text-white shadow-emerald-600/40 scale-105'
+                : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/30 active:scale-95'
+            }`}
+          >
+            {saveFeedback ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
+            <span>{saveFeedback ? 'সব সংরক্ষিত হয়েছে (Saved!)' : 'Save All Changes (সব সংরক্ষণ করুন)'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* 0. Institute Branding & Logo Crop/Resize Management */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -275,15 +255,13 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       {/* 1. HERO BANNER SLIDER STUDIO (ইন্টারেক্টিভ হিরো ব্যানার স্টুডিও) */}
       <HeroBannerEditor
         slides={slides}
-        onChangeSlides={(newSlides) => {
-          setSlides(newSlides);
-          updateWebsiteCmsConfig({ heroSlides: newSlides });
-        }}
+        onChangeSlides={handleUpdateSlides}
+        onSave={() => handleSaveAllHero()}
         onSuccessToast={onSuccessToast}
       />
 
       {/* 2. Top Notice Ticker */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSaveAllHero} className="space-y-6">
         <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl space-y-2">
           <div className="flex items-center space-x-2 text-amber-700 font-bold text-xs uppercase tracking-wider">
             <Bell className="w-4 h-4 text-amber-600" />
@@ -305,7 +283,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
           <div className="flex items-center space-x-2 text-indigo-950 font-black text-sm pb-2 border-b border-slate-100">
             <Sparkles className="w-4 h-4 text-indigo-600" />
-            <span>Hero Fallback Headline & Subtitles</span>
+            <span>Hero Fallback Headline & Subtitles (স্লাইডারের সাথে সিঙ্ক)</span>
           </div>
 
           <div className="space-y-3 text-xs">
@@ -314,7 +292,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               <input
                 type="text"
                 value={formData.heroBadgeText}
-                onChange={e => setFormData({ ...formData, heroBadgeText: e.target.value })}
+                onChange={e => handleBadgeChange(e.target.value)}
                 placeholder="e.g. Govt. Recognized IT Training Institute • Dhaka, Bangladesh"
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
@@ -326,7 +304,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                 type="text"
                 required
                 value={formData.heroHeadline}
-                onChange={e => setFormData({ ...formData, heroHeadline: e.target.value })}
+                onChange={e => handleHeadlineChange(e.target.value)}
                 placeholder="e.g. Build Your Tech Career with Hands-on Industry Training"
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
@@ -338,7 +316,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                 rows={3}
                 required
                 value={formData.heroSubtitle}
-                onChange={e => setFormData({ ...formData, heroSubtitle: e.target.value })}
+                onChange={e => handleSubtitleChange(e.target.value)}
                 placeholder="e.g. Master in-demand IT skills from top industry practitioners..."
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 leading-relaxed focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
@@ -349,7 +327,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               <input
                 type="text"
                 value={formData.heroCtaText}
-                onChange={e => setFormData({ ...formData, heroCtaText: e.target.value })}
+                onChange={e => handleCtaChange(e.target.value)}
                 placeholder="e.g. Explore Courses & Get Free Counseling"
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
@@ -496,33 +474,6 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
           updateAcademySettings({ customLogoUrl: '' });
           onSuccessToast('Logo reset to default brandmark');
         }}
-      />
-
-      {/* Slide Image Upload & Crop Modal (16:9 Banner) */}
-      <ImageUploadCropModal
-        isOpen={isCropModalOpen}
-        onClose={() => setIsCropModalOpen(false)}
-        currentImageUrl={
-          activeSlideCropTarget === 'form'
-            ? slideFormData.imageUrl
-            : (slides.find(s => s.id === (activeSlideCropTarget as any).id)?.imageUrl || slideFormData.imageUrl)
-        }
-        onSaveImage={(croppedUrl) => {
-          if (activeSlideCropTarget === 'form') {
-            setSlideFormData(prev => ({ ...prev, imageUrl: croppedUrl }));
-            onSuccessToast('Slide image cropped & applied!');
-          } else {
-            const updated = slides.map(s => (s.id === (activeSlideCropTarget as any).id ? { ...s, imageUrl: croppedUrl } : s));
-            setSlides(updated);
-            updateWebsiteCmsConfig({ heroSlides: updated });
-            onSuccessToast('Banner slide image cropped & updated!');
-          }
-        }}
-        title="Crop & Frame Hero Banner Slide"
-        subtitle="Crop to 16:9 widescreen format for high-definition website hero slider."
-        aspectRatio="16:9"
-        recommendedSize="Recommended: 1280 × 720px (16:9 Widescreen)"
-        presetImages={HERO_BANNER_PRESETS}
       />
     </div>
   );

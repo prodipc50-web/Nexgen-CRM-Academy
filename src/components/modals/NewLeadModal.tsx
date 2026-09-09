@@ -42,13 +42,25 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
   const [requirements, setRequirements] = useState('');
   const [nextFollowUpDate, setNextFollowUpDate] = useState(new Date(Date.now() + 86400000).toISOString().split('T')[0]);
   const [nextFollowUpNotes, setNextFollowUpNotes] = useState('');
+  const [formError, setFormError] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim() || !interestedCourseId) {
-      alert('Please fill the lead name, phone, and interested course.');
+    setFormError('');
+
+    if (!name.trim()) {
+      setFormError('অনুগ্রহ করে লিডের পূর্ণ নাম লিখুন।');
+      return;
+    }
+    const cleanDigits = phone.replace(/[^0-9]/g, '');
+    if (cleanDigits.length < 10) {
+      setFormError('অনুগ্রহ করে সঠিক মোবাইল নম্বর প্রদান করুন (কমপক্ষে ১১ ডিজিট)।');
+      return;
+    }
+    if (!interestedCourseId) {
+      setFormError('অনুগ্রহ করে পছন্দের কোর্স নির্বাচন করুন।');
       return;
     }
 
@@ -107,6 +119,19 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
 
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
+          {formError && (
+            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl font-bold flex items-center justify-between text-xs">
+              <span>⚠️ {formError}</span>
+              <button
+                type="button"
+                onClick={() => setFormError('')}
+                className="text-rose-500 hover:text-rose-700 font-black ml-2"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
             <div>
               <label className="block text-slate-600 font-semibold mb-1">

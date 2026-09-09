@@ -206,7 +206,17 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
   if (!isOpen) return null;
 
   const handlePrint = () => {
-    window.print();
+    const originalTitle = document.title;
+    try {
+      document.title = `Admission_Form_${formData.formNumber}_${(formData.name || 'Student').replace(/\s+/g, '_')}`;
+      window.print();
+    } catch (e) {
+      window.print();
+    } finally {
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
+    }
   };
 
   const handleSaveDefaults = () => {
@@ -469,7 +479,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
             </div>
 
             {/* Passport Photo Box */}
-            <div className="w-24 h-28 border-2 border-dashed border-slate-400 rounded-lg flex flex-col items-center justify-center p-1 bg-slate-50 text-center shrink-0 ml-3">
+            <div className="w-24 h-28 print:w-20 print:h-24 border-2 border-dashed border-slate-400 rounded-lg flex flex-col items-center justify-center p-1 bg-slate-50 text-center shrink-0 ml-3">
               {formData.photoUrl ? (
                 <img
                   src={formData.photoUrl}
@@ -486,128 +496,128 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
           </div>
 
           {/* Form Title & Reg Meta */}
-          <div className="flex items-center justify-between my-2.5 px-3 py-1.5 bg-slate-100 rounded-lg border border-slate-300">
+          <div className="flex items-center justify-between my-2.5 print:my-1 px-3 print:px-2 py-1.5 print:py-0.5 bg-slate-100 rounded-lg border border-slate-300">
             <div className="flex items-center space-x-2">
-              <span className="bg-indigo-900 text-white text-[11px] font-black uppercase px-2.5 py-0.5 rounded tracking-wide">
+              <span className="bg-indigo-900 text-white text-[11px] print:text-[10px] font-black uppercase px-2.5 py-0.5 rounded tracking-wide">
                 STUDENT ADMISSION & REGISTRATION FORM
               </span>
-              <span className="text-[10px] font-bold text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
+              <span className="text-[10px] print:text-[9px] font-bold text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
                 Mode: {formData.learningMode === 'Online Live' ? '🟢 Online Live Interactive' : formData.learningMode === 'Hybrid' ? '🟣 Hybrid (Lab + Online)' : '🔵 Offline / Campus Lab'}
               </span>
             </div>
-            <div className="text-right text-[10.5px] text-slate-700 space-x-3">
+            <div className="text-right text-[10.5px] print:text-[9.5px] text-slate-700 space-x-3">
               <span>Form No: <strong className="font-mono text-indigo-950">{formData.formNumber}</strong></span>
               <span>Date: <strong className="font-mono text-slate-900">{formData.admissionDate}</strong></span>
             </div>
           </div>
 
           {/* 1. Student Personal Information */}
-          <div className="space-y-1 mt-2">
-            <div className="bg-slate-800 text-white px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-t flex items-center space-x-1.5">
+          <div className="space-y-1 mt-2 print:mt-1">
+            <div className="bg-slate-800 text-white px-2.5 print:px-2 py-1 print:py-0.5 text-[10px] print:text-[9px] font-extrabold uppercase tracking-wider rounded-t flex items-center space-x-1.5">
               <span>1. STUDENT PERSONAL INFORMATION (শিক্ষার্থীর ব্যক্তিগত বিবরণ)</span>
             </div>
-            <div className="border border-slate-300 rounded-b p-2.5 text-[11px] grid grid-cols-3 gap-x-4 gap-y-1.5 bg-slate-50/50">
+            <div className="border border-slate-300 rounded-b p-2.5 print:p-1.5 text-[11px] print:text-[10px] grid grid-cols-3 gap-x-4 gap-y-1.5 print:gap-y-0.5 bg-slate-50/50">
               <div className="col-span-2">
-                <span className="text-slate-500 text-[10px] block">Full Name of Student (শিক্ষার্থীর নাম):</span>
-                <span className="font-bold text-slate-950 text-xs">{formData.name || '—'}</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Full Name of Student (শিক্ষার্থীর নাম):</span>
+                <span className="font-bold text-slate-950 text-xs print:text-[11px]">{formData.name || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">Student ID Code (আইডি):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Student ID Code (আইডি):</span>
                 <span className="font-mono font-bold text-indigo-900">{formData.studentCode || '—'}</span>
               </div>
 
               <div>
-                <span className="text-slate-500 text-[10px] block">Mobile Number (ফোন):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Mobile Number (ফোন):</span>
                 <span className="font-mono font-bold text-slate-900">{formData.phone || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">Alternative Phone (বিকল্প ফোন):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Alternative Phone (বিকল্প ফোন):</span>
                 <span className="font-mono text-slate-800">{formData.altPhone || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">Email Address (ইমেইল):</span>
-                <span className="font-mono text-slate-800 text-[10px] truncate block">{formData.studentEmail || '—'}</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Email Address (ইমেইল):</span>
+                <span className="font-mono text-slate-800 text-[10px] print:text-[9px] truncate block">{formData.studentEmail || '—'}</span>
               </div>
 
               <div>
-                <span className="text-slate-500 text-[10px] block">Date of Birth (জন্ম তারিখ):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Date of Birth (জন্ম তারিখ):</span>
                 <span className="font-mono text-slate-800">{formData.dateOfBirth || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">Gender (লিঙ্গ):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Gender (লিঙ্গ):</span>
                 <span className="font-semibold text-slate-900">{formData.gender || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">Blood Group (রক্তের গ্রুপ):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Blood Group (রক্তের গ্রুপ):</span>
                 <span className="font-bold text-rose-700">{formData.bloodGroup || '—'}</span>
               </div>
 
               <div>
-                <span className="text-slate-500 text-[10px] block">Occupation (পেশা):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Occupation (পেশা):</span>
                 <span className="font-medium text-slate-800">{formData.occupation || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">Education (শিক্ষাগত যোগ্যতা):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Education (শিক্ষাগত যোগ্যতা):</span>
                 <span className="font-medium text-slate-800">{formData.education || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">School/College/Institute:</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">School/College/Institute:</span>
                 <span className="font-medium text-slate-800 truncate block">{formData.institution || '—'}</span>
               </div>
 
               <div className="col-span-3">
-                <span className="text-slate-500 text-[10px] block">Present & Permanent Address (ঠিকানা):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Present & Permanent Address (ঠিকানা):</span>
                 <span className="font-medium text-slate-900">{formData.addressText || '—'}</span>
               </div>
             </div>
           </div>
 
           {/* 2. Guardian & Emergency Contact */}
-          <div className="space-y-1 mt-2">
-            <div className="bg-slate-800 text-white px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-t flex items-center space-x-1.5">
+          <div className="space-y-1 mt-2 print:mt-1">
+            <div className="bg-slate-800 text-white px-2.5 print:px-2 py-1 print:py-0.5 text-[10px] print:text-[9px] font-extrabold uppercase tracking-wider rounded-t flex items-center space-x-1.5">
               <span>2. GUARDIAN & EMERGENCY CONTACT (অভিভাবক ও জরুরি যোগাযোগ)</span>
             </div>
-            <div className="border border-slate-300 rounded-b p-2.5 text-[11px] grid grid-cols-3 gap-x-4 gap-y-1.5 bg-slate-50/50">
+            <div className="border border-slate-300 rounded-b p-2.5 print:p-1.5 text-[11px] print:text-[10px] grid grid-cols-3 gap-x-4 gap-y-1.5 print:gap-y-0.5 bg-slate-50/50">
               <div>
-                <span className="text-slate-500 text-[10px] block">Guardian Name (অভিভাবকের নাম):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Guardian Name (অভিভাবকের নাম):</span>
                 <span className="font-bold text-slate-900">{formData.guardianName || '—'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">Relationship (সম্পর্ক):</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Relationship (সম্পর্ক):</span>
                 <span className="font-medium text-slate-800">{formData.relation || 'Parent'}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block">Guardian Contact Phone:</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Guardian Contact Phone:</span>
                 <span className="font-mono font-bold text-slate-900">{formData.guardianPhone || '—'}</span>
               </div>
             </div>
           </div>
 
           {/* 3. Applied Program & Learning Delivery Mode */}
-          <div className="space-y-1 mt-2">
-            <div className="bg-indigo-900 text-white px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-t flex items-center space-x-1.5">
+          <div className="space-y-1 mt-2 print:mt-1">
+            <div className="bg-indigo-900 text-white px-2.5 print:px-2 py-1 print:py-0.5 text-[10px] print:text-[9px] font-extrabold uppercase tracking-wider rounded-t flex items-center space-x-1.5">
               <span>3. ENROLLED COURSE & LEARNING DELIVERY MODE (কোর্স ও ক্লাসের মাধ্যম)</span>
             </div>
-            <div className="border border-slate-300 rounded-b p-2.5 text-[11px] grid grid-cols-3 gap-x-4 gap-y-2 bg-slate-50/50">
+            <div className="border border-slate-300 rounded-b p-2.5 print:p-1.5 text-[11px] print:text-[10px] grid grid-cols-3 gap-x-4 gap-y-2 print:gap-y-1 bg-slate-50/50">
               <div className="col-span-2">
-                <span className="text-slate-500 text-[10px] block">Enrolled Course (কোর্সের নাম):</span>
-                <span className="font-black text-slate-950 text-xs">{formData.courseName}</span>
-                <span className="text-[10px] text-slate-500 font-mono block">Code: {formData.courseCode} • Duration: {formData.duration}</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Enrolled Course (কোর্সের নাম):</span>
+                <span className="font-black text-slate-950 text-xs print:text-[11px]">{formData.courseName}</span>
+                <span className="text-[10px] print:text-[9px] text-slate-500 font-mono block">Code: {formData.courseCode} • Duration: {formData.duration}</span>
               </div>
 
               <div>
-                <span className="text-slate-500 text-[10px] block">Batch & Timings:</span>
+                <span className="text-slate-500 text-[10px] print:text-[9px] block">Batch & Timings:</span>
                 <span className="font-bold text-indigo-950">{formData.batchNumber}</span>
-                <span className="text-[10px] text-slate-600 block">{formData.classSchedule}</span>
+                <span className="text-[10px] print:text-[9px] text-slate-600 block">{formData.classSchedule}</span>
               </div>
 
               {/* Delivery Mode Selector Box */}
-              <div className="col-span-3 bg-white p-2 rounded-lg border border-indigo-200">
-                <span className="text-indigo-950 font-bold text-[10.5px] block mb-1">
+              <div className="col-span-3 bg-white p-2 print:p-1.5 rounded-lg border border-indigo-200">
+                <span className="text-indigo-950 font-bold text-[10.5px] print:text-[9.5px] block mb-1">
                   Selected Learning Delivery Method (ক্লাস করার মাধ্যম):
                 </span>
-                <div className="grid grid-cols-3 gap-2 text-[10px]">
-                  <div className={`p-1.5 rounded border flex items-center space-x-1.5 ${
+                <div className="grid grid-cols-3 gap-2 print:gap-1 text-[10px] print:text-[9px]">
+                  <div className={`p-1.5 print:p-1 rounded border flex items-center space-x-1.5 ${
                     formData.learningMode === 'Offline' ? 'bg-indigo-50 border-indigo-600 font-bold text-indigo-950' : 'border-slate-200 text-slate-500'
                   }`}>
                     <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[9px] ${
@@ -618,7 +628,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
                     <span>1. Physical / Campus Lab</span>
                   </div>
 
-                  <div className={`p-1.5 rounded border flex items-center space-x-1.5 ${
+                  <div className={`p-1.5 print:p-1 rounded border flex items-center space-x-1.5 ${
                     formData.learningMode === 'Online Live' ? 'bg-indigo-50 border-indigo-600 font-bold text-indigo-950' : 'border-slate-200 text-slate-500'
                   }`}>
                     <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[9px] ${
@@ -629,7 +639,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
                     <span>2. Online Live Classes</span>
                   </div>
 
-                  <div className={`p-1.5 rounded border flex items-center space-x-1.5 ${
+                  <div className={`p-1.5 print:p-1 rounded border flex items-center space-x-1.5 ${
                     formData.learningMode === 'Hybrid' ? 'bg-indigo-50 border-indigo-600 font-bold text-indigo-950' : 'border-slate-200 text-slate-500'
                   }`}>
                     <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[9px] ${
@@ -640,7 +650,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
                     <span>3. Hybrid (Lab + Online)</span>
                   </div>
                 </div>
-                <div className="mt-1 text-[9.5px] text-slate-500 flex items-center justify-between">
+                <div className="mt-1 text-[9.5px] print:text-[8.5px] text-slate-500 flex items-center justify-between">
                   <span>Online Platform: <strong className="text-slate-800">{formData.onlinePlatform}</strong></span>
                   <span>Assigned Counselor: <strong className="text-slate-800">{formData.counselorName}</strong></span>
                 </div>
@@ -649,33 +659,33 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
           </div>
 
           {/* 4. Financial & Payment Summary Table */}
-          <div className="space-y-1 mt-2">
-            <div className="bg-slate-800 text-white px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-t flex items-center space-x-1.5">
+          <div className="space-y-1 mt-2 print:mt-1">
+            <div className="bg-slate-800 text-white px-2.5 print:px-2 py-1 print:py-0.5 text-[10px] print:text-[9px] font-extrabold uppercase tracking-wider rounded-t flex items-center space-x-1.5">
               <span>4. COURSE FEE STRUCTURE & PAYMENT RECORD (ফি ও পেমেন্ট বিবরণ)</span>
             </div>
-            <div className="border border-slate-300 rounded-b p-2 text-[11px] bg-slate-50/50">
-              <div className="grid grid-cols-4 gap-2 text-center">
-                <div className="bg-white p-1.5 rounded border border-slate-200">
-                  <span className="text-slate-500 text-[10px] block">Regular Course Fee:</span>
+            <div className="border border-slate-300 rounded-b p-2 print:p-1 text-[11px] print:text-[10px] bg-slate-50/50">
+              <div className="grid grid-cols-4 gap-2 print:gap-1 text-center">
+                <div className="bg-white p-1.5 print:p-1 rounded border border-slate-200">
+                  <span className="text-slate-500 text-[10px] print:text-[8.5px] block">Regular Course Fee:</span>
                   <span className="font-semibold text-slate-800">৳{formData.regularFee.toLocaleString()}</span>
                 </div>
-                <div className="bg-white p-1.5 rounded border border-slate-200">
-                  <span className="text-slate-500 text-[10px] block">Discount / Scholarship:</span>
+                <div className="bg-white p-1.5 print:p-1 rounded border border-slate-200">
+                  <span className="text-slate-500 text-[10px] print:text-[8.5px] block">Discount / Scholarship:</span>
                   <span className="font-bold text-emerald-700">৳{formData.discountScholarship.toLocaleString()}</span>
                 </div>
-                <div className="bg-white p-1.5 rounded border border-slate-200">
-                  <span className="text-slate-500 text-[10px] block">Net Agreed Fee:</span>
+                <div className="bg-white p-1.5 print:p-1 rounded border border-slate-200">
+                  <span className="text-slate-500 text-[10px] print:text-[8.5px] block">Net Agreed Fee:</span>
                   <span className="font-black text-indigo-950">৳{formData.finalFee.toLocaleString()}</span>
                 </div>
-                <div className="bg-white p-1.5 rounded border border-slate-200">
-                  <span className="text-slate-500 text-[10px] block">Paid at Admission:</span>
+                <div className="bg-white p-1.5 print:p-1 rounded border border-slate-200">
+                  <span className="text-slate-500 text-[10px] print:text-[8.5px] block">Paid at Admission:</span>
                   <span className="font-black text-emerald-700">৳{formData.paidAmount.toLocaleString()}</span>
                 </div>
               </div>
 
-              <div className="mt-1.5 flex items-center justify-between text-[10.5px] bg-amber-50/80 p-1.5 rounded border border-amber-200 text-amber-950">
+              <div className="mt-1.5 print:mt-1 flex items-center justify-between text-[10.5px] print:text-[9.5px] bg-amber-50/80 p-1.5 print:p-1 rounded border border-amber-200 text-amber-950">
                 <span>
-                  Remaining Due Balance: <strong className="font-black text-rose-700 text-xs">৳{formData.dueBalance.toLocaleString()}</strong>
+                  Remaining Due Balance: <strong className="font-black text-rose-700 text-xs print:text-[11px]">৳{formData.dueBalance.toLocaleString()}</strong>
                   {formData.dueBalance === 0 && ' (Full Paid ✓)'}
                 </span>
                 {formData.dueBalance > 0 && formData.nextDueDate && (
@@ -687,42 +697,42 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
           </div>
 
           {/* 5. Terms, Rules & Student Declaration */}
-          <div className="mt-2 border border-slate-300 rounded p-2 bg-slate-50/70 text-[10px] text-slate-700">
+          <div className="mt-2 print:mt-1 border border-slate-300 rounded p-2 print:p-1 bg-slate-50/70 text-[10px] print:text-[8.5px] text-slate-700">
             <span className="font-bold text-slate-900 uppercase tracking-wider block mb-0.5">
               Code of Conduct & Student Declaration (শর্তাবলি ও শিক্ষার্থীর অঙ্গীকারনামা):
             </span>
-            <div className="whitespace-pre-line leading-relaxed text-slate-600">
+            <div className="whitespace-pre-line leading-relaxed print:leading-snug text-slate-600">
               {formData.terms}
             </div>
           </div>
 
           {/* 6. Signatures */}
-          <div className="pt-6 mt-3 border-t border-slate-300 grid grid-cols-3 gap-6 items-end text-center text-xs">
+          <div className="pt-5 print:pt-2 mt-2.5 print:mt-1 border-t border-slate-300 grid grid-cols-3 gap-6 items-end text-center text-xs">
             <div>
-              <div className="h-7 border-b border-slate-400 w-36 mx-auto mb-1"></div>
-              <span className="text-[10px] font-bold text-slate-700 uppercase">Student / Applicant Signature</span>
-              <p className="text-[9px] text-slate-400">Date: {formData.admissionDate}</p>
+              <div className="h-6 print:h-5 border-b border-slate-400 w-36 mx-auto mb-1"></div>
+              <span className="text-[10px] print:text-[9px] font-bold text-slate-700 uppercase">Student / Applicant Signature</span>
+              <p className="text-[9px] print:text-[8px] text-slate-400">Date: {formData.admissionDate}</p>
             </div>
 
             <div>
-              <div className="h-7 border-b border-slate-400 w-36 mx-auto mb-1 flex items-center justify-center">
-                <span className="text-[11px] font-serif italic text-slate-700">{formData.counselorName}</span>
+              <div className="h-6 print:h-5 border-b border-slate-400 w-36 mx-auto mb-1 flex items-center justify-center">
+                <span className="text-[11px] print:text-[10px] font-serif italic text-slate-700">{formData.counselorName}</span>
               </div>
-              <span className="text-[10px] font-bold text-slate-700 uppercase">{formData.counselorTitle}</span>
-              <p className="text-[9px] text-slate-400">Nexgen Computer Academy</p>
+              <span className="text-[10px] print:text-[9px] font-bold text-slate-700 uppercase">{formData.counselorTitle}</span>
+              <p className="text-[9px] print:text-[8px] text-slate-400">Nexgen Computer Academy</p>
             </div>
 
             <div>
-              <div className="h-7 border-b border-indigo-900 w-40 mx-auto mb-1 flex items-center justify-center">
-                <span className="text-[11px] font-serif italic font-bold text-indigo-950">{formData.directorName}</span>
+              <div className="h-6 print:h-5 border-b border-indigo-900 w-40 mx-auto mb-1 flex items-center justify-center">
+                <span className="text-[11px] print:text-[10px] font-serif italic font-bold text-indigo-950">{formData.directorName}</span>
               </div>
-              <span className="text-[10px] font-black text-indigo-950 uppercase">{formData.directorTitle}</span>
-              <p className="text-[9px] text-indigo-800 font-semibold">Official Seal & Approval</p>
+              <span className="text-[10px] print:text-[9px] font-black text-indigo-950 uppercase">{formData.directorTitle}</span>
+              <p className="text-[9px] print:text-[8px] text-indigo-800 font-semibold">Official Seal & Approval</p>
             </div>
           </div>
 
           {/* Footer note */}
-          <div className="mt-3 pt-2 border-t border-slate-200 text-center text-[9px] text-slate-400">
+          <div className="mt-2 print:mt-1 pt-1.5 print:pt-0.5 border-t border-slate-200 text-center text-[9px] print:text-[8px] text-slate-400">
             Generated via Nexgen IT Academy Enterprise Management System • Hotline: {formData.hotlinePhone} • {formData.website}
           </div>
         </div>

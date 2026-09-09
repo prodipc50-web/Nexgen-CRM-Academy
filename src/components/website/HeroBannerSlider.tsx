@@ -19,19 +19,23 @@ interface HeroBannerSliderProps {
   language: AppLanguage;
   onOpenAdmission: () => void;
   onSelectCategory?: (category: string) => void;
+  fallbackHeadline?: string;
+  fallbackSubtitle?: string;
 }
 
 export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
   slides,
   language,
-  onOpenAdmission
+  onOpenAdmission,
+  fallbackHeadline,
+  fallbackSubtitle
 }) => {
   const activeSlides = slides.filter(s => s.isActive !== false);
-  const effectiveSlides = activeSlides.length > 0 ? activeSlides : [
+  const baseSlides = activeSlides.length > 0 ? activeSlides : [
     {
       id: 'default-slide',
-      title: 'Build Your Tech Career with Hands-on Industry Training',
-      subtitle: 'Master in-demand IT skills from top industry practitioners. 100% practical lab sessions, live freelance mentorship & verified job placement.',
+      title: fallbackHeadline || 'Build Your Tech Career with Hands-on Industry Training',
+      subtitle: fallbackSubtitle || 'Master in-demand IT skills from top industry practitioners. 100% practical lab sessions, live freelance mentorship & verified job placement.',
       badgeText: 'Govt. Recognized IT Training Institute • Dhaka',
       ctaText: 'Explore Courses & Fees',
       ctaLink: '#courses',
@@ -41,6 +45,12 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
       isActive: true
     }
   ];
+
+  const effectiveSlides = baseSlides.map(slide => ({
+    ...slide,
+    title: slide.title || fallbackHeadline || 'Build Your Tech Career with Hands-on Industry Training',
+    subtitle: slide.subtitle || fallbackSubtitle || ''
+  }));
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);

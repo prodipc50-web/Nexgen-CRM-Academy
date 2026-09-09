@@ -49,14 +49,24 @@ export const BulkBatchIdCardModal: React.FC<BulkBatchIdCardModalProps> = ({
   if (!isOpen) return null;
 
   const handlePrint = () => {
-    window.print();
+    const originalTitle = document.title;
+    try {
+      document.title = `${docType === 'id_card' ? 'ID_Cards' : 'Admit_Cards'}_${selectedBatch?.batchNumber || 'Batch'}`;
+      window.print();
+    } catch (e) {
+      window.print();
+    } finally {
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible">
+      <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden print:max-w-none print:w-full print:h-auto print:max-h-none print:shadow-none print:border-none print:rounded-none print:overflow-visible">
         {/* Modal Header */}
-        <div className="p-5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+        <div className="p-5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0 print:hidden">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center font-black">
               <Layers className="w-5 h-5" />
@@ -80,7 +90,7 @@ export const BulkBatchIdCardModal: React.FC<BulkBatchIdCardModalProps> = ({
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0 print:hidden">
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <div>
               <label className="font-bold text-slate-700 block mb-1">Select Batch</label>
@@ -160,17 +170,17 @@ export const BulkBatchIdCardModal: React.FC<BulkBatchIdCardModalProps> = ({
         </div>
 
         {/* Printable Cards Area */}
-        <div className="flex-1 p-6 overflow-y-auto bg-slate-100">
+        <div className="flex-1 p-6 overflow-y-auto bg-slate-100 print:bg-white print:p-2 print:m-0 print:overflow-visible print-page-a4">
           {batchStudents.length === 0 ? (
-            <div className="p-12 text-center text-slate-400 font-bold text-sm bg-white rounded-3xl border border-slate-200">
+            <div className="p-12 text-center text-slate-400 font-bold text-sm bg-white rounded-3xl border border-slate-200 print:hidden">
               No students enrolled in this batch yet.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 print:grid-cols-2 gap-6 print:gap-4 print:p-0">
               {batchStudents.map(student => (
                 <div
                   key={student.id}
-                  className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-4 shadow-xl border border-indigo-400/40 relative overflow-hidden flex flex-col justify-between"
+                  className="printable-card-item bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-4 shadow-xl border border-indigo-400/40 relative overflow-hidden flex flex-col justify-between print:shadow-none print:border-slate-800"
                   style={{ minHeight: docType === 'id_card' ? '230px' : '270px' }}
                 >
                   {/* Header Row */}

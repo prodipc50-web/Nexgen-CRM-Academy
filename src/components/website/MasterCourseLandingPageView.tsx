@@ -644,48 +644,20 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       ? 'Course Landing Free Counseling'
       : 'Course Landing Seat Booking';
 
-    const statusVal = isCounselingMode ? 'New' : 'Admission Pending';
-
     try {
-      // 1. Send to server-side lead pipeline and disk queue
-      await submitPublicLead({
-        fullName: leadName.trim(),
-        studentName: leadName.trim(),
-        name: leadName.trim(),
-        phone: leadPhone.trim(),
-        email: leadEmail.trim() || undefined,
-        address: addressText || undefined,
-        courseId: course.id,
-        courseName: course.name,
-        interestedCourseId: course.id,
-        preferredSchedule: effectiveSchedule,
-        preferredTime: effectiveSchedule,
-        leadSource: leadSourceStr,
-        source: leadSourceStr,
-        status: statusVal,
-        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
-        landingPage: typeof window !== 'undefined' ? window.location.pathname : undefined,
-        utmSource: utms.utmSource,
-        utmMedium: utms.utmMedium,
-        utmCampaign: utms.utmCampaign,
-        utmContent: utms.utmContent,
-        utmTerm: utms.utmTerm,
-        comments: commentsText,
-        message: commentsText,
-        honeypotVal: honeypot,
-        renderTimestampMs: formRenderTime,
-        otpVerified: true
-      });
-
-      // 2. Also register in local state for instant client-side feedback in CRM
+      // 1. Immediately register in CRM state with status 'New' so it appears right at the top of New Inquiries
       addLead({
         name: leadName.trim(),
         phone: leadPhone.trim(),
         email: leadEmail.trim() || undefined,
         address: addressText || undefined,
         preferredSchedule: effectiveSchedule,
+        preferredTime: effectiveSchedule,
         interestedCourseId: course.id,
+        courseId: course.id,
+        courseName: course.name,
         leadSource: leadSourceStr,
+        source: leadSourceStr,
         campaignId: utms.utmCampaign,
         utmSource: utms.utmSource,
         utmMedium: utms.utmMedium,
@@ -700,11 +672,11 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         counselorName: 'Admissions Desk (Tanvir Ahmed)',
         visitDate: today,
         firstContactDate: today,
-        status: statusVal,
+        status: 'New',
         comments: commentsText
       });
 
-      // 3. Immediately notify and sync CRM across all tabs
+      // 2. Immediately notify and sync CRM across all tabs and open windows
       if (typeof window !== 'undefined') {
         try {
           const bc = new BroadcastChannel('nexgen_leads_sync');
@@ -713,6 +685,38 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         } catch (e) {}
         window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
       }
+
+      // 3. Send to server-side lead pipeline and disk queue in background (without blocking UI)
+      submitPublicLead({
+        fullName: leadName.trim(),
+        studentName: leadName.trim(),
+        name: leadName.trim(),
+        phone: leadPhone.trim(),
+        email: leadEmail.trim() || undefined,
+        address: addressText || undefined,
+        courseId: course.id,
+        courseName: course.name,
+        interestedCourseId: course.id,
+        preferredSchedule: effectiveSchedule,
+        preferredTime: effectiveSchedule,
+        leadSource: leadSourceStr,
+        source: leadSourceStr,
+        status: 'New',
+        landingPageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+        landingPage: typeof window !== 'undefined' ? window.location.pathname : undefined,
+        utmSource: utms.utmSource,
+        utmMedium: utms.utmMedium,
+        utmCampaign: utms.utmCampaign,
+        utmContent: utms.utmContent,
+        utmTerm: utms.utmTerm,
+        comments: commentsText,
+        message: commentsText,
+        honeypotVal: honeypot,
+        renderTimestampMs: formRenderTime,
+        otpVerified: true
+      }).catch(err => {
+        console.warn('Background lead server sync notice:', err);
+      });
 
       if (syncIncomingLeadsNow) {
         syncIncomingLeadsNow().catch(() => {});
@@ -755,8 +759,10 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       return;
     }
 
-    if (!leadPhone.trim() || leadPhone.trim().length < 10) {
-      setLeadError('দয়া করে একটি সঠিক ১১ ডিজিটের মোবাইল নম্বর লিখুন।');
+    const cleanPhone = leadPhone.replace(/[^0-9]/g, '');
+    const isBdPhone = /^01[3-9]\d{8}$/.test(cleanPhone) || /^8801[3-9]\d{8}$/.test(cleanPhone);
+    if (!isBdPhone) {
+      setLeadError('দয়া করে একটি সঠিক ১১ ডিজিটের মোবাইল নম্বর লিখুন (যেমন: 01712345678)।');
       setIsSubmitting(false);
       return;
     }
@@ -3017,32 +3023,34 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         </div>
       )}
       {/* Desktop Floating Action Widget (WhatsApp & Direct Hotline) */}
-      <aside aria-label="Quick contact" className="hidden sm:flex fixed bottom-6 right-6 z-40 flex-col items-end space-y-2.5">
-        <a
-          href={whatsAppUrl}
-          target="_blank"
-          rel="noreferrer"
-          onClick={handleWhatsAppClick}
-          className="group flex items-center bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 rounded-full shadow-2xl hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
-          title="WhatsApp-এ সরাসরি কথা বলুন"
-        >
-          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:pr-2.5 transition-all duration-300 text-xs font-black">
-            WhatsApp-এ কথা বলুন
-          </span>
-          <MessageCircle className="w-5 h-5 fill-white shrink-0" />
-        </a>
+      {(websiteCmsConfig?.marketing?.enableFloatingWhatsApp !== false) && (
+        <aside aria-label="Quick contact" className="hidden sm:flex fixed bottom-6 right-6 z-40 flex-col items-end space-y-2.5">
+          <a
+            href={whatsAppUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={handleWhatsAppClick}
+            className="group flex items-center bg-emerald-600 hover:bg-emerald-500 text-white p-3.5 rounded-full shadow-2xl hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+            title="WhatsApp-এ সরাসরি কথা বলুন"
+          >
+            <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:pr-2.5 transition-all duration-300 text-xs font-black">
+              WhatsApp-এ কথা বলুন
+            </span>
+            <MessageCircle className="w-5 h-5 fill-white shrink-0" />
+          </a>
 
-        <a
-          href={`tel:${rawPhone}`}
-          className="group flex items-center bg-slate-900/95 hover:bg-slate-800 text-slate-100 hover:text-white p-3 rounded-full border border-slate-700 shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
-          title={`সরাসরি কল করুন: ${rawPhone}`}
-        >
-          <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:pr-2.5 transition-all duration-300 text-xs font-bold text-amber-300">
-            কল করুন: {rawPhone}
-          </span>
-          <Phone className="w-4 h-4 text-amber-400 shrink-0" />
-        </a>
-      </aside>
+          <a
+            href={`tel:${rawPhone}`}
+            className="group flex items-center bg-slate-900/95 hover:bg-slate-800 text-slate-100 hover:text-white p-3 rounded-full border border-slate-700 shadow-xl transition-all transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+            title={`সরাসরি কল করুন: ${rawPhone}`}
+          >
+            <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:pr-2.5 transition-all duration-300 text-xs font-bold text-amber-300">
+              কল করুন: {rawPhone}
+            </span>
+            <Phone className="w-4 h-4 text-amber-400 shrink-0" />
+          </a>
+        </aside>
+      )}
     </div>
   );
 };

@@ -185,8 +185,10 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
       setErrorMsg('দয়া করে আপনার নাম লিখুন।');
       return;
     }
-    if (!phone.trim() || phone.trim().length < 10) {
-      setErrorMsg('দয়া করে সঠিক মোবাইল/হোয়াটসঅ্যাপ নম্বর লিখুন।');
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const isBdPhone = /^01[3-9]\d{8}$/.test(cleanPhone) || /^8801[3-9]\d{8}$/.test(cleanPhone);
+    if (!isBdPhone) {
+      setErrorMsg('দয়া করে সঠিক ১১ ডিজিটের মোবাইল/হোয়াটসঅ্যাপ নম্বর লিখুন (যেমন: 01712345678)।');
       return;
     }
     if (!address.trim()) {

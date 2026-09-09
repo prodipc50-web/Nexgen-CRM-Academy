@@ -72,6 +72,22 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
   const [language, setLanguage] = useState<'bn' | 'en'>('bn');
   const [idCardSide, setIdCardSide] = useState<'front' | 'back'>('front');
 
+  // Dedicated ID Card Print Handler
+  const handlePrintIdCard = () => {
+    if (!loggedInStudent) return;
+    const originalTitle = document.title;
+    try {
+      document.title = `StudentID_${loggedInStudent.studentCode}_${(loggedInStudent.name || 'Student').replace(/\s+/g, '_')}`;
+      window.print();
+    } catch (e) {
+      window.print();
+    } finally {
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
+    }
+  };
+
   // Handle Login
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -306,9 +322,9 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
 
   // Active Student Dashboard
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col selection:bg-indigo-600 selection:text-white font-erp">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col selection:bg-indigo-600 selection:text-white font-erp print:bg-white print:min-h-0">
       {/* Top Navbar */}
-      <header className="bg-slate-900 text-white sticky top-0 z-40 px-4 sm:px-8 py-3.5 border-b border-slate-800 flex items-center justify-between shadow-lg">
+      <header className="bg-slate-900 text-white sticky top-0 z-40 px-4 sm:px-8 py-3.5 border-b border-slate-800 flex items-center justify-between shadow-lg print:hidden">
         <div className="flex items-center space-x-3">
           <NexgenLogo variant="crest" size={38} />
           <div>
@@ -340,9 +356,9 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
       </header>
 
       {/* Main Student Workspace */}
-      <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+      <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6 print:p-0 print:m-0 print:max-w-none">
         {/* Student Welcome Header Card */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden print:hidden">
           <div className="absolute right-0 top-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="flex items-center space-x-4 relative z-10">
@@ -415,7 +431,7 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
         </div>
 
         {/* Portal Tabs Navigation */}
-        <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs overflow-x-auto">
+        <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs overflow-x-auto print:hidden">
           <div className="flex items-center space-x-1.5 min-w-max">
             {[
               { id: 'overview', label: language === 'bn' ? 'প্রোফাইল ও ডিজিটাল আইডি' : 'Overview & Digital ID', icon: User },
@@ -453,12 +469,12 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-6"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-6 print:block"
           >
             {/* Left: Interactive PVC ID Card (Standard 85.6mm x 54mm equivalent ratio) */}
-            <div className="lg:col-span-6 space-y-4">
-              <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-2xs space-y-4">
-                <div className="flex items-center justify-between">
+            <div className="lg:col-span-6 space-y-4 print:w-full print:space-y-0">
+              <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-2xs space-y-4 print:p-0 print:border-none print:shadow-none">
+                <div className="flex items-center justify-between print:hidden">
                   <div className="flex items-center space-x-2">
                     <ShieldCheck className="w-4 h-4 text-indigo-600" />
                     <h3 className="font-black text-slate-900 text-sm">
@@ -489,7 +505,7 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
                     </div>
                     <button
                       type="button"
-                      onClick={() => window.print()}
+                      onClick={handlePrintIdCard}
                       className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-colors"
                     >
                       <Printer className="w-3.5 h-3.5 text-indigo-300" />
@@ -498,8 +514,8 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
                   </div>
                 </div>
 
-                {/* PVC Card Mockup Frame (Front / Back Side) */}
-                <div className="w-full max-w-sm mx-auto transition-all duration-300">
+                {/* PVC Card Mockup Frame (On Screen Interactive View) */}
+                <div className="w-full max-w-sm mx-auto transition-all duration-300 print:hidden">
                   {idCardSide === 'front' ? (
                     <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 shadow-2xl border-2 border-indigo-400/40 relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
@@ -606,9 +622,120 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
                   )}
                 </div>
 
-                <div className="mt-3">
+                {/* Dedicated Print Sheet for Student ID Card (Both Front & Back Aligned for Clean Cutting) */}
+                <div className="hidden print:block print-page-a4 max-w-2xl mx-auto py-6" id="student-id-printable">
+                  <div className="text-center pb-3 mb-6 border-b border-slate-300">
+                    <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">
+                      {academySettings.instituteName || 'Nexgen Computer Academy'}
+                    </h2>
+                    <p className="text-[11px] text-slate-600 font-medium">
+                      Official Student Identity Document • ID: {loggedInStudent.studentCode}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-row items-center justify-center gap-6 py-2">
+                    {/* Print Front Side */}
+                    <div className="w-[310px] rounded-2xl p-4 border-2 border-slate-800 bg-slate-950 text-white relative overflow-hidden shrink-0 shadow-none">
+                      <div className="flex items-center justify-between pb-2.5 border-b border-slate-700">
+                        <div className="flex items-center space-x-1.5">
+                          <NexgenLogo variant="crest" size={28} />
+                          <div>
+                            <h4 className="font-black text-[11px] text-white uppercase tracking-tight leading-tight">
+                              {academySettings.instituteName || 'Nexgen Academy'}
+                            </h4>
+                            <p className="text-[7.5px] text-indigo-300 font-bold uppercase">Govt. Recognized IT Institute</p>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 bg-amber-400 text-slate-950 font-black text-[8.5px] rounded-xs">
+                          STUDENT
+                        </span>
+                      </div>
+
+                      <div className="flex items-center space-x-3 py-3">
+                        <div className="w-16 h-20 rounded-lg overflow-hidden bg-slate-800 border-2 border-indigo-300/60 shrink-0">
+                          {loggedInStudent.photoUrl ? (
+                            <img src={loggedInStudent.photoUrl} alt={loggedInStudent.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-indigo-800 text-white text-xl font-black">
+                              {loggedInStudent.name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-0.5 min-w-0">
+                          <h4 className="font-black text-xs text-white truncate">{loggedInStudent.name}</h4>
+                          <p className="text-[9px] text-indigo-300 font-mono font-bold">{loggedInStudent.studentCode}</p>
+                          <p className="text-[9px] text-slate-300 font-bold truncate">
+                            {courses.find(c => c.id === studentAdmissions[0]?.courseId)?.name || 'Professional IT Course'}
+                          </p>
+                          <div className="flex items-center space-x-2 pt-0.5 text-[8.5px] text-slate-400">
+                            <span>Blood: <b className="text-white">{loggedInStudent.bloodGroup || 'O+'}</b></span>
+                            <span>•</span>
+                            <span>Mob: <b className="text-white">{loggedInStudent.phone}</b></span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2.5 border-t border-slate-700 flex items-center justify-between text-[7.5px] text-slate-300">
+                        <div className="space-y-0.5">
+                          <p className="font-bold text-white">Valid: 2026-2027</p>
+                          <p className="text-indigo-300 truncate max-w-[160px]">{academySettings.officialAddress || 'Dhaka, Bangladesh'}</p>
+                        </div>
+                        <div className="p-0.5 bg-white rounded-sm">
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(
+                              `${academySettings.certificateVerificationBaseUrl || 'https://nexgenacademy.edu.bd/verify/'}?student=${loggedInStudent.studentCode}`
+                            )}`}
+                            alt="QR Code"
+                            className="w-7 h-7 object-contain"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Print Back Side */}
+                    <div className="w-[310px] rounded-2xl p-4 border-2 border-slate-800 bg-slate-950 text-white relative overflow-hidden space-y-2 shrink-0 shadow-none">
+                      <div className="flex items-center justify-between border-b border-slate-700/60 pb-1.5">
+                        <span className="text-[9px] font-black text-amber-400 uppercase tracking-wider">Instructions & Rules</span>
+                        <span className="text-[8px] text-slate-400 font-mono">EMERGENCY: {academySettings.primarySupportPhone || '01700-000000'}</span>
+                      </div>
+
+                      <ul className="text-[8px] text-slate-300 space-y-1 list-disc pl-3 leading-relaxed">
+                        <li>This card is non-transferable and must be carried in labs.</li>
+                        <li>Loss must be reported immediately to the administration desk.</li>
+                        <li>Scan QR code to verify active enrollment status online.</li>
+                      </ul>
+
+                      <div className="pt-1.5 border-t border-slate-800 flex flex-col items-center justify-center space-y-0.5">
+                        <div className="h-6 w-44 bg-white/90 flex items-center justify-around px-2 rounded-xs">
+                          <div className="w-1 h-full bg-black"></div>
+                          <div className="w-0.5 h-full bg-black"></div>
+                          <div className="w-1.5 h-full bg-black"></div>
+                          <div className="w-0.5 h-full bg-black"></div>
+                          <div className="w-2 h-full bg-black"></div>
+                          <div className="w-1 h-full bg-black"></div>
+                          <div className="w-0.5 h-full bg-black"></div>
+                          <div className="w-1.5 h-full bg-black"></div>
+                          <div className="w-0.5 h-full bg-black"></div>
+                          <div className="w-2 h-full bg-black"></div>
+                        </div>
+                        <span className="text-[7.5px] font-mono text-slate-400 tracking-widest">{loggedInStudent.studentCode}</span>
+                      </div>
+
+                      <div className="text-center text-[7.5px] text-slate-400 pt-0.5">
+                        Principal / Authorised Signatory • {academySettings.instituteName || 'Nexgen Academy'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center pt-6 text-[10px] text-slate-500">
+                    ✂ Cut along solid borders • Fold or laminate for standard PVC card holder (85.6 mm × 54 mm)
+                  </div>
+                </div>
+
+                <div className="mt-3 print:hidden">
                   <button
-                    onClick={() => window.print()}
+                    onClick={handlePrintIdCard}
                     className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 flex items-center justify-center space-x-1.5 transition-colors shadow-2xs"
                   >
                     <Printer className="w-4 h-4 text-indigo-600" />
@@ -619,7 +746,7 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
             </div>
 
             {/* Right: Academic & Personal Details */}
-            <div className="lg:col-span-6 space-y-4">
+            <div className="lg:col-span-6 space-y-4 print:hidden">
               <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-2xs space-y-4">
                 <h3 className="font-black text-slate-900 text-sm flex items-center space-x-2 pb-2 border-b border-slate-100">
                   <User className="w-4 h-4 text-indigo-600" />

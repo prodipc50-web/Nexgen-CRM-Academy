@@ -96,7 +96,17 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
   const cashDiscrepancy = isCountingStarted ? (countedPhysicalCash - expectedCashInDrawer) : 0;
 
   const handlePrint = () => {
-    window.print();
+    const originalTitle = document.title;
+    try {
+      document.title = `Daily_Cash_Closing_${selectedDate}`;
+      window.print();
+    } catch (e) {
+      window.print();
+    } finally {
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
+    }
   };
 
   const handleDenominationChange = (denom: number, val: string) => {
@@ -124,11 +134,11 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-xs overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[96vh] animate-in zoom-in-95 duration-150"
+        className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[96vh] animate-in zoom-in-95 duration-150 print:max-w-none print:w-full print:h-auto print:max-h-none print:shadow-none print:border-none print:rounded-none print:overflow-visible"
         onClick={e => e.stopPropagation()}
       >
         {/* Top Control Bar */}
@@ -218,7 +228,7 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
         </div>
 
         {/* Printable / Viewable Report Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6 text-slate-800 print:p-0 print:m-0 print:overflow-visible" id="eod-report-printable">
+        <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6 text-slate-800 print:p-0 print:m-0 print:overflow-visible print-page-a4" id="eod-report-printable">
           {/* Printable Header */}
           <div className="border-b-2 border-slate-900 pb-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -403,7 +413,7 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
                 <span>Desk Cash Collections ({cashPayments.length})</span>
                 <span>৳{totalCashCollected.toLocaleString()}</span>
               </div>
-              <div className="max-h-56 overflow-y-auto divide-y divide-slate-100">
+              <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 print:max-h-none print:overflow-visible">
                 {cashPayments.length === 0 ? (
                   <div className="p-4 text-center text-slate-400">No cash collected on this date</div>
                 ) : (
@@ -435,7 +445,7 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
                 <span>Daily Petty Cash Vouchers ({cashExpenses.length})</span>
                 <span>৳{totalCashExpense.toLocaleString()}</span>
               </div>
-              <div className="max-h-56 overflow-y-auto divide-y divide-slate-100">
+              <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 print:max-h-none print:overflow-visible">
                 {cashExpenses.length === 0 ? (
                   <div className="p-4 text-center text-slate-400">No cash vouchers on this date</div>
                 ) : (

@@ -12,6 +12,7 @@ import { AcademyProvider, useAcademy } from './context/AcademyContext';
 import { UserRole } from './types';
 import { HeaderNavbar } from './components/layout/HeaderNavbar';
 import { SidebarNav } from './components/layout/SidebarNav';
+import { RoleAccessGuard } from './components/common/RoleAccessGuard';
 
 // Public & Auth Views (Fast Direct Load)
 import { PublicWebsiteView } from './components/website/PublicWebsiteView';
@@ -400,7 +401,7 @@ const AcademyAppContent: React.FC = () => {
       />
 
       {/* Main Workspace Body */}
-      <div className="flex-1 flex max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 gap-6 items-start pb-20 lg:pb-6">
+      <div id="app-workspace-body" className="flex-1 flex max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 gap-6 items-start pb-20 lg:pb-6 print:hidden erp-workspace-container">
         {/* Left Navigation Sidebar */}
         <SidebarNav
           activeTab={activeTab}

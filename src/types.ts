@@ -84,6 +84,12 @@ export interface AcademySettings {
   directorSignatureUrl?: string;
   authorizedSignatureUrl?: string;
   receiptNotes?: string;
+
+  // Automated Backup Schedule Configuration
+  autoBackupConfig?: AutoBackupConfig;
+
+  // Database Archiving & Storage Cleanup Policy
+  dataCleanupPolicy?: DataCleanupPolicy;
 }
 
 export type LeadStatus =
@@ -1644,6 +1650,70 @@ export interface VideoTestimonial {
   batchNumber?: string;
   storyDescription?: string;
   isActive: boolean;
+}
+
+export interface SystemSnapshotMetadata {
+  id: string;
+  timestamp: string;
+  dateLabel: string;
+  type: 'auto_daily' | 'manual';
+  note?: string;
+  studentCount: number;
+  admissionCount: number;
+  paymentCount: number;
+  leadCount: number;
+  courseCount: number;
+  batchCount: number;
+  sizeKb: number;
+}
+
+export interface AutoBackupConfig {
+  enabled: boolean;
+  frequency: 'daily' | 'weekly' | 'monthly';
+  maxSnapshotsToKeep: number;
+  lastExportedDate?: string;
+  reminderDaysThreshold: number; // e.g. 7 days
+  autoDownloadOnSchedule?: boolean;
+}
+
+export interface DataCleanupPolicy {
+  auditLogRetentionDays: number; // default 60
+  leadArchiveDays: number; // default 90 for closed/lost
+  autoPurgeTrashDays: number; // default 30
+}
+
+export interface ArchivedItem {
+  id: string;
+  originalId: string;
+  entityType: 'lead' | 'batch' | 'audit_log' | 'student';
+  title: string;
+  subtitle?: string;
+  archivedAt: string;
+  archivedBy: string;
+  payload: any;
+}
+
+export interface StorageUsageBreakdown {
+  studentsKb: number;
+  admissionsKb: number;
+  paymentsKb: number;
+  leadsKb: number;
+  auditLogsKb: number;
+  snapshotsKb: number;
+  trashKb: number;
+  archivedKb: number;
+  totalUsedKb: number;
+  estimatedQuotaKb: number; // default 5120 KB
+  percentageUsed: number;
+}
+
+export interface OptimizationReport {
+  timestamp: string;
+  freedKb: number;
+  archivedLogsCount: number;
+  archivedLeadsCount: number;
+  purgedTrashCount: number;
+  summary: string;
 }
 
 

@@ -52,8 +52,46 @@ export const CRMView: React.FC<CRMViewProps> = ({
     followUps,
     leadSources,
     occupationsList,
-    syncIncomingLeadsNow
+    syncIncomingLeadsNow,
+    academySettings
   } = useAcademy();
+
+  // Generate safe dynamic WhatsApp chat URL with institute name and course info
+  const getLeadWhatsAppUrl = (lead: Lead) => {
+    const rawDigits = lead.phone.replace(/[^0-9]/g, '');
+    const cleanPhone = rawDigits.startsWith('88') ? rawDigits : `88${rawDigits.slice(-11)}`;
+    const instName = academySettings?.instituteName || 'Nexgen Academy';
+    const crs = courses.find(c => c.id === lead.interestedCourseId);
+    const text = `আসসালামু আলাইকুম ${lead.name}, ${instName} থেকে আপনার সাথে যোগাযোগ করছি।${crs ? ` আপনার পছন্দের "${crs.name}" কোর্স সম্পর্কে যেকোনো তথ্য জানতে পারেন।` : ' আপনার কোর্স বা ভর্তি সংক্রান্ত কোনো তথ্য বা সহায়তার প্রয়োজন হলে জানাতে পারেন।'}`;
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+  };
+
+  // Detect Lead Intent (Career counseling vs direct seat booking vs syllabus)
+  const getLeadIntentBadge = (lead: Lead) => {
+    const cLower = (lead.comments || '').toLowerCase();
+    const sLower = (lead.leadSource || '').toLowerCase();
+    const pLower = (lead.preferredSchedule || '').toLowerCase();
+
+    if (cLower.includes('counseling') || cLower.includes('কাউন্সেলিং') || cLower.includes('ল্যাব ভিজিট') || pLower.includes('lab') || sLower.includes('counseling')) {
+      return {
+        label: '🎯 ক্যারিয়ার কাউন্সিলিং ও ল্যাব ভিজিট',
+        className: 'bg-teal-50 text-teal-800 border-teal-200'
+      };
+    }
+    if (cLower.includes('সিট বুকিং') || cLower.includes('seat booking') || cLower.includes('ভর্তি আবেদন') || sLower.includes('admission') || sLower.includes('seat booking')) {
+      return {
+        label: '⚡ সরাসরি সিট বুকিং',
+        className: 'bg-orange-50 text-orange-900 border-orange-200'
+      };
+    }
+    if (sLower.includes('syllabus') || cLower.includes('syllabus') || cLower.includes('সিলেবাস')) {
+      return {
+        label: '📚 সিলেবাস ডাউনলোড',
+        className: 'bg-purple-50 text-purple-900 border-purple-200'
+      };
+    }
+    return null;
+  };
 
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
   const [searchTerm, setSearchTerm] = useState('');
@@ -189,7 +227,13 @@ export const CRMView: React.FC<CRMViewProps> = ({
     if (status === 'OTP Verified' || status === 'Pending Verification' || status === 'Suspicious' || status === 'Duplicate') return 'New';
     if (status === 'Demo Attended') return 'Demo Scheduled';
     if (status === 'Enrolled' || status === 'Confirmed' || status === 'Paid') return 'Admitted';
-    return (status as LeadStatus) || 'New';
+    if (status === 'Not Interested' || status === 'Rejected' || status === 'Lost') return 'Lost';
+    if (status === 'Qualified') return 'Interested';
+    const validStatuses: LeadStatus[] = ['New', 'Contacted', 'Interested', 'Demo Scheduled', 'Follow-up', 'Admission Pending', 'Admitted', 'Lost'];
+    if (validStatuses.includes(status as LeadStatus)) {
+      return status as LeadStatus;
+    }
+    return 'New';
   };
 
   // Filtered Leads
@@ -437,7 +481,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                         <div className="flex items-center justify-between text-xs pt-1 gap-1">
                           <span className="text-xs text-slate-600 font-bold shrink-0">Stage:</span>
                           <select
-                            value={lead.status}
+                            value={normalizeLeadStatus(lead.status)}
                             onChange={e => handleStatusChange(lead.id, e.target.value as LeadStatus)}
                             className="text-xs font-bold bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-slate-800 outline-none max-w-[130px] truncate cursor-pointer"
                           >
@@ -448,7 +492,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                             <option value="Follow-up">Follow-up</option>
                             <option value="Admission Pending">Pending</option>
                             <option value="Admitted">Admit Now</option>
-                            <option value="Lost">Lost</option>
+                            <option value="Lost">Lost / Closed</option>
                           </select>
                         </div>
 
@@ -457,6 +501,17 @@ export const CRMView: React.FC<CRMViewProps> = ({
                           <div className="font-bold text-slate-900 truncate">
                             {crs?.name || 'General Inquiry'}
                           </div>
+                          {(() => {
+                            const badge = getLeadIntentBadge(lead);
+                            if (!badge) return null;
+                            return (
+                              <div className="pt-0.5">
+                                <span className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${badge.className}`}>
+                                  <span>{badge.label}</span>
+                                </span>
+                              </div>
+                            );
+                          })()}
                           <div className="text-xs text-slate-600 flex items-center justify-between gap-1">
                             <span className="flex items-center space-x-1 min-w-0 truncate">
                               <Calendar className="w-3.5 h-3.5 text-slate-500 shrink-0" />
@@ -559,7 +614,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                             </button>
 
                             <a
-                              href={`https://wa.me/88${lead.phone.replace(/[^0-9]/g, '').slice(-11)}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${lead.name}, ন্যাশনাল প্রফেশনাল অ্যাকাডেমি থেকে আপনার সাথে যোগাযোগ করছি...`)}`}
+                              href={getLeadWhatsAppUrl(lead)}
                               target="_blank"
                               rel="noreferrer"
                               className="p-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors inline-flex items-center"
@@ -641,7 +696,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                         <div className="font-semibold flex items-center space-x-1.5">
                           <span>{lead.phone}</span>
                           <a
-                            href={`https://wa.me/88${lead.phone.replace(/[^0-9]/g, '').slice(-11)}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${lead.name}, ন্যাশনাল প্রফেশনাল অ্যাকাডেমি থেকে আপনার সাথে যোগাযোগ করছি...`)}`}
+                            href={getLeadWhatsAppUrl(lead)}
                             target="_blank"
                             rel="noreferrer"
                             className="text-emerald-600 hover:text-emerald-700 p-0.5"
@@ -660,6 +715,17 @@ export const CRMView: React.FC<CRMViewProps> = ({
                       </td>
                       <td className="py-3 px-4 font-medium text-slate-800">
                         <div className="font-bold text-slate-900">{crs?.name || 'General Inquiry'}</div>
+                        {(() => {
+                          const badge = getLeadIntentBadge(lead);
+                          if (!badge) return null;
+                          return (
+                            <div className="mt-1">
+                              <span className={`inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[9px] font-bold border ${badge.className}`}>
+                                <span>{badge.label}</span>
+                              </span>
+                            </div>
+                          );
+                        })()}
                         {lead.preferredSchedule && (
                           <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200 mt-1 inline-block">
                             ⏰ {lead.preferredSchedule}
@@ -682,7 +748,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                       <td className="py-3 px-4 text-slate-600">{counselor?.name || '-'}</td>
                       <td className="py-3 px-4">
                         <select
-                          value={lead.status}
+                          value={normalizeLeadStatus(lead.status)}
                           onChange={e => handleStatusChange(lead.id, e.target.value as LeadStatus)}
                           className="bg-slate-50 border border-slate-200 font-bold rounded-lg px-2 py-1 text-slate-800 outline-none text-[11px]"
                         >
@@ -693,7 +759,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                           <option value="Follow-up">Follow-up</option>
                           <option value="Admission Pending">Admission Pending</option>
                           <option value="Admitted">Admitted</option>
-                          <option value="Lost">Lost</option>
+                          <option value="Lost">Lost / Closed</option>
                         </select>
                       </td>
                       <td className="py-3 px-4 text-amber-800 font-medium">
