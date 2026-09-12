@@ -184,7 +184,7 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
       setIsSubmitted(true);
       setErrorMessage('');
     } catch (err: any) {
-      setErrorMessage('Submission failed. Please call our hotline at 01798444444.');
+      setErrorMessage(`Submission failed. Please call our hotline at ${primaryPhone}.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -350,7 +350,7 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
                     onChange={e => setFormData({ ...formData, learningMode: e.target.value as any })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-medium outline-none focus:bg-white focus:border-indigo-600"
                   >
-                    <option value="Offline">Offline (Farmgate AC Lab Classroom)</option>
+                    <option value="Offline">Offline ({academySettings.campusName || 'Campus Lab Classroom'})</option>
                     <option value="Online Live">Online Live (Interactive Zoom + Recording)</option>
                     <option value="Hybrid">Hybrid (Classroom + Online Both)</option>
                   </select>

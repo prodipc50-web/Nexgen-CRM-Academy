@@ -29,7 +29,8 @@ import {
   FileSpreadsheet,
   Download,
   RefreshCw,
-  Globe
+  Globe,
+  Zap
 } from 'lucide-react';
 
 interface CRMViewProps {
@@ -60,7 +61,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
   const getLeadWhatsAppUrl = (lead: Lead) => {
     const rawDigits = lead.phone.replace(/[^0-9]/g, '');
     const cleanPhone = rawDigits.startsWith('88') ? rawDigits : `88${rawDigits.slice(-11)}`;
-    const instName = academySettings?.instituteName || 'Nexgen Academy';
+    const instName = academySettings?.instituteName || 'Academy';
     const crs = courses.find(c => c.id === lead.interestedCourseId);
     const text = `আসসালামু আলাইকুম ${lead.name}, ${instName} থেকে আপনার সাথে যোগাযোগ করছি।${crs ? ` আপনার পছন্দের "${crs.name}" কোর্স সম্পর্কে যেকোনো তথ্য জানতে পারেন।` : ' আপনার কোর্স বা ভর্তি সংক্রান্ত কোনো তথ্য বা সহায়তার প্রয়োজন হলে জানাতে পারেন।'}`;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
@@ -326,7 +327,10 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
           {/* Export Leads to Excel / Spreadsheet */}
           <button
-            onClick={() => exportLeadsSpreadsheet(filteredLeads, courses, staffList, 'Nexgen_Customer_Leads')}
+            onClick={() => {
+              const prefix = (academySettings?.instituteName || 'Academy').replace(/[^a-zA-Z0-9_-]/g, '_');
+              exportLeadsSpreadsheet(filteredLeads, courses, staffList, `${prefix}_Customer_Leads`, academySettings?.instituteName);
+            }}
             className="flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-3 py-2 rounded-xl shadow-2xs transition-colors"
             title={`Export ${filteredLeads.length} Leads to Excel Spreadsheet (CSV)`}
           >
@@ -626,11 +630,13 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
                           {lead.status !== 'Admitted' && (
                             <button
+                              type="button"
                               onClick={() => onOpenAdmissionWithLead(lead)}
-                              className="text-emerald-800 hover:text-emerald-900 font-bold bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg flex items-center space-x-1 border border-emerald-200 cursor-pointer whitespace-nowrap shrink-0"
+                              className="text-white font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-2.5 py-1 rounded-lg flex items-center space-x-1 shadow-2xs transition-all cursor-pointer whitespace-nowrap shrink-0 text-xs active:scale-95"
+                              title="Express Convert: ভর্তি ফর্মে সরাসরি রূপান্তর করুন"
                             >
-                              <span>Admit</span>
-                              <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                              <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300 shrink-0" />
+                              <span>Express Admit</span>
                             </button>
                           )}
                         </div>
@@ -781,6 +787,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => onOpenFollowUp(lead.id)}
                           className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold rounded text-[11px]"
                         >
@@ -788,10 +795,13 @@ export const CRMView: React.FC<CRMViewProps> = ({
                         </button>
                         {lead.status !== 'Admitted' && (
                           <button
+                            type="button"
                             onClick={() => onOpenAdmissionWithLead(lead)}
-                            className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[11px]"
+                            className="px-2.5 py-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded text-[11px] inline-flex items-center space-x-1 shadow-2xs transition-all active:scale-95"
+                            title="Express Convert: ভর্তি ফর্মে সরাসরি রূপান্তর করুন"
                           >
-                            Admit
+                            <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
+                            <span>Express Admit</span>
                           </button>
                         )}
                       </td>

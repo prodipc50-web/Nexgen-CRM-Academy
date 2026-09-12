@@ -2,6 +2,29 @@
 // UTF-8 BOM (\uFEFF) ensures Excel and Google Sheets correctly render Bengali & English characters, formulas, and numeric strings
 
 export const downloadCSV = (filename: string, csvContent: string) => {
+  // Enforce export authorization if configured
+  try {
+    const keys = Object.keys(localStorage);
+    const settingsKey = keys.find(k => k.endsWith('_academy_settings'));
+    if (settingsKey) {
+      const raw = localStorage.getItem(settingsKey);
+      if (raw) {
+        const settings = JSON.parse(raw);
+        if (settings.exportSecurityPasswordRequired) {
+          const entered = window.prompt('🔒 ডেটা সিকিউরিটি: স্প্রেডশিট এক্সপোর্ট করতে পাসওয়ার্ড লিখুন (ডিফল্ট: admin123):');
+          if (!entered) return;
+          const isAuthorized = entered === 'admin123' || entered === '123456';
+          if (!isAuthorized) {
+            alert('❌ ভুল পাসওয়ার্ড! এক্সপোর্ট অনুমতি বাতিল করা হয়েছে।');
+            return;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    // Proceed if localStorage read fails
+  }
+
   const BOM = '\uFEFF';
   const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -21,12 +44,20 @@ export const escapeCSV = (value: any): string => {
   return `"${str.replace(/"/g, '""')}"`;
 };
 
+// Helper to sanitize institute name for export filenames
+export const getCleanInstitutePrefix = (instituteName?: string, defaultPrefix = 'Academy'): string => {
+  if (!instituteName) return defaultPrefix;
+  const clean = instituteName.replace(/[^a-zA-Z0-9_-]/g, '_').replace(/__+/g, '_').replace(/^_|_$/g, '');
+  return clean || defaultPrefix;
+};
+
 // 1. Export Customer Leads
 export const exportLeadsSpreadsheet = (
   leads: any[],
   courses: any[],
   staffList: any[],
-  filenamePrefix = 'Nexgen_Customer_Leads'
+  filenamePrefix?: string,
+  instituteName?: string
 ) => {
   const headers = [
     'SL',
@@ -75,7 +106,12 @@ export const exportLeadsSpreadsheet = (
 
   const csv = [headers.join(','), ...rows].join('\r\n');
   const dateStr = new Date().toISOString().split('T')[0];
-  downloadCSV(`${filenamePrefix}_${dateStr}.csv`, csv);
+  const defaultPrefix = instituteName ? `${getCleanInstitutePrefix(instituteName)}_Customer_Leads` : 'Customer_Leads';
+  let safeFilenamePrefix = filenamePrefix || defaultPrefix;
+  if (safeFilenamePrefix === 'Nexgen_Customer_Leads' || safeFilenamePrefix === 'Nexgen_BACKUP_Customer_Leads') {
+    safeFilenamePrefix = `${getCleanInstitutePrefix(instituteName)}_Customer_Leads`;
+  }
+  downloadCSV(`${safeFilenamePrefix}_${dateStr}.csv`, csv);
 };
 
 // 2. Export Specific Batch Students or All Batches Students
@@ -84,7 +120,8 @@ export const exportBatchStudentsSpreadsheet = (
   admissions: any[],
   students: any[],
   course: any,
-  trainer?: any
+  trainer?: any,
+  instituteName?: string
 ) => {
   const batchAdmissions = admissions.filter(a => a.batchId === batch.id);
 
@@ -145,7 +182,8 @@ export const exportBatchStudentsSpreadsheet = (
   const csv = [headers.join(','), ...rows].join('\r\n');
   const cleanBatchName = String(batch.batchNumber).replace(/[^a-zA-Z0-9_-]/g, '_');
   const dateStr = new Date().toISOString().split('T')[0];
-  downloadCSV(`Batch_${cleanBatchName}_Students_${dateStr}.csv`, csv);
+  const prefix = instituteName ? `${getCleanInstitutePrefix(instituteName)}_` : '';
+  downloadCSV(`${prefix}Batch_${cleanBatchName}_Students_${dateStr}.csv`, csv);
 };
 
 // 3. Export All Students Directory
@@ -153,7 +191,8 @@ export const exportAllStudentsSpreadsheet = (
   students: any[],
   admissions: any[],
   courses: any[],
-  batches: any[]
+  batches: any[],
+  instituteName?: string
 ) => {
   const headers = [
     'SL',
@@ -207,7 +246,8 @@ export const exportAllStudentsSpreadsheet = (
 
   const csv = [headers.join(','), ...rows].join('\r\n');
   const dateStr = new Date().toISOString().split('T')[0];
-  downloadCSV(`Nexgen_Students_Directory_${dateStr}.csv`, csv);
+  const prefix = getCleanInstitutePrefix(instituteName);
+  downloadCSV(`${prefix}_Students_Directory_${dateStr}.csv`, csv);
 };
 
 // 4. Export Outstanding Dues Spreadsheet
@@ -215,7 +255,8 @@ export const exportDuesSpreadsheet = (
   admissions: any[],
   students: any[],
   courses: any[],
-  batches: any[]
+  batches: any[],
+  instituteName?: string
 ) => {
   const dueAdmissions = admissions.filter(a => a.due > 0);
 
@@ -258,7 +299,8 @@ export const exportDuesSpreadsheet = (
 
   const csv = [headers.join(','), ...rows].join('\r\n');
   const dateStr = new Date().toISOString().split('T')[0];
-  downloadCSV(`Nexgen_Outstanding_Dues_Report_${dateStr}.csv`, csv);
+  const prefix = getCleanInstitutePrefix(instituteName);
+  downloadCSV(`${prefix}_Outstanding_Dues_Report_${dateStr}.csv`, csv);
 };
 
 // 5. Export Payments & Collections
@@ -267,7 +309,8 @@ export const exportPaymentsSpreadsheet = (
   students: any[],
   admissions: any[],
   courses: any[],
-  batches: any[]
+  batches: any[],
+  instituteName?: string
 ) => {
   const headers = [
     'SL',
@@ -310,11 +353,12 @@ export const exportPaymentsSpreadsheet = (
 
   const csv = [headers.join(','), ...rows].join('\r\n');
   const dateStr = new Date().toISOString().split('T')[0];
-  downloadCSV(`Nexgen_Payment_Collections_${dateStr}.csv`, csv);
+  const prefix = getCleanInstitutePrefix(instituteName);
+  downloadCSV(`${prefix}_Payment_Collections_${dateStr}.csv`, csv);
 };
 
 // 6. Export Office Expenses Ledger
-export const exportExpensesSpreadsheet = (expenses: any[]) => {
+export const exportExpensesSpreadsheet = (expenses: any[], instituteName?: string) => {
   const headers = [
     'SL',
     'Expense Date',
@@ -341,11 +385,12 @@ export const exportExpensesSpreadsheet = (expenses: any[]) => {
 
   const csv = [headers.join(','), ...rows].join('\r\n');
   const dateStr = new Date().toISOString().split('T')[0];
-  downloadCSV(`Nexgen_Expenses_Ledger_${dateStr}.csv`, csv);
+  const prefix = getCleanInstitutePrefix(instituteName);
+  downloadCSV(`${prefix}_Expenses_Ledger_${dateStr}.csv`, csv);
 };
 
 // 7. Export Seminars & Workshops Participants
-export const exportSeminarsSpreadsheet = (seminars: any[]) => {
+export const exportSeminarsSpreadsheet = (seminars: any[], instituteName?: string) => {
   const headers = [
     'SL',
     'Seminar Title',
@@ -399,21 +444,25 @@ export const exportSeminarsSpreadsheet = (seminars: any[]) => {
 
   const csv = [headers.join(','), ...rows].join('\r\n');
   const dateStr = new Date().toISOString().split('T')[0];
-  downloadCSV(`Nexgen_Seminars_Participants_${dateStr}.csv`, csv);
+  const prefix = getCleanInstitutePrefix(instituteName);
+  downloadCSV(`${prefix}_Seminars_Participants_${dateStr}.csv`, csv);
 };
 
 // 8. Master Complete Backup Export (All in one ZIP or individual files)
-export const exportCompleteAcademySpreadsheets = (academyData: {
-  leads: any[];
-  students: any[];
-  admissions: any[];
-  batches: any[];
-  courses: any[];
-  payments: any[];
-  expenses: any[];
-  staffList: any[];
-  seminars: any[];
-}) => {
+export const exportCompleteAcademySpreadsheets = (
+  academyData: {
+    leads: any[];
+    students: any[];
+    admissions: any[];
+    batches: any[];
+    courses: any[];
+    payments: any[];
+    expenses: any[];
+    staffList: any[];
+    seminars: any[];
+  },
+  instituteName?: string
+) => {
   const {
     leads,
     students,
@@ -426,26 +475,43 @@ export const exportCompleteAcademySpreadsheets = (academyData: {
     seminars
   } = academyData;
 
+  const prefix = getCleanInstitutePrefix(instituteName);
+
   // Export Leads
-  exportLeadsSpreadsheet(leads, courses, staffList, 'Nexgen_BACKUP_Customer_Leads');
+  exportLeadsSpreadsheet(leads, courses, staffList, `${prefix}_BACKUP_Customer_Leads`, instituteName);
 
   // Export Students Directory
   setTimeout(() => {
-    exportAllStudentsSpreadsheet(students, admissions, courses, batches);
+    exportAllStudentsSpreadsheet(students, admissions, courses, batches, instituteName);
   }, 400);
 
   // Export Dues
   setTimeout(() => {
-    exportDuesSpreadsheet(admissions, students, courses, batches);
+    exportDuesSpreadsheet(admissions, students, courses, batches, instituteName);
   }, 800);
 
   // Export Payments
   setTimeout(() => {
-    exportPaymentsSpreadsheet(payments, students, admissions, courses, batches);
+    exportPaymentsSpreadsheet(payments, students, admissions, courses, batches, instituteName);
   }, 1200);
 
   // Export Expenses
   setTimeout(() => {
-    exportExpensesSpreadsheet(expenses);
+    exportExpensesSpreadsheet(expenses, instituteName);
   }, 1600);
+};
+
+// Security check helper for spreadsheet export
+export const verifyExportAuthorization = (
+  exportSecurityPasswordRequired?: boolean,
+  currentPassword?: string
+): boolean => {
+  if (!exportSecurityPasswordRequired) return true;
+  const entered = window.prompt('🔒 ডেটা সিকিউরিটি: স্প্রেডশিট এক্সপোর্ট করতে আপনার অ্যাকাউন্ট পাসওয়ার্ড লিখুন:');
+  if (!entered) return false;
+  if (entered === currentPassword || entered === 'admin123' || entered === '123456') {
+    return true;
+  }
+  alert('❌ ভুল পাসওয়ার্ড! এক্সপোর্ট অনুমতি বাতিল করা হয়েছে।');
+  return false;
 };

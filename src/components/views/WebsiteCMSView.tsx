@@ -38,6 +38,7 @@ import { CmsFaqsTab } from './cms/CmsFaqsTab';
 import { CmsStudentPortalTab } from './cms/CmsStudentPortalTab';
 import { CmsNotificationsTab } from './cms/CmsNotificationsTab';
 import { CmsSeoTab } from './cms/CmsSeoTab';
+import { CmsSectionsTab } from './cms/CmsSectionsTab';
 
 interface WebsiteCMSViewProps {
   onOpenPublicWebsite?: () => void;
@@ -55,6 +56,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
 
   const [activeTab, setActiveTab] = useState<
     | 'seo'
+    | 'sections'
     | 'hero'
     | 'trainers'
     | 'portal_config'
@@ -69,7 +71,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
     | 'notices'
     | 'faqs'
     | 'policies'
-  >('seo');
+  >('sections');
 
   const [toastMessage, setToastMessage] = useState('');
 
@@ -79,6 +81,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
   };
 
   const navTabs = [
+    { id: 'sections', label: 'Page Sections & Layout', icon: Layout, count: null, isHot: true, isNew: true },
     { id: 'seo', label: 'SEO & Local Search Hub', icon: Search, count: null, isHot: true, isPhase4: true },
     { id: 'hero', label: 'Hero & Banner Slider', icon: Layers, count: null, isHot: false },
     { id: 'trainers', label: 'Faculty & Mentors', icon: Users, count: null, isNew: true },
@@ -189,6 +192,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
 
       {/* Tab Content Display */}
       <div>
+        {activeTab === 'sections' && <CmsSectionsTab onSuccessToast={triggerToast} />}
         {activeTab === 'seo' && <CmsSeoTab onSaveToast={triggerToast} />}
         {activeTab === 'hero' && <CmsHeroTab onSuccessToast={triggerToast} />}
         {activeTab === 'trainers' && <CmsTrainersTab />}

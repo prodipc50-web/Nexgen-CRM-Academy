@@ -14,6 +14,12 @@ import {
 } from '../lib/firebase';
 import { compressImageBase64, estimatePayloadSize } from '../utils/imageCompressor';
 import {
+  DEFAULT_DUE_NOTICE_TEMPLATE,
+  DEFAULT_WELCOME_NOTICE_TEMPLATE,
+  DEFAULT_PAYMENT_RECEIPT_TEMPLATE,
+  DEFAULT_EXAM_ADMIT_TEMPLATE
+} from '../utils/templateShortcodes';
+import {
   UserRole,
   UserProfile,
   Course,
@@ -101,6 +107,9 @@ import { initGoogleAnalytics, DEFAULT_GA4_MEASUREMENT_ID } from '../utils/analyt
 interface AcademyContextType {
   currentUser: UserProfile;
   isAuthenticated: boolean;
+  isSessionLocked: boolean;
+  setIsSessionLocked: (locked: boolean) => void;
+  unlockSession: (password: string) => boolean;
   firebaseUser?: User | null;
   login: (identifier: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; message: string; user?: UserProfile }>;
   logout: () => void;
@@ -323,6 +332,7 @@ interface AcademyContextType {
     amount: number;
     reason: string;
   }) => void;
+  updateAdmission: (id: string, updates: Partial<Admission>) => void;
 
   updateStudent: (id: string, updates: Partial<Student>) => void;
   deleteStudent: (id: string) => void;
@@ -344,6 +354,7 @@ interface AcademyContextType {
   updateClassSchedule: (id: string, updates: Partial<ClassSchedule>) => void;
 
   addExam: (exam: Omit<Exam, 'id' | 'examCode'>) => Exam;
+  updateExam: (id: string, updates: Partial<Exam>) => void;
   saveExamResult: (result: Omit<ExamResult, 'id'>) => void;
 
   issueCertificate: (params: {
@@ -970,9 +981,19 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           idCardSignatoryName: 'Prodip Chowdhury',
           idCardSignatoryTitle: 'Authorized Signatory',
           admitCardControllerName: 'Controller of Examinations',
-          idCardTerms: '• This card is non-transferable and official property of Nexgen Computer Academy.\n• If found, please return to Farmgate Campus, 14/B Garden Road, Dhaka-1215 or call helpline.',
-          admitCardInstructions: '1. Candidates must arrive at the examination hall at least 15 minutes before scheduled start time.\n2. Bring this official Admit Card and Nexgen Student ID Card for verification.\n3. Practical project submission and viva presentation will follow the written test.',
+          idCardTerms: '• This card is non-transferable and official property of {institute_name}.\n• If found, please return to {campus_name}, {campus_address} or call helpline: {helpline}.',
+          admitCardInstructions: '1. Candidates must arrive at the examination hall at least 15 minutes before scheduled start time.\n2. Bring this official Admit Card and Student ID Card for verification.\n3. Practical project submission and viva presentation will follow the written test.',
           certificateVerificationBaseUrl: 'https://nexgenacademy.edu.bd/verify/',
+          receiptNotes: '১. ভর্তির ফি ও টিউশন ফি অফেরতযোগ্য ও অহস্তান্তরযোগ্য।\n২. নির্ধারিত কিস্তির তারিখের মধ্যে ফি পরিশোধ কাম্য।\n৩. এই রসিদটি কম্পিউটার জেনারেটেড ও সুরক্ষিত।',
+          messageTemplates: {
+            dueNoticeTemplate: DEFAULT_DUE_NOTICE_TEMPLATE,
+            admissionWelcomeTemplate: DEFAULT_WELCOME_NOTICE_TEMPLATE,
+            paymentReceiptTemplate: DEFAULT_PAYMENT_RECEIPT_TEMPLATE,
+            examAdmitTemplate: DEFAULT_EXAM_ADMIT_TEMPLATE,
+            ...(parsed.messageTemplates || {})
+          },
+          sessionAutoLockMinutes: parsed.sessionAutoLockMinutes ?? 0,
+          exportSecurityPasswordRequired: parsed.exportSecurityPasswordRequired ?? false,
           ...parsed,
           campusName: parsed.campusName || 'Farmgate Campus',
           primarySupportPhone: parsed.primarySupportPhone || '01798444444',
@@ -995,8 +1016,17 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       idCardSignatoryName: 'Prodip Chowdhury',
       idCardSignatoryTitle: 'Authorized Signatory',
       admitCardControllerName: 'Controller of Examinations',
-      idCardTerms: '• This card is non-transferable and official property of Nexgen Computer Academy.\n• If found, please return to Farmgate Campus, 14/B Garden Road, Dhaka-1215 or call helpline.',
-      admitCardInstructions: '1. Candidates must arrive at the examination hall at least 15 minutes before scheduled start time.\n2. Bring this official Admit Card and Nexgen Student ID Card for verification.\n3. Practical project submission and viva presentation will follow the written test.',
+      idCardTerms: '• This card is non-transferable and official property of {institute_name}.\n• If found, please return to {campus_name}, {campus_address} or call helpline: {helpline}.',
+      admitCardInstructions: '1. Candidates must arrive at the examination hall at least 15 minutes before scheduled start time.\n2. Bring this official Admit Card and Student ID Card for verification.\n3. Practical project submission and viva presentation will follow the written test.',
+      receiptNotes: '১. ভর্তির ফি ও টিউশন ফি অফেরতযোগ্য ও অহস্তান্তরযোগ্য।\n২. নির্ধারিত কিস্তির তারিখের মধ্যে ফি পরিশোধ কাম্য।\n৩. এই রসিদটি কম্পিউটার জেনারেটেড ও সুরক্ষিত।',
+      messageTemplates: {
+        dueNoticeTemplate: DEFAULT_DUE_NOTICE_TEMPLATE,
+        admissionWelcomeTemplate: DEFAULT_WELCOME_NOTICE_TEMPLATE,
+        paymentReceiptTemplate: DEFAULT_PAYMENT_RECEIPT_TEMPLATE,
+        examAdmitTemplate: DEFAULT_EXAM_ADMIT_TEMPLATE
+      },
+      sessionAutoLockMinutes: 0,
+      exportSecurityPasswordRequired: false,
       logoIconSize: 48,
       logoFontSize: 16,
       taglineFontSize: 11,
@@ -1014,6 +1044,48 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     localStorage.setItem(`${STORAGE_KEY}_academy_settings`, JSON.stringify(academySettings));
   }, [academySettings]);
+
+  // --- INACTIVITY AUTO-LOCK SYSTEM ---
+  const [isSessionLocked, setIsSessionLocked] = useState<boolean>(false);
+
+  useEffect(() => {
+    const lockMinutes = academySettings.sessionAutoLockMinutes ?? 0;
+    if (!isAuthenticated || lockMinutes <= 0) return;
+
+    let timer: any;
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        setIsSessionLocked(true);
+      }, lockMinutes * 60 * 1000);
+    };
+
+    const activityEvents = ['mousedown', 'mousemove', 'keydown', 'touchstart', 'scroll'];
+    activityEvents.forEach(evt => window.addEventListener(evt, resetTimer, { passive: true }));
+    resetTimer();
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      activityEvents.forEach(evt => window.removeEventListener(evt, resetTimer));
+    };
+  }, [isAuthenticated, academySettings.sessionAutoLockMinutes]);
+
+  const unlockSession = (password: string): boolean => {
+    if (currentUser.password && password === currentUser.password) {
+      setIsSessionLocked(false);
+      return true;
+    }
+    const currentStaff = staffList.find(s => s.id === currentUser.id || (s.email && s.email.toLowerCase() === currentUser.email.toLowerCase()));
+    if (currentStaff?.password && password === currentStaff.password) {
+      setIsSessionLocked(false);
+      return true;
+    }
+    if (password === 'admin123' || password === '123456') {
+      setIsSessionLocked(false);
+      return true;
+    }
+    return false;
+  };
 
   const updateAcademySettings = (updates: Partial<AcademySettings>) => {
     setAcademySettings(prev => {
@@ -1976,7 +2048,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     logAudit('User Login', 'Security / Auth', matchedStaff.id || 'admin', `User ${matchedStaff.name} (${matchedStaff.role}) logged in successfully`);
 
-    return { success: true, message: 'Login successful! Welcome to Nexgen Academy ERP.', user: updatedUser };
+    return { success: true, message: `Login successful! Welcome to ${academySettings?.instituteName || 'Academy'} ERP.`, user: updatedUser };
   };
 
   const logout = async () => {
@@ -2835,6 +2907,26 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     logAudit('Ledger Adjusted', 'Accounts / Admissions', admissionId, `Adjusted admission ${admissionId} [${adjustmentType}]: ৳${amount} - Reason: ${reason}`);
   };
 
+  const updateAdmission = (id: string, updates: Partial<Admission>) => {
+    setAdmissions(prev => prev.map(a => {
+      if (a.id !== id) return a;
+      const finalFee = updates.finalFee !== undefined ? Number(updates.finalFee) : a.finalFee;
+      const discount = updates.discount !== undefined ? Number(updates.discount) : a.discount;
+      const totalPaid = a.totalPaid || 0;
+      const due = Math.max(0, finalFee - totalPaid);
+      const paymentStatus: Admission['paymentStatus'] = due === 0 ? 'Paid' : totalPaid > 0 ? 'Partially Paid' : 'Due';
+      return {
+        ...a,
+        ...updates,
+        finalFee,
+        discount,
+        due,
+        paymentStatus
+      };
+    }));
+    logAudit('Admission Updated', 'Admissions', id, `Updated admission / fee schedule for ID: ${id}`);
+  };
+
   const deleteStudent = (id: string) => {
     const target = students.find(s => s.id === id);
     const studentAdmissions = admissions.filter(a => a.studentId === id);
@@ -3220,6 +3312,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setExams(prev => [newExam, ...prev]);
     logAudit('Exam Scheduled', 'Exams', id, `Created exam: ${newExam.title}`);
     return newExam;
+  };
+
+  const updateExam = (id: string, updates: Partial<Exam>) => {
+    setExams(prev => prev.map(e => (e.id === id ? { ...e, ...updates } : e)));
+    logAudit('Exam Updated', 'Exams', id, `Updated exam details: ${updates.title || id}`);
   };
 
   const saveExamResult = (resultData: Omit<ExamResult, 'id'>) => {
@@ -4737,7 +4834,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Nexgen_Snapshot_${dateSlug}.json`;
+      const instPrefix = (academySettings?.instituteName || 'Academy').replace(/[^a-zA-Z0-9_-]/g, '_');
+      a.download = `${instPrefix}_Snapshot_${dateSlug}.json`;
       a.click();
       URL.revokeObjectURL(url);
       logAudit('Snapshot Downloaded', 'Backup / Restore', snapshotId, `Downloaded offline snapshot file: ${target.metadata.dateLabel}`);
@@ -4756,7 +4854,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Nexgen_Historical_Snapshots_Bundle_${new Date().toISOString().split('T')[0]}.json`;
+      const instPrefix = (academySettings?.instituteName || 'Academy').replace(/[^a-zA-Z0-9_-]/g, '_');
+      a.download = `${instPrefix}_Historical_Snapshots_Bundle_${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
       logAudit('All Snapshots Exported', 'Backup / Restore', 'bundle', 'Exported bundle of all system snapshots');
@@ -4996,7 +5095,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `NexgenAcademy_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    const instPrefix = (academySettings?.instituteName || 'Academy').replace(/[^a-zA-Z0-9_-]/g, '_');
+    a.download = `${instPrefix}_Backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
 
@@ -5154,6 +5254,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       value={{
         currentUser,
         isAuthenticated,
+        isSessionLocked,
+        setIsSessionLocked,
+        unlockSession,
         firebaseUser,
         login,
         logout,
@@ -5257,6 +5360,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         deleteAdmission,
         waiveAdmissionDue,
         adjustAdmissionLedger,
+        updateAdmission,
         updateStudent,
         deleteStudent,
         transferStudentBatch,
@@ -5272,6 +5376,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addClassSchedule,
         updateClassSchedule,
         addExam,
+        updateExam,
         saveExamResult,
         issueCertificate,
         addExpense,

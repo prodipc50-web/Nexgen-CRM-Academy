@@ -24,7 +24,8 @@ import {
   FileText,
   Eye,
   RefreshCw,
-  Download
+  Download,
+  Star
 } from 'lucide-react';
 
 interface CourseFormModalProps {
@@ -65,6 +66,13 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
   const [description, setDescription] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [status, setStatus] = useState<CourseStatus>('Active');
+
+  // Website Performance Metrics & Badges
+  const [badgeText, setBadgeText] = useState('');
+  const [rating, setRating] = useState<number>(4.9);
+  const [reviewsCount, setReviewsCount] = useState<number>(431);
+  const [projectsCount, setProjectsCount] = useState<number>(10);
+  const [studentsJoined, setStudentsJoined] = useState<number>(450);
 
   // Duration & Schedule
   const [durationValue, setDurationValue] = useState<number>(3);
@@ -151,6 +159,11 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       setDescription(initialCourse.description || '');
       setThumbnailUrl(initialCourse.thumbnailUrl || '');
       setStatus(initialCourse.status || 'Active');
+      setBadgeText(initialCourse.badgeText || '');
+      setRating(initialCourse.rating ?? 4.9);
+      setReviewsCount(initialCourse.reviewsCount ?? 431);
+      setProjectsCount(initialCourse.projectsCount ?? 10);
+      setStudentsJoined(initialCourse.studentsJoined ?? 450);
       setDurationValue(initialCourse.durationValue || 3);
       setDurationUnit(initialCourse.durationUnit || 'Months');
       setTotalClasses(initialCourse.totalClasses || 36);
@@ -418,6 +431,11 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       description: description.trim(),
       thumbnailUrl: thumbnailUrl.trim() || undefined,
       status,
+      badgeText: badgeText.trim() || undefined,
+      rating: Number(rating) || 4.9,
+      reviewsCount: Number(reviewsCount) || 0,
+      projectsCount: Number(projectsCount) || 0,
+      studentsJoined: Number(studentsJoined) || 0,
       durationValue,
       durationUnit,
       duration: formattedDuration,
@@ -735,6 +753,99 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
                         {preset.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Website Card Display & Performance Metrics */}
+              <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/40 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                    <span className="font-bold text-slate-800 text-xs sm:text-sm">
+                      Website Card Badges & Performance Metrics (পাবলিক ওয়েবসাইট কার্ড ডিসপ্লে)
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded-full">
+                    CMS Controlled
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-700 font-bold text-xs mb-1">
+                      Card Badge Tag (ট্যাগ / ব্যাজ)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. UITB-VE-01, Bestseller, Trending"
+                      value={badgeText}
+                      onChange={e => setBadgeText(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:border-indigo-600 outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">Displayed as the top pill on public cards</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold text-xs mb-1">
+                      Rating Score (রেটিং)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="1.0"
+                      max="5.0"
+                      placeholder="4.9"
+                      value={rating}
+                      onChange={e => setRating(parseFloat(e.target.value) || 4.9)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:border-indigo-600 outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">e.g. 4.9 out of 5.0</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold text-xs mb-1">
+                      Total Reviews Count (রিভিউ সংখ্যা)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="431"
+                      value={reviewsCount}
+                      onChange={e => setReviewsCount(parseInt(e.target.value, 10) || 0)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:border-indigo-600 outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">Shown alongside the rating score</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold text-xs mb-1">
+                      Real Projects Count (প্রজেক্ট সংখ্যা)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="10"
+                      value={projectsCount}
+                      onChange={e => setProjectsCount(parseInt(e.target.value, 10) || 0)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:border-indigo-600 outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">e.g. 10 Real Projects</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold text-xs mb-1">
+                      Students Enrolled / Joined (শিক্ষার্থী সংখ্যা)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="450"
+                      value={studentsJoined}
+                      onChange={e => setStudentsJoined(parseInt(e.target.value, 10) || 0)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:border-indigo-600 outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">e.g. 450+ Enrolled</p>
                   </div>
                 </div>
               </div>

@@ -31,7 +31,8 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({ onOpenAddExpense }) 
     clearDemoExpenses,
     expenseCategoriesList,
     paymentMethodsList,
-    stats
+    stats,
+    academySettings
   } = useAcademy();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -124,7 +125,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({ onOpenAddExpense }) 
 
         <div className="flex items-center flex-wrap gap-2">
           <button
-            onClick={() => exportExpensesSpreadsheet(filteredExpenses)}
+            onClick={() => exportExpensesSpreadsheet(filteredExpenses, academySettings?.instituteName)}
             className="flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-2xs transition-colors"
             title={`Export ${filteredExpenses.length} Expense Records to Excel Spreadsheet`}
           >

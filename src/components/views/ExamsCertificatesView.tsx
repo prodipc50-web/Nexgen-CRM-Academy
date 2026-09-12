@@ -14,6 +14,8 @@ import {
   Trash2,
   AlertTriangle,
   Edit3,
+  Edit2,
+  Save,
   Upload,
   Crop
 } from 'lucide-react';
@@ -34,6 +36,7 @@ export const ExamsCertificatesView: React.FC<ExamsCertificatesViewProps> = ({
     students,
     admissions,
     addExam,
+    updateExam,
     deleteExam,
     issueCertificate,
     deleteCertificate
@@ -44,6 +47,44 @@ export const ExamsCertificatesView: React.FC<ExamsCertificatesViewProps> = ({
   const [verificationResult, setVerificationResult] = useState<Certificate | null | 'not_found'>(null);
   const [deletingCert, setDeletingCert] = useState<{ id: string; code: string; studentName?: string } | null>(null);
   const [deletingExam, setDeletingExam] = useState<Exam | null>(null);
+
+  // Edit Exam State
+  const [editingExam, setEditingExam] = useState<Exam | null>(null);
+  const [editExamTitle, setEditExamTitle] = useState('');
+  const [editExamCourseId, setEditExamCourseId] = useState('');
+  const [editExamBatchId, setEditExamBatchId] = useState('');
+  const [editExamDate, setEditExamDate] = useState('');
+  const [editExamTotalMarks, setEditExamTotalMarks] = useState(100);
+  const [editExamPassMarks, setEditExamPassMarks] = useState(50);
+  const [editExamStatus, setEditExamStatus] = useState<string>('Upcoming');
+
+  const openEditExamModal = (exam: Exam) => {
+    setEditingExam(exam);
+    setEditExamTitle(exam.title);
+    setEditExamCourseId(exam.courseId);
+    setEditExamBatchId(exam.batchId);
+    setEditExamDate(exam.examDate);
+    setEditExamTotalMarks(exam.totalMarks);
+    setEditExamPassMarks(exam.passMarks);
+    setEditExamStatus(exam.status);
+  };
+
+  const handleEditExamSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingExam || !editExamTitle.trim()) return;
+
+    updateExam(editingExam.id, {
+      title: editExamTitle.trim(),
+      courseId: editExamCourseId,
+      batchId: editExamBatchId,
+      examDate: editExamDate,
+      totalMarks: Number(editExamTotalMarks),
+      passMarks: Number(editExamPassMarks),
+      status: editExamStatus as any
+    });
+
+    setEditingExam(null);
+  };
 
   // Issue Certificate Form State
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
@@ -304,7 +345,14 @@ export const ExamsCertificatesView: React.FC<ExamsCertificatesViewProps> = ({
                           {exam.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-4 text-right space-x-1.5">
+                        <button
+                          onClick={() => openEditExamModal(exam)}
+                          className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-200"
+                          title="Edit Exam Title, Date, Total/Pass Marks"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => setDeletingExam(exam)}
                           className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
@@ -556,6 +604,130 @@ export const ExamsCertificatesView: React.FC<ExamsCertificatesViewProps> = ({
                 Delete Exam
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Exam Modal */}
+      {editingExam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-4 bg-indigo-950 text-white flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold">Edit Exam Details</h3>
+                <p className="text-[11px] text-indigo-300 font-mono">{editingExam.examCode}</p>
+              </div>
+              <button onClick={() => setEditingExam(null)} className="p-1 rounded-lg text-slate-300 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditExamSubmit} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1">Exam Title (পরীক্ষার নাম) *</label>
+                <input
+                  type="text"
+                  required
+                  value={editExamTitle}
+                  onChange={e => setEditExamTitle(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Course</label>
+                  <select
+                    value={editExamCourseId}
+                    onChange={e => setEditExamCourseId(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    {courses.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Batch</label>
+                  <select
+                    value={editExamBatchId}
+                    onChange={e => setEditExamBatchId(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    {batches.map(b => (
+                      <option key={b.id} value={b.id}>Batch #{b.batchNumber}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Exam Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={editExamDate}
+                    onChange={e => setEditExamDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Status</label>
+                  <select
+                    value={editExamStatus}
+                    onChange={e => setEditExamStatus(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="Upcoming">Upcoming</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Total Marks *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={editExamTotalMarks}
+                    onChange={e => setEditExamTotalMarks(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Pass Marks *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={editExamPassMarks}
+                    onChange={e => setEditExamPassMarks(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingExam(null)}
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center space-x-1.5 shadow-xs"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Update Exam</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

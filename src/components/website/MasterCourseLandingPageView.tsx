@@ -104,6 +104,76 @@ const DEFAULT_PAIN_POINTS: CourseLandingPainPoint[] = [
   }
 ];
 
+const getSmartPainPoints = (course: Course): CourseLandingPainPoint[] => {
+  const cat = (course.category || '').toLowerCase();
+  const nm = (course.name || '').toLowerCase();
+
+  if (cat.includes('graphic') || nm.includes('graphic') || nm.includes('ui/ux') || nm.includes('design')) {
+    return [
+      {
+        problem: 'ডিজাইন সেন্স থাকলেও ইন্ডাস্ট্রি স্ট্যান্ডার্ড সফটওয়্যার ও কালার থিওরি না জানার কারণে ক্লায়েন্ট কাজ পছন্দ করে না',
+        solution: 'Photoshop, Illustrator ও Figma দিয়ে আন্তর্জাতিক মানের ব্র্যান্ডিং, লোগো ও ডিজিটাল আর্ট তৈরি'
+      },
+      {
+        problem: 'ম্যানুয়াল ডিজাইনে ঘণ্টার পর ঘণ্টা সময় অপচয় এবং নতুন আইডিয়া খুঁজে পেতে ভোগান্তি',
+        solution: 'Midjourney, Firefly ও AI জেনারেটিভ টুলস দিয়ে দ্রুত চোখধাঁধানো কনসেপ্ট ও ভেক্টর ডিজাইন'
+      },
+      {
+        problem: 'মার্কেটপ্লেস ও দেশীয় জবে পোর্টফোলিও বা ক্লায়েন্ট রেডি প্রেজেন্টেশনের অভাব',
+        solution: 'Behance ও Dribbble-এ লাইভ কমার্শিয়াল প্রজেক্ট সহ শক্তিশালী পোর্টফোলিও বিল্ডিং'
+      },
+      {
+        problem: 'প্রিন্ট ও ডিজিটাল মিডিয়ার সঠিক রেজোলিউশন ও কালার প্রোফাইল (RGB vs CMYK) ভুল হওয়া',
+        solution: 'হাতে-কলমে প্রিন্ট-রেডি প্রেস ফাইল ও সোশ্যাল মিডিয়া এক্সপোর্ট স্ট্যান্ডার্ড গাইডলাইন'
+      }
+    ];
+  }
+
+  if (cat.includes('video') || nm.includes('video') || nm.includes('motion') || nm.includes('audio')) {
+    return [
+      {
+        problem: 'বেসিক এডিটিং জানা সত্ত্বেও প্রফেশনাল স্টোরিটেলিং ও মসৃণ ট্রানজিশনের অভাবে ভিডিও আকর্ষক হয় না',
+        solution: 'Premiere Pro ও After Effects দিয়ে সিনেম্যাটিক এডিটিং, সাউন্ড ডিজাইন ও স্মুথ ট্রানজিশন'
+      },
+      {
+        problem: 'কালার কারেকশন ও কালার গ্রেডিং ঠিকমতো না করায় ভিডিও দেখতে অপেশাদার লাগে',
+        solution: 'Lumetri Color ও প্রফেশনাল LUTs দিয়ে ফিল্মিক কালার গ্রেডিং ও স্কিন টোন ব্যালান্স'
+      },
+      {
+        problem: 'ইউটিউব ও সোশ্যাল মিডিয়ার জন্য হাই-কনভার্টিং থাম্বনেইল ও মোশন গ্রাফিক্সের অভাব',
+        solution: 'লোয়ার থার্ড, মোশন টাইপোগ্রাফি ও ট্রেন্ডি রিলস/শর্টস এডিটিং টেকনিক্স'
+      },
+      {
+        problem: 'রেন্ডারিংয়ে দীর্ঘ সময় নষ্ট এবং ভিডিও এক্সপোর্ট সেটিংসে কনফিউশন',
+        solution: 'Hardware acceleration ও আল্ট্রা-ফাস্ট 4K/1080p রেন্ডার অপটিমাইজেশন'
+      }
+    ];
+  }
+
+  if (cat.includes('web') || nm.includes('web') || nm.includes('code') || nm.includes('full-stack') || nm.includes('software')) {
+    return [
+      {
+        problem: 'টিউটোরিয়াল দেখে কোড বুঝলেও রিয়েল-লাইফ প্রোডাকশন প্রজেক্ট একা একা তৈরি করতে আটকে যাওয়া',
+        solution: 'হাতে-কলমে ফুল-স্ট্যাক প্রজেক্ট ডিজাইন, ফ্রন্টএন্ড, ব্যাকএন্ড ও ডাটাবেস ইন্টিগ্রেশন'
+      },
+      {
+        problem: 'আধুনিক ফ্রেমওয়ার্ক (React, Next.js, Node) ও গিটহাব ভার্সন কন্ট্রোলে আত্মবিশ্বাসের অভাব',
+        solution: 'ইন্ডাস্ট্রি-স্ট্যান্ডার্ড কোডিং স্ট্রাকচার, Git PR কোলাবোরেশন ও লাইভ সার্ভার ডেপ্লয়মেন্ট'
+      },
+      {
+        problem: 'মোবাইল রেসপন্সিভ ডিজাইন ও এপিআই কানেকশনে জটিলতা ও বাগ ফিক্সিংয়ে ঘণ্টার পর ঘণ্টা নষ্ট',
+        solution: 'Tailwind CSS, আধুনিক API হ্যান্ডলিং ও সিস্টেমেটিক ডিবাগিং কৌশল'
+      },
+      {
+        problem: 'জব ইন্টারভিউ ও ক্লায়েন্ট টেস্টে কোডিং চ্যালেঞ্জ ফেস করতে ভয় পাওয়া',
+        solution: 'রিয়েল-ওয়ার্ল্ড কোডিং টেস্ট ও টেকনিক্যাল ইন্টারভিউ ক্র্যাকিং মেন্টরিং'
+      }
+    ];
+  }
+
+  return DEFAULT_PAIN_POINTS;
+};
+
 const DEFAULT_FEATURE_CARDS: CourseLandingFeatureCard[] = [
   {
     iconName: 'laptop',
@@ -136,6 +206,53 @@ const DEFAULT_FEATURE_CARDS: CourseLandingFeatureCard[] = [
     description: 'স্ট্যান্ডার্ড সিভি ও ইন্টারভিউ প্রিপারেশন এবং করপোরেট কমিউনিকেশন টিপস।'
   }
 ];
+
+const getSmartFeatureCards = (course: Course): CourseLandingFeatureCard[] => {
+  const cat = (course.category || '').toLowerCase();
+  const nm = (course.name || '').toLowerCase();
+
+  let projectDesc = 'অফিসিয়াল চিঠি, ক্যাশবুক, ইনভয়েস, স্যালারি শিট ও পে-রোল ম্যানেজমেন্ট প্রজেক্ট।';
+  if (cat.includes('graphic') || nm.includes('graphic') || nm.includes('design')) {
+    projectDesc = 'ব্র্যান্ডিং, লোগো, সোশ্যাল মিডিয়া পোস্টার, প্যাকেজিং ও কমার্শিয়াল ক্লায়েন্ট প্রজেক্ট।';
+  } else if (cat.includes('video') || nm.includes('video')) {
+    projectDesc = 'ইউটিউব লং ভিডিও, ট্রেন্ডিং রিলস, কমার্শিয়াল অ্যাড ও মোশন গ্রাফিক্স প্রজেক্ট।';
+  } else if (cat.includes('web') || nm.includes('web') || nm.includes('software')) {
+    projectDesc = 'ই-কমার্স প্ল্যাটফর্ম, রেসপন্সিভ পোর্টফোলিও, ড্যাশবোর্ড ও ফুল-স্ট্যাক লাইভ প্রজেক্ট।';
+  }
+
+  return [
+    {
+      iconName: 'laptop',
+      title: '১০০% হ্যান্ডস-অন ল্যাব প্র্যাকটিস',
+      description: 'ক্লাসরুমেই প্রতিটি শিক্ষার্থীর জন্য আলাদা পার্সোনাল কম্পিউটার ও রিয়েল-লাইফ অ্যাসাইনমেন্ট।'
+    },
+    {
+      iconName: 'zap',
+      title: 'AI ইন্টিগ্রেশন ও আধুনিক টুলস',
+      description: 'কাজের গতি বহুগুণ বৃদ্ধি করতে জেনারেটিভ AI ও আধুনিক প্রোডাক্টিভিটি টুলসের বাস্তব ব্যবহার।'
+    },
+    {
+      iconName: 'award',
+      title: 'ভেরিফায়েবল সরকারি ও আইটি সার্টিফিকেট',
+      description: 'কোর্স শেষে অনলাইন কিউআর কোড ভেরিফিকেশন সহ প্রফেশনাল সার্টিফিকেট প্রদান।'
+    },
+    {
+      iconName: 'briefcase',
+      title: 'জব-রেডি রিয়েল ইন্ডাস্ট্রি প্রজেক্ট',
+      description: projectDesc
+    },
+    {
+      iconName: 'shield',
+      title: 'লাইফটাইম মেন্টর ও ল্যাব সাপোর্ট',
+      description: 'কোর্স শেষ হলেও যেকোনো সময়ে ল্যাব ব্যবহার ও মেন্টরদের কাছ থেকে ফ্রি সলিউশন সুবিধা।'
+    },
+    {
+      iconName: 'users',
+      title: 'ক্যারিয়ার ও সিভি মেকিং গাইডলাইন',
+      description: 'স্ট্যান্ডার্ড সিভি ও ইন্টারভিউ প্রিপারেশন এবং করপোরেট কমিউনিকেশন টিপস।'
+    }
+  ];
+};
 
 const DEFAULT_AUDIENCE: CourseLandingTargetAudienceItem[] = [
   {
@@ -186,14 +303,90 @@ const DEFAULT_REVIEWS: CourseLandingReview[] = [
   }
 ];
 
+const getSmartReviews = (course: Course): CourseLandingReview[] => {
+  const cat = (course.category || '').toLowerCase();
+  const nm = (course.name || '').toLowerCase();
+
+  if (cat.includes('graphic') || nm.includes('graphic') || nm.includes('design')) {
+    return [
+      {
+        name: 'রাকিবুল হাসান',
+        roleOrBatch: 'জুনিয়র ডিজাইনার • ব্যাচ-০৯',
+        rating: 5,
+        text: 'ইলাস্ট্রেটর ও ফটোশপের প্রফেশনাল টুলস এবং ব্র্যান্ডিং প্রজেক্ট তৈরি করে আমি প্রথম মাসেই মার্কেটপ্লেসে কাজ পেয়েছি!'
+      },
+      {
+        name: 'তানজিলা তাসনিম',
+        roleOrBatch: 'সোশ্যাল মিডিয়া ডিজাইনার • ব্যাচ-১৪',
+        rating: 5,
+        text: 'কালার থিওরি ও টাইপোগ্রাফি এত সুন্দর করে শেখানো হয়েছে যে এখন যেকোনো সোশ্যাল পোস্টার ও ব্যানার খুব প্রফেশনাল লাগে।'
+      },
+      {
+        name: 'ফাহিম মোর্শেদ',
+        roleOrBatch: 'ফ্রিল্যান্স ভেক্টর আর্টিস্ট • ব্যাচ-০৭',
+        rating: 5,
+        text: 'Behance-এ লাইভ পোর্টফোলিও তৈরি ও ক্লায়েন্ট প্রেজেন্টেশন গাইডলাইন আমার ফ্রিল্যান্সিং ক্যারিয়ারে টার্নিং পয়েন্ট ছিল।'
+      }
+    ];
+  }
+
+  if (cat.includes('video') || nm.includes('video') || nm.includes('motion')) {
+    return [
+      {
+        name: 'আরিফুল ইসলাম',
+        roleOrBatch: 'কনটেন্ট ক্রিয়েটর • ব্যাচ-০৬',
+        rating: 5,
+        text: 'Premiere Pro-তে কালার গ্রেডিং ও সাউন্ড ডিজাইনিং শেখার পর আমার ভিডিওর রিচ ও প্রোডাকশন কোয়ালিটি বহুগুণ বেড়ে গেছে!'
+      },
+      {
+        name: 'সাদিয়া জাহান',
+        roleOrBatch: 'ভিডিও এডিটর • ব্যাচ-১১',
+        rating: 5,
+        text: 'আফটার ইফেক্টসে স্মুথ ট্রানজিশন ও লোয়ার থার্ড মোশন গ্রাফিক্স হাতে-কলমে শেখার চমৎকার অভিজ্ঞতা।'
+      },
+      {
+        name: 'মেহেদী হাসান',
+        roleOrBatch: 'রিলস ও শর্টস স্পেশালিস্ট • ব্যাচ-০৮',
+        rating: 5,
+        text: 'ট্রেন্ডি শর্টস ও রিলসের হুক এডিটিং টেকনিক আন্তর্জাতিক ক্লায়েন্ট প্রজেক্টে দারুণ সহায়তা করছে।'
+      }
+    ];
+  }
+
+  if (cat.includes('web') || nm.includes('web') || nm.includes('code') || nm.includes('software')) {
+    return [
+      {
+        name: 'নাজমুল হুদা',
+        roleOrBatch: 'ফ্রন্টএন্ড ডেভেলপার • ব্যাচ-০৫',
+        rating: 5,
+        text: 'রিঅ্যাক্ট ও টেইলউইন্ড দিয়ে রিয়েল প্রোডাকশন অ্যাপ বানিয়ে সরাসরি সফটওয়্যার কোম্পানিতে জবে জয়েন করতে পেরেছি।'
+      },
+      {
+        name: 'সুমাইয়া ফারহানা',
+        roleOrBatch: 'সিএসই শিক্ষার্থী • ব্যাচ-১২',
+        rating: 5,
+        text: 'ভার্সিটির থিওরির বাইরে রিয়েল-ওয়ার্ল্ড এপিআই ও ব্যাকএন্ড আর্কিটেকচার এখানে সহজভাবে শিখেছি।'
+      },
+      {
+        name: 'হাসান মাহমুদ',
+        roleOrBatch: 'ফুল-স্ট্যাক লার্নার • ব্যাচ-০৩',
+        rating: 5,
+        text: 'গিটহাব কোলাবোরেশন ও লাইভ ক্লাউড সার্ভার ডেপ্লয়মেন্ট মেন্টরদের সহায়তায় খুব দ্রুত আয়ত্ত করেছি।'
+      }
+    ];
+  }
+
+  return DEFAULT_REVIEWS;
+};
+
 const DEFAULT_FAQS: CourseLandingFaq[] = [
   {
     question: 'এই কোর্সে ভর্তি হতে কি কোনো পূর্ব অভিজ্ঞতার প্রয়োজন আছে?',
-    answer: 'না, কোনো পূর্ব অভিজ্ঞতার প্রয়োজন নেই। একদম শুরু থেকে কম্পিউটার অন-অফ, টাইপিং থেকে শুরু করে অ্যাডভান্সড এক্সেল ও AI প্রম্পটিং পর্যন্ত শূন্য থেকেই হাতে-কলমে শেখানো হবে।'
+    answer: 'না, কোনো পূর্ব অভিজ্ঞতার প্রয়োজন নেই। একদম শুরু থেকে বেসিক ধারণা থেকে শুরু করে অ্যাডভান্সড ইন্ডাস্ট্রি প্রজেক্ট ও AI টুলস পর্যন্ত শূন্য থেকেই হাতে-কলমে শেখানো হবে।'
   },
   {
     question: 'ল্যাবে কি প্রতিটি শিক্ষার্থীর জন্য আলাদা কম্পিউটার থাকবে?',
-    answer: 'হ্যাঁ, আমাদের ফার্মগেট ক্যাম্পাসে হাই-স্পিড ইন্টারনেট ও শীতাতপ নিয়ন্ত্রিত আধুনিক ল্যাবে প্রতিটি শিক্ষার্থীর জন্য ডেডিকেটেড পার্সোনাল পিসি বরাদ্দ থাকে।'
+    answer: 'হ্যাঁ, আমাদের হাই-স্পিড ইন্টারনেট ও শীতাতপ নিয়ন্ত্রিত আধুনিক ল্যাবে প্রতিটি শিক্ষার্থীর জন্য ডেডিকেটেড পার্সোনাল পিসি বরাদ্দ থাকে।'
   },
   {
     question: 'ক্লাস মিস গেলে কি ব্যাকআপ সাপোর্ট বা রেকর্ডিং পাওয়া যাবে?',
@@ -201,21 +394,57 @@ const DEFAULT_FAQS: CourseLandingFaq[] = [
   },
   {
     question: 'কোর্স শেষে কি সার্টিফিকেট দেওয়া হবে?',
-    answer: 'হ্যাঁ, কোর্স সমাপ্তির পর সফল শিক্ষার্থীদের সরকারি ও বেসরকারি প্রতিষ্ঠানে গ্রহণযোগ্য ভেরিফায়েবল সার্টিফিকেট প্রদান করা হবে।'
+    answer: 'হ্যাঁ, কোর্স সমাপ্তির পর সফল শিক্ষার্থীদের সরকারি ও আন্তর্জাতিক প্রতিষ্ঠানে গ্রহণযোগ্য কিউআর কোড ভেরিফায়েবল সার্টিফিকেট প্রদান করা হবে।'
   },
   {
     question: 'ভর্তি ফি কি কিস্তিতে (Installment) পরিশোধ করা যাবে?',
-    answer: 'হ্যাঁ, প্রাথমিক মাত্র ৳২,৫০০ দিয়ে সিট বুকিং করে বাকি কোর্স ফি সহজ ২টি কিস্তিতে পরিশোধের সুযোগ রয়েছে।'
+    answer: 'হ্যাঁ, প্রাথমিক ডাউন পেমেন্ট দিয়ে সিট বুকিং করে বাকি কোর্স ফি সহজ কিস্তিতে পরিশোধের সুব্যবস্থা রয়েছে।'
   }
 ];
 
 const DEFAULT_BONUSES: string[] = [
-  'ChatGPT & AI Office Productivity প্রম্পট গাইড বুক (PDF ফ্রি)',
-  '৫০+ রেডিমেড করপোরেট এক্সেল ও ওয়ার্ড টেমপ্লেট লাইব্রেরি',
-  'ফুল স্পিড টাইピング সফটওয়্যার ফুল লাইসেন্স',
+  'ChatGPT & AI Productivity প্রম্পট গাইড বুক (PDF ফ্রি)',
+  '৫০+ রেডিমেড করপোরেট প্রজেক্ট টেমপ্লেট লাইব্রেরি',
   'প্রফেশনাল সিভি মেকিং ফরম্যাট ও ইন্টারভিউ প্রশ্ন ব্যাংক',
   'লাইফটাইম ক্লাস রিসোর্স ও ভিডিও ব্যাকআপ সাপোর্ট'
 ];
+
+const getSmartBonuses = (course: Course): string[] => {
+  const cat = (course.category || '').toLowerCase();
+  const nm = (course.name || '').toLowerCase();
+
+  if (cat.includes('graphic') || nm.includes('graphic') || nm.includes('design')) {
+    return [
+      '১০০+ প্রিমিয়াম ফন্ট, মকআপ ও ভেক্টর এসেট প্যাক (Free Drive)',
+      'ফটোশপ ও ইলাস্ট্রেটর প্রো শর্টকাট চিটশিট',
+      'Behance ও Dribbble লাইভ পোর্টফোলিও সেটআপ গাইড',
+      'ক্লায়েন্ট প্রপোজাল টেমপ্লেট ও আন্তর্জাতিক ইনভয়েস ফরম্যাট',
+      'লাইফটাইম ডিজাইন রিসোর্স ও মেন্টর সাপোর্ট'
+    ];
+  }
+
+  if (cat.includes('video') || nm.includes('video') || nm.includes('motion')) {
+    return [
+      '৫০০+ সিনেম্যাটিক সাউন্ড এফেক্টস ও কালার LUTs প্যাক',
+      'স্মুথ ট্রানজিশন ও লোয়ার থার্ড মোশন গ্রাফিক্স প্রিসেট',
+      'ইউটিউব থাম্বনেইল ও ট্রেন্ডি রিলস টেমপ্লেট লাইব্রেরি',
+      'ক্লায়েন্ট ডিলিং ও ফ্রিল্যান্স ভিডিও এডিটিং গাইড',
+      'লাইফটাইম ভিডিও রিসোর্স ও মেন্টর সাপোর্ট'
+    ];
+  }
+
+  if (cat.includes('web') || nm.includes('web') || nm.includes('code') || nm.includes('software')) {
+    return [
+      'ফুল-স্ট্যাক রেডি বয়লারপ্লেট ও কোড স্নিপেট লাইব্রেরি',
+      'Git ও GitHub প্রফেশনাল চিটশিট গাইড',
+      'টেক ইন্টারভিউ ও কোডিং চ্যালেঞ্জ প্রিপারেশন কিট',
+      'রেজিউমে ও লিঙ্কডইন প্রোফাইল অপটিমাইজেশন সাপোর্ট',
+      'লাইফটাইম কোড রিসোর্স ও ল্যাব সহায়তা'
+    ];
+  }
+
+  return DEFAULT_BONUSES;
+};
 
 const DEFAULT_TRAINERS: TrainerProfile[] = [
   {
@@ -540,21 +769,23 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   const rawPhone =
     landingConfig.customWhatsAppNumber ||
     websiteCmsConfig?.marketing?.floatingWhatsAppNumber ||
+    academySettings?.primarySupportPhone ||
+    academySettings?.helplines?.[0] ||
     '01798444444';
   const defaultWhatsAppMsg =
     landingConfig.customWhatsAppMessage ||
-    `Hello Nexgen Academy! I want to enroll in "${course.name}" with the special discount.`;
+    `Hello ${academySettings?.instituteName || 'Academy'}! I want to enroll in "${course.name}" with the special discount.`;
   const whatsAppUrl = getWhatsAppDirectUrl(rawPhone, defaultWhatsAppMsg);
 
   const rawMessenger =
     landingConfig.customMessengerUrl ||
     websiteCmsConfig?.socialLinks?.facebookPageUrl ||
-    'https://m.me/nexgenacademy';
-  const messengerUrl = getMessengerDirectUrl(rawMessenger);
+    '';
+  const messengerUrl = rawMessenger ? getMessengerDirectUrl(rawMessenger) : whatsAppUrl;
 
   // Dynamic Content Sources from landingConfig with robust fallbacks
-  const painPoints: CourseLandingPainPoint[] = (landingConfig.painPointsList && landingConfig.painPointsList.length > 0) ? landingConfig.painPointsList : DEFAULT_PAIN_POINTS;
-  const featureCards: CourseLandingFeatureCard[] = (landingConfig.featureCards && landingConfig.featureCards.length > 0) ? landingConfig.featureCards : DEFAULT_FEATURE_CARDS;
+  const painPoints: CourseLandingPainPoint[] = (landingConfig.painPointsList && landingConfig.painPointsList.length > 0) ? landingConfig.painPointsList : getSmartPainPoints(course);
+  const featureCards: CourseLandingFeatureCard[] = (landingConfig.featureCards && landingConfig.featureCards.length > 0) ? landingConfig.featureCards : getSmartFeatureCards(course);
   const audienceList: CourseLandingTargetAudienceItem[] = (landingConfig.audienceList && landingConfig.audienceList.length > 0) ? landingConfig.audienceList : DEFAULT_AUDIENCE;
   const editableModules: CourseLandingCurriculumModule[] =
     landingConfig.editableModules && landingConfig.editableModules.length > 0
@@ -569,19 +800,22 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           topics: m.topics || []
         })) || [];
   const faqs: CourseLandingFaq[] = (landingConfig.faqs && landingConfig.faqs.length > 0) ? landingConfig.faqs : DEFAULT_FAQS;
-  const bonusItems: string[] = (landingConfig.bonusItems && landingConfig.bonusItems.length > 0) ? landingConfig.bonusItems : DEFAULT_BONUSES;
+  const bonusItems: string[] = (landingConfig.bonusItems && landingConfig.bonusItems.length > 0) ? landingConfig.bonusItems : getSmartBonuses(course);
   const ctaMode = landingConfig.ctaMode || 'both';
 
   // Campus Address & Phone
   const campusAddress =
     landingConfig.campusAddress ||
+    academySettings?.officialAddress ||
     websiteCmsConfig?.officeAddress ||
-    '১৪/বি, গার্ডেন রোড, কাজী নজরুল ইসলাম এভিনিউ (ফার্মগেট ওভারব্রিজ সংলগ্ন), ঢাকা-১২১৫';
+    'ক্যাম্পাস অফিস, বাংলাদেশ';
   const campusPhone =
     landingConfig.campusPhone ||
     websiteCmsConfig?.multiplePhones?.find(p => p.isHotline)?.number ||
+    academySettings?.primarySupportPhone ||
+    academySettings?.helplines?.[0] ||
     websiteCmsConfig?.whatsappSupportNumber ||
-    '01798-444444';
+    '01798444444';
   const campusHours =
     landingConfig.campusHours ||
     websiteCmsConfig?.officeHours ||
@@ -2259,7 +2493,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   </div>
                 </div>
               ))
-            : DEFAULT_REVIEWS.map((rev, idx) => (
+            : getSmartReviews(course).map((rev, idx) => (
                 <div
                   key={idx}
                   className="edtech-card-glow rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-4 shadow-lg hover:border-slate-600 transition-all"

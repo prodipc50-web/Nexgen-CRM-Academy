@@ -56,6 +56,7 @@ const CertificateModal = lazy(() => import('./components/modals/CertificateModal
 const NewExpenseModal = lazy(() => import('./components/modals/NewExpenseModal').then(m => ({ default: m.NewExpenseModal })));
 const StudentProfileModal = lazy(() => import('./components/modals/StudentProfileModal').then(m => ({ default: m.StudentProfileModal })));
 const BulkBatchIdCardModal = lazy(() => import('./components/modals/BulkBatchIdCardModal').then(m => ({ default: m.BulkBatchIdCardModal })));
+import { SessionLockModal } from './components/modals/SessionLockModal';
 
 import { Lead, Course } from './types';
 
@@ -625,6 +626,8 @@ const AcademyAppContent: React.FC = () => {
           isOpen={isBulkIdModalOpen}
           onClose={() => setIsBulkIdModalOpen(false)}
         />
+
+        <SessionLockModal />
       </Suspense>
 
       {/* Mobile Bottom Navigation Bar (lg:hidden) */}

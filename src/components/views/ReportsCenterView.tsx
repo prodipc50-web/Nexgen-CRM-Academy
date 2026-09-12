@@ -45,7 +45,8 @@ export const ReportsCenterView: React.FC = () => {
     seminars,
     cloudSyncStatus,
     lastCloudSyncTime,
-    syncToCloudNow
+    syncToCloudNow,
+    academySettings
   } = useAcademy();
 
   const [reportType, setReportType] = useState<
@@ -55,6 +56,7 @@ export const ReportsCenterView: React.FC = () => {
   const [selectedBatchId, setSelectedBatchId] = useState<string>(batches[0]?.id || '');
   const [backupToast, setBackupToast] = useState(false);
 
+  const instName = academySettings?.instituteName;
   const selectedBatch = batches.find(b => b.id === selectedBatchId) || batches[0];
   const selectedBatchCourse = courses.find(c => c.id === selectedBatch?.courseId);
   const selectedBatchTrainer = {
@@ -65,36 +67,36 @@ export const ReportsCenterView: React.FC = () => {
   const handleExportCurrent = () => {
     switch (reportType) {
       case 'leads':
-        exportLeadsSpreadsheet(leads, courses, staffList);
+        exportLeadsSpreadsheet(leads, courses, staffList, undefined, instName);
         break;
       case 'batch_students':
         if (selectedBatch) {
-          exportBatchStudentsSpreadsheet(selectedBatch, admissions, students, selectedBatchCourse, selectedBatchTrainer);
+          exportBatchStudentsSpreadsheet(selectedBatch, admissions, students, selectedBatchCourse, selectedBatchTrainer, instName);
         }
         break;
       case 'all_students':
-        exportAllStudentsSpreadsheet(students, admissions, courses, batches);
+        exportAllStudentsSpreadsheet(students, admissions, courses, batches, instName);
         break;
       case 'admissions':
-        exportAllStudentsSpreadsheet(students, admissions, courses, batches);
+        exportAllStudentsSpreadsheet(students, admissions, courses, batches, instName);
         break;
       case 'dues':
-        exportDuesSpreadsheet(admissions, students, courses, batches);
+        exportDuesSpreadsheet(admissions, students, courses, batches, instName);
         break;
       case 'payments':
-        exportPaymentsSpreadsheet(payments, students, admissions, courses, batches);
+        exportPaymentsSpreadsheet(payments, students, admissions, courses, batches, instName);
         break;
       case 'expenses':
-        exportExpensesSpreadsheet(expenses);
+        exportExpensesSpreadsheet(expenses, instName);
         break;
       case 'seminars':
-        exportSeminarsSpreadsheet(seminars);
+        exportSeminarsSpreadsheet(seminars, instName);
         break;
       case 'certificates':
-        exportAllStudentsSpreadsheet(students, admissions, courses, batches);
+        exportAllStudentsSpreadsheet(students, admissions, courses, batches, instName);
         break;
       default:
-        exportLeadsSpreadsheet(leads, courses, staffList);
+        exportLeadsSpreadsheet(leads, courses, staffList, undefined, instName);
     }
   };
 
@@ -109,7 +111,7 @@ export const ReportsCenterView: React.FC = () => {
       expenses,
       staffList,
       seminars
-    });
+    }, instName);
     setBackupToast(true);
     setTimeout(() => setBackupToast(false), 4000);
   };
@@ -240,7 +242,7 @@ export const ReportsCenterView: React.FC = () => {
             <button
               onClick={() => {
                 if (selectedBatch) {
-                  exportBatchStudentsSpreadsheet(selectedBatch, admissions, students, selectedBatchCourse, selectedBatchTrainer);
+                  exportBatchStudentsSpreadsheet(selectedBatch, admissions, students, selectedBatchCourse, selectedBatchTrainer, instName);
                 }
               }}
               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-xs transition-colors shrink-0"

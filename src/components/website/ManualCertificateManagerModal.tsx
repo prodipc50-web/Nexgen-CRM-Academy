@@ -80,11 +80,17 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
     batches,
     issueCertificate,
     updateCertificate,
-    deleteCertificate
+    deleteCertificate,
+    academySettings
   } = useAcademy();
 
   const [activeTab, setActiveTab] = useState<'editor' | 'registry'>('editor');
   const [editingCertId, setEditingCertId] = useState<string | null>(initialEditCertId || null);
+
+  const defaultInstituteRemarks = `Authenticated by ${academySettings?.instituteName || 'Academy'} Academic Board.`;
+  const defaultSignatory = academySettings?.idCardSignatoryName 
+    ? `${academySettings.idCardSignatoryName} (${academySettings.idCardSignatoryTitle || 'Academic Director'})` 
+    : 'Academic Director';
 
   // Form State
   const [studentName, setStudentName] = useState('');
@@ -96,9 +102,9 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0]);
   const [completionDate, setCompletionDate] = useState(new Date().toISOString().split('T')[0]);
   const [grade, setGrade] = useState('A+ (Distinction)');
-  const [instructorSignatureName, setInstructorSignatureName] = useState('Engr. Md. Shariful Islam (Academic Director)');
+  const [instructorSignatureName, setInstructorSignatureName] = useState(defaultSignatory);
   const [status, setStatus] = useState<'Issued' | 'Draft' | 'Revoked'>('Issued');
-  const [remarks, setRemarks] = useState('Authenticated by Nexgen Computer Academy Academic Board.');
+  const [remarks, setRemarks] = useState(defaultInstituteRemarks);
 
   // Image Upload, Crop & Resize State
   const [uploadedImageSrc, setUploadedImageSrc] = useState<string | null>(null);
@@ -126,7 +132,8 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
   const generateSerial = () => {
     const year = new Date().getFullYear();
     const randomNum = Math.floor(1000 + Math.random() * 9000);
-    return `NCA-CERT-${year}-${randomNum}`;
+    const prefix = (academySettings?.instituteName ? academySettings.instituteName.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 4) : 'CERT') || 'CERT';
+    return `${prefix}-${year}-${randomNum}`;
   };
 
   // Reset or Populate Form
@@ -141,9 +148,9 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
     setIssueDate(new Date().toISOString().split('T')[0]);
     setCompletionDate(new Date().toISOString().split('T')[0]);
     setGrade('A+ (Distinction)');
-    setInstructorSignatureName('Engr. Md. Shariful Islam (Academic Director)');
+    setInstructorSignatureName(defaultSignatory);
     setStatus('Issued');
-    setRemarks('Authenticated by Nexgen Computer Academy Academic Board.');
+    setRemarks(defaultInstituteRemarks);
     setUploadedImageSrc(null);
     setIsCropping(false);
     setCropZoom(1);
@@ -986,7 +993,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       type="text"
                       value={remarks}
                       onChange={e => setRemarks(e.target.value)}
-                      placeholder="e.g. Authenticated by Nexgen Computer Academy Academic Board & Managing Director."
+                      placeholder={`e.g. Authenticated by ${academySettings?.instituteName || 'Academy'} Academic Board & Managing Director.`}
                       className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-medium"
                     />
                   </div>
@@ -1225,12 +1232,12 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
             <div className="w-full flex items-center justify-between pt-3 px-3">
               <span className="text-xs text-slate-400 font-bold flex items-center space-x-1">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Nexgen Verified Certificate Registry Image</span>
+                <span>{academySettings?.instituteName || 'Academy'} Verified Certificate Registry Image</span>
               </span>
               <div className="flex items-center space-x-2">
                 <a
                   href={lightboxImageUrl}
-                  download="nexgen-certificate.jpg"
+                  download={`${(academySettings?.instituteName || 'academy').toLowerCase().replace(/\s+/g, '-')}-certificate.jpg`}
                   className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors"
                 >
                   <Download className="w-3.5 h-3.5" />
@@ -1243,7 +1250,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                     if (printWin) {
                       printWin.document.write(`
                         <html>
-                          <head><title>Certificate Print</title></head>
+                          <head><title>Certificate Print - ${academySettings?.instituteName || 'Academy'}</title></head>
                           <body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#fff;">
                             <img src="${lightboxImageUrl}" style="max-width:100%;max-height:100%;object-fit:contain;" />
                           </body>

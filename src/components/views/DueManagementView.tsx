@@ -23,8 +23,12 @@ import {
   BellRing,
   CheckCircle2,
   FileSpreadsheet,
-  Download
+  Download,
+  Edit2,
+  Save,
+  X
 } from 'lucide-react';
+import { Admission } from '../../types';
 
 interface DueManagementViewProps {
   onOpenCollectPayment: (admissionId: string) => void;
@@ -35,7 +39,7 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
   onOpenCollectPayment,
   onSelectStudent
 }) => {
-  const { admissions, students, courses, batches, stats, deleteStudent, deleteAdmission, waiveAdmissionDue, addFollowUp } = useAcademy();
+  const { admissions, students, courses, batches, stats, deleteStudent, deleteAdmission, waiveAdmissionDue, updateAdmission, addFollowUp, academySettings } = useAcademy();
 
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
@@ -51,6 +55,45 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
     dueAmount: number;
     courseName: string;
   } | null>(null);
+
+  // Edit Due & Reschedule Date State
+  const [editingDueAdmission, setEditingDueAdmission] = useState<{
+    admission: Admission;
+    studentName: string;
+    courseName: string;
+  } | null>(null);
+  const [editNextPaymentDate, setEditNextPaymentDate] = useState('');
+  const [editFinalFee, setEditFinalFee] = useState<number>(0);
+  const [editDiscount, setEditDiscount] = useState<number>(0);
+  const [editRemarks, setEditRemarks] = useState('');
+
+  const openEditDueModal = (adm: Admission, stuName: string, crsName: string) => {
+    setEditingDueAdmission({
+      admission: adm,
+      studentName: stuName,
+      courseName: crsName
+    });
+    setEditNextPaymentDate(adm.nextPaymentDate || adm.nextDueDate || '');
+    setEditFinalFee(adm.finalFee);
+    setEditDiscount(adm.discount || 0);
+    setEditRemarks(adm.remarks || '');
+  };
+
+  const handleSaveDueEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDueAdmission) return;
+
+    updateAdmission(editingDueAdmission.admission.id, {
+      nextPaymentDate: editNextPaymentDate || undefined,
+      nextDueDate: editNextPaymentDate || undefined,
+      finalFee: Number(editFinalFee),
+      discount: Number(editDiscount),
+      remarks: editRemarks.trim() || undefined
+    });
+
+    showToast(`Due schedule updated for ${editingDueAdmission.studentName}`);
+    setEditingDueAdmission(null);
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -118,7 +161,10 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
   };
 
   const handleCopyReminder = (admId: string, stuName: string, courseName: string, dueAmount: number, dueDate?: string) => {
-    const text = `Dear ${stuName}, this is a gentle reminder from Nexgen Computer Academy regarding your course "${courseName}". Your outstanding course fee due balance is ৳${dueAmount.toLocaleString()} (Due Date: ${dueDate || 'Immediate'}). Please clear your dues at the academy office or via bKash/Nagad Merchant to avoid batch deactivation. Help desk: +8801700-000000.`;
+    const instName = academySettings?.instituteName || 'Academy';
+    const phone = academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '';
+    const helpDeskText = phone ? ` Help desk: ${phone}.` : '';
+    const text = `Dear ${stuName}, this is a gentle reminder from ${instName} regarding your course "${courseName}". Your outstanding course fee due balance is ৳${dueAmount.toLocaleString()} (Due Date: ${dueDate || 'Immediate'}). Please clear your dues at the academy office or via official payment channels to avoid batch deactivation.${helpDeskText}`;
     navigator.clipboard.writeText(text);
     setCopiedId(admId);
     setTimeout(() => setCopiedId(null), 2500);
@@ -173,7 +219,7 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
 
         <div className="flex items-center space-x-2">
           <button
-            onClick={() => exportDuesSpreadsheet(dueAdmissions, students, courses, batches)}
+            onClick={() => exportDuesSpreadsheet(dueAdmissions, students, courses, batches, academySettings?.instituteName)}
             className="flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-2xs transition-colors"
             title={`Export ${dueAdmissions.length} Due Accounts to Excel Spreadsheet`}
           >
@@ -325,7 +371,10 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
               studentName: stu?.name || 'Student',
               courseName: crs?.name || 'Course',
               dueAmount: adm.due,
-              dueDate: dueDate
+              dueDate: dueDate,
+              instituteName: academySettings?.instituteName || 'Academy',
+              hotline: academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '',
+              customTemplate: academySettings?.messageTemplates?.dueNoticeTemplate
             });
 
             return (
@@ -424,6 +473,15 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                     </button>
 
                     <button
+                      onClick={() => openEditDueModal(adm, stu?.name || 'Student', crs?.name || 'Course')}
+                      className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold inline-flex items-center space-x-1"
+                      title="Edit Due Date or Fee Amount"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span className="text-[10px]">Edit</span>
+                    </button>
+
+                    <button
                       onClick={() => onOpenCollectPayment(adm.id)}
                       className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs inline-flex items-center space-x-1 shadow-xs"
                     >
@@ -489,7 +547,10 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                   studentName: stu?.name || 'Student',
                   courseName: crs?.name || 'Course',
                   dueAmount: adm.due,
-                  dueDate: dueDate
+                  dueDate: dueDate,
+                  instituteName: academySettings?.instituteName || 'Academy',
+                  hotline: academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '',
+                  customTemplate: academySettings?.messageTemplates?.dueNoticeTemplate
                 });
 
                 return (
@@ -611,6 +672,15 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                       </button>
 
                       <button
+                        onClick={() => openEditDueModal(adm, stu?.name || 'Student', crs?.name || 'Course')}
+                        className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-xs font-bold transition-all inline-flex items-center space-x-1"
+                        title="Reschedule Next Due Date or Adjust Final Fee"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        <span>Edit Due</span>
+                      </button>
+
+                      <button
                         onClick={() => onOpenCollectPayment(adm.id)}
                         className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-xs inline-flex items-center space-x-1 shadow-xs"
                       >
@@ -712,6 +782,107 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
                 <span>Delete Entry</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Due & Reschedule Modal */}
+      {editingDueAdmission && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-4 bg-indigo-950 text-white flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold">Edit Due & Reschedule Payment Date</h3>
+                <p className="text-[11px] text-indigo-300">
+                  {editingDueAdmission.studentName} • {editingDueAdmission.courseName}
+                </p>
+              </div>
+              <button onClick={() => setEditingDueAdmission(null)} className="p-1 rounded-lg text-slate-300 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveDueEdit} className="p-5 space-y-4 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-slate-500 block">Total Paid So Far</span>
+                  <span className="font-bold text-emerald-700 text-sm">৳{editingDueAdmission.admission.totalPaid.toLocaleString()}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-slate-500 block">Calculated Due</span>
+                  <span className="font-black text-rose-600 text-sm">
+                    ৳{Math.max(0, editFinalFee - editingDueAdmission.admission.totalPaid).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1">
+                  Next Payment / Due Date (পরবর্তী কিস্তির তারিখ)
+                </label>
+                <input
+                  type="date"
+                  value={editNextPaymentDate}
+                  onChange={e => setEditNextPaymentDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Leave empty if no specific due date is committed.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Final Agreed Fee (মোট কোর্স ফি) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    value={editFinalFee}
+                    onChange={e => setEditFinalFee(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Discount / Waiver (৳)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editDiscount}
+                    onChange={e => setEditDiscount(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1">Follow-up Note / Remarks (নোট / রিমার্কস)</label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Student committed to pay remainder on next salary day"
+                  value={editRemarks}
+                  onChange={e => setEditRemarks(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingDueAdmission(null)}
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center space-x-1.5 shadow-xs"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Update Due Schedule</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

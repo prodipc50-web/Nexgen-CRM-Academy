@@ -44,7 +44,8 @@ export const AccountsPaymentsView: React.FC<AccountsPaymentsViewProps> = ({
     stats,
     updatePayment,
     deletePayment,
-    clearDemoPayments
+    clearDemoPayments,
+    academySettings
   } = useAcademy();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -119,6 +120,25 @@ export const AccountsPaymentsView: React.FC<AccountsPaymentsViewProps> = ({
 
   const totalFilteredAmount = filteredPayments.reduce((sum, p) => sum + p.amount, 0);
 
+  // Account-wise reconciliation summary (Cash, bKash, Nagad, Bank, Card)
+  const accountBreakdown = React.useMemo(() => {
+    let cash = 0;
+    let bkash = 0;
+    let nagad = 0;
+    let bank = 0;
+    let card = 0;
+
+    payments.forEach(p => {
+      if (p.paymentMethod === 'Cash') cash += p.amount;
+      else if (p.paymentMethod === 'bKash') bkash += p.amount;
+      else if (p.paymentMethod === 'Nagad') nagad += p.amount;
+      else if (p.paymentMethod === 'Bank') bank += p.amount;
+      else card += p.amount;
+    });
+
+    return { cash, bkash, nagad, bank, card, total: cash + bkash + nagad + bank + card };
+  }, [payments]);
+
   // Computed helper for edit payment target admission
   const editTargetAdm = editingPayment ? admissions.find(a => a.id === editingPayment.admissionId) : null;
   const editDiff = editingPayment ? editAmount - editingPayment.amount : 0;
@@ -154,7 +174,7 @@ export const AccountsPaymentsView: React.FC<AccountsPaymentsViewProps> = ({
           </button>
 
           <button
-            onClick={() => exportPaymentsSpreadsheet(filteredPayments, students, admissions, courses, batches)}
+            onClick={() => exportPaymentsSpreadsheet(filteredPayments, students, admissions, courses, batches, academySettings?.instituteName)}
             className="flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-2xs transition-colors"
             title={`Export ${filteredPayments.length} Payment Receipts to Excel Spreadsheet`}
           >
@@ -211,6 +231,95 @@ export const AccountsPaymentsView: React.FC<AccountsPaymentsViewProps> = ({
           <span className="text-xl font-black text-rose-600 mt-1 block">
             ৳{stats.totalDue.toLocaleString()}
           </span>
+        </div>
+      </div>
+
+      {/* Account-Wise Balance & Daily Reconciliation Bar */}
+      <div className="bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+          <div className="flex items-center space-x-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-black tracking-wide uppercase text-slate-200">
+              Account-Wise Balance & Drawer Reconciliation (হিসাব ও ক্যাশ রিকনসিলিয়েশন)
+            </span>
+          </div>
+          <span className="text-[11px] text-slate-400 font-mono">
+            Total Vault: ৳{accountBreakdown.total.toLocaleString()}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          {/* Cash Drawer */}
+          <button
+            type="button"
+            onClick={() => setMethodFilter(methodFilter === 'Cash' ? 'all' : 'Cash')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              methodFilter === 'Cash'
+                ? 'bg-amber-500/20 border-amber-400 text-white'
+                : 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-300'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Cash in Hand</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">Drawer</span>
+            </div>
+            <div className="text-base font-black text-white mt-1">৳{accountBreakdown.cash.toLocaleString()}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block">Front desk counter cash</span>
+          </button>
+
+          {/* bKash Wallet */}
+          <button
+            type="button"
+            onClick={() => setMethodFilter(methodFilter === 'bKash' ? 'all' : 'bKash')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              methodFilter === 'bKash'
+                ? 'bg-pink-500/20 border-pink-400 text-white'
+                : 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-300'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-pink-400 uppercase tracking-wider">bKash Balance</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 font-bold">Wallet</span>
+            </div>
+            <div className="text-base font-black text-white mt-1">৳{accountBreakdown.bkash.toLocaleString()}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block">Merchant / Personal wallet</span>
+          </button>
+
+          {/* Nagad Wallet */}
+          <button
+            type="button"
+            onClick={() => setMethodFilter(methodFilter === 'Nagad' ? 'all' : 'Nagad')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              methodFilter === 'Nagad'
+                ? 'bg-orange-500/20 border-orange-400 text-white'
+                : 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-300'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-orange-400 uppercase tracking-wider">Nagad Balance</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300 font-bold">Wallet</span>
+            </div>
+            <div className="text-base font-black text-white mt-1">৳{accountBreakdown.nagad.toLocaleString()}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block">Mobile banking wallet</span>
+          </button>
+
+          {/* Bank & Card */}
+          <button
+            type="button"
+            onClick={() => setMethodFilter(methodFilter === 'Bank' ? 'all' : 'Bank')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              methodFilter === 'Bank'
+                ? 'bg-blue-500/20 border-blue-400 text-white'
+                : 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-300'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-blue-400 uppercase tracking-wider">Bank & Card</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold">Direct</span>
+            </div>
+            <div className="text-base font-black text-white mt-1">৳{(accountBreakdown.bank + accountBreakdown.card).toLocaleString()}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block">Corporate bank & POS</span>
+          </button>
         </div>
       </div>
 
@@ -295,7 +404,7 @@ export const AccountsPaymentsView: React.FC<AccountsPaymentsViewProps> = ({
                         {stu?.name || 'Student Record'}
                       </button>
                       <div className="text-[10px] text-slate-400 font-mono">
-                        {stu?.studentCode || 'NCA-STU'} • {stu?.phone || 'No Phone'}
+                        {stu?.studentCode || 'STU'} • {stu?.phone || 'No Phone'}
                       </div>
                     </td>
 

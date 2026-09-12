@@ -85,11 +85,31 @@ export interface AcademySettings {
   authorizedSignatureUrl?: string;
   receiptNotes?: string;
 
+  // SMS & WhatsApp Notification Templates
+  messageTemplates?: {
+    dueNoticeTemplate?: string;
+    admissionWelcomeTemplate?: string;
+    paymentReceiptTemplate?: string;
+    examAdmitTemplate?: string;
+  };
+
+  // Staff Session & Data Export Security
+  sessionAutoLockMinutes?: number; // 0 = disabled, 15, 30, 60
+  exportSecurityPasswordRequired?: boolean;
+
   // Automated Backup Schedule Configuration
   autoBackupConfig?: AutoBackupConfig;
 
   // Database Archiving & Storage Cleanup Policy
   dataCleanupPolicy?: DataCleanupPolicy;
+
+  // Backward compatibility & convenience aliases
+  phone?: string;
+  whatsapp?: string;
+  whatsappNumber?: string;
+  name?: string;
+  instituteCode?: string;
+  branches?: any[];
 }
 
 export type LeadStatus =
@@ -1638,6 +1658,136 @@ export interface WebsiteCmsConfig {
 
   // Video Testimonials / Success Stories
   videoTestimonials?: VideoTestimonial[];
+
+  // 1. Upcoming Batches Card in Hero
+  upcomingBatchesCard?: UpcomingBatchesCardConfig;
+
+  // 2. Learning Delivery Modes (4 cards)
+  deliveryModesConfig?: LearningDeliveryModesConfig;
+
+  // 3. Admission & Onboarding Roadmap (4 steps)
+  admissionRoadmap?: AdmissionRoadmapConfig;
+
+  // 4. Community & YouTube Masterclasses Hub
+  communityHub?: CommunityHubConfig;
+
+  // 5. Dynamic Footer Configuration
+  footerConfig?: FooterCmsConfig;
+
+  // 6. Impact & Trust Metrics Configuration
+  impactTrustConfig?: ImpactTrustConfig;
+
+  // 7. Section Heading Customizations
+  coursesSectionConfig?: SectionHeadingConfig;
+  blogSectionConfig?: SectionHeadingConfig;
+  seminarsSectionConfig?: SectionHeadingConfig;
+  mentorsSectionConfig?: SectionHeadingConfig;
+
+  // 8. Section Visibility Controls (Show/Hide any section on the public site)
+  sectionVisibility?: WebsiteSectionVisibility;
+}
+
+export interface UpcomingBatchesCardConfig {
+  badgeText?: string; // e.g. "40% Offer"
+  title?: string; // e.g. "Upcoming Batches"
+  heading?: string; // e.g. "Apply for Direct Admission"
+  description?: string; // e.g. "Fast-track your IT career..."
+  featureNote?: string; // e.g. "Free Lifetime Lab Access"
+  ctaText?: string; // e.g. "Free Seminars →"
+  ctaLink?: string; // e.g. "#seminars"
+  pinnedCourseIds?: string[]; // course IDs to show in the quick list
+}
+
+export interface LearningDeliveryFormatCard {
+  id: 'offline' | 'online' | 'recorded' | 'corporate';
+  title: string;
+  badge: string;
+  description: string;
+  footerText?: string;
+  enabled: boolean;
+}
+
+export interface LearningDeliveryModesConfig {
+  enabled?: boolean;
+  cards?: LearningDeliveryFormatCard[];
+}
+
+export interface AdmissionRoadmapStep {
+  id: string;
+  stepNumber: string; // e.g. "০১", "০২", "০৩", "০৪"
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+export interface AdmissionRoadmapConfig {
+  enabled?: boolean;
+  tagText?: string;
+  title?: string;
+  heading?: string;
+  subtitle?: string;
+  description?: string;
+  steps?: AdmissionRoadmapStep[];
+}
+
+export interface CommunityHubConfig {
+  enabled?: boolean;
+  badge?: string;
+  badgeText?: string;
+  heading?: string;
+  title?: string;
+  description?: string;
+}
+
+export interface FooterCmsConfig {
+  bio?: string;
+  copyrightText?: string;
+  creditsText?: string;
+  showSocials?: boolean;
+  showTopCourses?: boolean;
+  showQuickNav?: boolean;
+  showLegalLinks?: boolean;
+}
+
+export interface ImpactTrustMetricItem {
+  id: string;
+  metric: string;
+  label: string;
+  subtext: string;
+  color?: string; // Tailwind color class, e.g. text-indigo-600
+}
+
+export interface ImpactTrustConfig {
+  enabled?: boolean;
+  tagText?: string;
+  heading?: string;
+  subtitle?: string;
+  metrics?: ImpactTrustMetricItem[];
+}
+
+export interface SectionHeadingConfig {
+  tagText?: string;
+  heading?: string;
+  subtitle?: string;
+}
+
+export interface WebsiteSectionVisibility {
+  heroBanner: boolean;
+  deliveryModes: boolean;
+  impactTrust: boolean;
+  courses: boolean;
+  admissionRoadmap: boolean;
+  aboutUs: boolean;
+  mentors?: boolean;
+  communityHub: boolean;
+  blog: boolean;
+  seminars: boolean;
+  gallery: boolean;
+  reviews: boolean;
+  verifyCertificate: boolean;
+  noticesAndFaq: boolean;
+  contactAndMap: boolean;
+  footer?: boolean;
 }
 
 export interface VideoTestimonial {

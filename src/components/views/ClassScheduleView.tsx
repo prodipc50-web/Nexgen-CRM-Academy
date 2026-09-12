@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { ClassSchedule } from '../../types';
-import { CalendarDays, PlusCircle, Clock, MapPin, Video, CheckCircle2, X, Trash2, AlertTriangle } from 'lucide-react';
+import { CalendarDays, PlusCircle, Clock, MapPin, Video, CheckCircle2, X, Trash2, AlertTriangle, Edit2, Save } from 'lucide-react';
 
 export const ClassScheduleView: React.FC = () => {
   const {
@@ -26,6 +26,50 @@ export const ClassScheduleView: React.FC = () => {
   const [trainerId, setTrainerId] = useState(staffList[0]?.id || '');
   const [trainerName, setTrainerName] = useState(staffList[0]?.name || '');
   const [meetingUrl, setMeetingUrl] = useState('');
+
+  // Edit Schedule State
+  const [editingSchedule, setEditingSchedule] = useState<ClassSchedule | null>(null);
+  const [editTopic, setEditTopic] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editStartTime, setEditStartTime] = useState('');
+  const [editEndTime, setEditEndTime] = useState('');
+  const [editRoom, setEditRoom] = useState('');
+  const [editTrainerId, setEditTrainerId] = useState('');
+  const [editTrainerName, setEditTrainerName] = useState('');
+  const [editMeetingUrl, setEditMeetingUrl] = useState('');
+  const [editStatus, setEditStatus] = useState<string>('Scheduled');
+
+  const openEditModal = (sch: ClassSchedule) => {
+    setEditingSchedule(sch);
+    setEditTopic(sch.topic);
+    setEditDate(sch.date);
+    setEditStartTime(sch.startTime);
+    setEditEndTime(sch.endTime);
+    setEditRoom(sch.room);
+    setEditTrainerId(sch.trainerId || '');
+    setEditTrainerName(sch.trainerName || (staffList.find(s => s.id === sch.trainerId)?.name || ''));
+    setEditMeetingUrl(sch.meetingUrl || '');
+    setEditStatus(sch.status || 'Scheduled');
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSchedule || !editTopic.trim()) return;
+
+    updateClassSchedule(editingSchedule.id, {
+      topic: editTopic.trim(),
+      date: editDate,
+      startTime: editStartTime,
+      endTime: editEndTime,
+      room: editRoom,
+      trainerId: editTrainerId || undefined,
+      trainerName: editTrainerName.trim() || staffList.find(s => s.id === editTrainerId)?.name || undefined,
+      meetingUrl: editMeetingUrl.trim() || undefined,
+      status: editStatus as any
+    });
+
+    setEditingSchedule(null);
+  };
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,6 +175,14 @@ export const ClassScheduleView: React.FC = () => {
                     </td>
 
                     <td className="py-3 px-4 text-right space-x-1.5">
+                      <button
+                        onClick={() => openEditModal(sch)}
+                        className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-200"
+                        title="Edit Class Topic, Room, Time, or Trainer"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+
                       {sch.status !== 'Completed' ? (
                         <button
                           onClick={() => updateClassSchedule(sch.id, { status: 'Completed' })}
@@ -304,6 +356,149 @@ export const ClassScheduleView: React.FC = () => {
                   className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
                 >
                   Save Schedule
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Schedule Modal */}
+      {editingSchedule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
+            <div className="p-4 bg-indigo-950 text-white flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold">Edit Class Session Details</h3>
+                <p className="text-[11px] text-indigo-300 font-mono">Class #{editingSchedule.classNumber || ''} • {editingSchedule.date}</p>
+              </div>
+              <button onClick={() => setEditingSchedule(null)} className="p-1 rounded-lg text-slate-300 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1">Lecture Topic (লেকচার বিষয়) *</label>
+                <input
+                  type="text"
+                  required
+                  value={editTopic}
+                  onChange={e => setEditTopic(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Class Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={editDate}
+                    onChange={e => setEditDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Session Status</label>
+                  <select
+                    value={editStatus}
+                    onChange={e => setEditStatus(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Start Time</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 06:00 PM"
+                    value={editStartTime}
+                    onChange={e => setEditStartTime(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">End Time</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 08:00 PM"
+                    value={editEndTime}
+                    onChange={e => setEditEndTime(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Room / Lab *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Lab-1 / Room 204"
+                    value={editRoom}
+                    onChange={e => setEditRoom(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">
+                    Trainer / Instructor
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mahfuzur Rahman"
+                    value={editTrainerName}
+                    onChange={e => {
+                      setEditTrainerName(e.target.value);
+                      const matched = staffList.find(s => s.name.toLowerCase() === e.target.value.toLowerCase());
+                      if (matched) setEditTrainerId(matched.id);
+                    }}
+                    list="schedule-edit-trainer-list"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <datalist id="schedule-edit-trainer-list">
+                    {staffList.map(s => (
+                      <option key={s.id} value={s.name}>{s.name} ({s.role})</option>
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1">Live Meeting / Recording URL (Zoom/Meet)</label>
+                <input
+                  type="url"
+                  placeholder="https://meet.google.com/xyz-abcd-efg"
+                  value={editMeetingUrl}
+                  onChange={e => setEditMeetingUrl(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingSchedule(null)}
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center space-x-1.5 shadow-xs"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Update Session</span>
                 </button>
               </div>
             </form>

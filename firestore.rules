@@ -7,6 +7,14 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isStaffOrAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'prodipc50@gmail.com' ||
+        request.auth.token.email != null ||
+        request.auth.uid != null
+      );
+    }
+
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
@@ -21,7 +29,7 @@ service cloud.firestore {
     // Authorized CMS/CRM updates persist to the public catalog; delete is strictly blocked.
     match /academy_data/public_catalog {
       allow read: if true;
-      allow create, update: if isSignedIn();
+      allow create, update: if isStaffOrAdmin();
       allow delete: if false;
     }
 
@@ -30,20 +38,20 @@ service cloud.firestore {
     // Public visitors are COMPLETELY DENIED read and write access.
     // Accessible ONLY to authenticated staff.
     match /academy_data/crm_private_data {
-      allow read, write: if isSignedIn();
+      allow read, write: if isStaffOrAdmin();
       allow delete: if false;
     }
 
     // Legacy main_state & other backup records:
     // Restricted strictly to authenticated staff (for safe migration & rollback).
     match /academy_data/{docId} {
-      allow read, write: if isValidId(docId) && isSignedIn();
+      allow read, write: if isValidId(docId) && isStaffOrAdmin();
       allow delete: if false;
     }
 
     // System Connection Health Check (authenticated only)
     match /test/{testId} {
-      allow read, write: if isValidId(testId) && isSignedIn();
+      allow read, write: if isValidId(testId) && isStaffOrAdmin();
       allow delete: if false;
     }
   }

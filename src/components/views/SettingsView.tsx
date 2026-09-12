@@ -29,14 +29,25 @@ import {
   Save,
   Crop,
   Palette,
-  BarChart3
+  BarChart3,
+  CreditCard,
+  MessageSquare,
+  Clock,
+  FileSpreadsheet,
+  Copy,
+  Sparkles
 } from 'lucide-react';
+import {
+  DEFAULT_DUE_NOTICE_TEMPLATE,
+  DEFAULT_WELCOME_NOTICE_TEMPLATE,
+  DEFAULT_PAYMENT_RECEIPT_TEMPLATE,
+  DEFAULT_EXAM_ADMIT_TEMPLATE
+} from '../../utils/templateShortcodes';
 import { ThemeEditor } from '../settings/ThemeEditor';
 import { MarketingAnalyticsDashboard } from '../marketing/MarketingAnalyticsDashboard';
 import { FraudAndSecuritySettings } from '../settings/FraudAndSecuritySettings';
 import { PaymentGatewaysSettings } from '../settings/PaymentGatewaysSettings';
 import { AutoBackupAndArchiveManager } from '../settings/AutoBackupAndArchiveManager';
-import { CreditCard } from 'lucide-react';
 
 interface SettingsViewProps {
   onViewPublicWebsite?: () => void;
@@ -107,7 +118,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     emptyTrash
   } = useAcademy();
 
-  const [activeTab, setActiveTab] = useState<'security' | 'payments' | 'theme' | 'marketing' | 'profile' | 'dropdowns' | 'rbac' | 'audit' | 'backup'>('marketing');
+  const [activeTab, setActiveTab] = useState<'security' | 'payments' | 'theme' | 'marketing' | 'profile' | 'dropdowns' | 'rbac' | 'audit' | 'backup' | 'notifications'>('marketing');
   const [resetSuccess, setResetSuccess] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -134,6 +145,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     admitCardControllerName: academySettings.admitCardControllerName || 'Controller of Examinations',
     idCardTerms: academySettings.idCardTerms || '• This card is non-transferable and official property of Nexgen Computer Academy.\n• If found, please return to Farmgate Campus, 14/B Garden Road, Dhaka-1215 or call helpline.',
     admitCardInstructions: academySettings.admitCardInstructions || '1. Candidates must arrive at the examination hall at least 15 minutes before scheduled start time.\n2. Bring this official Admit Card and Nexgen Student ID Card for verification.\n3. Practical project submission and viva presentation will follow the written test.',
+    receiptNotes: academySettings.receiptNotes || '১. ভর্তির ফি ও টিউশন ফি অফেরতযোগ্য ও অহস্তান্তরযোগ্য।\n২. নির্ধারিত কিস্তির তারিখের মধ্যে ফি পরিশোধ কাম্য।\n৩. এই রসিদটি কম্পিউটার জেনারেটেড ও সুরক্ষিত।',
+    sessionAutoLockMinutes: academySettings.sessionAutoLockMinutes ?? 0,
+    exportSecurityPasswordRequired: academySettings.exportSecurityPasswordRequired ?? false,
+    messageTemplates: {
+      dueNoticeTemplate: academySettings.messageTemplates?.dueNoticeTemplate || DEFAULT_DUE_NOTICE_TEMPLATE,
+      admissionWelcomeTemplate: academySettings.messageTemplates?.admissionWelcomeTemplate || DEFAULT_WELCOME_NOTICE_TEMPLATE,
+      paymentReceiptTemplate: academySettings.messageTemplates?.paymentReceiptTemplate || DEFAULT_PAYMENT_RECEIPT_TEMPLATE,
+      examAdmitTemplate: academySettings.messageTemplates?.examAdmitTemplate || DEFAULT_EXAM_ADMIT_TEMPLATE
+    },
     logoIconSize: academySettings.logoIconSize || 48,
     logoFontSize: academySettings.logoFontSize || 16,
     taglineFontSize: academySettings.taglineFontSize || 11
@@ -157,6 +177,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
       admitCardControllerName: academySettings.admitCardControllerName || 'Controller of Examinations',
       idCardTerms: academySettings.idCardTerms || '• This card is non-transferable and official property of Nexgen Computer Academy.\n• If found, please return to Farmgate Campus, 14/B Garden Road, Dhaka-1215 or call helpline.',
       admitCardInstructions: academySettings.admitCardInstructions || '1. Candidates must arrive at the examination hall at least 15 minutes before scheduled start time.\n2. Bring this official Admit Card and Nexgen Student ID Card for verification.\n3. Practical project submission and viva presentation will follow the written test.',
+      receiptNotes: academySettings.receiptNotes || '১. ভর্তির ফি ও টিউশন ফি অফেরতযোগ্য ও অহস্তান্তরযোগ্য।\n২. নির্ধারিত কিস্তির তারিখের মধ্যে ফি পরিশোধ কাম্য।\n৩. এই রসিদটি কম্পিউটার জেনারেটেড ও সুরক্ষিত।',
+      sessionAutoLockMinutes: academySettings.sessionAutoLockMinutes ?? 0,
+      exportSecurityPasswordRequired: academySettings.exportSecurityPasswordRequired ?? false,
+      messageTemplates: {
+        dueNoticeTemplate: academySettings.messageTemplates?.dueNoticeTemplate || DEFAULT_DUE_NOTICE_TEMPLATE,
+        admissionWelcomeTemplate: academySettings.messageTemplates?.admissionWelcomeTemplate || DEFAULT_WELCOME_NOTICE_TEMPLATE,
+        paymentReceiptTemplate: academySettings.messageTemplates?.paymentReceiptTemplate || DEFAULT_PAYMENT_RECEIPT_TEMPLATE,
+        examAdmitTemplate: academySettings.messageTemplates?.examAdmitTemplate || DEFAULT_EXAM_ADMIT_TEMPLATE
+      },
       logoIconSize: academySettings.logoIconSize || 48,
       logoFontSize: academySettings.logoFontSize || 16,
       taglineFontSize: academySettings.taglineFontSize || 11
@@ -502,6 +531,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
         </button>
 
         <button
+          onClick={() => setActiveTab('notifications')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'notifications'
+              ? 'border-indigo-600 text-indigo-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <MessageSquare className="w-4 h-4 text-indigo-600" />
+          <span>মেসেজ ও SMS নোটিফিকেশন</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('profile')}
           className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
             activeTab === 'profile'
@@ -514,7 +555,191 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
         </button>
       </div>
 
-      {/* TAB: PAYMENT GATEWAYS & MFS NUMBERS */}
+      {/* TAB: NOTIFICATIONS & MESSAGE TEMPLATES */}
+      {activeTab === 'notifications' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-black text-slate-900 flex items-center space-x-2">
+                  <MessageSquare className="w-4 h-4 text-indigo-600" />
+                  <span>SMS ও WhatsApp মেসেজ টেমপ্লেট কাস্টমাইজেশন</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  বকেয়া ফি রিমাইন্ডার, ভর্তি নোটিশ ও মানি রিসিট মেসেজের ভাষা ও ফরম্যাট আপনার পছন্দমতো পরিবর্তন করুন
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs inline-flex items-center space-x-1.5 transition-colors"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>টেমপ্লেট সেভ করুন</span>
+              </button>
+            </div>
+
+            {/* Shortcode Helper Bar */}
+            <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3.5">
+              <div className="text-xs font-bold text-indigo-900 mb-2 flex items-center space-x-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                <span>উপলব্ধ ডায়নামিক শর্টকোড (ক্লিক করে কপি করুন):</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { tag: '{student_name}', desc: 'শিক্ষার্থীর নাম' },
+                  { tag: '{student_code}', desc: 'আইডি নম্বর' },
+                  { tag: '{course_name}', desc: 'কোর্সের নাম' },
+                  { tag: '{batch_number}', desc: 'ব্যাচ' },
+                  { tag: '{due_amount}', desc: 'বকেয়া টাকা' },
+                  { tag: '{due_date}', desc: 'পরিশোধের শেষ তারিখ' },
+                  { tag: '{paid_amount}', desc: 'পরিশোধিত টাকা' },
+                  { tag: '{receipt_number}', desc: 'মানি রিসিট নং' },
+                  { tag: '{institute_name}', desc: 'প্রতিষ্ঠানের নাম' },
+                  { tag: '{helpline}', desc: 'হটলাইন ফোন' }
+                ].map(item => (
+                  <button
+                    key={item.tag}
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(item.tag);
+                      alert(`Copied "${item.tag}" to clipboard! You can paste it into the message template.`);
+                    }}
+                    className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white border border-indigo-200 text-indigo-800 rounded-lg text-[11px] font-mono font-bold hover:bg-indigo-100 transition-colors shadow-2xs"
+                    title={`Click to copy: ${item.desc}`}
+                  >
+                    <span>{item.tag}</span>
+                    <span className="text-[10px] text-indigo-500 font-sans">({item.desc})</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 1. Due Notice Template */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800">
+                  ১. বকেয়া ফি রিমাইন্ডার টেমপ্লেট (Overdue / Payment Reminder)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setProfileForm(prev => ({
+                    ...prev,
+                    messageTemplates: { ...prev.messageTemplates, dueNoticeTemplate: DEFAULT_DUE_NOTICE_TEMPLATE }
+                  }))}
+                  className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold"
+                >
+                  ডিফল্ট ফরম্যাট আনুন
+                </button>
+              </div>
+              <textarea
+                rows={3}
+                value={profileForm.messageTemplates?.dueNoticeTemplate || ''}
+                onChange={e => setProfileForm(prev => ({
+                  ...prev,
+                  messageTemplates: { ...prev.messageTemplates, dueNoticeTemplate: e.target.value }
+                }))}
+                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-slate-900 text-xs outline-none focus:border-indigo-500 font-sans leading-relaxed"
+              />
+            </div>
+
+            {/* 2. Admission Welcome Template */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800">
+                  ২. ভর্তি অভিনন্দন নোটিশ টেমপ্লেট (Admission Welcome Message)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setProfileForm(prev => ({
+                    ...prev,
+                    messageTemplates: { ...prev.messageTemplates, admissionWelcomeTemplate: DEFAULT_WELCOME_NOTICE_TEMPLATE }
+                  }))}
+                  className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold"
+                >
+                  ডিফল্ট ফরম্যাট আনুন
+                </button>
+              </div>
+              <textarea
+                rows={3}
+                value={profileForm.messageTemplates?.admissionWelcomeTemplate || ''}
+                onChange={e => setProfileForm(prev => ({
+                  ...prev,
+                  messageTemplates: { ...prev.messageTemplates, admissionWelcomeTemplate: e.target.value }
+                }))}
+                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-slate-900 text-xs outline-none focus:border-indigo-500 font-sans leading-relaxed"
+              />
+            </div>
+
+            {/* 3. Payment Receipt Template */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800">
+                  ৩. মানি রিসিট পেমেন্ট কনফার্মেশন (Payment Confirmation)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setProfileForm(prev => ({
+                    ...prev,
+                    messageTemplates: { ...prev.messageTemplates, paymentReceiptTemplate: DEFAULT_PAYMENT_RECEIPT_TEMPLATE }
+                  }))}
+                  className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold"
+                >
+                  ডিফল্ট ফরম্যাট আনুন
+                </button>
+              </div>
+              <textarea
+                rows={3}
+                value={profileForm.messageTemplates?.paymentReceiptTemplate || ''}
+                onChange={e => setProfileForm(prev => ({
+                  ...prev,
+                  messageTemplates: { ...prev.messageTemplates, paymentReceiptTemplate: e.target.value }
+                }))}
+                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-slate-900 text-xs outline-none focus:border-indigo-500 font-sans leading-relaxed"
+              />
+            </div>
+
+            {/* 4. Exam Admit Template */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800">
+                  ৪. পরীক্ষার মূল্যায়ন ও অ্যাডমিট নোটিশ (Exam Admit Notification)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setProfileForm(prev => ({
+                    ...prev,
+                    messageTemplates: { ...prev.messageTemplates, examAdmitTemplate: DEFAULT_EXAM_ADMIT_TEMPLATE }
+                  }))}
+                  className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold"
+                >
+                  ডিফল্ট ফরম্যাট আনুন
+                </button>
+              </div>
+              <textarea
+                rows={2}
+                value={profileForm.messageTemplates?.examAdmitTemplate || ''}
+                onChange={e => setProfileForm(prev => ({
+                  ...prev,
+                  messageTemplates: { ...prev.messageTemplates, examAdmitTemplate: e.target.value }
+                }))}
+                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-slate-900 text-xs outline-none focus:border-indigo-500 font-sans leading-relaxed"
+              />
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs inline-flex items-center space-x-2 transition-colors"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save All Notification Templates</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {activeTab === 'payments' && <PaymentGatewaysSettings />}
 
       {/* TAB: FRAUD PROTECTION & OTP GATEWAY */}
@@ -1368,6 +1593,65 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                   onChange={e => setProfileForm({ ...profileForm, admitCardInstructions: e.target.value })}
                   className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-900 text-xs outline-none focus:border-indigo-500"
                 />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 text-xs font-semibold mb-1">
+                  মানি রিসিট শর্তাবলী ও নির্দেশিকা (Printable Money Receipt Terms & Notes)
+                </label>
+                <textarea
+                  rows={3}
+                  value={profileForm.receiptNotes}
+                  onChange={e => setProfileForm({ ...profileForm, receiptNotes: e.target.value })}
+                  placeholder="১. ভর্তির ফি ও টিউশন ফি অফেরতযোগ্য ও অহস্তান্তরযোগ্য..."
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-900 text-xs outline-none focus:border-indigo-500"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">মানি রিসিটের নিচে শর্তাবলী অংশে স্বয়ংক্রিয়ভাবে প্রিন্ট হবে।</p>
+              </div>
+            </div>
+
+            {/* ERP Staff Session & Export Security Settings */}
+            <div className="bg-amber-50/60 p-4 rounded-2xl border border-amber-200 space-y-3">
+              <h4 className="font-bold text-amber-950 text-sm flex items-center space-x-1.5">
+                <Lock className="w-4 h-4 text-amber-600" />
+                <span>সেশন লক ও স্প্রেডশিট সিকিউরিটি (ERP Access Protection)</span>
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-700 text-xs font-semibold mb-1">
+                    ইনঅ্যাক্টিভ থাকলে অটো-লক (Session Inactivity Lock)
+                  </label>
+                  <select
+                    value={profileForm.sessionAutoLockMinutes}
+                    onChange={e => setProfileForm({ ...profileForm, sessionAutoLockMinutes: Number(e.target.value) })}
+                    className="w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-slate-900 text-xs font-bold outline-none focus:border-amber-500"
+                  >
+                    <option value={0}>নিষ্ক্রিয় / বন্ধ (Always Active)</option>
+                    <option value={15}>১৫ মিনিট পর লক করুন (15 minutes)</option>
+                    <option value={30}>৩০ মিনিট পর লক করুন (30 minutes)</option>
+                    <option value={60}>১ ঘণ্টা পর লক করুন (60 minutes)</option>
+                  </select>
+                  <p className="text-[11px] text-amber-800 mt-1">কম্পিউটার ফেলে রাখলে পাসওয়ার্ড স্ক্রিন এসে ডেটা সুরক্ষিত রাখবে।</p>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 text-xs font-semibold mb-1">
+                    এক্সেল এক্সপোর্ট প্রটেকশন (Export Password Confirmation)
+                  </label>
+                  <div className="flex items-center space-x-3 mt-1.5 bg-white p-2.5 rounded-xl border border-amber-200">
+                    <input
+                      type="checkbox"
+                      id="exportSecurityToggle"
+                      checked={profileForm.exportSecurityPasswordRequired}
+                      onChange={e => setProfileForm({ ...profileForm, exportSecurityPasswordRequired: e.target.checked })}
+                      className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                    />
+                    <label htmlFor="exportSecurityToggle" className="text-xs font-bold text-slate-800 cursor-pointer">
+                      স্প্রেডশিট ডাউনলোডের সময় পাসওয়ার্ড প্রয়োজন
+                    </label>
+                  </div>
+                  <p className="text-[11px] text-amber-800 mt-1">শিক্ষার্থী ও অর্থনৈতিক তালিকা অননুমোদিত এক্সপোর্ট হওয়া প্রতিরোধ করে।</p>
+                </div>
               </div>
             </div>
 

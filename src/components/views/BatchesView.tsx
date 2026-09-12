@@ -39,14 +39,21 @@ export const BatchesView: React.FC<BatchesViewProps> = ({ onSelectStudent }) => 
     rooms,
     addBatch,
     updateBatch,
-    deleteBatch
+    deleteBatch,
+    academySettings
   } = useAcademy();
+
+  const getInstitutePrefix = () => {
+    const raw = academySettings?.instituteName || 'BAT';
+    const letters = raw.split(/\s+/).map((w: string) => w[0]).join('').toUpperCase().replace(/[^A-Z]/g, '');
+    return letters.slice(0, 4) || 'BAT';
+  };
 
   const [filterMode, setFilterMode] = useState<'All' | 'Offline' | 'Online Live' | 'Hybrid'>('All');
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id || '');
-  const [batchNumber, setBatchNumber] = useState(`NCA-B${batches.length + 1}`);
+  const [batchNumber, setBatchNumber] = useState(`${getInstitutePrefix()}-B${batches.length + 1}`);
   const [trainerId, setTrainerId] = useState(staffList.find(s => s.role === 'TRAINER')?.id || staffList[0]?.id || '');
   const [trainerName, setTrainerName] = useState('');
   const [batchType, setBatchType] = useState<'Offline' | 'Online Live' | 'Hybrid'>('Offline');
@@ -57,7 +64,7 @@ export const BatchesView: React.FC<BatchesViewProps> = ({ onSelectStudent }) => 
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [classDays, setClassDays] = useState('Sun, Tue, Thu');
   const [classTime, setClassTime] = useState('06:00 PM - 08:00 PM');
-  const [room, setRoom] = useState(rooms[0]?.name || 'Lab-1 (Farmgate)');
+  const [room, setRoom] = useState(rooms[0]?.name || (academySettings?.campusName ? `Lab-1 (${academySettings.campusName})` : 'Lab-1'));
   const [seatCapacity, setSeatCapacity] = useState(20);
   const [status, setStatus] = useState<BatchStatus>('Ongoing');
 
@@ -199,7 +206,7 @@ export const BatchesView: React.FC<BatchesViewProps> = ({ onSelectStudent }) => 
           </button>
 
           <button
-            onClick={() => exportAllStudentsSpreadsheet(students, admissions, courses, batches)}
+            onClick={() => exportAllStudentsSpreadsheet(students, admissions, courses, batches, academySettings?.instituteName)}
             className="flex items-center space-x-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold px-3 py-2 rounded-xl shadow-2xs transition-colors"
             title="Export all students of all batches to Excel Spreadsheet"
           >
@@ -209,7 +216,7 @@ export const BatchesView: React.FC<BatchesViewProps> = ({ onSelectStudent }) => 
 
           <button
             onClick={() => {
-              setBatchNumber(`NCA-B${batches.length + 1}`);
+              setBatchNumber(`${getInstitutePrefix()}-B${batches.length + 1}`);
               setIsAddModalOpen(true);
             }}
             className="flex items-center space-x-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs transition-colors"
@@ -395,7 +402,7 @@ export const BatchesView: React.FC<BatchesViewProps> = ({ onSelectStudent }) => 
               {/* Action: View Roster & Export */}
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5">
                 <button
-                  onClick={() => exportBatchStudentsSpreadsheet(batch, admissions, students, course, trainer)}
+                  onClick={() => exportBatchStudentsSpreadsheet(batch, admissions, students, course, trainer, academySettings?.instituteName)}
                   className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold rounded-lg text-[11px] flex items-center space-x-1 transition-colors"
                   title={`Export Batch #${batch.batchNumber} students to Excel Spreadsheet (CSV)`}
                 >
@@ -431,7 +438,7 @@ export const BatchesView: React.FC<BatchesViewProps> = ({ onSelectStudent }) => 
                   onClick={() => {
                     const c = courses.find(cr => cr.id === selectedBatchDetails.courseId);
                     const tName = selectedBatchDetails.trainerName || staffList.find(s => s.id === selectedBatchDetails.trainerId)?.name || 'Unassigned';
-                    exportBatchStudentsSpreadsheet(selectedBatchDetails, admissions, students, c, { name: tName });
+                    exportBatchStudentsSpreadsheet(selectedBatchDetails, admissions, students, c, { name: tName }, academySettings?.instituteName);
                   }}
                   className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow-xs transition-colors"
                   title="Export this batch's roster to Excel Spreadsheet"

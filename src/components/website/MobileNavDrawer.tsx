@@ -23,7 +23,8 @@ import {
   Award,
   Video,
   Monitor,
-  MessageCircle
+  MessageCircle,
+  GraduationCap
 } from 'lucide-react';
 import { NexgenLogo } from '../common/NexgenLogo';
 import { AcademySettings, WebsiteCmsConfig } from '../../types';
@@ -249,6 +250,25 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                     <ChevronRight className="w-4 h-4 text-slate-400" />
                   </div>
                 </a>
+
+                {websiteCmsConfig?.sectionVisibility?.mentors !== false && (
+                  <a
+                    href="#mentors"
+                    onClick={() => handleNavClick('#mentors')}
+                    className="min-h-[48px] px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-slate-800 hover:bg-indigo-50 hover:text-indigo-700 transition-colors active:scale-[0.98]"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                        <GraduationCap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-sm block">Mentors (শিক্ষক ও মেন্টর)</span>
+                        <span className="text-[10px] text-slate-400 font-medium">Expert Faculty Panel</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                  </a>
+                )}
 
                 <a
                   href="#seminars"

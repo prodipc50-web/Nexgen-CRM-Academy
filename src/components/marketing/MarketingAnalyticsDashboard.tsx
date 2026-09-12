@@ -48,7 +48,8 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
     admissions,
     courses,
     websiteCmsConfig,
-    updateWebsiteCmsConfig
+    updateWebsiteCmsConfig,
+    academySettings
   } = useAcademy();
 
   const [notificationMsg, setNotificationMsg] = useState<string | null>(null);
@@ -57,6 +58,9 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
     setNotificationMsg(msg);
     setTimeout(() => setNotificationMsg(null), 3500);
   };
+
+  const instName = academySettings?.instituteName || 'Academy';
+  const promoCodePrefix = instName.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase() || 'OFFER';
 
   // Local config state for Pixel, GA4, GTM, CAPI, and CRO Popups
   const [config, setConfig] = useState<MarketingAnalyticsConfig>({
@@ -74,10 +78,10 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
     enableExitIntentPopup: websiteCmsConfig?.marketing?.enableExitIntentPopup ?? true,
     exitIntentTitle: websiteCmsConfig?.marketing?.exitIntentTitle || '🎁 Special 45% Scholarship Voucher',
     exitIntentSubtitle: websiteCmsConfig?.marketing?.exitIntentSubtitle || 'Claim your exclusive student fee discount voucher before leaving. Valid for next 24 hours!',
-    exitIntentDiscountCode: websiteCmsConfig?.marketing?.exitIntentDiscountCode || 'NEXGEN-SPECIAL45',
+    exitIntentDiscountCode: websiteCmsConfig?.marketing?.exitIntentDiscountCode || `${promoCodePrefix}-SPECIAL45`,
     enableFloatingWhatsApp: websiteCmsConfig?.marketing?.enableFloatingWhatsApp ?? true,
-    floatingWhatsAppNumber: websiteCmsConfig?.marketing?.floatingWhatsAppNumber || '01798444444',
-    floatingWhatsAppWelcomeText: websiteCmsConfig?.marketing?.floatingWhatsAppWelcomeText || 'Hello Nexgen Academy! I want to know about course admission & scholarship.'
+    floatingWhatsAppNumber: websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01700000000',
+    floatingWhatsAppWelcomeText: websiteCmsConfig?.marketing?.floatingWhatsAppWelcomeText || `Hello ${instName}! I want to know about course admission & scholarship.`
   });
 
   const [isSaved, setIsSaved] = useState(false);

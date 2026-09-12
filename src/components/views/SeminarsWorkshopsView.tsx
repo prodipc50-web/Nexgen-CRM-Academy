@@ -36,7 +36,8 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
     deleteSeminar,
     registerLeadToSeminar,
     leads,
-    courses
+    courses,
+    academySettings
   } = useAcademy();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -213,7 +214,7 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
         <div className="flex items-center flex-wrap gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => exportSeminarsSpreadsheet(seminars)}
+            onClick={() => exportSeminarsSpreadsheet(seminars, academySettings?.instituteName)}
             className="inline-flex items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition-colors"
             title="Export Seminar Leads & Participants to Excel Spreadsheet"
           >

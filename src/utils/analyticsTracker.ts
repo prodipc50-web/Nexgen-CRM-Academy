@@ -262,7 +262,7 @@ export function trackGa4PageView(pageData?: {
     lastTrackedPageView = { path, timestamp: now };
 
     const utms = getCapturedUtmParams();
-    const title = pageData?.pageTitle || document.title || 'Nexgen Computer Academy';
+    const title = pageData?.pageTitle || document.title || 'Academy';
     const location = pageData?.pageLocation || window.location.href;
 
     const params: Record<string, any> = {

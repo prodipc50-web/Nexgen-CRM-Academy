@@ -24,6 +24,8 @@ export interface SeoMetadataPayload {
   googleSiteVerification?: string;
   bingSiteVerification?: string;
   jsonLdSchemas?: object[];
+  author?: string;
+  siteName?: string;
 }
 
 /**
@@ -88,7 +90,9 @@ export function getHomepageSeoMetadata(
     noIndex: false,
     googleSiteVerification: seo?.googleSiteVerification || undefined,
     bingSiteVerification: seo?.bingSiteVerification || undefined,
-    jsonLdSchemas: schemas
+    jsonLdSchemas: schemas,
+    author: instituteName,
+    siteName: instituteName
   };
 }
 
@@ -159,7 +163,9 @@ export function getCourseSeoMetadata(
     ogType: 'article',
     twitterCard: 'summary_large_image',
     noIndex,
-    jsonLdSchemas: schemas
+    jsonLdSchemas: schemas,
+    author: instituteName,
+    siteName: instituteName
   };
 }
 
@@ -417,7 +423,7 @@ export function applySeoMetadata(meta: SeoMetadataPayload): void {
   if (meta.metaDescription) setMetaTag('name', 'description', meta.metaDescription);
   if (meta.keywords && meta.keywords.length > 0) setMetaTag('name', 'keywords', meta.keywords.join(', '));
   setMetaTag('name', 'robots', meta.noIndex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
-  setMetaTag('name', 'author', 'Nexgen Computer Academy');
+  setMetaTag('name', 'author', meta.author || 'Academy');
 
   // Geo Meta Tags (Local SEO)
   setMetaTag('name', 'geo.region', 'BD-13');
@@ -432,7 +438,7 @@ export function applySeoMetadata(meta: SeoMetadataPayload): void {
   if (meta.canonicalUrl) setMetaTag('property', 'og:url', meta.canonicalUrl);
   setMetaTag('property', 'og:type', meta.ogType || 'website');
   setMetaTag('property', 'og:locale', 'en_US');
-  setMetaTag('property', 'og:site_name', 'Nexgen Computer Academy');
+  setMetaTag('property', 'og:site_name', meta.siteName || 'Academy');
 
   // Twitter
   setMetaTag('name', 'twitter:card', meta.twitterCard || 'summary_large_image');
@@ -524,13 +530,13 @@ ${courseUrls}
 /**
  * Generate Dynamic Robots.txt Content
  */
-export function generateRobotsTxt(cmsConfig: WebsiteCmsConfig): string {
+export function generateRobotsTxt(cmsConfig: WebsiteCmsConfig, instituteName?: string): string {
   const baseUrl = (cmsConfig.seo?.canonicalBaseUrl || 'https://nexgenacademy.edu.bd').replace(/\/+$/, '');
   if (cmsConfig.seo?.robotsTxtCustomContent) {
     return cmsConfig.seo.robotsTxtCustomContent;
   }
 
-  return `# Nexgen Computer Academy Robots.txt
+  return `# ${instituteName || 'Academy'} Robots.txt
 User-agent: *
 Allow: /
 Allow: /courses/

@@ -19,7 +19,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   onClose,
   seminar
 }) => {
-  const { addLead, submitPublicLead, syncIncomingLeadsNow, registerLeadToSeminar, websiteCmsConfig } = useAcademy();
+  const { addLead, submitPublicLead, syncIncomingLeadsNow, registerLeadToSeminar, websiteCmsConfig, academySettings } = useAcademy();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -122,7 +122,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
       setIsSuccess(true);
       setError('');
     } catch (err) {
-      setError('Failed to complete registration. Please contact hotline 01798444444.');
+      setError(`Failed to complete registration. Please contact hotline ${academySettings.primarySupportPhone || academySettings.helplines?.[0] || 'our helpline'}.`);
     }
   };
 

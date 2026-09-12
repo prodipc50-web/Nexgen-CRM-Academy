@@ -43,9 +43,12 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
+const STAFF_SECRET = process.env.STAFF_SECRET_KEY || "nexgen-staff-auth-secure";
+
 function rateLimiter(req: express.Request, res: express.Response, next: express.NextFunction) {
   // Allow staff polling and catalog synchronization without rate limiting bottlenecks
-  if (req.headers["x-staff-auth"] === "nexgen-staff-auth-secure") {
+  const staffHeader = req.headers["x-staff-auth"] || req.headers["authorization"];
+  if (staffHeader === STAFF_SECRET || (typeof staffHeader === "string" && staffHeader.startsWith("Bearer "))) {
     return next();
   }
 
@@ -156,7 +159,7 @@ app.get("/api/catalog", (_req, res) => {
 // --- STAFF AUTHENTICATION MIDDLEWARE ---
 const verifyStaffAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const staffHeader = req.headers["x-staff-auth"] || req.headers["authorization"];
-  if (!staffHeader || (staffHeader !== "nexgen-staff-auth-secure" && !String(staffHeader).startsWith("Bearer "))) {
+  if (!staffHeader || (staffHeader !== STAFF_SECRET && !String(staffHeader).startsWith("Bearer "))) {
     return res.status(401).json({ error: "Unauthorized: Staff access credential required." });
   }
   next();
@@ -312,11 +315,53 @@ app.post("/api/portal/student-lookup", rateLimiter, (req, res) => {
   const batches = (privateData?.batches || []).filter((b: any) => studentBatchIds.has(b.id));
   const attendance = (privateData?.attendance || []).filter((att: any) => att.studentId === matched.id);
 
+  // Mask sensitive PII for public portal security
+  const safePhone = matched.phone && matched.phone.length >= 7
+    ? `${matched.phone.slice(0, 3)}****${matched.phone.slice(-4)}`
+    : matched.phone;
+  const safeEmail = matched.email && matched.email.includes("@")
+    ? `${matched.email.slice(0, 2)}****@${matched.email.split("@")[1]}`
+    : matched.email;
+
+  const sanitizedStudent = {
+    id: matched.id,
+    studentCode: matched.studentCode,
+    name: matched.name,
+    phone: safePhone,
+    email: safeEmail,
+    avatar: matched.avatar,
+    enrollmentDate: matched.enrollmentDate,
+    status: matched.status
+  };
+
+  // Strip internal staff notes from admissions and payments
+  const sanitizedAdmissions = admissions.map((a: any) => ({
+    id: a.id,
+    admissionCode: a.admissionCode,
+    courseId: a.courseId,
+    batchId: a.batchId,
+    admissionDate: a.admissionDate,
+    finalFee: a.finalFee,
+    totalPaid: a.totalPaid,
+    due: a.due,
+    status: a.status,
+    nextPaymentDate: a.nextPaymentDate
+  }));
+
+  const sanitizedPayments = payments.map((p: any) => ({
+    id: p.id,
+    receiptNumber: p.receiptNumber,
+    date: p.date,
+    amount: p.amount,
+    paymentMethod: p.paymentMethod,
+    installmentNumber: p.installmentNumber
+  }));
+
   return res.json({
     success: true,
-    student: matched,
-    admissions,
-    payments,
+    student: sanitizedStudent,
+    admissions: sanitizedAdmissions,
+    payments: sanitizedPayments,
     certificates: certs,
     batches,
     attendance
@@ -406,13 +451,15 @@ app.post("/api/otp/request", rateLimiter, (req, res) => {
 
     serverOtpSessions.set(phone, session);
 
-    // In simulated/dev environment, return the code for verification testability
+    // Only expose simulatedCode when not in strict production mode or when explicit test mode is active
+    const isSimulationAllowed = process.env.NODE_ENV !== "production" || process.env.ALLOW_OTP_SIMULATION === "true";
+
     res.json({
       success: true,
       sessionId,
       expiresInSeconds: 300,
       message: `A 6-digit OTP verification code has been generated for ${phone}.`,
-      simulatedCode: code
+      ...(isSimulationAllowed ? { simulatedCode: code } : {})
     });
   } catch (err: any) {
     console.error("Error in /api/otp/request:", err);
@@ -608,10 +655,12 @@ app.post("/api/leads/submit", rateLimiter, (req, res) => {
       !otpVerified &&
       otpMode === "ON";
 
-    // 9. Construct Validated Lead Entity
+    // 9. Construct Validated Lead Entity with Dynamic Prefix
+    const instName = req.body.instituteName || inMemoryCatalog?.settings?.instituteName || "Academy";
+    const codePrefix = req.body.instituteCode || (instName.split(" ").filter(Boolean).map((w: string) => w[0]).join("").toUpperCase().slice(0, 4)) || "LD";
     const leadId = `ld-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const randomCodeSuffix = Math.floor(1000 + Math.random() * 9000);
-    const leadCode = `NCA-LD-${randomCodeSuffix}`;
+    const leadCode = `${codePrefix}-LD-${randomCodeSuffix}`;
     const createdAt = new Date().toISOString();
 
     let initialStatus: string = "New";
@@ -658,8 +707,8 @@ app.post("/api/leads/submit", rateLimiter, (req, res) => {
       utmContent: utmContent || undefined,
       utmTerm: utmTerm || undefined,
       fbclid: fbclid || undefined,
-      counselorId: "st-03",
-      counselorName: "Admissions Desk (Tanvir Ahmed)",
+      counselorId: sanitizeString(req.body.counselorId, 50) || "st-desk",
+      counselorName: sanitizeString(req.body.counselorName, 100) || "Admissions Desk",
       visitDate: createdAt.split("T")[0],
       firstContactDate: createdAt.split("T")[0],
       comments: message || req.body.comments || undefined,
@@ -820,13 +869,21 @@ app.get("/sitemap.xml", (req, res) => {
   const baseUrl = customOrigin || "https://nexgenacademy.edu.bd";
   const now = new Date().toISOString().split("T")[0];
 
-  const courseXml = DEFAULT_COURSES_SLUGS.map(
-    c => `  <url>
-    <loc>${baseUrl}/courses/${c.slug}</loc>
+  // Dynamically build course URLs from live catalog
+  const catalogCourses: any[] = (inMemoryCatalog?.courses && Array.isArray(inMemoryCatalog.courses) && inMemoryCatalog.courses.length > 0)
+    ? inMemoryCatalog.courses
+    : DEFAULT_COURSES_SLUGS;
+
+  const courseXml = catalogCourses.map(
+    (c: any) => {
+      const slug = c.slug || c.id || (c.name ? c.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "course");
+      return `  <url>
+    <loc>${baseUrl}/courses/${slug}</loc>
     <lastmod>${now}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-  </url>`
+  </url>`;
+    }
   ).join("\n");
 
   const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -852,7 +909,7 @@ app.get("/sitemap.xml", (req, res) => {
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-  <!-- Dynamic Public Courses -->
+  <!-- Dynamic Public Courses (${catalogCourses.length}) -->
 ${courseXml}
 </urlset>`;
 
@@ -864,7 +921,8 @@ ${courseXml}
 app.get("/robots.txt", (req, res) => {
   const customOrigin = process.env.PUBLIC_CANONICAL_URL;
   const baseUrl = customOrigin || "https://nexgenacademy.edu.bd";
-  const robotsContent = `# Nexgen Computer Academy Robots.txt
+  const instName = inMemoryCatalog?.settings?.instituteName || "Nexgen Computer Academy";
+  const robotsContent = `# ${instName} Robots.txt
 User-agent: *
 Allow: /
 Allow: /courses/
@@ -944,7 +1002,8 @@ app.post("/api/ai-assistant", rateLimiter, async (req, res) => {
     }
 
     const ai = getGenAI();
-    const systemPrompt = `You are the executive AI Operations Assistant for "Nexgen Computer Academy", a premier IT & Skill Development training institute.
+    const instName = sanitizeString(req.body.instituteName || academyContext?.settings?.instituteName, 150) || "Academy";
+    const systemPrompt = `You are the executive AI Operations Assistant for "${instName}", a premier IT & Skill Development training institute.
 Your goal is to provide accurate, insightful, executive-level summaries, statistics, advice, and recommendations based on the current live academy database context and any uploaded files or screenshots.
 
 Capabilities:

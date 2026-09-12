@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
 import { numberToWordsEnglish } from '../../utils/numberToWords';
+import { replaceShortcodes } from '../../utils/templateShortcodes';
 
 interface MoneyReceiptModalProps {
   isOpen: boolean;
@@ -161,7 +162,22 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
 
   const handleSendWhatsAppReceipt = () => {
     const phone = receiptData.studentPhone;
-    const msg = `🎓 *${receiptData.instituteName}*
+    let msg = '';
+    if (academySettings.messageTemplates?.paymentReceiptTemplate) {
+      msg = replaceShortcodes(academySettings.messageTemplates.paymentReceiptTemplate, {
+        institute_name: receiptData.instituteName,
+        receipt_number: receiptData.receiptNumber,
+        student_name: receiptData.studentName,
+        student_code: receiptData.studentCode,
+        course_name: receiptData.courseName,
+        batch_number: receiptData.batchNumber,
+        paid_amount: receiptData.paidAmount.toLocaleString(),
+        due_amount: receiptData.dueBalance.toLocaleString(),
+        due_date: receiptData.nextDueDate || 'নাই',
+        helpline: receiptData.hotlinePhone
+      });
+    } else {
+      msg = `🎓 *${receiptData.instituteName}*
 🧾 *ফি পরিশোধের মানি রিসিট কনফার্মেশন*
 ----------------------------------------
 রিসিপ্ট নং: ${receiptData.receiptNumber}
@@ -179,6 +195,7 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
 
 সাপোর্ট ও ইনফো হটলাইন: ${receiptData.hotlinePhone}
 ধন্যবাদ! আমাদের সাথেই থাকুন।`;
+    }
     const url = getWhatsAppDirectUrl(phone, msg);
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -877,7 +894,21 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
             {academySettings.receiptNotes && (
               <div className="bg-slate-50 p-2 print:p-1.5 rounded-lg border border-slate-200 text-[10px] print:text-[9px] text-slate-600 space-y-0.5">
                 <div className="font-bold text-slate-800">শর্তাবলী ও নির্দেশিকা (Terms & Instructions):</div>
-                <div className="whitespace-pre-line leading-relaxed">{academySettings.receiptNotes}</div>
+                <div className="whitespace-pre-line leading-relaxed">
+                  {replaceShortcodes(academySettings.receiptNotes, {
+                    institute_name: receiptData.instituteName,
+                    campus_name: receiptData.campusName,
+                    campus_address: receiptData.address,
+                    helpline: receiptData.hotlinePhone,
+                    student_name: receiptData.studentName,
+                    student_code: receiptData.studentCode,
+                    course_name: receiptData.courseName,
+                    batch_number: receiptData.batchNumber,
+                    paid_amount: receiptData.paidAmount,
+                    due_amount: receiptData.dueBalance,
+                    receipt_number: receiptData.receiptNumber
+                  })}
+                </div>
               </div>
             )}
 

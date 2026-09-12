@@ -51,13 +51,32 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
     linkedinUrl: socials.linkedinUrl || '',
     instagramUrl: socials.instagramUrl || '',
     telegramUrl: socials.telegramUrl || '',
-    tiktokUrl: socials.tiktokUrl || ''
+    tiktokUrl: socials.tiktokUrl || '',
+    // Community Hub Section Config
+    communityBadgeText: websiteCmsConfig.communityHub?.badgeText || 'Connect with 18,000+ Bangladeshi Coders',
+    communityHeading: websiteCmsConfig.communityHub?.heading || 'Official Community Groups & YouTube Masterclasses',
+    communityDescription: websiteCmsConfig.communityHub?.description || 'Join our active developer network, ask code queries, collaborate on projects, and watch free full-length crash courses.',
+    communityEnabled: websiteCmsConfig.communityHub?.enabled ?? true
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const {
+      communityBadgeText,
+      communityHeading,
+      communityDescription,
+      communityEnabled,
+      ...socialsData
+    } = formData;
+
     updateWebsiteCmsConfig({
-      socialLinks: formData
+      socialLinks: socialsData,
+      communityHub: {
+        enabled: communityEnabled,
+        badgeText: communityBadgeText,
+        heading: communityHeading,
+        description: communityDescription
+      }
     });
     onSuccessToast('Social media links, Facebook community group, & YouTube setup saved!');
   };
@@ -261,6 +280,60 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
               onChange={e => setFormData({ ...formData, tiktokUrl: e.target.value })}
               placeholder="https://tiktok.com/@..."
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Community Hub Section Header & Controls */}
+      <div className="bg-white p-5 rounded-2xl border border-indigo-100 shadow-2xs space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-indigo-50">
+          <div className="flex items-center space-x-2 text-indigo-950 font-black text-sm">
+            <Users className="w-4 h-4 text-indigo-600" />
+            <span>Community & YouTube Masterclasses Section (কমিউনিটি হাব সেকশন টেক্সট)</span>
+          </div>
+          <label className="flex items-center space-x-2 text-xs font-bold text-slate-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.communityEnabled}
+              onChange={e => setFormData({ ...formData, communityEnabled: e.target.checked })}
+              className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+            />
+            <span>Show Section on Public Site</span>
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label className="font-bold text-slate-700 block mb-1">Badge Pill (ব্যাজ টেক্সট)</label>
+            <input
+              type="text"
+              value={formData.communityBadgeText}
+              onChange={e => setFormData({ ...formData, communityBadgeText: e.target.value })}
+              placeholder="e.g. Connect with 18,000+ Bangladeshi Coders"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-700"
+            />
+          </div>
+
+          <div>
+            <label className="font-bold text-slate-700 block mb-1">Section Heading (শিরোনাম)</label>
+            <input
+              type="text"
+              value={formData.communityHeading}
+              onChange={e => setFormData({ ...formData, communityHeading: e.target.value })}
+              placeholder="e.g. Official Community Groups & YouTube Masterclasses"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="font-bold text-slate-700 block mb-1">Section Subtitle / Description (বিবরণ)</label>
+            <textarea
+              rows={2}
+              value={formData.communityDescription}
+              onChange={e => setFormData({ ...formData, communityDescription: e.target.value })}
+              placeholder="e.g. Join our active developer network, ask code queries, collaborate on projects, and watch free full-length crash courses."
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
             />
           </div>
         </div>

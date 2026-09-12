@@ -61,7 +61,7 @@ import {
   Edit,
   ChevronRight
 } from 'lucide-react';
-import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage } from '../../types';
+import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage, WebsiteSectionVisibility } from '../../types';
 import { HeroBannerSlider } from './HeroBannerSlider';
 import { TopNoticeTickerModal } from './TopNoticeTickerModal';
 import { getTranslation } from '../../utils/translations';
@@ -89,6 +89,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
     categories,
     seminars,
     websiteCmsConfig,
+    trainersList,
     websiteReviews,
     websiteGallery,
     websiteNotices,
@@ -232,15 +233,15 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   };
 
   const socials = websiteCmsConfig.socialLinks || {
-    facebookPageUrl: 'https://facebook.com/nexgencodingacademy',
-    facebookGroupUrl: 'https://facebook.com/groups/nexgendevcommunity',
-    facebookGroupName: 'NexGen Dev & Tech Career Community (Dhaka)',
+    facebookPageUrl: 'https://facebook.com',
+    facebookGroupUrl: 'https://facebook.com/groups',
+    facebookGroupName: `${academySettings.instituteName || 'IT Training'} Tech Career Community`,
     facebookGroupMembersCount: '18,500+ Members',
-    youtubeChannelUrl: 'https://youtube.com/@nexgencodingacademy',
+    youtubeChannelUrl: 'https://youtube.com',
     youtubeFeaturedVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    youtubeVideoTitle: 'Watch Campus Tour & Student Success Stories',
-    whatsappSupportNumber: '01798444444',
-    whatsappCommunityUrl: 'https://chat.whatsapp.com/sampleInviteLink',
+    youtubeVideoTitle: `${academySettings.instituteName || 'Campus'} Experience & Student Success Stories`,
+    whatsappSupportNumber: academySettings.primarySupportPhone || academySettings.helplines?.[0] || '01798444444',
+    whatsappCommunityUrl: 'https://chat.whatsapp.com',
     linkedinUrl: 'https://linkedin.com',
     instagramUrl: 'https://instagram.com',
     telegramUrl: 'https://t.me',
@@ -248,13 +249,13 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   };
 
   const about = websiteCmsConfig.aboutUs || {
-    storyTitle: 'Pioneering Industry-Driven Tech Education Since 2018',
-    storyDescription: 'NexGen Coding Academy was established with a singular mission: bridging the gap between textbook academic theory and real-world software engineering practices in Bangladesh.',
+    storyTitle: 'Pioneering Industry-Driven Tech Education',
+    storyDescription: `${academySettings.instituteName || 'Our Academy'} was established with a singular mission: bridging the gap between textbook academic theory and real-world software engineering and digital skills in Bangladesh.`,
     mission: 'To empower 50,000+ Bangladeshi youth with market-ready software engineering, cloud computing, and AI skills by 2030.',
     vision: 'To be South Asia\'s premier hands-on tech vocational academy and talent incubator.',
-    directorMessage: 'We believe genuine coding competence is forged in the lab through real production projects and relentless debugging, not multiple-choice rote tests.',
-    directorName: 'Engr. Prodip Chowdhury',
-    directorTitle: 'Founder & Chief Academic Director',
+    directorMessage: 'We believe genuine professional competence is forged in the lab through real production projects and relentless debugging, not multiple-choice rote tests.',
+    directorName: academySettings.idCardSignatoryName || 'Chief Academic Director',
+    directorTitle: academySettings.idCardSignatoryTitle || 'Founder & Academic Director',
     directorPhotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     establishedYear: '2018',
     affiliations: ['ISO 9001:2015 Certified', 'BASIS Member Institute', 'BTEB Approved Center', 'National Skill Development Partner'],
@@ -269,23 +270,34 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const multiplePhones = websiteCmsConfig.multiplePhones?.length > 0
     ? websiteCmsConfig.multiplePhones
     : [
-        { id: '1', number: '01798444444', label: 'Main Admission Hotline', isHotline: true, isWhatsapp: true },
-        { id: '2', number: '+880 1711-223344', label: 'Career Counseling Desk', isHotline: false, isWhatsapp: true },
-        { id: '3', number: '+880 1811-556677', label: 'Student Support & Exam Cell', isHotline: false, isWhatsapp: false }
+        { id: '1', number: academySettings.primarySupportPhone || academySettings.helplines?.[0] || '01798444444', label: 'Main Admission Hotline', isHotline: true, isWhatsapp: true },
+        { id: '2', number: academySettings.helplines?.[1] || '+880 1711-223344', label: 'Career Counseling Desk', isHotline: false, isWhatsapp: true },
+        { id: '3', number: academySettings.helplines?.[2] || '+880 1811-556677', label: 'Student Support & Exam Cell', isHotline: false, isWhatsapp: false }
       ];
 
   const multipleEmails = websiteCmsConfig.multipleEmails?.length > 0
     ? websiteCmsConfig.multipleEmails
     : [
-        { id: '1', email: 'admissions@nexgenacademy.edu.bd', label: 'Admission & Registration' },
-        { id: '2', email: 'info@nexgenacademy.edu.bd', label: 'General Inquiry & Campus Tour' },
-        { id: '3', email: 'corporate@nexgenacademy.edu.bd', label: 'Corporate Training & Hiring Partnerships' }
+        { id: '1', email: academySettings.officialEmail || 'admissions@academy.edu.bd', label: 'Admission & Registration' },
+        { id: '2', email: academySettings.officialEmail || 'info@academy.edu.bd', label: 'General Inquiry & Campus Tour' },
+        { id: '3', email: academySettings.officialEmail || 'corporate@academy.edu.bd', label: 'Corporate Training & Hiring Partnerships' }
       ];
 
   const officeAddress = websiteCmsConfig.officeAddress || academySettings.officialAddress || '14/B Garden Road, Farmgate, Dhaka-1215, Bangladesh';
   const campusDirections = websiteCmsConfig.campusDirections || 'Located 2 minutes walk from Farmgate Metro Station (Exit 3), opposite to Green Super Market.';
   const officeHours = websiteCmsConfig.officeHours || 'Saturday to Friday: 9:00 AM - 8:30 PM';
   const googleMapEmbedUrl = websiteCmsConfig.googleMapEmbedUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.848881261358!2d90.3887!3d23.7527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ1JzA5LjciTiA5MMKwMjMnMTkuMyJF!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd';
+
+  const sectionVisibility: Partial<WebsiteSectionVisibility> = websiteCmsConfig.sectionVisibility || {};
+  const deliveryConfig = websiteCmsConfig.deliveryModesConfig;
+  const deliveryCards = deliveryConfig?.cards || [];
+  const offlineCard = deliveryCards.find(c => c.id === 'offline');
+  const onlineCard = deliveryCards.find(c => c.id === 'online');
+  const recordedCard = deliveryCards.find(c => c.id === 'recorded');
+  const corporateCard = deliveryCards.find(c => c.id === 'corporate');
+  const roadmapConfig = websiteCmsConfig.admissionRoadmap;
+  const communityHubConfig = websiteCmsConfig.communityHub;
+  const footerConfig = websiteCmsConfig.footerConfig;
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-website-body antialiased selection:bg-indigo-600 selection:text-white flex flex-col">
@@ -421,6 +433,9 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             </a>
             <a href="#courses" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Courses (কোর্স)</a>
             <a href="#about" className="hover:text-indigo-600 transition-colors whitespace-nowrap">About Us</a>
+            {sectionVisibility.mentors !== false && (
+              <a href="#mentors" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Mentors</a>
+            )}
             <a href="#community" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-blue-700 whitespace-nowrap">
               <Users className="w-4 h-4" />
               <span>Community</span>
@@ -492,7 +507,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       />
 
       {/* 3. HERO BANNER SECTION WITH DYNAMIC MULTI-SLIDE CAROUSEL */}
-      <section className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white py-8 sm:py-12 lg:py-14 overflow-hidden">
+      {sectionVisibility.heroBanner !== false && (
+        <section className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white py-8 sm:py-12 lg:py-14 overflow-hidden">
         {/* Background Gradients */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 -left-24 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -610,20 +626,20 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 {/* Header Row with Inline Non-overlapping Discount Tag */}
                 <div className="flex items-center justify-between gap-2 pb-0.5">
                   <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                    Upcoming Batches
+                    {websiteCmsConfig.upcomingBatchesCard?.title || 'Upcoming Batches'}
                   </span>
                   <span className="bg-gradient-to-r from-rose-500 to-pink-600 text-white font-black text-[11px] px-3 py-1 rounded-full shadow-sm flex items-center space-x-1 shrink-0">
                     <Sparkles className="w-3 h-3 text-amber-300 shrink-0" />
-                    <span>40% Offer</span>
+                    <span>{websiteCmsConfig.upcomingBatchesCard?.badgeText || '40% Offer'}</span>
                   </span>
                 </div>
 
                 <div className="space-y-1">
                   <h3 className="text-base sm:text-xl font-black text-white leading-snug">
-                    Apply for Direct Admission
+                    {websiteCmsConfig.upcomingBatchesCard?.heading || 'Apply for Direct Admission'}
                   </h3>
                   <p className="text-xs text-slate-300">
-                    Fast-track your IT career with practical project portfolios and certified diplomas.
+                    {websiteCmsConfig.upcomingBatchesCard?.description || 'Fast-track your IT career with practical project portfolios and certified diplomas.'}
                   </p>
                 </div>
 
@@ -653,10 +669,13 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 <div className="pt-2 border-t border-slate-700/80 flex items-center justify-between text-xs text-slate-300">
                   <div className="flex items-center space-x-1.5">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Free Lifetime Lab Access</span>
+                    <span>{websiteCmsConfig.upcomingBatchesCard?.featureNote || 'Free Lifetime Lab Access'}</span>
                   </div>
-                  <a href="#seminars" className="text-amber-400 font-bold hover:underline shrink-0">
-                    Free Seminars →
+                  <a
+                    href={websiteCmsConfig.upcomingBatchesCard?.ctaLink || '#seminars'}
+                    className="text-amber-400 font-bold hover:underline shrink-0"
+                  >
+                    {websiteCmsConfig.upcomingBatchesCard?.ctaText || 'Free Seminars →'}
                   </a>
                 </div>
               </div>
@@ -664,224 +683,231 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </div>
       </section>
+      )}
 
-      {/* 4. FOUR LEARNING DELIVERY FORMAT CARDS (MATCHING REFERENCE DESIGN) */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-50px' }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="py-12 bg-white border-b border-slate-200"
-      >
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {/* Card 1: Offline Course */}
-            <div
-              onClick={() => {
-                setSelectedDeliveryMode('Offline');
-                const el = document.getElementById('courses');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="p-5 rounded-3xl bg-emerald-50/70 border border-emerald-200/80 hover:border-emerald-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 shrink-0">
-                    <Building className="w-6 h-6" />
+      {/* 4. FOUR LEARNING DELIVERY FORMAT CARDS (CMS DRIVEN) */}
+      {sectionVisibility.deliveryModes !== false && deliveryConfig?.enabled !== false && (
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="py-12 bg-white border-b border-slate-200"
+        >
+          <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+              {/* Card 1: Offline Course */}
+              {(offlineCard?.enabled !== false) && (
+                <div
+                  onClick={() => {
+                    setSelectedDeliveryMode('Offline');
+                    const el = document.getElementById('courses');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="p-5 rounded-3xl bg-emerald-50/70 border border-emerald-200/80 hover:border-emerald-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 shrink-0">
+                        <Building className="w-6 h-6" />
+                      </div>
+                      <span className="px-2.5 py-0.5 bg-emerald-200/80 text-emerald-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                        {offlineCard?.badge || 'ল্যাব ব্যাচ'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
+                        {offlineCard?.title || 'Offline Course'}
+                      </h3>
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                        {offlineCard?.description || 'ইন-পার্সন সরাসরি ফার্মগেট ক্যাম্পাসে আধুনিক এসি ল্যাবে প্র্যাকটিক্যাল ক্লাস ও সার্বক্ষণিক শিক্ষক সাপোর্ট।'}
+                      </p>
+                    </div>
                   </div>
-                  <span className="px-2.5 py-0.5 bg-emerald-200/80 text-emerald-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
-                    ল্যাব ব্যাচ
-                  </span>
+                  <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-xs font-bold text-emerald-800">
+                    <span>{offlineCoursesCount} {offlineCard?.footerText || 'Courses Available'}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-black text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
-                    Offline Course
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                    ইন-পার্সন সরাসরি ফার্মগেট ক্যাম্পাসে আধুনিক এসি ল্যাবে প্র্যাকটিক্যাল ক্লাস ও সার্বক্ষণিক শিক্ষক সাপোর্ট।
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-xs font-bold text-emerald-800">
-                <span>{offlineCoursesCount} Courses Available</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
+              )}
 
-            {/* Card 2: Online Live Course */}
-            <div
-              onClick={() => {
-                setSelectedDeliveryMode('Online');
-                const el = document.getElementById('courses');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="p-5 rounded-3xl bg-rose-50/70 border border-rose-200/80 hover:border-rose-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200 shrink-0">
-                    <Video className="w-6 h-6" />
+              {/* Card 2: Online Live Course */}
+              {(onlineCard?.enabled !== false) && (
+                <div
+                  onClick={() => {
+                    setSelectedDeliveryMode('Online');
+                    const el = document.getElementById('courses');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="p-5 rounded-3xl bg-rose-50/70 border border-rose-200/80 hover:border-rose-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200 shrink-0">
+                        <Video className="w-6 h-6" />
+                      </div>
+                      <span className="px-2.5 py-0.5 bg-rose-200/80 text-rose-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                        {onlineCard?.badge || 'লাইভ ক্লাস'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base group-hover:text-rose-700 transition-colors">
+                        {onlineCard?.title || 'Online Live Course'}
+                      </h3>
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                        {onlineCard?.description || 'দেশ-বিদেশের যেকোনো স্থান থেকে লাইভ ক্লাসে অংশ নিন, ইনস্ট্যান্ট প্রশ্ন করুন ও ক্লাস রেকর্ডিং পান।'}
+                      </p>
+                    </div>
                   </div>
-                  <span className="px-2.5 py-0.5 bg-rose-200/80 text-rose-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
-                    লাইভ ক্লাস
-                  </span>
+                  <div className="flex items-center justify-between pt-2 border-t border-rose-200/60 text-xs font-bold text-rose-800">
+                    <span>{onlineCoursesCount} {onlineCard?.footerText || 'Courses Available'}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-black text-slate-900 text-base group-hover:text-rose-700 transition-colors">
-                    Online Live Course
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                    দেশ-বিদেশের যেকোনো স্থান থেকে লাইভ ক্লাসে অংশ নিন, ইনস্ট্যান্ট প্রশ্ন করুন ও ক্লাস রেকর্ডিং পান।
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-rose-200/60 text-xs font-bold text-rose-800">
-                <span>{onlineCoursesCount} Courses Available</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
+              )}
 
-            {/* Card 3: Pre-Recorded Course */}
-            <div
-              onClick={() => {
-                setSelectedDeliveryMode('Pre Recorded');
-                const el = document.getElementById('courses');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="p-5 rounded-3xl bg-purple-50/70 border border-purple-200/80 hover:border-purple-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-200 shrink-0">
-                    <PlaySquare className="w-6 h-6" />
+              {/* Card 3: Pre-Recorded Course */}
+              {(recordedCard?.enabled !== false) && (
+                <div
+                  onClick={() => {
+                    setSelectedDeliveryMode('Pre Recorded');
+                    const el = document.getElementById('courses');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="p-5 rounded-3xl bg-purple-50/70 border border-purple-200/80 hover:border-purple-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-200 shrink-0">
+                        <PlaySquare className="w-6 h-6" />
+                      </div>
+                      <span className="px-2.5 py-0.5 bg-purple-200/80 text-purple-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                        {recordedCard?.badge || 'সেলফ-পেসড'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base group-hover:text-purple-700 transition-colors">
+                        {recordedCard?.title || 'Pre Recorded Course'}
+                      </h3>
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                        {recordedCard?.description || 'নিজের সুবিধাজনক সময়ে প্রিমিয়াম এইচডি ভিডিও দেখুন, প্রজেক্ট জমা দিন ও লাইফটাইম অ্যাক্সেস উপভোগ করুন।'}
+                      </p>
+                    </div>
                   </div>
-                  <span className="px-2.5 py-0.5 bg-purple-200/80 text-purple-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
-                    সেলফ-পেসড
-                  </span>
+                  <div className="flex items-center justify-between pt-2 border-t border-purple-200/60 text-xs font-bold text-purple-800">
+                    <span>{preRecordedCoursesCount} {recordedCard?.footerText || 'Courses Available'}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-black text-slate-900 text-base group-hover:text-purple-700 transition-colors">
-                    Pre Recorded Course
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                    নিজের সুবিধাজনক সময়ে প্রিমিয়াম এইচডি ভিডিও দেখুন, প্রজেক্ট জমা দিন ও লাইফটাইম অ্যাক্সেস উপভোগ করুন।
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-purple-200/60 text-xs font-bold text-purple-800">
-                <span>{preRecordedCoursesCount} Courses Available</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
+              )}
 
-            {/* Card 4: Corporate Training */}
-            <div
-              onClick={() => {
-                const el = document.getElementById('contact');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="p-5 rounded-3xl bg-cyan-50/70 border border-cyan-200/80 hover:border-cyan-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="w-12 h-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center shadow-md shadow-cyan-200 shrink-0">
-                    <Briefcase className="w-6 h-6" />
+              {/* Card 4: Corporate Training */}
+              {(corporateCard?.enabled !== false) && (
+                <div
+                  onClick={() => {
+                    const el = document.getElementById('contact');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="p-5 rounded-3xl bg-cyan-50/70 border border-cyan-200/80 hover:border-cyan-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="w-12 h-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center shadow-md shadow-cyan-200 shrink-0">
+                        <Briefcase className="w-6 h-6" />
+                      </div>
+                      <span className="px-2.5 py-0.5 bg-cyan-200/80 text-cyan-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                        {corporateCard?.badge || 'কর্পোরেট'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base group-hover:text-cyan-700 transition-colors">
+                        {corporateCard?.title || 'Corporate Training'}
+                      </h3>
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                        {corporateCard?.description || 'ব্যাংক, বহুজাতিক প্রতিষ্ঠান ও কর্পোরেট টিমের কর্মীদের আধুনিক সফটওয়্যার ও আইটি স্কিলস ট্রেনিং।'}
+                      </p>
+                    </div>
                   </div>
-                  <span className="px-2.5 py-0.5 bg-cyan-200/80 text-cyan-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
-                    কর্পোরেট
-                  </span>
+                  <div className="flex items-center justify-between pt-2 border-t border-cyan-200/60 text-xs font-bold text-cyan-800">
+                    <span>{corporateCard?.footerText || 'Custom Team Upskilling'}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-black text-slate-900 text-base group-hover:text-cyan-700 transition-colors">
-                    Corporate Training
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                    ব্যাংক, বহুজাতিক প্রতিষ্ঠান ও কর্পোরেট টিমের কর্মীদের আধুনিক সফটওয়্যার ও আইটি স্কিলস ট্রেনিং।
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-cyan-200/60 text-xs font-bold text-cyan-800">
-                <span>Custom Team Upskilling</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
+              )}
             </div>
           </div>
-        </div>
-      </motion.section>
+        </motion.section>
+      )}
 
-      {/* 5. IMPACT & TRUST SECTION: "From Beginner to IT Professionals We Close That Gap." */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-50px' }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="py-14 bg-slate-50 border-b border-slate-200"
-      >
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
-          <div className="text-center max-w-3xl mx-auto space-y-2">
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
-              From Beginner to IT Professionals We Close That Gap.
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
-              অভিজ্ঞ মেন্টরশিপ ও প্রজেক্ট-ভিত্তিক ট্রেনিং এর মাধ্যমে বাংলাদেশের তরুণদের গ্লোবাল ক্যারিয়ার গঠনে আমরা প্রতিশ্রুতিবদ্ধ।
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-2xs space-y-1 hover:shadow-md transition-shadow">
-              <span className="block text-2xl font-black text-indigo-600">20,000+</span>
-              <h4 className="text-xs font-black text-slate-900">Successful Students</h4>
-              <p className="text-[10px] text-slate-500">সফল শিক্ষার্থী</p>
+      {/* 5. IMPACT & TRUST SECTION: Dynamic from CMS */}
+      {sectionVisibility.impactTrust !== false && websiteCmsConfig?.impactTrustConfig?.enabled !== false && (
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="py-14 bg-slate-50 border-b border-slate-200"
+        >
+          <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
+            <div className="text-center max-w-3xl mx-auto space-y-2">
+              {websiteCmsConfig?.impactTrustConfig?.tagText && (
+                <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-1">
+                  <span>{websiteCmsConfig.impactTrustConfig.tagText}</span>
+                </div>
+              )}
+              <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+                {websiteCmsConfig?.impactTrustConfig?.heading || 'From Beginner to IT Professionals We Close That Gap.'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600">
+                {websiteCmsConfig?.impactTrustConfig?.subtitle ||
+                  'অভিজ্ঞ মেন্টরশিপ ও প্রজেক্ট-ভিত্তিক ট্রেনিং এর মাধ্যমে বাংলাদেশের তরুণদের গ্লোবাল ক্যারিয়ার গঠনে আমরা প্রতিশ্রুতিবদ্ধ।'}
+              </p>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-2xs space-y-1 hover:shadow-md transition-shadow">
-              <span className="block text-2xl font-black text-emerald-600">9,000+</span>
-              <h4 className="text-xs font-black text-slate-900">Expert Freelancers</h4>
-              <p className="text-[10px] text-slate-500">সফল ফ্রিল্যান্সার</p>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-2xs space-y-1 hover:shadow-md transition-shadow">
-              <span className="block text-2xl font-black text-blue-600">2,000+</span>
-              <h4 className="text-xs font-black text-slate-900">Skilled Job Holders</h4>
-              <p className="text-[10px] text-slate-500">কর্মসংস্থানপ্রাপ্ত গ্র্যাজুয়েট</p>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-2xs space-y-1 hover:shadow-md transition-shadow">
-              <span className="block text-2xl font-black text-amber-500">5,000+</span>
-              <h4 className="text-xs font-black text-slate-900">Industry Experts</h4>
-              <p className="text-[10px] text-slate-500">মেন্টরস নেটওয়ার্ক</p>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-2xs space-y-1 hover:shadow-md transition-shadow">
-              <span className="block text-2xl font-black text-rose-500">95%</span>
-              <h4 className="text-xs font-black text-slate-900">Course Success Ratio</h4>
-              <p className="text-[10px] text-slate-500">সফলতার হার</p>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-2xs space-y-1 hover:shadow-md transition-shadow">
-              <span className="block text-2xl font-black text-purple-600">100+</span>
-              <h4 className="text-xs font-black text-slate-900">Hiring Partners</h4>
-              <p className="text-[10px] text-slate-500">পার্টনার প্রতিষ্ঠান</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+              {(websiteCmsConfig?.impactTrustConfig?.metrics && websiteCmsConfig.impactTrustConfig.metrics.length > 0
+                ? websiteCmsConfig.impactTrustConfig.metrics
+                : [
+                    { id: 'm1', metric: '20,000+', label: 'Successful Students', subtext: 'সফল শিক্ষার্থী', color: 'text-indigo-600' },
+                    { id: 'm2', metric: '9,000+', label: 'Expert Freelancers', subtext: 'সফল ফ্রিল্যান্সার', color: 'text-emerald-600' },
+                    { id: 'm3', metric: '2,000+', label: 'Skilled Job Holders', subtext: 'কর্মসংস্থানপ্রাপ্ত গ্র্যাজুয়েট', color: 'text-blue-600' },
+                    { id: 'm4', metric: '5,000+', label: 'Industry Experts', subtext: 'মেন্টরস নেটওয়ার্ক', color: 'text-amber-500' },
+                    { id: 'm5', metric: '95%', label: 'Course Success Ratio', subtext: 'সফলতার হার', color: 'text-rose-500' },
+                    { id: 'm6', metric: '100+', label: 'Hiring Partners', subtext: 'পার্টনার প্রতিষ্ঠান', color: 'text-purple-600' }
+                  ]
+              ).map((mItem, idx) => (
+                <div
+                  key={mItem.id || idx}
+                  className="bg-white p-4 rounded-2xl border border-slate-200 text-center shadow-2xs space-y-1 hover:shadow-md transition-shadow"
+                >
+                  <span className={`block text-2xl font-black ${mItem.color || 'text-indigo-600'}`}>
+                    {mItem.metric}
+                  </span>
+                  <h4 className="text-xs font-black text-slate-900">{mItem.label}</h4>
+                  <p className="text-[10px] text-slate-500">{mItem.subtext}</p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </motion.section>
+        </motion.section>
+      )}
 
       {/* 6. REDESIGNED COURSES SHOWCASE SECTION (MATCHING REFERENCE DESIGN) */}
-      <section id="courses" className="py-16 sm:py-20 bg-white">
+      {sectionVisibility.courses !== false && (
+        <section id="courses" className="py-16 sm:py-20 bg-white">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-1">
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold">
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Industry-Standard IT Curriculum</span>
+                <span>{websiteCmsConfig?.coursesSectionConfig?.tagText || 'Industry-Standard IT Curriculum'}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                Our Specialized IT Career Courses (কোর্সসমূহ)
+                {websiteCmsConfig?.coursesSectionConfig?.heading || 'Our Specialized IT Career Courses (কোর্সসমূহ)'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500">
-                মার্কেটপ্লেস ও কর্পোরেট জব রেডি স্কিলস ডেভেলপ করুন অভিজ্ঞ মেন্টরদের সাথে।
+                {websiteCmsConfig?.coursesSectionConfig?.subtitle || 'মার্কেটপ্লেস ও কর্পোরেট জব রেডি স্কিলস ডেভেলপ করুন অভিজ্ঞ মেন্টরদের সাথে।'}
               </p>
             </div>
 
@@ -1183,100 +1209,102 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           )}
         </div>
       </section>
+      )}
 
-      {/* 5.5. ADMISSION & LEARNING JOURNEY ROADMAP (ভর্তি থেকে ক্লাস শুরুর ৪টি সহজ ধাপ) */}
-      <section className="py-16 sm:py-20 bg-white border-b border-slate-200 text-left">
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-12">
-          <div className="text-center space-y-3 max-w-3xl mx-auto">
-            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200/80 rounded-full text-xs font-bold">
-              <Compass className="w-3.5 h-3.5 text-indigo-600" />
-              <span>{language === 'bn' ? 'ভর্তি ও ক্লাস শুরুর প্রক্রিয়া' : 'Admission & Learning Journey'}</span>
+      {/* 5.5. ADMISSION & LEARNING JOURNEY ROADMAP (CMS DRIVEN) */}
+      {sectionVisibility.admissionRoadmap !== false && roadmapConfig?.enabled !== false && (
+        <section className="py-16 sm:py-20 bg-white border-b border-slate-200 text-left">
+          <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-12">
+            <div className="text-center space-y-3 max-w-3xl mx-auto">
+              <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200/80 rounded-full text-xs font-bold">
+                <Compass className="w-3.5 h-3.5 text-indigo-600" />
+                <span>{language === 'bn' ? 'ভর্তি ও ক্লাস শুরুর প্রক্রিয়া' : 'Admission & Learning Journey'}</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-website-heading">
+                {roadmapConfig?.heading || (language === 'bn' ? 'সহজ ৪টি ধাপে শুরু করুন আপনার আইটি ক্যারিয়ার' : 'Start Your IT Career in 4 Simple Steps')}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                {roadmapConfig?.subtitle || (language === 'bn'
+                  ? 'কোনো ঝামেলা ছাড়াই সম্পূর্ণ স্বচ্ছ প্রক্রিয়ায় কোর্স নির্বাচন, সরাসরি ল্যাব ওরিয়েন্টেশন এবং বাস্তব কাজ শেখা শুরু করুন।'
+                  : 'A seamless, structured roadmap from counseling and seat reservation to hands-on practical labs and lifetime career guidance.')}
+              </p>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight font-website-heading">
-              {language === 'bn' ? 'সহজ ৪টি ধাপে শুরু করুন আপনার আইটি ক্যারিয়ার' : 'Start Your IT Career in 4 Simple Steps'}
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-              {language === 'bn'
-                ? 'কোনো ঝামেলা ছাড়াই সম্পূর্ণ স্বচ্ছ প্রক্রিয়ায় কোর্স নির্বাচন, সরাসরি ল্যাব ওরিয়েন্টেশন এবং বাস্তব কাজ শেখা শুরু করুন।'
-                : 'A seamless, structured roadmap from counseling and seat reservation to hands-on practical labs and lifetime career guidance.'}
-            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {(roadmapConfig?.steps && roadmapConfig.steps.length > 0 ? roadmapConfig.steps : [
+                {
+                  id: '1',
+                  stepNumber: '০১',
+                  title: language === 'bn' ? 'কোর্স নির্বাচন ও কাউন্সেলিং' : 'Course Selection & Guidance',
+                  description: language === 'bn'
+                    ? 'আপনার বর্তমান ক্যারিয়ার লক্ষ্য অনুযায়ী উপযুক্ত কোর্স বেছে নিন বা আমাদের এক্সপার্ট মেন্টরের সাথে কথা বলুন।'
+                    : 'Explore industry-curated curriculums and consult with career advisors to find your ideal learning path.',
+                  icon: 'book'
+                },
+                {
+                  id: '2',
+                  stepNumber: '০২',
+                  title: language === 'bn' ? 'অনলাইন আবেদন ও সিট বুকিং' : 'Online Application & Booking',
+                  description: language === 'bn'
+                    ? 'পছন্দের ব্যাচ টাইম স্লট (সকাল, বিকাল বা উইকেন্ড) নির্বাচন করে সিট কনফার্ম করুন এবং রেজিস্ট্রেশন কপি বুঝে নিন।'
+                    : 'Select your preferred morning, evening, or weekend schedule and confirm your admission registration online.',
+                  icon: 'calendar'
+                },
+                {
+                  id: '3',
+                  stepNumber: '০৩',
+                  title: language === 'bn' ? 'ল্যাব ওরিয়েন্টেশন ও সিঙ্গেল পিসি' : 'Orientation & Dedicated PC',
+                  description: language === 'bn'
+                    ? 'প্রথম দিন ক্যাম্পাসে পরিচিতি এবং ক্লাসের প্রতিটি সেশনে ব্যক্তিগত হাই-কনফিগ কম্পিউটার বরাদ্দ বুঝে নিন।'
+                    : 'Get oriented with institute lab facilities and receive your dedicated personal workstation setup.',
+                  icon: 'laptop'
+                },
+                {
+                  id: '4',
+                  stepNumber: '০৪',
+                  title: language === 'bn' ? 'রিয়েল প্রজেক্ট ও আজীবন সাপোর্ট' : 'Real Projects & Lifetime Support',
+                  description: language === 'bn'
+                    ? 'বাস্তব প্রজেক্টে দক্ষতা অর্জন, সরকারি/ভেরিফায়েবল সার্টিফিকেট এবং আজীবন মেন্টরশিপ কমিউনিটি সহায়তা।'
+                    : 'Build real-world client-grade projects, achieve verifiable certificates, and access lifetime alumni support.',
+                  icon: 'award'
+                }
+              ]).map((stepItem, idx) => {
+                const colorVariants = [
+                  { text: 'text-indigo-600', bg: 'bg-indigo-100', border: 'hover:border-indigo-500/50' },
+                  { text: 'text-emerald-600', bg: 'bg-emerald-100', border: 'hover:border-emerald-500/50' },
+                  { text: 'text-amber-600', bg: 'bg-amber-100', border: 'hover:border-amber-500/50' },
+                  { text: 'text-purple-600', bg: 'bg-purple-100', border: 'hover:border-purple-500/50' },
+                ];
+                const theme = colorVariants[idx % colorVariants.length];
+                return (
+                  <div key={stepItem.id || idx} className={`bg-slate-50 border border-slate-200/80 ${theme.border} p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-3xl font-black ${theme.text} font-mono`}>{stepItem.stepNumber || `0${idx + 1}`}</span>
+                      <div className={`w-11 h-11 rounded-2xl ${theme.bg} ${theme.text} flex items-center justify-center font-bold`}>
+                        {stepItem.icon === 'calendar' ? <Calendar className="w-5 h-5" /> :
+                         stepItem.icon === 'laptop' ? <Laptop className="w-5 h-5" /> :
+                         stepItem.icon === 'award' ? <Award className="w-5 h-5" /> :
+                         <BookOpen className="w-5 h-5" />}
+                      </div>
+                    </div>
+                    <h3 className={`font-black text-slate-900 text-base sm:text-lg group-hover:${theme.text} transition-colors`}>
+                      {stepItem.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                      {stepItem.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-slate-50 border border-slate-200/80 hover:border-indigo-500/50 p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-black text-indigo-600 font-mono">০১</span>
-                <div className="w-11 h-11 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-              </div>
-              <h3 className="font-black text-slate-900 text-base sm:text-lg group-hover:text-indigo-600 transition-colors">
-                {language === 'bn' ? 'কোর্স নির্বাচন ও কাউন্সেলিং' : 'Course Selection & Guidance'}
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                {language === 'bn'
-                  ? 'আপনার বর্তমান ক্যারিয়ার লক্ষ্য অনুযায়ী উপযুক্ত কোর্স বেছে নিন বা আমাদের এক্সপার্ট মেন্টরের সাথে কথা বলুন।'
-                  : 'Explore industry-curated curriculums and consult with career advisors to find your ideal learning path.'}
-              </p>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200/80 hover:border-emerald-500/50 p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-black text-emerald-600 font-mono">০২</span>
-                <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                  <Calendar className="w-5 h-5" />
-                </div>
-              </div>
-              <h3 className="font-black text-slate-900 text-base sm:text-lg group-hover:text-emerald-600 transition-colors">
-                {language === 'bn' ? 'অনলাইন আবেদন ও সিট বুকিং' : 'Online Application & Booking'}
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                {language === 'bn'
-                  ? 'পছন্দের ব্যাচ টাইম স্লট (সকাল, বিকাল বা উইকেন্ড) নির্বাচন করে সিট কনফার্ম করুন এবং রেজিস্ট্রেশন কপি বুঝে নিন।'
-                  : 'Select your preferred morning, evening, or weekend schedule and confirm your admission registration online.'}
-              </p>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200/80 hover:border-amber-500/50 p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-black text-amber-600 font-mono">০৩</span>
-                <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                  <Laptop className="w-5 h-5" />
-                </div>
-              </div>
-              <h3 className="font-black text-slate-900 text-base sm:text-lg group-hover:text-amber-600 transition-colors">
-                {language === 'bn' ? 'ল্যাব ওরিয়েন্টেশন ও সিঙ্গেল পিসি' : 'Orientation & Dedicated PC'}
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                {language === 'bn'
-                  ? 'প্রথম দিন ক্যাম্পাসে পরিচিতি এবং ক্লাসের প্রতিটি সেশনে ব্যক্তিগত হাই-কনফিগ কম্পিউটার বরাদ্দ বুঝে নিন।'
-                  : 'Get oriented with institute lab facilities and receive your dedicated personal workstation setup.'}
-              </p>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200/80 hover:border-purple-500/50 p-6 sm:p-7 rounded-3xl space-y-4 shadow-2xs hover:shadow-md transition-all group">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-black text-purple-600 font-mono">০৪</span>
-                <div className="w-11 h-11 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-                  <Award className="w-5 h-5" />
-                </div>
-              </div>
-              <h3 className="font-black text-slate-900 text-base sm:text-lg group-hover:text-purple-600 transition-colors">
-                {language === 'bn' ? 'রিয়েল প্রজেক্ট ও আজীবন সাপোর্ট' : 'Real Projects & Lifetime Support'}
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                {language === 'bn'
-                  ? 'বাস্তব প্রজেক্টে দক্ষতা অর্জন, সরকারি/ভেরিফায়েবল সার্টিফিকেট এবং আজীবন মেন্টরশিপ কমিউনিটি সহায়তা।'
-                  : 'Build real-world client-grade projects, achieve verifiable certificates, and access lifetime alumni support.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 6. ABOUT US & LEADERSHIP SECTION */}
-      <section id="about" className="py-16 sm:py-20 bg-slate-50 border-y border-slate-200">
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-12">
+      {sectionVisibility.aboutUs !== false && (
+        <section id="about" className="py-16 sm:py-20 bg-slate-50 border-y border-slate-200">
+          <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-12">
           {/* Top Story Header */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-7 space-y-4">
@@ -1370,22 +1398,150 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </div>
       </section>
+      )}
+
+      {/* 6.5. FACULTY & MENTORS SHOWCASE: Dynamic from CMS trainersList */}
+      {sectionVisibility.mentors !== false && trainersList && trainersList.length > 0 && (
+        <section id="mentors" className="py-16 sm:py-20 bg-slate-50 border-t border-slate-200">
+          <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-10">
+            {/* Header */}
+            <div className="text-center max-w-3xl mx-auto space-y-2">
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-1">
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>
+                  {websiteCmsConfig?.mentorsSectionConfig?.tagText || 'Top Industry Practitioners & Mentors'}
+                </span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+                {websiteCmsConfig?.mentorsSectionConfig?.heading || 'Meet Our Expert Faculty & Instructors (মেন্টরস প্যানেল)'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500">
+                {websiteCmsConfig?.mentorsSectionConfig?.subtitle ||
+                  'মার্কেটপ্লেসে সফল ফ্রিল্যান্সার ও শীর্ষ টেক কোম্পানির সিনিয়র ইঞ্জিনিয়ারদের সরাসরি তত্ত্বাবধানে শিখুন।'}
+              </p>
+            </div>
+
+            {/* Mentors Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {trainersList
+                .filter(t => t.isActive !== false)
+                .map((trainer) => (
+                  <div
+                    key={trainer.id}
+                    className="bg-white rounded-3xl border border-slate-200/80 p-6 flex flex-col justify-between space-y-5 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all group"
+                  >
+                    <div className="space-y-4">
+                      {/* Avatar & Info */}
+                      <div className="flex items-center space-x-4">
+                        <img
+                          src={trainer.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80'}
+                          alt={trainer.name}
+                          className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-100 shadow-2xs group-hover:scale-105 transition-transform"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
+                            {trainer.name}
+                          </h3>
+                          <p className="text-xs font-bold text-indigo-600 line-clamp-1">
+                            {trainer.designation}
+                          </p>
+                          <span className="inline-flex items-center text-[10px] text-slate-500 font-semibold mt-0.5">
+                            <Award className="w-3 h-3 text-amber-500 mr-1 shrink-0" />
+                            {trainer.experienceYears}+ Years Experience
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bio */}
+                      <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                        {trainer.shortBio}
+                      </p>
+
+                      {/* Skills Badges */}
+                      {trainer.skills && trainer.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {trainer.skills.slice(0, 4).map((skill, sIdx) => (
+                            <span
+                              key={sIdx}
+                              className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[10px] font-bold"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {trainer.skills.length > 4 && (
+                            <span className="px-1.5 py-0.5 text-[10px] font-bold text-slate-400">
+                              +{trainer.skills.length - 4} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer with organization and socials */}
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-500 truncate max-w-[140px]">
+                        {trainer.companyOrOrg || 'Nexgen Academy'}
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        {trainer.socialLinks?.linkedin && (
+                          <a
+                            href={trainer.socialLinks.linkedin}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-600 flex items-center justify-center transition-colors text-xs font-bold"
+                            title="LinkedIn Profile"
+                          >
+                            in
+                          </a>
+                        )}
+                        {trainer.socialLinks?.github && (
+                          <a
+                            href={trainer.socialLinks.github}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-900 text-slate-600 hover:text-white flex items-center justify-center transition-colors text-xs font-bold"
+                            title="GitHub Profile"
+                          >
+                            gh
+                          </a>
+                        )}
+                        {trainer.socialLinks?.facebook && (
+                          <a
+                            href={trainer.socialLinks.facebook}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors text-xs font-bold"
+                            title="Facebook Profile"
+                          >
+                            f
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 7. SOCIAL MEDIA, FACEBOOK COMMUNITY GROUP & YOUTUBE HUB */}
-      <section id="community" className="py-16 bg-white">
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-10">
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold mb-2">
-              <Users className="w-3.5 h-3.5" />
-              <span>Connect with 18,000+ Bangladeshi Coders</span>
+      {sectionVisibility.communityHub !== false && communityHubConfig?.enabled !== false && (
+        <section id="community" className="py-16 bg-white">
+          <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-10">
+            <div className="text-center max-w-2xl mx-auto">
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold mb-2">
+                <Users className="w-3.5 h-3.5" />
+                <span>{communityHubConfig?.badge || 'Connect with 18,000+ Bangladeshi Coders'}</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {communityHubConfig?.title || 'Official Community Groups & YouTube Masterclasses'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                {communityHubConfig?.description || 'Join our active developer network, ask code queries, collaborate on projects, and watch free full-length crash courses.'}
+              </p>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Official Community Groups & YouTube Masterclasses
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Join our active developer network, ask code queries, collaborate on projects, and watch free full-length crash courses.
-            </p>
-          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             {/* Facebook Group & Socials Box (5 cols) */}
@@ -1486,21 +1642,23 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </div>
       </section>
+      )}
 
       {/* 8. TECH BLOG & CAREER ARTICLES SECTION */}
-      <section id="blog" className="py-16 sm:py-20 bg-slate-50 border-t border-slate-200">
+      {sectionVisibility.blog !== false && (
+        <section id="blog" className="py-16 sm:py-20 bg-slate-50 border-t border-slate-200">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-2">
                 <FileText className="w-3.5 h-3.5" />
-                <span>Industry Insights & Placement Guides</span>
+                <span>{websiteCmsConfig?.blogSectionConfig?.tagText || 'Industry Insights & Placement Guides'}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                Tech Blog & Career Roadmap Articles (ব্লগ)
+                {websiteCmsConfig?.blogSectionConfig?.heading || 'Tech Blog & Career Roadmap Articles (ব্লগ)'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Explore expert tutorials, freelance interview strategies, and high-growth software engineering roadmaps.
+                {websiteCmsConfig?.blogSectionConfig?.subtitle || 'Explore expert tutorials, freelance interview strategies, and high-growth software engineering roadmaps.'}
               </p>
             </div>
 
@@ -1576,21 +1734,23 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </div>
       </section>
+      )}
 
       {/* 9. UPCOMING FREE SEMINARS & WORKSHOPS */}
-      <section id="seminars" className="py-16 bg-slate-900 text-white relative overflow-hidden">
+      {sectionVisibility.seminars !== false && (
+        <section id="seminars" className="py-16 bg-slate-900 text-white relative overflow-hidden">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-xs font-bold mb-2">
                 <Calendar className="w-3.5 h-3.5" />
-                <span>100% Free Career Masterclasses</span>
+                <span>{websiteCmsConfig?.seminarsSectionConfig?.tagText || '100% Free Career Masterclasses'}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Upcoming Free Seminars & Workshops (ফ্রি সেমিনার)
+                {websiteCmsConfig?.seminarsSectionConfig?.heading || 'Upcoming Free Seminars & Workshops (ফ্রি সেমিনার)'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 mt-1">
-                Participate in live career counseling, ask industry mentors, and book your verified entry pass.
+                {websiteCmsConfig?.seminarsSectionConfig?.subtitle || 'Participate in live career counseling, ask industry mentors, and book your verified entry pass.'}
               </p>
             </div>
           </div>
@@ -1675,15 +1835,17 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </div>
       </section>
+      )}
 
       {/* 10. STUDENT PHOTO & LAB ACTIVITY GALLERY */}
-      <section id="gallery" className="py-16 sm:py-20 bg-slate-50 border-y border-slate-200">
+      {sectionVisibility.gallery !== false && (
+        <section id="gallery" className="py-16 sm:py-20 bg-slate-50 border-y border-slate-200">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-2">
                 <ImageIcon className="w-3.5 h-3.5" />
-                <span>Life at Nexgen Computer Academy</span>
+                <span>Life at {academySettings.instituteName || 'Our Academy'}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Student Lab & Activity Photo Gallery (গ্যালারি)
@@ -1748,9 +1910,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </div>
       </section>
+      )}
 
       {/* 11. VERIFIED STUDENT REVIEWS & SUCCESS STORIES */}
-      <section id="reviews" className="py-16 sm:py-20 bg-white">
+      {sectionVisibility.reviews !== false && (
+        <section id="reviews" className="py-16 sm:py-20 bg-white">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-xs font-bold mb-2">
@@ -1859,12 +2023,16 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           )}
         </div>
       </section>
+      )}
 
       {/* 12. PUBLIC CERTIFICATE VERIFICATION ENGINE */}
-      <CertificateVerificationSection onOpenStaffLogin={onOpenStaffLogin} />
+      {sectionVisibility.verifyCertificate !== false && (
+        <CertificateVerificationSection onOpenStaffLogin={onOpenStaffLogin} />
+      )}
 
       {/* 13. NOTICES & FREQUENTLY ASKED QUESTIONS */}
-      <section id="notices" className="py-16 bg-slate-50 border-t border-slate-200">
+      {sectionVisibility.noticesAndFaq !== false && (
+        <section id="notices" className="py-16 bg-slate-50 border-t border-slate-200">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* Left: Notice Board (5 cols) */}
@@ -1935,9 +2103,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </div>
       </section>
+      )}
 
       {/* 14. CONTACT & MULTI-CHANNEL LOCATION SECTION */}
-      <section id="contact" className="py-16 bg-white border-t border-slate-200">
+      {sectionVisibility.contactAndMap !== false && (
+        <section id="contact" className="py-16 bg-white border-t border-slate-200">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
@@ -2017,7 +2187,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 <a
                   href={getWhatsAppDirectUrl(
                     socials.whatsappSupportNumber || academySettings.primarySupportPhone || '01798444444',
-                    'Hello Nexgen Academy! I want to know about course admission & scholarship details.'
+                    `Hello ${academySettings.instituteName || 'Academy'}! I want to know about course admission & scholarship details.`
                   )}
                   target="_blank"
                   rel="noreferrer"
@@ -2041,123 +2211,134 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </div>
       </section>
+      )}
 
       {/* 15. FOOTER & POLICIES */}
-      <footer className="bg-slate-950 text-slate-400 text-xs border-t border-slate-800 pt-12 pb-8">
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="space-y-3">
-              <NexgenLogo variant="horizontal" size={40} />
-              <p className="text-slate-400 text-[11px] leading-relaxed">
-                {academySettings.instituteName || 'Nexgen Computer Academy'} is a premier professional IT training organization based in Dhaka, dedicated to creating industry-grade developers, designers, and freelance leaders.
-              </p>
-              {/* Social Icons */}
-              <div className="flex items-center space-x-2.5 pt-2">
-                {socials.facebookPageUrl && (
-                  <a href={socials.facebookPageUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-blue-600 text-white flex items-center justify-center transition-colors">
-                    f
-                  </a>
-                )}
-                {socials.youtubeChannelUrl && (
-                  <a href={socials.youtubeChannelUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-red-600 text-white flex items-center justify-center transition-colors">
-                    <Youtube className="w-4 h-4" />
-                  </a>
-                )}
-                {socials.linkedinUrl && (
-                  <a href={socials.linkedinUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-sky-600 text-white flex items-center justify-center transition-colors">
-                    in
-                  </a>
+      {sectionVisibility.footer !== false && (
+        <footer className="bg-slate-950 text-slate-400 text-xs border-t border-slate-800 pt-12 pb-8">
+          <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="space-y-3">
+                <NexgenLogo variant="horizontal" size={40} />
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  {footerConfig?.bio || `${academySettings.instituteName || 'Nexgen Computer Academy'} is a premier professional IT training organization based in Dhaka, dedicated to creating industry-grade developers, designers, and freelance leaders.`}
+                </p>
+                {/* Social Icons */}
+                {footerConfig?.showSocials !== false && (
+                  <div className="flex items-center space-x-2.5 pt-2">
+                    {socials.facebookPageUrl && (
+                      <a href={socials.facebookPageUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-blue-600 text-white flex items-center justify-center transition-colors">
+                        f
+                      </a>
+                    )}
+                    {socials.youtubeChannelUrl && (
+                      <a href={socials.youtubeChannelUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-red-600 text-white flex items-center justify-center transition-colors">
+                        <Youtube className="w-4 h-4" />
+                      </a>
+                    )}
+                    {socials.linkedinUrl && (
+                      <a href={socials.linkedinUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-sky-600 text-white flex items-center justify-center transition-colors">
+                        in
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
+
+              {footerConfig?.showTopCourses !== false && (
+                <div className="space-y-2.5">
+                  <h4 className="font-black text-white text-xs uppercase tracking-wider">Top Courses</h4>
+                  <ul className="space-y-1.5 text-[11px]">
+                    {courses.slice(0, 5).map(c => (
+                      <li key={c.id}>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEnroll(c)}
+                          className="hover:text-amber-400 transition-colors text-left"
+                        >
+                          {c.name}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {footerConfig?.showQuickNav !== false && (
+                <div className="space-y-2.5">
+                  <h4 className="font-black text-white text-xs uppercase tracking-wider">Quick Navigation</h4>
+                  <ul className="space-y-1.5 text-[11px]">
+                    <li><a href="#courses" className="hover:text-white">All Courses & Fees</a></li>
+                    <li><a href="#about" className="hover:text-white">About Us & Campus</a></li>
+                    <li><a href="#community" className="hover:text-white">Facebook Community Group</a></li>
+                    <li><a href="#blog" className="hover:text-white">Tech Blogs & Career Tips</a></li>
+                    <li><a href="#seminars" className="hover:text-white">Free Career Seminars</a></li>
+                    <li><a href="#verify-certificate" className="hover:text-white">Verify Student Certificate</a></li>
+                    <li>
+                      <button type="button" onClick={onOpenStaffLogin} className="hover:text-amber-400 font-bold">
+                        ERP Staff Administration
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
+
+              {footerConfig?.showLegalLinks !== false && (
+                <div className="space-y-2.5">
+                  <h4 className="font-black text-white text-xs uppercase tracking-wider">Legal Policies & Standards</h4>
+                  <ul className="space-y-1.5 text-[11px]">
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => setActivePolicyModal('terms')}
+                        className="hover:text-indigo-400 transition-colors text-left font-bold"
+                      >
+                        Terms & Conditions (শর্তাবলী)
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => setActivePolicyModal('privacy')}
+                        className="hover:text-indigo-400 transition-colors text-left font-bold"
+                      >
+                        Privacy Policy (গোপনীয়তা নীতি)
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => setActivePolicyModal('refund')}
+                        className="hover:text-indigo-400 transition-colors text-left font-bold"
+                      >
+                        Refund & Batch Transfer Policy
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => setActivePolicyModal('conduct')}
+                        className="hover:text-indigo-400 transition-colors text-left font-bold"
+                      >
+                        Student Code of Conduct
+                      </button>
+                    </li>
+                  </ul>
+                  <div className="pt-2 flex items-center space-x-2 text-emerald-400 text-xs font-bold">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>100% Genuine Certified Credentials</span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="space-y-2.5">
-              <h4 className="font-black text-white text-xs uppercase tracking-wider">Top Courses</h4>
-              <ul className="space-y-1.5 text-[11px]">
-                {courses.slice(0, 5).map(c => (
-                  <li key={c.id}>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEnroll(c)}
-                      className="hover:text-amber-400 transition-colors text-left"
-                    >
-                      {c.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-2.5">
-              <h4 className="font-black text-white text-xs uppercase tracking-wider">Quick Navigation</h4>
-              <ul className="space-y-1.5 text-[11px]">
-                <li><a href="#courses" className="hover:text-white">All Courses & Fees</a></li>
-                <li><a href="#about" className="hover:text-white">About Us & Campus</a></li>
-                <li><a href="#community" className="hover:text-white">Facebook Community Group</a></li>
-                <li><a href="#blog" className="hover:text-white">Tech Blogs & Career Tips</a></li>
-                <li><a href="#seminars" className="hover:text-white">Free Career Seminars</a></li>
-                <li><a href="#verify-certificate" className="hover:text-white">Verify Student Certificate</a></li>
-                <li>
-                  <button type="button" onClick={onOpenStaffLogin} className="hover:text-amber-400 font-bold">
-                    ERP Staff Administration
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-2.5">
-              <h4 className="font-black text-white text-xs uppercase tracking-wider">Legal Policies & Standards</h4>
-              <ul className="space-y-1.5 text-[11px]">
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActivePolicyModal('terms')}
-                    className="hover:text-indigo-400 transition-colors text-left font-bold"
-                  >
-                    Terms & Conditions (শর্তাবলী)
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActivePolicyModal('privacy')}
-                    className="hover:text-indigo-400 transition-colors text-left font-bold"
-                  >
-                    Privacy Policy (গোপনীয়তা নীতি)
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActivePolicyModal('refund')}
-                    className="hover:text-indigo-400 transition-colors text-left font-bold"
-                  >
-                    Refund & Batch Transfer Policy
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => setActivePolicyModal('conduct')}
-                    className="hover:text-indigo-400 transition-colors text-left font-bold"
-                  >
-                    Student Code of Conduct
-                  </button>
-                </li>
-              </ul>
-              <div className="pt-2 flex items-center space-x-2 text-emerald-400 text-xs font-bold">
-                <ShieldCheck className="w-4 h-4" />
-                <span>100% Genuine Certified Credentials</span>
-              </div>
+            <div className="pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
+              <p>{footerConfig?.copyrightText || `© ${new Date().getFullYear()} ${academySettings.instituteName || 'Nexgen Computer Academy'}. All Rights Reserved.`}</p>
+              <p>{footerConfig?.creditsText || 'Empowered by NexGen Multi-Campus ERP & Centralized CMS Engine.'}</p>
             </div>
           </div>
-
-          <div className="pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
-            <p>© {new Date().getFullYear()} {academySettings.instituteName || 'Nexgen Computer Academy'}. All Rights Reserved.</p>
-            <p>Empowered by NexGen Multi-Campus ERP & Centralized CMS Engine.</p>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
       {/* POPUP MODALS */}
       <OnlineAdmissionModal
@@ -2321,8 +2502,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         const welcomeText =
           websiteCmsConfig?.marketing?.floatingWhatsAppWelcomeText ||
           (language === 'bn'
-            ? 'হ্যালো Nexgen Academy! আমি কোর্স ভর্তি ও স্কলারশিপ সম্পর্কে জানতে চাই।'
-            : 'Hello Nexgen Academy! I want to know about course admission & scholarship.');
+            ? `হ্যালো ${academySettings.instituteName || 'Academy'}! আমি কোর্স ভর্তি ও স্কলারশিপ সম্পর্কে জানতে চাই।`
+            : `Hello ${academySettings.instituteName || 'Academy'}! I want to know about course admission & scholarship.`);
 
         return (
           <aside aria-label="Quick contact" className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end space-y-2.5">

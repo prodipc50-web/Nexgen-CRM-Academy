@@ -36,7 +36,14 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     promoDescription: websiteCmsConfig.promoBanner?.description || '',
     promoCode: websiteCmsConfig.promoBanner?.discountCode || '',
     promoExpiresAt: websiteCmsConfig.promoBanner?.expiresAt || '',
-    promoEnabled: websiteCmsConfig.promoBanner?.enabled ?? true
+    promoEnabled: websiteCmsConfig.promoBanner?.enabled ?? true,
+    upcomingCardBadge: websiteCmsConfig.upcomingBatchesCard?.badgeText || '40% Offer',
+    upcomingCardTitle: websiteCmsConfig.upcomingBatchesCard?.title || 'Upcoming Batches',
+    upcomingCardHeading: websiteCmsConfig.upcomingBatchesCard?.heading || 'Apply for Direct Admission',
+    upcomingCardDescription: websiteCmsConfig.upcomingBatchesCard?.description || 'Fast-track your IT career with practical project portfolios and certified diplomas.',
+    upcomingCardFeatureNote: websiteCmsConfig.upcomingBatchesCard?.featureNote || 'Free Lifetime Lab Access',
+    upcomingCardCtaText: websiteCmsConfig.upcomingBatchesCard?.ctaText || 'Free Seminars →',
+    upcomingCardCtaLink: websiteCmsConfig.upcomingBatchesCard?.ctaLink || '#seminars'
   });
 
   const [slides, setSlides] = useState<HeroBannerSlide[]>(
@@ -160,6 +167,16 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         description: formData.promoDescription,
         discountCode: formData.promoCode,
         expiresAt: formData.promoExpiresAt
+      },
+      upcomingBatchesCard: {
+        badgeText: formData.upcomingCardBadge,
+        title: formData.upcomingCardTitle,
+        heading: formData.upcomingCardHeading,
+        description: formData.upcomingCardDescription,
+        featureNote: formData.upcomingCardFeatureNote,
+        ctaText: formData.upcomingCardCtaText,
+        ctaLink: formData.upcomingCardCtaLink,
+        pinnedCourseIds: websiteCmsConfig.upcomingBatchesCard?.pinnedCourseIds || []
       }
     });
 
@@ -444,6 +461,98 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                 onChange={e => setFormData({ ...formData, promoDescription: e.target.value })}
                 placeholder="e.g. Enroll in upcoming weekend batches and get lifetime lab access."
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Upcoming Batches / Offer Card Settings in Hero */}
+        <div className="bg-white p-5 rounded-2xl border border-amber-200 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-amber-50">
+            <div className="flex items-center space-x-2 text-amber-950 font-black text-sm">
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span>Upcoming Batches & Admission Offer Card (হিরো সেকশনের ডানপাশের অ্যাডমিশন কার্ড)</span>
+            </div>
+            <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+              Hero Side Card
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Offer Badge Pill (অফার ব্যাজ)</label>
+              <input
+                type="text"
+                value={formData.upcomingCardBadge}
+                onChange={e => setFormData({ ...formData, upcomingCardBadge: e.target.value })}
+                placeholder="e.g. 40% Offer"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-amber-700"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Card Small Label (লেবেল)</label>
+              <input
+                type="text"
+                value={formData.upcomingCardTitle}
+                onChange={e => setFormData({ ...formData, upcomingCardTitle: e.target.value })}
+                placeholder="e.g. Upcoming Batches"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Main Heading (প্রধান শিরোনাম)</label>
+              <input
+                type="text"
+                value={formData.upcomingCardHeading}
+                onChange={e => setFormData({ ...formData, upcomingCardHeading: e.target.value })}
+                placeholder="e.g. Apply for Direct Admission"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Feature Note (নিচের বিশেষ সুবিধা)</label>
+              <input
+                type="text"
+                value={formData.upcomingCardFeatureNote}
+                onChange={e => setFormData({ ...formData, upcomingCardFeatureNote: e.target.value })}
+                placeholder="e.g. Free Lifetime Lab Access"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-emerald-600"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="font-bold text-slate-700 block mb-1">Card Description (বিবরণ)</label>
+              <input
+                type="text"
+                value={formData.upcomingCardDescription}
+                onChange={e => setFormData({ ...formData, upcomingCardDescription: e.target.value })}
+                placeholder="e.g. Fast-track your IT career with practical project portfolios and certified diplomas."
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Bottom CTA Button Text (বাটন টেক্সট)</label>
+              <input
+                type="text"
+                value={formData.upcomingCardCtaText}
+                onChange={e => setFormData({ ...formData, upcomingCardCtaText: e.target.value })}
+                placeholder="e.g. Free Seminars →"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-700"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">Bottom CTA Button Link (বাটন লিংক)</label>
+              <input
+                type="text"
+                value={formData.upcomingCardCtaLink}
+                onChange={e => setFormData({ ...formData, upcomingCardCtaLink: e.target.value })}
+                placeholder="e.g. #seminars"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
               />
             </div>
           </div>

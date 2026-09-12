@@ -22,7 +22,9 @@ import {
   Check,
   Upload,
   Crop,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ExternalLink,
+  Copy
 } from 'lucide-react';
 
 interface CertificateModalProps {
@@ -146,6 +148,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
 
   const [isLogoCropOpen, setIsLogoCropOpen] = useState(false);
   const [isWatermarkCropOpen, setIsWatermarkCropOpen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const logoFileInputRef = useRef<HTMLInputElement>(null);
   const watermarkFileInputRef = useRef<HTMLInputElement>(null);
@@ -183,8 +186,12 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       const certCode = certificate.certificateCode || certificate.certificateNumber || 'NCA-CERT-2026-5172';
       const durationW = currentCourse?.durationWeeks || (currentCourse?.durationMonths ? currentCourse.durationMonths * 4 : 12);
       const totalHrs = currentCourse?.totalHours || 72;
-      const baseUrl = academySettings.certificateVerificationBaseUrl || 'https://nexgenacademy.edu.bd/verify/';
-      const defaultVerifyLink = baseUrl.endsWith('/') ? `${baseUrl}${certCode}` : `${baseUrl}/${certCode}`;
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://nexgenacademy.edu.bd';
+      const defaultVerifyLink = academySettings.certificateVerificationBaseUrl
+        ? (academySettings.certificateVerificationBaseUrl.endsWith('/')
+            ? `${academySettings.certificateVerificationBaseUrl}${certCode}`
+            : `${academySettings.certificateVerificationBaseUrl}/${certCode}`)
+        : `${origin}/?cert=${encodeURIComponent(certCode)}#verify-certificate`;
 
       setCertData(prev => ({
         ...prev,
@@ -1129,8 +1136,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                 <div className={`pt-4 border-t ${themeStyles.divider} flex flex-col sm:flex-row items-center justify-between text-[10px] font-sans text-slate-500 gap-2`}>
                   <div className="flex items-center space-x-2.5">
                     <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=2&data=${encodeURIComponent(
-                        certData.verificationUrl || `https://nexgenacademy.edu.bd/verify/${certData.certificateSerial}`
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=2&data=${encodeURIComponent(
+                        certData.verificationUrl || `${typeof window !== 'undefined' ? window.location.origin : ''}/?cert=${encodeURIComponent(certData.certificateSerial)}#verify-certificate`
                       )}`}
                       alt="Verification QR Code"
                       className="w-12 h-12 bg-white border border-slate-300 rounded p-0.5 shadow-2xs shrink-0"
@@ -1143,6 +1150,32 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                       <span className="font-mono text-[9px] text-slate-400 block max-w-sm truncate">
                         {certData.verificationUrl}
                       </span>
+                      <div className="flex items-center space-x-1.5 mt-1 print:hidden">
+                        <a
+                          href={certData.verificationUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-1 px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded text-[10px] border border-emerald-200 transition-colors"
+                          title="Verify live on public website"
+                        >
+                          <ExternalLink className="w-2.5 h-2.5" />
+                          <span>Test QR Link</span>
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (certData.verificationUrl) {
+                              navigator.clipboard.writeText(certData.verificationUrl);
+                              setCopiedLink(true);
+                              setTimeout(() => setCopiedLink(false), 2000);
+                            }
+                          }}
+                          className="inline-flex items-center space-x-1 px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded text-[10px] border border-slate-300 transition-colors"
+                        >
+                          {copiedLink ? <Check className="w-2.5 h-2.5 text-emerald-600" /> : <Copy className="w-2.5 h-2.5 text-slate-500" />}
+                          <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">

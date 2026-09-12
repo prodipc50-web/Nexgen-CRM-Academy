@@ -40,7 +40,8 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
     courses,
     batches,
     isAuthenticated,
-    currentUser
+    currentUser,
+    academySettings
   } = useAcademy();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -196,7 +197,7 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
           <!DOCTYPE html>
           <html>
             <head>
-              <title>Student Certificate - Nexgen Academy</title>
+              <title>Student Certificate - ${academySettings?.instituteName || 'Academy'}</title>
               <style>
                 @page { size: landscape; margin: 0; }
                 body { margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; height: 100vh; background: #fff; box-sizing: border-box; }
@@ -474,7 +475,7 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
               <div className="flex items-center space-x-2 text-slate-300">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>
-                  {matchedCert.remarks || 'Authenticated by Nexgen Computer Academy Academic Board & Managing Director.'}
+                  {matchedCert.remarks || `Authenticated by ${academySettings?.instituteName || 'Academy'} Academic Board & Managing Director.`}
                 </span>
               </div>
 
@@ -505,7 +506,7 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
             </div>
             <h4 className="text-base font-bold text-white">No Matching Certificate Found</h4>
             <p className="text-xs text-slate-300">
-              We could not find any active certificate matching "<span className="text-rose-400 font-mono">{searchQuery}</span>". Please check the spelling or contact our helpline at 01798444444.
+              We could not find any active certificate matching "<span className="text-rose-400 font-mono">{searchQuery}</span>". Please check the spelling or contact our helpline at {academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || 'our helpline'}.
             </p>
           </div>
         )}

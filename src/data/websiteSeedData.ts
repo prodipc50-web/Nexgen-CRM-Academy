@@ -698,6 +698,132 @@ We foster a welcoming, respectful, and harassment-free learning atmosphere for a
 
 ### 2. Academic Integrity
 Plagiarism, submitting another student's work as your own, or illicit sharing of academy course materials without authorization is strictly prohibited.`
+  },
+
+  // 1. Upcoming Batches Card in Hero
+  upcomingBatchesCard: {
+    badgeText: '40% Offer',
+    title: 'Upcoming Batches',
+    heading: 'Apply for Direct Admission',
+    description: 'Fast-track your IT career with practical project portfolios and certified diplomas.',
+    featureNote: 'Free Lifetime Lab Access',
+    ctaText: 'Free Seminars →',
+    ctaLink: '#seminars',
+    pinnedCourseIds: []
+  },
+
+  // 2. Learning Delivery Modes
+  deliveryModesConfig: {
+    enabled: true,
+    cards: [
+      {
+        id: 'offline',
+        title: 'Offline Course',
+        badge: 'ল্যাব ব্যাচ',
+        description: 'ইন-পার্সন সরাসরি আধুনিক এসি ল্যাবে প্র্যাকটিক্যাল ক্লাস ও সার্বক্ষণিক শিক্ষক সাপোর্ট।',
+        footerText: 'Courses Available',
+        enabled: true
+      },
+      {
+        id: 'online',
+        title: 'Online Live Course',
+        badge: 'লাইভ ক্লাস',
+        description: 'দেশ-বিদেশের যেকোনো স্থান থেকে লাইভ ক্লাসে অংশ নিন, ইনস্ট্যান্ট প্রশ্ন করুন ও ক্লাস রেকর্ডিং পান।',
+        footerText: 'Courses Available',
+        enabled: true
+      },
+      {
+        id: 'recorded',
+        title: 'Pre Recorded Course',
+        badge: 'সেলফ-পেসড',
+        description: 'নিজের সুবিধাজনক সময়ে প্রিমিয়াম এইচডি ভিডিও দেখুন, প্রজেক্ট জমা দিন ও লাইফটাইম অ্যাক্সেস উপভোগ করুন।',
+        footerText: 'Courses Available',
+        enabled: true
+      },
+      {
+        id: 'corporate',
+        title: 'Corporate Training',
+        badge: 'কর্পোরেট',
+        description: 'ব্যাংক, বহুজাতিক প্রতিষ্ঠান ও কর্পোরেট টিমের কর্মীদের আধুনিক সফটওয়্যার ও আইটি স্কিলস ট্রেনিং।',
+        footerText: 'Custom Team Upskilling',
+        enabled: true
+      }
+    ]
+  },
+
+  // 3. Admission & Onboarding Roadmap (4 Steps)
+  admissionRoadmap: {
+    enabled: true,
+    tagText: 'ভর্তি ও ক্লাস শুরুর প্রক্রিয়া',
+    title: 'সহজ ৪টি ধাপে শুরু করুন আপনার আইটি ক্যারিয়ার',
+    description: 'কোনো ঝামেলা ছাড়াই সম্পূর্ণ স্বচ্ছ প্রক্রিয়ায় কোর্স নির্বাচন, সরাসরি ল্যাব ওরিয়েন্টেশন এবং বাস্তব কাজ শেখা শুরু করুন।',
+    steps: [
+      {
+        id: 'step-1',
+        stepNumber: '০১',
+        title: 'কোর্স নির্বাচন ও কাউন্সেলিং',
+        description: 'আপনার বর্তমান ক্যারিয়ার লক্ষ্য অনুযায়ী উপযুক্ত কোর্স বেছে নিন বা আমাদের এক্সপার্ট মেন্টরের সাথে কথা বলুন।',
+        icon: 'BookOpen'
+      },
+      {
+        id: 'step-2',
+        stepNumber: '০২',
+        title: 'অনলাইন আবেদন ও সিট বুকিং',
+        description: 'পছন্দের ব্যাচ টাইম স্লট (সকাল, বিকাল বা উইকেন্ড) নির্বাচন করে সিট কনফার্ম করুন এবং রেজিস্ট্রেশন কপি বুঝে নিন।',
+        icon: 'Calendar'
+      },
+      {
+        id: 'step-3',
+        stepNumber: '০৩',
+        title: 'ল্যাব ওরিয়েন্টেশন ও সিঙ্গেল পিসি',
+        description: 'প্রথম দিন ক্যাম্পাসে পরিচিতি এবং ক্লাসের প্রতিটি সেশনে ব্যক্তিগত হাই-কনফিগ কম্পিউটার বরাদ্দ বুঝে নিন।',
+        icon: 'Laptop'
+      },
+      {
+        id: 'step-4',
+        stepNumber: '০৪',
+        title: 'রিয়েল প্রজেক্ট ও আজীবন সাপোর্ট',
+        description: 'বাস্তব প্রজেক্টে দক্ষতা অর্জন, সরকারি/ভেরিফায়েবল সার্টিফিকেট এবং আজীবন মেন্টরশিপ কমিউনিটি সহায়তা।',
+        icon: 'Award'
+      }
+    ]
+  },
+
+  // 4. Community & YouTube Hub
+  communityHub: {
+    enabled: true,
+    badgeText: 'Connect with 18,000+ Bangladeshi Coders',
+    heading: 'Official Community Groups & YouTube Masterclasses',
+    description: 'Join our active developer network, ask code queries, collaborate on projects, and watch free full-length crash courses.'
+  },
+
+  // 5. Dynamic Footer
+  footerConfig: {
+    bio: 'Premier professional IT training organization dedicated to creating industry-grade developers, designers, and freelance leaders with 100% practical lab practice.',
+    copyrightText: 'All Rights Reserved.',
+    creditsText: 'Empowered by NexGen Multi-Campus ERP & Centralized CMS Engine.',
+    showSocials: true,
+    showTopCourses: true,
+    showQuickNav: true,
+    showLegalLinks: true
+  },
+
+  // 6. Section Visibility Controls
+  sectionVisibility: {
+    heroBanner: true,
+    deliveryModes: true,
+    impactTrust: true,
+    courses: true,
+    admissionRoadmap: true,
+    aboutUs: true,
+    communityHub: true,
+    blog: true,
+    seminars: true,
+    gallery: true,
+    reviews: true,
+    verifyCertificate: true,
+    noticesAndFaq: true,
+    contactAndMap: true
   }
 };
 

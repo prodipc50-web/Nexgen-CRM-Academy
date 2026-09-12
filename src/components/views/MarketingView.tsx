@@ -11,11 +11,13 @@ import {
   Trophy,
   BarChart2,
   Calendar,
-  X
+  X,
+  Edit2,
+  Save
 } from 'lucide-react';
 
 export const MarketingView: React.FC = () => {
-  const { campaigns, leads, staffList, addCampaign } = useAcademy();
+  const { campaigns, leads, staffList, addCampaign, updateCampaign } = useAcademy();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [name, setName] = useState('');
@@ -26,6 +28,51 @@ export const MarketingView: React.FC = () => {
   const [admissionsCount, setAdmissionsCount] = useState(24);
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState('');
+
+  // Edit Campaign State
+  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
+  const [editCampName, setEditCampName] = useState('');
+  const [editCampPlatform, setEditCampPlatform] = useState('');
+  const [editCampBudget, setEditCampBudget] = useState(0);
+  const [editCampSpent, setEditCampSpent] = useState(0);
+  const [editCampLeads, setEditCampLeads] = useState(0);
+  const [editCampAdmissions, setEditCampAdmissions] = useState(0);
+  const [editCampStatus, setEditCampStatus] = useState<'Active' | 'Completed' | 'Paused'>('Active');
+  const [editCampStartDate, setEditCampStartDate] = useState('');
+  const [editCampEndDate, setEditCampEndDate] = useState('');
+
+  const openEditCampaignModal = (camp: Campaign) => {
+    setEditingCampaign(camp);
+    setEditCampName(camp.name);
+    setEditCampPlatform(camp.platform);
+    setEditCampBudget(camp.budget ?? camp.adSpend ?? 0);
+    setEditCampSpent(camp.spent ?? camp.adSpend ?? 0);
+    setEditCampLeads(camp.leadsGenerated ?? 0);
+    setEditCampAdmissions(camp.admissionsCount ?? 0);
+    setEditCampStatus(camp.status || 'Active');
+    setEditCampStartDate(camp.startDate || '');
+    setEditCampEndDate(camp.endDate || '');
+  };
+
+  const handleEditCampaignSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCampaign || !editCampName.trim()) return;
+
+    updateCampaign(editingCampaign.id, {
+      name: editCampName.trim(),
+      platform: editCampPlatform.trim() || editingCampaign.platform,
+      budget: Number(editCampBudget),
+      spent: Number(editCampSpent),
+      adSpend: Number(editCampSpent),
+      leadsGenerated: Number(editCampLeads),
+      admissionsCount: Number(editCampAdmissions),
+      status: editCampStatus,
+      startDate: editCampStartDate || editingCampaign.startDate,
+      endDate: editCampEndDate || editingCampaign.endDate
+    });
+
+    setEditingCampaign(null);
+  };
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,9 +198,20 @@ export const MarketingView: React.FC = () => {
                       </span>
                       <h4 className="text-xs font-bold text-slate-900 mt-1">{camp.name}</h4>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                      {camp.status}
-                    </span>
+                    <div className="flex items-center space-x-1.5">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        camp.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : camp.status === 'Paused' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        {camp.status}
+                      </span>
+                      <button
+                        onClick={() => openEditCampaignModal(camp)}
+                        className="p-1 rounded-lg text-slate-400 hover:text-pink-600 hover:bg-pink-50 transition-colors border border-transparent hover:border-pink-200"
+                        title="Edit Campaign Budget, Spend, or Leads"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl text-[11px]">
@@ -302,6 +360,144 @@ export const MarketingView: React.FC = () => {
                   className="px-5 py-2 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-bold"
                 >
                   Save Campaign
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Campaign Modal */}
+      {editingCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-4 bg-indigo-950 text-white flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold">Edit Campaign Analytics & Budget</h3>
+                <p className="text-[11px] text-pink-300">{editingCampaign.name}</p>
+              </div>
+              <button onClick={() => setEditingCampaign(null)} className="p-1 rounded-lg text-slate-300 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditCampaignSubmit} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1">Campaign Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editCampName}
+                  onChange={e => setEditCampName(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-bold outline-none focus:ring-2 focus:ring-pink-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Platform / Channel</label>
+                  <input
+                    type="text"
+                    value={editCampPlatform}
+                    onChange={e => setEditCampPlatform(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-pink-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Status</label>
+                  <select
+                    value={editCampStatus}
+                    onChange={e => setEditCampStatus(e.target.value as any)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold outline-none focus:ring-2 focus:ring-pink-500"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Paused">Paused</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Total Budget (৳)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editCampBudget}
+                    onChange={e => setEditCampBudget(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-pink-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Spent So Far (৳) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editCampSpent}
+                    onChange={e => setEditCampSpent(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-bold outline-none focus:ring-2 focus:ring-pink-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Leads Generated</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editCampLeads}
+                    onChange={e => setEditCampLeads(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-pink-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Admissions Converted</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editCampAdmissions}
+                    onChange={e => setEditCampAdmissions(Number(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-bold outline-none focus:ring-2 focus:ring-pink-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={editCampStartDate}
+                    onChange={e => setEditCampStartDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-pink-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-600 font-semibold mb-1">End Date</label>
+                  <input
+                    type="date"
+                    value={editCampEndDate}
+                    onChange={e => setEditCampEndDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 outline-none focus:ring-2 focus:ring-pink-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingCampaign(null)}
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold flex items-center space-x-1.5 shadow-xs"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Update Campaign</span>
                 </button>
               </div>
             </form>

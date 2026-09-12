@@ -48,7 +48,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
   course,
   onOpenEnroll
 }) => {
-  const { staffList, websiteReviews, websiteGallery, websiteFaqs, websiteCmsConfig, addLead } = useAcademy();
+  const { staffList, websiteReviews, websiteGallery, websiteFaqs, websiteCmsConfig, academySettings, addLead } = useAcademy();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'schedules' | 'trainers' | 'reviews' | 'gallery' | 'faqs'>('overview');
   const [expandedFaqIndex, setExpandedFaqIndex] = useState<number | null>(0);
@@ -279,7 +279,9 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
               <Award className="w-3.5 h-3.5 text-emerald-600" />
               <span>Certificate</span>
             </span>
-            <span className="font-black text-emerald-700 text-sm">Govt. Verified</span>
+            <span className="font-black text-emerald-700 text-sm">
+              {(landingConfig as any).certificateBadge || 'Govt. Verified'}
+            </span>
           </div>
 
           <div className="space-y-0.5">
@@ -287,7 +289,9 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
               <Laptop className="w-3.5 h-3.5 text-cyan-600" />
               <span>Learning Mode</span>
             </span>
-            <span className="font-black text-cyan-700 text-sm">Offline & Live</span>
+            <span className="font-black text-cyan-700 text-sm">
+              {course.courseType || course.deliveryMode || 'Offline & Live'}
+            </span>
           </div>
 
           <div className="col-span-2 sm:col-span-1 space-y-0.5">
@@ -354,15 +358,25 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                     {landingConfig.subheadline || course.description}
                   </p>
                   <div className="flex flex-wrap items-center gap-2 pt-2">
-                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
-                      ✓ ১০০% প্র্যাকটিক্যাল ল্যাব
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 text-[11px] font-bold">
-                      ✓ ওয়ান-টু-ওয়ান মেন্টরিং
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 text-[11px] font-bold">
-                      ✓ সার্টিফিকেট নিশ্চয়তা
-                    </span>
+                    {(course.learningFeatures && course.learningFeatures.length > 0
+                      ? course.learningFeatures.slice(0, 4)
+                      : ['১০০% প্র্যাকটিক্যাল ল্যাব', 'ওয়ান-টু-ওয়ান মেন্টরিং', 'সার্টিফিকেট নিশ্চয়তা']
+                    ).map((pill, pIdx) => {
+                      const badgeColors = [
+                        'bg-emerald-500/20 text-emerald-300',
+                        'bg-indigo-500/20 text-indigo-300',
+                        'bg-rose-500/20 text-rose-300',
+                        'bg-amber-500/20 text-amber-300'
+                      ];
+                      return (
+                        <span
+                          key={pIdx}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${badgeColors[pIdx % badgeColors.length]}`}
+                        >
+                          ✓ {pill}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -373,7 +387,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                 )}
               </div>
 
-              {/* What You Will Learn & Career Scope */}
+              {/* What You Will Learn & Career Scope: Dynamic from Course Entity */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100 space-y-3">
                   <h5 className="font-black text-indigo-950 text-sm flex items-center space-x-2">
@@ -381,39 +395,41 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                     <span>কোর্সের মূল উদ্দেশ্য ও শিখনফল</span>
                   </h5>
                   <ul className="space-y-2 text-slate-700 text-xs">
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>রিয়েল-লাইফ প্রজেক্ট এবং হ্যান্ডস-অন ল্যাব প্র্যাকটিস</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>আধুনিক সফটওয়্যার ও AI প্রোডাক্টিভিটি টুলসের পূর্ণাঙ্গ ব্যবহার</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>প্রফেশনাল পোর্টফোলিও তৈরি এবং ক্লায়েন্ট রেডি প্রেজেন্টেশন</span>
-                    </li>
+                    {(course.curriculumHighlights && course.curriculumHighlights.length > 0
+                      ? course.curriculumHighlights
+                      : [
+                          'রিয়েল-লাইফ প্রজেক্ট এবং হ্যান্ডস-অন ল্যাব প্র্যাকটিস',
+                          'আধুনিক সফটওয়্যার ও AI প্রোডাক্টিভিটি টুলসের পূর্ণাঙ্গ ব্যবহার',
+                          'প্রফেশনাল পোর্টফোলিও তৈরি এবং ক্লায়েন্ট রেডি প্রেজেন্টেশন'
+                        ]
+                    ).map((item, idx) => (
+                      <li key={idx} className="flex items-start space-x-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
 
                 <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100 space-y-3">
                   <h5 className="font-black text-emerald-950 text-sm flex items-center space-x-2">
                     <Briefcase className="w-4 h-4 text-emerald-600" />
-                    <span>ক্যারিয়ার সুবিধা ও প্লেসমেন্ট সাপোর্ট</span>
+                    <span>কোর্স সুবিধা ও ক্যারিয়ার গাইডেন্স</span>
                   </h5>
                   <ul className="space-y-2 text-slate-700 text-xs">
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>লাইভ মার্কেটপ্লেস (Fiverr & Upwork) অ্যাকাউন্ট সেটআপ গাইড</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>কর্পোরেট ইন্টার্নশিপ ও জব ইন্টারভিউ রেফারেল সাপোর্ট</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>লাইফটাইম প্রজেক্ট রিভিউ ও সমস্যা সমাধান ব্যাকআপ সাপোর্ট</span>
-                    </li>
+                    {(course.learningFeatures && course.learningFeatures.length > 0
+                      ? course.learningFeatures
+                      : [
+                          'লাইভ মার্কেটপ্লেস (Fiverr & Upwork) অ্যাকাউন্ট সেটআপ গাইড',
+                          'কর্পোরেট ইন্টার্নশিপ ও জব ইন্টারভিউ রেফারেল সাপোর্ট',
+                          'লাইফটাইম প্রজেক্ট রিভিউ ও সমস্যা সমাধান ব্যাকআপ সাপোর্ট'
+                        ]
+                    ).map((feat, idx) => (
+                      <li key={idx} className="flex items-start space-x-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -809,14 +825,14 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
         <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
           <div className="flex items-center space-x-2 text-xs text-slate-600">
             <Phone className="w-4 h-4 text-indigo-600" />
-            <span>ভর্তি হেল্পলাইন: <strong>{landingConfig.campusPhone || (websiteCmsConfig as any)?.contactInfo?.phone || (websiteCmsConfig as any)?.contactPhone || '০১৭৯৮-৪৪৪৪৪৪'}</strong></span>
+            <span>ভর্তি হেল্পলাইন: <strong>{landingConfig.campusPhone || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || (websiteCmsConfig as any)?.contactInfo?.phone || (websiteCmsConfig as any)?.contactPhone || '০১৭৯৮-৪৪৪৪৪৪'}</strong></span>
           </div>
 
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <a
               href={getWhatsAppDirectUrl(
-                landingConfig.customWhatsAppNumber || websiteCmsConfig?.marketing?.floatingWhatsAppNumber || '01798444444',
-                landingConfig.customWhatsAppMessage || `Hello Nexgen Academy! I want to enroll in "${course.name}".`
+                landingConfig.customWhatsAppNumber || websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01798444444',
+                landingConfig.customWhatsAppMessage || `Hello ${academySettings?.instituteName || 'Academy'}! I want to enroll in "${course.name}".`
               )}
               target="_blank"
               rel="noopener noreferrer"
