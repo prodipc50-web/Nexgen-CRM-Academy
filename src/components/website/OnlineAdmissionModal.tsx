@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
-import { X, CheckCircle2, User, Phone, Mail, BookOpen, GraduationCap, MapPin, Send, HelpCircle, Shield, Sparkles, CreditCard, QrCode } from 'lucide-react';
+import { X, CheckCircle2, User, Phone, Mail, BookOpen, GraduationCap, MapPin, Send, HelpCircle, Shield, Sparkles, CreditCard, QrCode, ShieldCheck } from 'lucide-react';
 import { Course } from '../../types';
+import { StudentTermsModal } from '../modals/StudentTermsModal';
 import {
   trackMetaPixelEvent,
   getCapturedUtmParams,
@@ -48,6 +49,8 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [activeQrModal, setActiveQrModal] = useState<{ name: string; url: string } | null>(null);
 
   const activeAccounts = (academySettings.paymentAccounts || []).filter(a => a.isActive);
@@ -70,6 +73,11 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
     const isBdPhone = /^01[3-9]\d{8}$/.test(cleanPhone) || (/^8801[3-9]\d{8}$/.test(cleanPhone));
     if (!isBdPhone) {
       setErrorMessage('অনুগ্রহ করে সঠিক ১১ ডিজিটের সচল মোবাইল নম্বর লিখুন (যেমন: 01712345678)।');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setErrorMessage('অনুগ্রহ করে একাডেমির ছাত্র আচরণবিধি ও শর্তাবলীতে (Terms & Conditions) টিক দিয়ে সম্মতি প্রদান করুন।');
       return;
     }
 
@@ -441,6 +449,31 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
                 />
               </div>
 
+              {/* Student Terms & Conditions Agreement */}
+              <div className="bg-teal-50/60 border border-teal-200/80 rounded-2xl p-3.5 text-xs">
+                <label className="flex items-start space-x-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={e => setAgreedToTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 text-teal-600 rounded border-teal-400 focus:ring-teal-500 cursor-pointer shrink-0"
+                    required
+                  />
+                  <div className="text-slate-700 leading-snug">
+                    <span>আমি NexGen Computer Academy-এর </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="font-bold text-teal-700 hover:text-teal-900 underline decoration-teal-400 inline-flex items-center space-x-1 cursor-pointer"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-teal-600 inline" />
+                      <span>ছাত্র আচরণবিধি ও ১০টি নিয়মাবলী (Terms & Conditions)</span>
+                    </button>
+                    <span> পড়েছি, বুঝেছি এবং কোর্সে ভর্তির জন্য এতে সম্মতি প্রদান করছি।</span>
+                  </div>
+                </label>
+              </div>
+
               {/* Submit Button */}
               <div className="pt-2 flex items-center justify-between">
                 <div className="text-[11px] text-slate-500 flex items-center space-x-1">
@@ -498,6 +531,20 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
           </div>
         </div>
       )}
+
+      {/* Student Terms & Conditions Lightbox Modal */}
+      <StudentTermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        studentName={formData.name}
+        courseName={selectedCourse?.name}
+        batchNumber="Upcoming Regular Batch"
+        isAccepted={agreedToTerms}
+        onAccept={() => {
+          setAgreedToTerms(true);
+          setShowTermsModal(false);
+        }}
+      />
     </div>
   );
 };

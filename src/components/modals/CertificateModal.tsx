@@ -4,6 +4,7 @@ import { Certificate } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
 import { ImageUploadCropModal } from '../common/ImageUploadCropModal';
 import { compressImageBase64 } from '../../utils/imageCompressor';
+import { executeCleanPrint } from '../../utils/printHelper';
 import {
   X,
   Printer,
@@ -97,6 +98,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   const [activeTab, setActiveTab] = useState<'preview' | 'customize' | 'styles'>('preview');
   const [isSavedToast, setIsSavedToast] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<CertificateTheme>('gold');
+  const [paperSize, setPaperSize] = useState<'a4' | 'letter'>('a4');
+  const [paperMargin, setPaperMargin] = useState<'borderless' | 'standard'>('borderless');
 
   // Find target certificate
   const certificate = certificateId
@@ -224,16 +227,30 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
     }
   }, [certificate, students, courses, batches, isOpen, academySettings]);
 
-  // Handle ESC key press to close modal
+  // Robust Print Handler
+  const handlePrint = () => {
+    executeCleanPrint({
+      documentTitle: `Certificate_${certData.certificateSerial}_${(certData.studentName || 'Student').replace(/\s+/g, '_')}`,
+      size: paperSize,
+      orientation: 'landscape',
+      margin: paperMargin === 'borderless' ? '0mm' : '5mm'
+    });
+  };
+
+  // Handle ESC and Ctrl+P key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
+        e.preventDefault();
+        handlePrint();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, certData, paperSize, paperMargin]);
 
   if (!isOpen || !certificate) return null;
 
@@ -303,21 +320,6 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       grade: preset.gradeDefault
     }));
     setSelectedTheme(preset.theme);
-  };
-
-  // Robust Print Handler
-  const handlePrint = () => {
-    const originalTitle = document.title;
-    try {
-      document.title = `Certificate_${certData.certificateSerial}_${(certData.studentName || 'Student').replace(/\s+/g, '_')}`;
-      window.print();
-    } catch (e) {
-      window.print();
-    } finally {
-      setTimeout(() => {
-        document.title = originalTitle;
-      }, 1000);
-    }
   };
 
   // Theme Styling Configuration
@@ -472,6 +474,82 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
             >
               <X className="w-5 h-5" />
             </button>
+          </div>
+        </div>
+
+        {/* Landscape & Page Setup Toolbar (Screen only) */}
+        <div className="bg-slate-900/95 px-4 py-2 border-b border-slate-800 text-white flex flex-wrap items-center justify-between gap-2.5 text-xs print:hidden">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Orientation Badge */}
+            <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-amber-500/15 border border-amber-500/30 rounded-lg text-amber-300 font-bold">
+              <RotateCcw className="w-3.5 h-3.5 rotate-90" />
+              <span>Landscape Mode (আড়াআড়ি)</span>
+            </div>
+
+            {/* Paper Size Selector */}
+            <div className="flex items-center space-x-1.5">
+              <span className="text-slate-400 text-[11px] font-semibold">পেপার সাইজ:</span>
+              <div className="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setPaperSize('a4')}
+                  className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-colors ${
+                    paperSize === 'a4'
+                      ? 'bg-amber-600 text-white shadow-2xs'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  A4 Landscape (297×210 mm)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaperSize('letter')}
+                  className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-colors ${
+                    paperSize === 'letter'
+                      ? 'bg-amber-600 text-white shadow-2xs'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  US Letter (11×8.5 in)
+                </button>
+              </div>
+            </div>
+
+            {/* Margins Selector */}
+            <div className="flex items-center space-x-1.5">
+              <span className="text-slate-400 text-[11px] font-semibold">মার্জিন:</span>
+              <div className="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setPaperMargin('borderless')}
+                  className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-colors ${
+                    paperMargin === 'borderless'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                  title="বর্ডার ছাড়া ফুল আর্ট পেপারে নিখুঁত প্রিন্টের জন্য"
+                >
+                  Borderless (0mm)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaperMargin('standard')}
+                  className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-colors ${
+                    paperMargin === 'standard'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                  title="সাধারণ প্রিন্টারের জন্য ৫ মিমি মার্জিন"
+                >
+                  Standard (5mm)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-[11px] text-amber-200/90 font-medium flex items-center space-x-1">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span>১ পাতায় অটো-ফিট লক সক্রিয় (Ctrl+P চাপলেও সরাসরি ল্যান্ডস্কেপ হবে)</span>
           </div>
         </div>
 
@@ -989,7 +1067,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
         <div className="overflow-y-auto flex-1 p-2 sm:p-6 bg-slate-100/70 print:bg-white print:p-0 print:m-0 print:overflow-visible">
           {/* Certificate Canvas */}
           <div
-            className={`p-6 sm:p-12 ${themeStyles.bg} text-slate-900 font-serif border-[10px] sm:border-[14px] border-double ${themeStyles.border} rounded-xl relative overflow-hidden bg-white shadow-md print:shadow-none print:m-0 print:border-8 print:p-6 transition-colors duration-200 print-landscape-page print-page-a4-landscape`}
+            className={`p-6 sm:p-12 ${themeStyles.bg} text-slate-900 font-serif border-[10px] sm:border-[14px] border-double ${themeStyles.border} rounded-xl relative overflow-hidden bg-white shadow-md print:shadow-none print:m-0 print:border-8 print:p-4 print:max-h-[198mm] print:overflow-hidden transition-colors duration-200 print-landscape-page print-page-a4-landscape`}
             id="certificate-printable"
           >
             {/* Subtle Background Watermark */}
@@ -1015,33 +1093,33 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               )}
             </div>
 
-            <div className="relative z-10 text-center space-y-6">
+            <div className="relative z-10 text-center space-y-5 print:space-y-2">
               {/* Header */}
-              <div className="space-y-1">
+              <div className="space-y-1 print:space-y-0.5">
                 {certData.showLogo && (
-                  <div className="flex justify-center mb-1">
+                  <div className="flex justify-center mb-1 print:mb-0.5">
                     <NexgenLogo
                       variant="full"
                       size={certData.logoSize || 130}
                       customLogoUrl={certData.customLogoUrl}
-                      className="mx-auto"
+                      className="mx-auto print:max-h-12 print:w-auto"
                     />
                   </div>
                 )}
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-wider uppercase">
+                <h1 className="text-2xl sm:text-3xl print:text-xl font-black text-slate-900 tracking-wider uppercase">
                   {certData.instituteName}
                 </h1>
-                <p className={`text-xs font-sans ${themeStyles.tagline} font-semibold tracking-widest uppercase mt-0.5`}>
+                <p className={`text-xs print:text-[10px] font-sans ${themeStyles.tagline} font-semibold tracking-widest uppercase mt-0.5`}>
                   {certData.instituteTagline}
                 </p>
               </div>
 
               {/* Certificate Title */}
-              <div className="pt-2">
-                <div className={`inline-block border-b-2 ${themeStyles.titleUnderline} pb-1`}>
+              <div className="pt-2 print:pt-0.5">
+                <div className={`inline-block border-b-2 ${themeStyles.titleUnderline} pb-1 print:pb-0.5`}>
                   <span
                     style={{ fontSize: `${certData.certTitleSize || 15}px` }}
-                    className={`font-sans font-extrabold uppercase tracking-widest px-6 py-1.5 ${themeStyles.badgeBg} rounded shadow-2xs`}
+                    className={`font-sans font-extrabold uppercase tracking-widest px-6 py-1.5 print:py-1 print:px-4 ${themeStyles.badgeBg} rounded shadow-2xs print:text-xs`}
                   >
                     {certData.certTitle}
                   </span>
@@ -1049,29 +1127,29 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               </div>
 
               {/* Body Description */}
-              <div className="space-y-3 font-sans max-w-2xl mx-auto text-slate-700">
-                <p className="text-xs italic text-slate-500">{certData.certSubtext}</p>
+              <div className="space-y-2.5 print:space-y-1 font-sans max-w-2xl mx-auto text-slate-700">
+                <p className="text-xs print:text-[11px] italic text-slate-500">{certData.certSubtext}</p>
                 <h2
                   style={{ fontSize: `${certData.studentNameSize || 28}px` }}
-                  className="font-serif font-black text-slate-950 tracking-tight"
+                  className="font-serif font-black text-slate-950 tracking-tight print:text-2xl print:py-0.5"
                 >
                   {certData.studentName}
                 </h2>
-                <p className="text-xs text-slate-500 font-mono">
+                <p className="text-xs print:text-[10px] text-slate-500 font-mono">
                   Student ID: <span className="font-bold text-slate-800">{certData.studentCode}</span>
                 </p>
-                <p className="text-xs leading-relaxed pt-2">
+                <p className="text-xs print:text-[11px] leading-relaxed pt-1 print:pt-0">
                   {certData.achievementText}
                 </p>
-                <div className="py-1">
-                  <h3 className={`text-lg sm:text-xl font-bold font-sans ${themeStyles.courseColor}`}>
+                <div className="py-1 print:py-0">
+                  <h3 className={`text-lg sm:text-xl print:text-base font-bold font-sans ${themeStyles.courseColor}`}>
                     {certData.courseName}
                   </h3>
-                  <p className="text-xs text-slate-600 mt-0.5">
+                  <p className="text-xs print:text-[10px] text-slate-600 mt-0.5">
                     {certData.batchText} {certData.durationText ? `| Duration: ${certData.durationText}` : ''}
                   </p>
                 </div>
-                <div className={`inline-flex items-center space-x-2 border px-4 py-1 rounded-full text-xs font-bold ${themeStyles.gradeBadge}`}>
+                <div className={`inline-flex items-center space-x-2 border px-4 py-1 print:py-0.5 print:px-2.5 rounded-full text-xs print:text-[10px] font-bold ${themeStyles.gradeBadge}`}>
                   <span>Awarded Grade: {certData.grade}</span>
                   <span>•</span>
                   <span>Completed: {certData.completionDate}</span>
@@ -1079,7 +1157,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               </div>
 
               {/* Signatures & Seal */}
-              <div className="pt-8 grid grid-cols-3 gap-4 items-end text-xs font-sans text-slate-700">
+              <div className="pt-6 print:pt-2 grid grid-cols-3 gap-4 items-end text-xs font-sans text-slate-700">
                 <div className="text-center">
                   <div className="border-b border-slate-400 pb-1 font-semibold text-slate-800">
                     {certData.instructorName}
@@ -1133,7 +1211,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
 
               {/* Bottom Verification Note & Verification QR Code */}
               {certData.showVerification && (
-                <div className={`pt-4 border-t ${themeStyles.divider} flex flex-col sm:flex-row items-center justify-between text-[10px] font-sans text-slate-500 gap-2`}>
+                <div className={`pt-4 print:pt-1 border-t ${themeStyles.divider} flex flex-col sm:flex-row items-center justify-between text-[10px] font-sans text-slate-500 gap-2 print:gap-1`}>
                   <div className="flex items-center space-x-2.5">
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=2&data=${encodeURIComponent(

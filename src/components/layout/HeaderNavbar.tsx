@@ -27,7 +27,8 @@ import {
   Check,
   Smartphone,
   Download,
-  Globe
+  Globe,
+  WifiOff
 } from 'lucide-react';
 
 
@@ -137,41 +138,61 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
           <Search className="w-5 h-5" />
         </button>
 
-        {/* Cloud Firestore Sync Status Badge */}
-        <button
-          onClick={() => syncToCloudNow()}
-          className={`hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap shrink-0 ${
-            cloudSyncStatus === 'synced'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80 hover:bg-emerald-100'
-              : cloudSyncStatus === 'syncing'
-              ? 'bg-indigo-50 text-indigo-700 border-indigo-200 animate-pulse'
-              : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-          }`}
-          title={`Google Cloud Firestore Database: ${
-            cloudSyncStatus === 'synced'
-              ? `Safe & Synchronized (Last: ${lastCloudSyncTime || 'Just now'})`
-              : cloudSyncStatus === 'syncing'
-              ? 'Saving changes to Cloud...'
-              : 'Offline Cache Active. Click to sync.'
-          }`}
-        >
-          {cloudSyncStatus === 'synced' ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span className="text-xs font-bold">Cloud Safe</span>
-            </>
-          ) : cloudSyncStatus === 'syncing' ? (
-            <>
-              <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin shrink-0" />
-              <span className="text-xs font-bold">Saving...</span>
-            </>
-          ) : (
-            <>
-              <Cloud className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span className="text-xs font-bold">Sync</span>
-            </>
-          )}
-        </button>
+        {/* Cloud Firestore Sync & Offline Status Badge */}
+        {(() => {
+          const isOffline = (typeof navigator !== 'undefined' && !navigator.onLine) || cloudSyncStatus === 'offline';
+          if (isOffline) {
+            return (
+              <button
+                type="button"
+                onClick={() => syncToCloudNow(true)}
+                className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap shrink-0 bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100 cursor-pointer shadow-2xs"
+                title="অফলাইন মোড সক্রিয় - লোকাল ক্যাশে ডাটা সেভ হচ্ছে। ক্লিক করে সিঙ্ক চেক করুন।"
+              >
+                <WifiOff className="w-3.5 h-3.5 text-amber-600 animate-pulse shrink-0" />
+                <span className="text-xs font-bold">Offline (Local)</span>
+              </button>
+            );
+          }
+
+          return (
+            <button
+              type="button"
+              onClick={() => syncToCloudNow()}
+              className={`hidden sm:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                cloudSyncStatus === 'synced'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80 hover:bg-emerald-100'
+                  : cloudSyncStatus === 'syncing'
+                  ? 'bg-indigo-50 text-indigo-700 border-indigo-200 animate-pulse'
+                  : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+              }`}
+              title={`Google Cloud Firestore Database: ${
+                cloudSyncStatus === 'synced'
+                  ? `Safe & Synchronized (Last: ${lastCloudSyncTime || 'Just now'})`
+                  : cloudSyncStatus === 'syncing'
+                  ? 'Saving changes to Cloud...'
+                  : 'Offline Cache Active. Click to sync.'
+              }`}
+            >
+              {cloudSyncStatus === 'synced' ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span className="text-xs font-bold">Cloud Safe</span>
+                </>
+              ) : cloudSyncStatus === 'syncing' ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 text-indigo-600 animate-spin shrink-0" />
+                  <span className="text-xs font-bold">Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Cloud className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <span className="text-xs font-bold">Sync</span>
+                </>
+              )}
+            </button>
+          );
+        })()}
 
         {/* View Public Website Button */}
         {onViewPublicWebsite && (

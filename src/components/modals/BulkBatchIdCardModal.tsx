@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Batch, Student } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
+import { executeCleanPrint } from '../../utils/printHelper';
 import {
   X,
   Printer,
@@ -46,21 +47,30 @@ export const BulkBatchIdCardModal: React.FC<BulkBatchIdCardModalProps> = ({
   const selectedBatch = batches.find(b => b.id === selectedBatchId);
   const selectedCourse = courses.find(c => c.id === selectedBatch?.courseId);
 
-  if (!isOpen) return null;
-
   const handlePrint = () => {
-    const originalTitle = document.title;
-    try {
-      document.title = `${docType === 'id_card' ? 'ID_Cards' : 'Admit_Cards'}_${selectedBatch?.batchNumber || 'Batch'}`;
-      window.print();
-    } catch (e) {
-      window.print();
-    } finally {
-      setTimeout(() => {
-        document.title = originalTitle;
-      }, 1000);
-    }
+    executeCleanPrint({
+      documentTitle: `${docType === 'id_card' ? 'Bulk_ID_Cards' : 'Bulk_Admit_Cards'}_${selectedBatch?.batchNumber || 'Batch'}`,
+      size: 'a4',
+      orientation: 'portrait',
+      margin: '6mm'
+    });
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
+        e.preventDefault();
+        handlePrint();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, docType, selectedBatch]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible">

@@ -23,6 +23,7 @@ import {
 import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
 import { numberToWordsEnglish } from '../../utils/numberToWords';
 import { replaceShortcodes } from '../../utils/templateShortcodes';
+import { executeCleanPrint } from '../../utils/printHelper';
 
 interface MoneyReceiptModalProps {
   isOpen: boolean;
@@ -147,18 +148,28 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
   }
 
   const handlePrint = () => {
-    const originalTitle = document.title;
-    try {
-      document.title = `Official_Receipt_${receiptData.receiptNumber}_${(receiptData.studentName || 'Student').replace(/\s+/g, '_')}`;
-      window.print();
-    } catch (e) {
-      window.print();
-    } finally {
-      setTimeout(() => {
-        document.title = originalTitle;
-      }, 1000);
-    }
+    executeCleanPrint({
+      documentTitle: `Official_Receipt_${receiptData.receiptNumber}_${(receiptData.studentName || 'Student').replace(/\s+/g, '_')}`,
+      size: printFormat === 'pos80' ? 'pos80' : 'a4',
+      orientation: 'portrait',
+      margin: printFormat === 'pos80' ? '0mm' : '5mm'
+    });
   };
+
+  // Keyboard Shortcuts (Esc to close, Ctrl+P to print)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
+        e.preventDefault();
+        handlePrint();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, receiptData, printFormat]);
 
   const handleSendWhatsAppReceipt = () => {
     const phone = receiptData.studentPhone;
@@ -242,11 +253,11 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[96vh] animate-in zoom-in-95 duration-150"
+        className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[96vh] animate-in zoom-in-95 duration-150 print:max-w-none print:w-full print:h-auto print:max-h-none print:shadow-none print:border-none print:rounded-none print:overflow-visible"
         onClick={e => e.stopPropagation()}
       >
         {/* Modal Top Actions (Hidden during print) */}

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { NexgenLogo } from '../common/NexgenLogo';
+import { executeCleanPrint } from '../../utils/printHelper';
 import {
   X,
   Printer,
@@ -96,18 +97,27 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
   const cashDiscrepancy = isCountingStarted ? (countedPhysicalCash - expectedCashInDrawer) : 0;
 
   const handlePrint = () => {
-    const originalTitle = document.title;
-    try {
-      document.title = `Daily_Cash_Closing_${selectedDate}`;
-      window.print();
-    } catch (e) {
-      window.print();
-    } finally {
-      setTimeout(() => {
-        document.title = originalTitle;
-      }, 1000);
-    }
+    executeCleanPrint({
+      documentTitle: `Daily_Cash_Closing_${selectedDate}`,
+      size: 'a4',
+      orientation: 'portrait',
+      margin: '5mm'
+    });
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
+        e.preventDefault();
+        handlePrint();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, selectedDate]);
 
   const handleDenominationChange = (denom: number, val: string) => {
     setIsCountingStarted(true);

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Student, Course, Batch } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
+import { executeCleanPrint } from '../../utils/printHelper';
 import {
   X,
   Printer,
@@ -147,30 +148,41 @@ export const IdCardAdmitCardModal: React.FC<IdCardAdmitCardModalProps> = ({
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
-  // Handle ESC key press to close modal
+  const handlePrint = () => {
+    executeCleanPrint({
+      documentTitle: activeMode === 'id_card'
+        ? `Student_ID_Card_${student.studentCode || 'Student'}_${(student.name || 'Student').replace(/\s+/g, '_')}`
+        : `Admit_Card_${student.studentCode || 'Student'}_${(student.name || 'Student').replace(/\s+/g, '_')}`,
+      size: 'a4',
+      orientation: 'portrait',
+      margin: '5mm'
+    });
+  };
+
+  // Handle ESC key press and Ctrl+P
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
+        e.preventDefault();
+        handlePrint();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, student, activeMode]);
 
   if (!isOpen || !student) return null;
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-150 my-auto max-h-[96vh] flex flex-col"
+        className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-150 my-auto max-h-[96vh] flex flex-col print:max-w-none print:w-full print:h-auto print:max-h-none print:shadow-none print:border-none print:rounded-none print:overflow-visible"
         onClick={e => e.stopPropagation()}
       >
         {/* Sticky Header */}

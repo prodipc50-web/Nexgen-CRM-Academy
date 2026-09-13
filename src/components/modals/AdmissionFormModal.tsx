@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Admission, Student, Course, Batch } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
+import { executeCleanPrint } from '../../utils/printHelper';
 import {
   X,
   Printer,
@@ -22,8 +23,20 @@ import {
   FileText,
   UserCheck,
   Video,
-  Monitor
+  Monitor,
+  Layers,
+  CreditCard,
+  BookOpen,
+  Bot,
+  Compass,
+  Camera
 } from 'lucide-react';
+import {
+  STUDENT_TERMS_AND_CONDITIONS,
+  STUDENT_DECLARATION_TEXT,
+  STUDENT_TERMS_HEADER_SUBTITLE,
+  STUDENT_TERMS_NOTICE
+} from '../../data/studentTerms';
 
 interface AdmissionFormModalProps {
   isOpen: boolean;
@@ -58,6 +71,12 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
 
   const [showEditor, setShowEditor] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [activeSheetTab, setActiveSheetTab] = useState<'form' | 'terms' | 'both'>('form');
+
+  const effectiveTerms = (academySettings.studentTerms || STUDENT_TERMS_AND_CONDITIONS).filter(
+    c => c.isActive !== false
+  );
+  const effectiveDeclaration = academySettings.studentTermsDeclaration || STUDENT_DECLARATION_TEXT;
 
   // Find target admission & student
   const admission = propAdmission || (admissionId
@@ -192,32 +211,38 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
     }
   }, [admission, student, course, batch, counselor, academySettings, isOpen]);
 
-  // Handle ESC key press
+  const handlePrint = () => {
+    const docTitle =
+      activeSheetTab === 'terms'
+        ? `Student_Terms_${formData.formNumber}_${(formData.name || 'Student').replace(/\s+/g, '_')}`
+        : activeSheetTab === 'both'
+        ? `Admission_Complete_Set_${formData.formNumber}_${(formData.name || 'Student').replace(/\s+/g, '_')}`
+        : `Admission_Form_${formData.formNumber}_${(formData.name || 'Student').replace(/\s+/g, '_')}`;
+
+    executeCleanPrint({
+      documentTitle: docTitle,
+      size: 'a4',
+      orientation: 'portrait',
+      margin: '5mm'
+    });
+  };
+
+  // Handle ESC and Ctrl+P key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
+        e.preventDefault();
+        handlePrint();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, formData]);
 
   if (!isOpen) return null;
-
-  const handlePrint = () => {
-    const originalTitle = document.title;
-    try {
-      document.title = `Admission_Form_${formData.formNumber}_${(formData.name || 'Student').replace(/\s+/g, '_')}`;
-      window.print();
-    } catch (e) {
-      window.print();
-    } finally {
-      setTimeout(() => {
-        document.title = originalTitle;
-      }, 1000);
-    }
-  };
 
   const handleSaveDefaults = () => {
     updateAcademySettings({
@@ -233,11 +258,11 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[96vh] animate-in zoom-in-95 duration-150"
+        className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[96vh] animate-in zoom-in-95 duration-150 print:max-w-none print:w-full print:h-auto print:max-h-none print:shadow-none print:border-none print:rounded-none print:overflow-visible"
         onClick={e => e.stopPropagation()}
       >
         {/* Modal Top Toolbar (Hidden on print) */}
@@ -278,7 +303,13 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
               className="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-xs transition-colors"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Print A4 Form (প্রিন্ট করুন)</span>
+              <span>
+                {activeSheetTab === 'form'
+                  ? 'Print A4 Form'
+                  : activeSheetTab === 'terms'
+                  ? 'Print Terms Sheet'
+                  : 'Print 2-Page Set'}
+              </span>
             </button>
             <button
               onClick={onClose}
@@ -288,6 +319,56 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
               <X className="w-5 h-5" />
             </button>
           </div>
+        </div>
+
+        {/* Sheet Selector Sub-Bar */}
+        <div className="bg-slate-800 px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 print:hidden text-xs">
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <button
+              type="button"
+              onClick={() => setActiveSheetTab('form')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+                activeSheetTab === 'form'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-700/70 text-slate-300 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>১. ভর্তি আবেদন ফরম</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSheetTab('terms')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+                activeSheetTab === 'terms'
+                  ? 'bg-teal-600 text-white shadow-xs'
+                  : 'bg-slate-700/70 text-slate-300 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>২. আচরণবিধি ও শর্তাবলী (Terms)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSheetTab('both')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+                activeSheetTab === 'both'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'bg-slate-700/70 text-slate-300 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>উভয় পেজ একসাথে (Both Pages)</span>
+            </button>
+          </div>
+
+          <span className="text-[11px] font-semibold text-slate-300 bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 hidden sm:inline">
+            {activeSheetTab === 'form'
+              ? 'Page 1: Admission Form Sheet'
+              : activeSheetTab === 'terms'
+              ? 'Page 2: Official Terms & Conditions'
+              : 'Complete Set: Page 1 + Page 2'}
+          </span>
         </div>
 
         {/* Customizer Drawer */}
@@ -461,8 +542,11 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
           className="overflow-y-auto flex-1 p-5 sm:p-8 bg-white text-slate-900 font-sans print:p-0 print:m-0 print-page-a4"
           id="admission-form-printable"
         >
-          {/* Header Banner with Logo & Passport Photo Box */}
-          <div className="flex items-start justify-between border-b-2 border-indigo-950 pb-3">
+          {/* Page 1: Admission Form Sheet */}
+          {(activeSheetTab === 'form' || activeSheetTab === 'both') && (
+            <div>
+              {/* Header Banner with Logo & Passport Photo Box */}
+              <div className="flex items-start justify-between border-b-2 border-indigo-950 pb-3">
             <div className="flex items-center space-x-3 flex-1">
               <NexgenLogo variant="crest" size={54} />
               <div>
@@ -733,8 +817,129 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
 
           {/* Footer note */}
           <div className="mt-2 print:mt-1 pt-1.5 print:pt-0.5 border-t border-slate-200 text-center text-[9px] print:text-[8px] text-slate-400">
-            Generated via Nexgen IT Academy Enterprise Management System • Hotline: {formData.hotlinePhone} • {formData.website}
+            Generated via {formData.instituteName} Enterprise Management System • Hotline: {formData.hotlinePhone} • {formData.website}
           </div>
+            </div>
+          )}
+
+          {/* Page Break Separator when both pages are printed/viewed */}
+          {activeSheetTab === 'both' && (
+            <div className="print:break-before-page my-6 print:my-0 border-t-2 border-dashed border-slate-300 print:border-none relative flex items-center justify-center print:hidden">
+              <span className="bg-teal-50 text-teal-900 border border-teal-300 px-3.5 py-1 text-[10.5px] font-black uppercase rounded-full tracking-wider shadow-2xs">
+                ↓ Page 2: Student Terms & Conditions (ছাত্র আচরণবিধি ও নিয়মাবলী) ↓
+              </span>
+            </div>
+          )}
+
+          {/* Page 2: Official Student Terms & Conditions Sheet */}
+          {(activeSheetTab === 'terms' || activeSheetTab === 'both') && (
+            <div className="pt-2 print:pt-0">
+              {/* Header Banner */}
+              <div className="flex items-start justify-between border-b-2 border-teal-900 pb-2.5">
+                <div className="flex items-center space-x-3">
+                  <div className="w-11 h-11 rounded-xl bg-teal-900 text-white flex items-center justify-center font-black text-lg tracking-tighter shrink-0">
+                    NG
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-teal-950 uppercase tracking-tight leading-none">
+                      {formData.instituteName}
+                    </h2>
+                    <p className="text-[10px] text-slate-600 font-bold tracking-wide mt-0.5">
+                      {STUDENT_TERMS_HEADER_SUBTITLE}
+                    </p>
+                    <p className="text-[9.5px] text-slate-600 font-medium">
+                      Hotline: <strong className="text-slate-900 font-mono">{formData.hotlinePhone}</strong> | {formData.website}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="bg-teal-900 text-white text-[9.5px] font-black uppercase px-2.5 py-0.5 rounded tracking-wide inline-block">
+                    STUDENT TERMS & CONDITIONS
+                  </div>
+                  <p className="text-[9px] text-slate-500 font-medium mt-0.5">
+                    Form: <strong className="font-mono text-teal-950">{formData.formNumber}</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Notice & Student Meta Bar */}
+              <div className="my-2 flex flex-wrap items-center justify-between gap-1 px-2.5 py-1 bg-teal-50/70 border border-teal-200 rounded-lg text-[10px]">
+                <span className="font-bold text-teal-900">
+                  {STUDENT_TERMS_NOTICE}
+                </span>
+                <div className="flex items-center space-x-3 text-slate-700">
+                  <span>Student: <strong className="text-slate-950">{formData.name || '—'}</strong></span>
+                  <span>ID: <strong className="font-mono text-teal-900">{formData.studentCode || '—'}</strong></span>
+                  <span>Batch: <strong className="text-slate-950">{formData.batchNumber || '—'}</strong></span>
+                </div>
+              </div>
+
+              {/* Clauses Grid Layout (Matching PDF 2-column aesthetic) */}
+              <div className="grid grid-cols-2 gap-2 text-[9.5px] print:text-[8.5px] leading-tight">
+                {effectiveTerms.map(clause => (
+                  <div
+                    key={clause.id}
+                    className="border border-slate-300 rounded-lg overflow-hidden bg-white flex flex-col justify-between shadow-2xs"
+                  >
+                    <div className="bg-teal-900 text-white px-2 py-0.5 flex items-center justify-between">
+                      <span className="font-black">
+                        {clause.numberBn}. {clause.titleEn}
+                      </span>
+                      <span className="text-[8.5px] text-teal-200">
+                        ({clause.titleBn})
+                      </span>
+                    </div>
+                    <div className="p-2 text-slate-700 bg-slate-50/40">
+                      <p>{clause.details}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Student Declaration Box */}
+              <div className="mt-2.5 border border-teal-900/40 bg-teal-50/50 rounded-lg p-2 text-[9.5px] print:text-[8.5px]">
+                <div className="flex items-start space-x-2">
+                  <div className="w-3.5 h-3.5 border-2 border-teal-900 rounded bg-white flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-teal-900 text-[10px] font-black leading-none">✓</span>
+                  </div>
+                  <p className="font-bold text-teal-950 leading-snug">
+                    {effectiveDeclaration}
+                  </p>
+                </div>
+              </div>
+
+              {/* Dual Signatures */}
+              <div className="pt-5 print:pt-3 mt-3 border-t border-slate-300 grid grid-cols-2 gap-8 text-center text-xs">
+                <div>
+                  <div className="h-6 print:h-5 border-b border-slate-400 w-44 mx-auto mb-1 flex items-end justify-center">
+                    {formData.name && (
+                      <span className="text-[10.5px] font-serif italic text-slate-800">{formData.name}</span>
+                    )}
+                  </div>
+                  <span className="text-[10px] print:text-[9px] font-bold text-slate-800 uppercase block">
+                    Student Signature & Date
+                  </span>
+                  <p className="text-[9px] print:text-[8px] text-slate-400">Date: {formData.admissionDate}</p>
+                </div>
+
+                <div>
+                  <div className="h-6 print:h-5 border-b border-teal-900 w-48 mx-auto mb-1 flex items-end justify-center">
+                    <span className="text-[10.5px] font-serif italic font-bold text-teal-950">{formData.directorName}</span>
+                  </div>
+                  <span className="text-[10px] print:text-[9px] font-black text-teal-950 uppercase block">
+                    Authorized Signature — {formData.instituteName}
+                  </span>
+                  <p className="text-[9px] print:text-[8px] text-teal-700 font-semibold">Official Seal & Academic Approval</p>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-2 print:mt-1 pt-1 border-t border-slate-200 text-center text-[9px] print:text-[8px] text-slate-400">
+                {formData.instituteName} • {formData.address} • Hotline: {formData.hotlinePhone} • {formData.website}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Modal Bottom Bar */}
@@ -749,10 +954,16 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
 
           <button
             onClick={handlePrint}
-            className="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors"
+            className="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>Print Admission Form (ভর্তি ফরম প্রিন্ট)</span>
+            <span>
+              {activeSheetTab === 'form'
+                ? 'Print Admission Form (ভর্তি ফরম প্রিন্ট)'
+                : activeSheetTab === 'terms'
+                ? 'Print Terms Sheet (শর্তাবলী প্রিন্ট)'
+                : 'Print Full 2-Page Set (উভয় পেজ প্রিন্ট)'}
+            </span>
           </button>
         </div>
       </div>

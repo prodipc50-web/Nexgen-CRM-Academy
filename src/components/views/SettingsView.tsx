@@ -35,7 +35,8 @@ import {
   Clock,
   FileSpreadsheet,
   Copy,
-  Sparkles
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 import {
   DEFAULT_DUE_NOTICE_TEMPLATE,
@@ -48,6 +49,8 @@ import { MarketingAnalyticsDashboard } from '../marketing/MarketingAnalyticsDash
 import { FraudAndSecuritySettings } from '../settings/FraudAndSecuritySettings';
 import { PaymentGatewaysSettings } from '../settings/PaymentGatewaysSettings';
 import { AutoBackupAndArchiveManager } from '../settings/AutoBackupAndArchiveManager';
+import { StudentTermsManager } from '../settings/StudentTermsManager';
+import { DatabaseRestoreVerificationModal, BackupPayloadSummary } from '../modals/DatabaseRestoreVerificationModal';
 
 interface SettingsViewProps {
   onViewPublicWebsite?: () => void;
@@ -118,13 +121,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     emptyTrash
   } = useAcademy();
 
-  const [activeTab, setActiveTab] = useState<'security' | 'payments' | 'theme' | 'marketing' | 'profile' | 'dropdowns' | 'rbac' | 'audit' | 'backup' | 'notifications'>('marketing');
+  const [activeTab, setActiveTab] = useState<'security' | 'payments' | 'theme' | 'marketing' | 'profile' | 'terms' | 'dropdowns' | 'rbac' | 'audit' | 'backup' | 'notifications'>('marketing');
   const [resetSuccess, setResetSuccess] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [integrityMessage, setIntegrityMessage] = useState<string | null>(null);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
   const [isLogoCropModalOpen, setIsLogoCropModalOpen] = useState(false);
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [restoreCandidate, setRestoreCandidate] = useState<BackupPayloadSummary | null>(null);
   const [restoringSnapshotId, setRestoringSnapshotId] = useState<string | null>(null);
   const [isCreatingSnapshot, setIsCreatingSnapshot] = useState(false);
   const [snapshotNotice, setSnapshotNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -243,7 +248,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     }
   };
 
-  // Restore JSON upload with validation and state recovery
+  // Restore JSON upload with deep inspection, comparison verification and state recovery
   const handleRestoreUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -257,22 +262,41 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
           return;
         }
 
-        const success = importDatabaseJson(json);
-        if (success) {
-          setImportStatus({
-            type: 'success',
-            message: `Successfully restored database! Loaded records: ${parsed.students?.length || 0} students, ${parsed.admissions?.length || 0} admissions, ${parsed.payments?.length || 0} payments.`
-          });
-          setTimeout(() => setImportStatus(null), 6000);
-        } else {
-          setImportStatus({ type: 'error', message: 'Could not restore database. The file structure is unrecognized.' });
-        }
+        // Support direct payload or snapshot-wrapped payload
+        const actualData = parsed.payload && typeof parsed.payload === 'object' ? parsed.payload : parsed;
+        const paymentsArr = Array.isArray(actualData.payments) ? actualData.payments : [];
+        const expensesArr = Array.isArray(actualData.expenses) ? actualData.expenses : [];
+
+        const summary: BackupPayloadSummary = {
+          fileName: file.name,
+          fileSizeKb: Math.max(1, Math.round(file.size / 1024)),
+          rawJson: json,
+          parsedData: actualData,
+          exportedAt: actualData.exportedAt || parsed.metadata?.dateLabel || parsed.date,
+          instituteName: actualData.academySettings?.instituteName || actualData.instituteName,
+          version: actualData.version || parsed.version || '2.6',
+          studentCount: Array.isArray(actualData.students) ? actualData.students.length : 0,
+          admissionCount: Array.isArray(actualData.admissions) ? actualData.admissions.length : 0,
+          paymentCount: paymentsArr.length,
+          totalPaymentAmount: paymentsArr.reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0),
+          batchCount: Array.isArray(actualData.batches) ? actualData.batches.length : 0,
+          courseCount: Array.isArray(actualData.courses) ? actualData.courses.length : 0,
+          expenseCount: expensesArr.length,
+          totalExpenseAmount: expensesArr.reduce((sum: number, exp: any) => sum + (Number(exp.amount) || 0), 0),
+          leadCount: Array.isArray(actualData.leads) ? actualData.leads.length : 0,
+          attendanceCount: Array.isArray(actualData.attendance) ? actualData.attendance.length : 0,
+          certificateCount: Array.isArray(actualData.certificates) ? actualData.certificates.length : 0,
+          hasCmsData: Boolean(actualData.websiteCmsConfig || actualData.websiteReviews)
+        };
+
+        setRestoreCandidate(summary);
+        setIsRestoreModalOpen(true);
       } catch (err: any) {
         setImportStatus({ type: 'error', message: 'Invalid JSON file: ' + (err?.message || 'Parse error') });
       }
     };
     reader.readAsText(file);
-    // Reset file input value so user can upload the same file again if desired
+    // Reset file input value so user can re-upload if needed
     e.target.value = '';
   };
 
@@ -543,6 +567,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
         </button>
 
         <button
+          onClick={() => setActiveTab('terms')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'terms'
+              ? 'border-teal-600 text-teal-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <ShieldCheck className="w-4 h-4 text-teal-600" />
+          <span>ছাত্র আচরণবিধি ও শর্তাবলী</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('profile')}
           className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
             activeTab === 'profile'
@@ -554,6 +590,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
           <span>Academy Profile & Receipts</span>
         </button>
       </div>
+
+      {/* TAB: STUDENT TERMS & CONDITIONS */}
+      {activeTab === 'terms' && <StudentTermsManager />}
 
       {/* TAB: NOTIFICATIONS & MESSAGE TEMPLATES */}
       {activeTab === 'notifications' && (
@@ -1681,6 +1720,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
         }}
         onResetLogo={() => {
           updateAcademySettings({ customLogoUrl: '' });
+        }}
+      />
+
+      {/* Pre-Restore Database Inspection & Verification Modal */}
+      <DatabaseRestoreVerificationModal
+        isOpen={isRestoreModalOpen}
+        onClose={() => setIsRestoreModalOpen(false)}
+        summary={restoreCandidate}
+        onSuccessRestore={(msg) => {
+          setImportStatus({ type: 'success', message: msg });
+          setTimeout(() => setImportStatus(null), 6000);
         }}
       />
     </div>

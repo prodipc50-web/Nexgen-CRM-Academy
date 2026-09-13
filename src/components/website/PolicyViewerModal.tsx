@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { PoliciesConfig } from '../../types';
 import { useAcademy } from '../../context/AcademyContext';
-import { X, ShieldCheck, FileCheck2, RefreshCw, Users2, Check, Edit3, Save, RotateCcw } from 'lucide-react';
+import { X, ShieldCheck, FileCheck2, RefreshCw, Users2, Check, Edit3, Save, RotateCcw, Printer, ExternalLink } from 'lucide-react';
+import { STUDENT_TERMS_AND_CONDITIONS, STUDENT_DECLARATION_TEXT } from '../../data/studentTerms';
+import { StudentTermsModal } from '../modals/StudentTermsModal';
 
 interface PolicyViewerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialType?: 'terms' | 'privacy' | 'refund' | 'conduct';
+  initialType?: 'terms' | 'privacy' | 'refund' | 'conduct' | 'studentTerms';
   policies?: PoliciesConfig;
   instituteName?: string;
 }
@@ -18,13 +20,19 @@ export const PolicyViewerModal: React.FC<PolicyViewerModalProps> = ({
   policies: propPolicies,
   instituteName = 'Nexgen Computer Academy'
 }) => {
-  const { websiteCmsConfig, updateWebsiteCmsConfig, currentUser } = useAcademy();
-  const [activeType, setActiveType] = useState<'terms' | 'privacy' | 'refund' | 'conduct'>(initialType);
+  const { websiteCmsConfig, updateWebsiteCmsConfig, currentUser, academySettings } = useAcademy();
+  const [activeType, setActiveType] = useState<'terms' | 'privacy' | 'refund' | 'conduct' | 'studentTerms'>(initialType);
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState('');
   const [saveToast, setSaveToast] = useState(false);
+  const [showDedicatedTermsModal, setShowDedicatedTermsModal] = useState(false);
 
   const effectivePolicies = websiteCmsConfig.policies || propPolicies;
+
+  const dynamicTerms = (academySettings?.studentTerms || STUDENT_TERMS_AND_CONDITIONS).filter(
+    t => t.isActive !== false
+  );
+  const dynamicDeclaration = academySettings?.studentTermsDeclaration || STUDENT_DECLARATION_TEXT;
 
   React.useEffect(() => {
     if (initialType) {
@@ -83,6 +91,13 @@ export const PolicyViewerModal: React.FC<PolicyViewerModalProps> = ({
           icon: Users2,
           text: getPolicyText('conduct'),
           key: 'codeOfConduct' as const
+        };
+      case 'studentTerms':
+        return {
+          title: 'Student Terms & Conditions (ছাত্র আচরণবিধি ও ১০টি শর্তাবলী)',
+          icon: ShieldCheck,
+          text: '',
+          key: 'studentTerms' as any
         };
     }
   };
@@ -230,6 +245,20 @@ export const PolicyViewerModal: React.FC<PolicyViewerModalProps> = ({
             <Users2 className="w-3.5 h-3.5" />
             <span>Code of Conduct</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveType('studentTerms');
+              setIsEditing(false);
+            }}
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center space-x-1 whitespace-nowrap ${
+              activeType === 'studentTerms' ? 'bg-teal-700 text-white shadow-xs' : 'text-teal-800 bg-teal-50 hover:bg-teal-100'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Student Terms (১০টি শর্তাবলী)</span>
+          </button>
         </div>
 
         {saveToast && (
@@ -285,6 +314,58 @@ export const PolicyViewerModal: React.FC<PolicyViewerModalProps> = ({
               </div>
             </div>
           </div>
+        ) : activeType === 'studentTerms' ? (
+          <div className="p-6 sm:p-7 max-h-[62vh] overflow-y-auto space-y-4 bg-slate-50/50">
+            {/* Header info bar */}
+            <div className="bg-teal-900 text-white p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm">
+              <div>
+                <h4 className="font-black text-sm tracking-wide flex items-center space-x-2">
+                  <ShieldCheck className="w-4 h-4 text-teal-300" />
+                  <span>{dynamicTerms.length}টি ছাত্র আচরণবিধি ও প্রাতিষ্ঠানিক শর্তাবলী</span>
+                </h4>
+                <p className="text-xs text-teal-200 mt-0.5">
+                  ভর্তির পূর্বে প্রতিটি ধারা মনোযোগ সহকারে পাঠ করুন।
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowDedicatedTermsModal(true)}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>প্রিন্ট ভিউ / ফরম দেখুন</span>
+              </button>
+            </div>
+
+            {/* Dynamic Clauses 2-column Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              {dynamicTerms.map(clause => (
+                <div
+                  key={clause.id}
+                  className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs flex flex-col justify-between"
+                >
+                  <div className="bg-teal-900 text-white px-3 py-1.5 flex items-center justify-between">
+                    <span className="font-bold">
+                      {clause.numberBn}. {clause.titleEn}
+                    </span>
+                    <span className="text-[11px] text-teal-200 font-medium">
+                      ({clause.titleBn})
+                    </span>
+                  </div>
+                  <div className="p-3 text-slate-700 leading-relaxed bg-white">
+                    <p>{clause.details}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Declaration note */}
+            <div className="bg-teal-50 border border-teal-200 rounded-xl p-3.5 text-xs text-teal-950 font-medium flex items-start space-x-2.5">
+              <span className="text-teal-700 font-bold text-base leading-none mt-0.5">✓</span>
+              <p>{dynamicDeclaration}</p>
+            </div>
+          </div>
         ) : (
           <div className="p-6 sm:p-8 max-h-[60vh] overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-line bg-white">
             {current.text}
@@ -298,15 +379,35 @@ export const PolicyViewerModal: React.FC<PolicyViewerModalProps> = ({
             <span>Last Updated: {new Date().getFullYear()} Active Academic Session</span>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl"
-          >
-            I Understand & Close
-          </button>
+          <div className="flex items-center space-x-2">
+            {activeType === 'studentTerms' && (
+              <button
+                type="button"
+                onClick={() => setShowDedicatedTermsModal(true)}
+                className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-xl flex items-center space-x-1.5 cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>প্রিন্ট / সম্পূর্ণ ফরম</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl"
+            >
+              I Understand & Close
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Dedicated Terms Modal for clean print & full sheet */}
+      <StudentTermsModal
+        isOpen={showDedicatedTermsModal}
+        onClose={() => setShowDedicatedTermsModal(false)}
+        terms={dynamicTerms}
+        declarationText={dynamicDeclaration}
+      />
     </div>
   );
 };

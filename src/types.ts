@@ -1,3 +1,15 @@
+export interface StudentTermClause {
+  id: number | string;
+  numberBn: string;
+  numberEn: string;
+  titleEn: string;
+  titleBn: string;
+  summary: string;
+  details: string;
+  iconName: string;
+  isActive?: boolean;
+}
+
 export type UserRole =
   | 'SUPER_ADMIN'
   | 'MANAGER'
@@ -67,6 +79,8 @@ export interface AcademySettings {
   idCardTerms?: string;
   admitCardInstructions?: string;
   admissionFormTerms?: string;
+  studentTerms?: StudentTermClause[];
+  studentTermsDeclaration?: string;
   defaultLearningMode?: 'Offline' | 'Online Live' | 'Hybrid';
   logoIconSize: number; // default 48
   logoFontSize: number; // default 16
