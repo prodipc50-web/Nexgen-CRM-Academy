@@ -3,7 +3,7 @@
 // Prevents 2-3 page overflow and guarantees exact 1-page fit across all browsers (Chrome, Edge, Firefox, Safari)
 
 export type PrintOrientation = 'portrait' | 'landscape';
-export type PrintPaperSize = 'a4' | 'letter' | 'pos80';
+export type PrintPaperSize = 'a4' | 'letter' | 'pos80' | 'pos58';
 
 export interface PrintOptions {
   documentTitle?: string;
@@ -37,6 +37,18 @@ export const executeCleanPrint = (options: PrintOptions = {}) => {
         margin: 0 !important;
         padding: 0 !important;
         width: 76mm !important;
+      }
+    `;
+  } else if (size === 'pos58') {
+    pageCss = `
+      @page {
+        size: 58mm auto !important;
+        margin: 0mm !important;
+      }
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 54mm !important;
       }
     `;
   } else if (size === 'letter') {

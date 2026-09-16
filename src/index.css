@@ -34,6 +34,11 @@ body {
   letter-spacing: 0.01em;
 }
 
+/* Smart typographic text-balance for headings to eliminate single-word orphan wrapping */
+h1, h2, h3, h4, .text-balance {
+  text-wrap: balance;
+}
+
 /* Prevent broken alignments in badges, pills, and action chips */
 .nowrap, .pill-nowrap {
   white-space: nowrap;

@@ -13,6 +13,7 @@ import {
   type User
 } from '../lib/firebase';
 import { compressImageBase64, estimatePayloadSize } from '../utils/imageCompressor';
+import { validatePublicSubmission } from '../utils/securityDefense';
 import {
   DEFAULT_DUE_NOTICE_TEMPLATE,
   DEFAULT_WELCOME_NOTICE_TEMPLATE,
@@ -65,8 +66,12 @@ import {
   DataCleanupPolicy,
   ArchivedItem,
   StorageUsageBreakdown,
-  OptimizationReport
+  OptimizationReport,
+  CrmSettingsConfig,
+  CrmLeadTag,
+  CrmCustomFieldDefinition
 } from '../types';
+import { INITIAL_CRM_SETTINGS } from '../data/crmSeedData';
 import {
   INITIAL_STAFF,
   INITIAL_COURSES,
@@ -288,6 +293,18 @@ interface AcademyContextType {
     message: string;
     error?: string;
   }>;
+
+  // CRM Settings & Dynamic Fields/Tags
+  crmSettings: CrmSettingsConfig;
+  updateCrmSettings: (patch: Partial<CrmSettingsConfig>) => void;
+  addLeadTag: (tag: Omit<CrmLeadTag, 'id'>) => CrmLeadTag;
+  updateLeadTag: (id: string, updates: Partial<CrmLeadTag>) => void;
+  deleteLeadTag: (id: string) => void;
+  addCustomField: (field: Omit<CrmCustomFieldDefinition, 'id'>) => CrmCustomFieldDefinition;
+  updateCustomField: (id: string, updates: Partial<CrmCustomFieldDefinition>) => void;
+  deleteCustomField: (id: string) => void;
+  toggleLeadTag: (leadId: string, tagName: string) => void;
+  updateLeadCustomFields: (leadId: string, values: Record<string, any>) => void;
 
   addFollowUp: (followUp: Omit<FollowUp, 'id' | 'createdAt'>) => void;
 
@@ -786,9 +803,16 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             ? DEFAULT_GA4_MEASUREMENT_ID
             : parsed.marketing.googleAnalyticsId
         };
+        const effectiveShareUrl = parsed.googleMapShareUrl || (parsed.googleMapEmbedUrl?.includes('share.google') ? parsed.googleMapEmbedUrl : 'https://share.google/9W8K1XZHLbZxFpF8G');
+        const effectiveEmbedUrl = (parsed.googleMapEmbedUrl && !parsed.googleMapEmbedUrl.includes('share.google'))
+          ? parsed.googleMapEmbedUrl
+          : INITIAL_WEBSITE_CMS_CONFIG.googleMapEmbedUrl;
+
         return {
           ...INITIAL_WEBSITE_CMS_CONFIG,
           ...parsed,
+          googleMapShareUrl: effectiveShareUrl,
+          googleMapEmbedUrl: effectiveEmbedUrl,
           marketing: marketingConfig,
           heroStats: { ...INITIAL_WEBSITE_CMS_CONFIG.heroStats, ...(parsed.heroStats || {}) },
           promoBanner: { ...INITIAL_WEBSITE_CMS_CONFIG.promoBanner, ...(parsed.promoBanner || {}) },
@@ -821,7 +845,18 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           fraudProtection: { ...INITIAL_WEBSITE_CMS_CONFIG.fraudProtection, ...(parsed.fraudProtection || {}) },
           otpConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.otpConfig, ...(parsed.otpConfig || {}) },
           multiplePhones: Array.isArray(parsed.multiplePhones) && parsed.multiplePhones.length > 0 ? parsed.multiplePhones : INITIAL_WEBSITE_CMS_CONFIG.multiplePhones,
-          multipleEmails: Array.isArray(parsed.multipleEmails) && parsed.multipleEmails.length > 0 ? parsed.multipleEmails : INITIAL_WEBSITE_CMS_CONFIG.multipleEmails
+          multipleEmails: Array.isArray(parsed.multipleEmails) && parsed.multipleEmails.length > 0 ? parsed.multipleEmails : INITIAL_WEBSITE_CMS_CONFIG.multipleEmails,
+          sectionVisibility: { ...INITIAL_WEBSITE_CMS_CONFIG.sectionVisibility, ...(parsed.sectionVisibility || {}) },
+          topOfferRibbon: { ...INITIAL_WEBSITE_CMS_CONFIG.topOfferRibbon, ...(parsed.topOfferRibbon || {}) },
+          leadCapturePopup: { ...INITIAL_WEBSITE_CMS_CONFIG.leadCapturePopup, ...(parsed.leadCapturePopup || {}) },
+          hiringPartnersConfig: {
+            ...INITIAL_WEBSITE_CMS_CONFIG.hiringPartnersConfig,
+            ...(parsed.hiringPartnersConfig || {}),
+            partners: Array.isArray(parsed.hiringPartnersConfig?.partners) && parsed.hiringPartnersConfig.partners.length > 0
+              ? parsed.hiringPartnersConfig.partners
+              : (INITIAL_WEBSITE_CMS_CONFIG.hiringPartnersConfig?.partners || [])
+          },
+          floatingActionWidget: { ...INITIAL_WEBSITE_CMS_CONFIG.floatingActionWidget, ...(parsed.floatingActionWidget || {}) }
         };
       } catch (e) {
         console.error('Error parsing website_cms_config', e);
@@ -870,6 +905,25 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       'Phone Call / Direct Inquiry',
       'Other'
     ];
+  });
+
+  // CRM Settings: Dynamic Tags, Custom Fields, Lead Sources & Lost Reasons
+  const [crmSettings, setCrmSettings] = useState<CrmSettingsConfig>(() => {
+    const saved = localStorage.getItem(`${STORAGE_KEY}_crm_settings`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          tags: Array.isArray(parsed.tags) && parsed.tags.length > 0 ? parsed.tags : INITIAL_CRM_SETTINGS.tags,
+          customFields: Array.isArray(parsed.customFields) ? parsed.customFields : INITIAL_CRM_SETTINGS.customFields,
+          leadSources: Array.isArray(parsed.leadSources) && parsed.leadSources.length > 0 ? parsed.leadSources : INITIAL_CRM_SETTINGS.leadSources,
+          lostReasons: Array.isArray(parsed.lostReasons) && parsed.lostReasons.length > 0 ? parsed.lostReasons : INITIAL_CRM_SETTINGS.lostReasons
+        };
+      } catch (e) {
+        console.error('Error parsing crm_settings', e);
+      }
+    }
+    return INITIAL_CRM_SETTINGS;
   });
 
   const [expenseCategoriesList, setExpenseCategoriesList] = useState<string[]>(() => {
@@ -2220,6 +2274,142 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     logAudit('Lead Moved to Trash', 'CRM', id, `Moved lead "${target.name}" to trash`);
   };
 
+  const updateCrmSettings = (patch: Partial<CrmSettingsConfig>) => {
+    setCrmSettings(prev => {
+      const updated = { ...prev, ...patch };
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_crm_settings`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const addLeadTag = (tag: Omit<CrmLeadTag, 'id'>): CrmLeadTag => {
+    const newTag: CrmLeadTag = {
+      ...tag,
+      id: `tag-${Date.now()}`
+    };
+    setCrmSettings(prev => {
+      const updated = { ...prev, tags: [...prev.tags, newTag] };
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_crm_settings`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    logAudit('CRM Tag Created', 'CRM', newTag.id, `Created lead tag "${newTag.name}"`);
+    return newTag;
+  };
+
+  const updateLeadTag = (id: string, updates: Partial<CrmLeadTag>) => {
+    setCrmSettings(prev => {
+      const updated = {
+        ...prev,
+        tags: prev.tags.map(t => t.id === id ? { ...t, ...updates } : t)
+      };
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_crm_settings`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const deleteLeadTag = (id: string) => {
+    setCrmSettings(prev => {
+      const targetTag = prev.tags.find(t => t.id === id);
+      const updated = {
+        ...prev,
+        tags: prev.tags.filter(t => t.id !== id)
+      };
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_crm_settings`, JSON.stringify(updated));
+      } catch {}
+      if (targetTag) {
+        logAudit('CRM Tag Deleted', 'CRM', id, `Deleted lead tag "${targetTag.name}"`);
+      }
+      return updated;
+    });
+  };
+
+  const addCustomField = (field: Omit<CrmCustomFieldDefinition, 'id'>): CrmCustomFieldDefinition => {
+    const newField: CrmCustomFieldDefinition = {
+      ...field,
+      id: `cf-${Date.now()}`
+    };
+    setCrmSettings(prev => {
+      const updated = { ...prev, customFields: [...prev.customFields, newField] };
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_crm_settings`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    logAudit('CRM Field Created', 'CRM', newField.id, `Created custom lead field "${newField.label}"`);
+    return newField;
+  };
+
+  const updateCustomField = (id: string, updates: Partial<CrmCustomFieldDefinition>) => {
+    setCrmSettings(prev => {
+      const updated = {
+        ...prev,
+        customFields: prev.customFields.map(f => f.id === id ? { ...f, ...updates } : f)
+      };
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_crm_settings`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const deleteCustomField = (id: string) => {
+    setCrmSettings(prev => {
+      const targetField = prev.customFields.find(f => f.id === id);
+      const updated = {
+        ...prev,
+        customFields: prev.customFields.filter(f => f.id !== id)
+      };
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_crm_settings`, JSON.stringify(updated));
+      } catch {}
+      if (targetField) {
+        logAudit('CRM Field Deleted', 'CRM', id, `Deleted custom field "${targetField.label}"`);
+      }
+      return updated;
+    });
+  };
+
+  const toggleLeadTag = (leadId: string, tagName: string) => {
+    setLeads(prev => {
+      const updated = prev.map(ld => {
+        if (ld.id !== leadId) return ld;
+        const currentTags = Array.isArray(ld.tags) ? ld.tags : [];
+        const newTags = currentTags.includes(tagName)
+          ? currentTags.filter(t => t !== tagName)
+          : [...currentTags, tagName];
+        return { ...ld, tags: newTags, updatedAt: new Date().toISOString() };
+      });
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const updateLeadCustomFields = (leadId: string, values: Record<string, any>) => {
+    setLeads(prev => {
+      const updated = prev.map(ld => {
+        if (ld.id !== leadId) return ld;
+        return {
+          ...ld,
+          customFieldValues: { ...(ld.customFieldValues || {}), ...values },
+          updatedAt: new Date().toISOString()
+        };
+      });
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
   // Submit Lead from Public Website / Landing Page with Server Fraud Check & OTP
   const submitPublicLead = async (payload: {
     fullName?: string;
@@ -2261,12 +2451,29 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     captchaExpected?: string;
     otpVerified?: boolean;
   }) => {
+    // 🛡️ Cyber Security & Anti-Bot Defense Verification
+    const defense = validatePublicSubmission(payload, {
+      formName: payload.leadSource || 'public_lead_submission',
+      honeypotValue: payload.honeypotVal,
+      phoneFieldName: 'phone',
+      requirePhone: true
+    });
+
+    if (!defense.isSafe) {
+      return {
+        success: false,
+        message: defense.errorMessage || 'নিরাপত্তা ত্রুটির কারণে আবেদনটি বাতিল করা হয়েছে।'
+      };
+    }
+
+    const cleanPayload = defense.sanitizedPayload;
+
     try {
       const response = await fetch('/api/leads/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...payload,
+          ...cleanPayload,
           fraudConfig: websiteCmsConfig.fraudProtection,
           otpMode: websiteCmsConfig.leadFormConfig?.otpMode || websiteCmsConfig.otpConfig?.mode || 'OFF'
         })
@@ -5349,6 +5556,16 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addLead,
         updateLead,
         deleteLead,
+        crmSettings,
+        updateCrmSettings,
+        addLeadTag,
+        updateLeadTag,
+        deleteLeadTag,
+        addCustomField,
+        updateCustomField,
+        deleteCustomField,
+        toggleLeadTag,
+        updateLeadCustomFields,
         syncIncomingLeadsNow,
         submitPublicLead,
         addFollowUp,

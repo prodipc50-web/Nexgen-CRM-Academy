@@ -164,6 +164,7 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
   campusDirections: 'Behind Bashundhara City Market, 2 minutes walking distance from Farmgate Metro Station.',
   officeHours: 'Saturday to Friday: 9:00 AM – 8:00 PM (7 Days Open)',
   googleMapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.848881261358!2d90.3887!3d23.7527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ1JzA5LjciTiA5MMKwMjMnMTkuMyJF!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd',
+  googleMapShareUrl: 'https://share.google/9W8K1XZHLbZxFpF8G',
 
   // Legacy fallbacks
   whatsappSupportNumber: '01798444444',
@@ -821,9 +822,200 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     seminars: true,
     gallery: true,
     reviews: true,
+    hiringPartners: true,
+    placements: true,
     verifyCertificate: true,
     noticesAndFaq: true,
     contactAndMap: true
+  },
+
+  // 7. Top Sticky Offer Ribbon Bar
+  topOfferRibbon: {
+    enabled: true,
+    badgeText: '🎉 স্পেশাল অফার',
+    message: 'পবিত্র ঈদ উপলক্ষে সকল আইটি কোর্সে ৩০% পর্যন্ত স্কলারশিপ ছাড়! সীমিত আসন বাকি।',
+    couponCode: 'EID2026',
+    buttonText: 'ভর্তি আবেদন করুন',
+    actionType: 'open_admission',
+    bgColor: 'bg-gradient-to-r from-amber-600 via-rose-600 to-indigo-700',
+    expiresAt: '2026-10-31',
+    dismissible: true
+  },
+
+  // 8. Lead Generation Popup / Exit Intent Offer Modal
+  leadCapturePopup: {
+    enabled: true,
+    title: '🎓 ফ্রি ক্যারিয়ার কাউন্সেলিং ও স্কলারশিপ ভাউচার!',
+    subtitle: 'আপনার নাম ও মোবাইল নম্বর দিন, আমাদের অভিজ্ঞ সিনিয়র মেন্টর সরাসরি আপনার সাথে যোগাযোগ করে সর্বোচ্চ স্কলারশিপ কোটা ও উপযুক্ত কোর্স বাছাইয়ে সহায়তা করবেন।',
+    badgeText: '🔥 সীমিত আসন • Batch 2026',
+    discountText: '৳১,৫০০ পর্যন্ত নিশ্চিত স্কলারশিপ ভাউচার',
+    submitButtonText: 'আমার স্কলারশিপ ভাউচার বুক করুন',
+    successMessage: 'অভিনন্দন! আপনার তথ্য সফলভাবে গৃহীত হয়েছে। আমাদের হেড অব কাউন্সেলিং খুব শীঘ্রই আপনার সাথে যোগাযোগ করবেন।',
+    triggerType: 'delay',
+    delaySeconds: 8,
+    scrollPercentage: 35,
+    showCourseSelect: true,
+    showEmailField: false
+  },
+
+  // 9. Hiring Partners & Corporate Recruiters Showcase
+  hiringPartnersConfig: {
+    enabled: true,
+    sectionTag: 'TOP RECRUITERS & CORPORATE AFFILIATIONS',
+    heading: 'যেসব শীর্ষ প্রতিষ্ঠানে আমাদের শিক্ষার্থীরা কর্মরত',
+    subtitle: 'আমাদের দক্ষ গ্র্যাজুয়েটরা দেশ-বিদেশের খ্যাতিমান আইটি কোম্পানি, সফটওয়্যার ফার্ম এবং গ্লোবাল ফ্রিল্যান্স মার্কেটপ্লেসে সুনামের সাথে কাজ করছেন।',
+    partners: [
+      {
+        id: 'hp-1',
+        name: 'Brain Station 23',
+        logoUrl: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200&auto=format&fit=crop&q=60',
+        category: 'Corporate Recruiter',
+        hiredCount: 42,
+        isActive: true,
+        sortOrder: 1
+      },
+      {
+        id: 'hp-2',
+        name: 'BJIT Limited',
+        logoUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=60',
+        category: 'Corporate Recruiter',
+        hiredCount: 28,
+        isActive: true,
+        sortOrder: 2
+      },
+      {
+        id: 'hp-3',
+        name: 'Daraz Bangladesh',
+        logoUrl: 'https://images.unsplash.com/photo-1516876437184-593fda40c7ce?w=200&auto=format&fit=crop&q=60',
+        category: 'Corporate Recruiter',
+        hiredCount: 35,
+        isActive: true,
+        sortOrder: 3
+      },
+      {
+        id: 'hp-4',
+        name: 'Pathao Tech',
+        logoUrl: 'https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=200&auto=format&fit=crop&q=60',
+        category: 'Corporate Recruiter',
+        hiredCount: 19,
+        isActive: true,
+        sortOrder: 4
+      },
+      {
+        id: 'hp-5',
+        name: 'Walton Hi-Tech',
+        logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&auto=format&fit=crop&q=60',
+        category: 'Corporate Recruiter',
+        hiredCount: 24,
+        isActive: true,
+        sortOrder: 5
+      },
+      {
+        id: 'hp-6',
+        name: 'Brotecs Technologies',
+        logoUrl: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=200&auto=format&fit=crop&q=60',
+        category: 'Tech Partner',
+        hiredCount: 16,
+        isActive: true,
+        sortOrder: 6
+      },
+      {
+        id: 'hp-7',
+        name: 'BTEB Approved Partner Center',
+        logoUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=200&auto=format&fit=crop&q=60',
+        category: 'Govt Accreditation',
+        isActive: true,
+        sortOrder: 7
+      }
+    ]
+  },
+
+  // 10. Floating Action & Quick Contact Controller
+  floatingActionWidget: {
+    enabled: true,
+    whatsappNumber: '01798444444',
+    whatsappMessage: 'হ্যালো! Nexgen Computer Academy এর কোর্স ও ভর্তি সংক্রান্ত তথ্য জানতে চাচ্ছি।',
+    callNumber: '01798444444',
+    showCallButton: true,
+    showAdmissionButton: true,
+    showScrollToTop: true,
+    position: 'bottom_right'
+  },
+
+  // 11. Social Proof Real-time Ticker
+  socialProofTicker: {
+    enabled: true,
+    intervalSeconds: 14,
+    displayDurationSeconds: 5,
+    position: 'bottom_left',
+    customActivities: [
+      {
+        id: 'sp-1',
+        studentName: 'রাকিব আহমেদ',
+        location: 'মিরপুর, ঢাকা',
+        actionType: 'enrolled',
+        courseName: 'Graphic Design & Freelancing',
+        timeAgo: '২ মিনিট আগে'
+      },
+      {
+        id: 'sp-2',
+        studentName: 'তানজিলা হক',
+        location: 'উত্তরা, ঢাকা',
+        actionType: 'downloaded_syllabus',
+        courseName: 'MERN Stack Web Development',
+        timeAgo: '৫ মিনিট আগে'
+      },
+      {
+        id: 'sp-3',
+        studentName: 'মাহমুদুল হাসান',
+        location: 'ধানমন্ডি, ঢাকা',
+        actionType: 'booked_tour',
+        courseName: 'Python, Django & AI Automation',
+        timeAgo: '৮ মিনিট আগে'
+      },
+      {
+        id: 'sp-4',
+        studentName: 'সাদিয়া আফরিন',
+        location: 'চট্টগ্রাম',
+        actionType: 'enrolled',
+        courseName: 'UI/UX Design & Product Strategy',
+        timeAgo: '১২ মিনিট আগে'
+      }
+    ]
+  },
+
+  // 12. Free Campus Tour & Counseling Booking
+  campusTourConfig: {
+    enabled: true,
+    badgeText: 'ফ্রি ১-অন-১ ক্যারিয়ার কাউন্সেলিং ও ল্যাব ভিজিট',
+    title: 'ক্যাম্পাস ও আধুনিক কম্পিউটার ল্যাব ভিজিট বুক করুন',
+    subtitle: 'সরাসরি ফার্মগেট সেন্টারে এসে সিনিয়র মেন্টরদের সাথে কথা বলুন ও আধুনিক প্র্যাকটিক্যাল ল্যাব পরিবেশ ঘুরে দেখুন।',
+    availableDays: 'শনিবার থেকে বৃহস্পতিবার (সকাল ১০টা - রাত ৮টা)',
+    availableTimeSlots: [
+      '10:30 AM - 12:00 PM',
+      '12:00 PM - 02:00 PM',
+      '03:00 PM - 05:00 PM',
+      '05:30 PM - 07:30 PM'
+    ],
+    ctaButtonText: 'ফ্রি ক্যাম্পাস ভিজিট কনফার্ম করুন'
+  },
+
+  // 13. Syllabus Download Lead Magnet Config
+  syllabusDownloadConfig: {
+    enabled: true,
+    modalTitle: 'অফিসিয়াল কোর্স কারিকুলাম ও মডিউল',
+    modalSubtitle: 'সম্পূর্ণ কারিকুলাম, ক্লাস শিডিউল ও প্রজেক্টের তালিকা ডাউনলোড করতে নিচের তথ্য দিন',
+    requirePhone: true,
+    requireEmail: false,
+    buttonText: 'ইনস্ট্যান্ট সিলেবাস ডাউনলোড করুন',
+    successMessage: 'ধন্যবাদ! আপনার অনুরোধ সংরক্ষিত হয়েছে। নিচের বোতামে ক্লিক করে সিলেবাসটি দেখুন বা ডাউনলোড করুন।'
+  },
+
+  // 14. Placements Showcase Section Config
+  placementsSectionConfig: {
+    tagText: 'Real Alumni Career Success & Placements',
+    heading: 'সফল শিক্ষার্থীদের কর্মসংস্থান ও ফ্রিল্যান্সিং অর্জন',
+    subtitle: 'কোর্স সম্পন্নের পর আমাদের ক্যারিয়ার সেলের প্রত্যক্ষ নির্দেশনায় দেশি-বিদেশি শীর্ষ সফটওয়্যার কোম্পানি এবং গ্লোবাল ফ্রিল্যান্স মার্কেটপ্লেসে সফলতার সাথে কাজ করছেন আমাদের শিক্ষার্থীরা।'
   }
 };
 

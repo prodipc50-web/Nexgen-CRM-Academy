@@ -34,6 +34,7 @@ import { useAcademy } from '../../context/AcademyContext';
 import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
 import { trackMetaPixelEvent, getCapturedUtmParams } from '../../utils/analyticsTracker';
 import { LeadForm } from '../LeadForm';
+import { SyllabusDownloadModal } from './SyllabusDownloadModal';
 
 interface CourseDetailsModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
   course,
   onOpenEnroll
 }) => {
+  const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
   const { staffList, websiteReviews, websiteGallery, websiteFaqs, websiteCmsConfig, academySettings, addLead } = useAcademy();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'schedules' | 'trainers' | 'reviews' | 'gallery' | 'faqs'>('overview');
@@ -471,34 +473,30 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                 </span>
               </div>
 
-              {/* MANUAL CURRICULUM FILE DOWNLOAD BANNER */}
-              {(course.curriculumFileUrl || course.syllabusPdfUrl || course.landingConfig?.syllabusDownload?.fileUrl) && (
-                <div className="p-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
-                  <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs uppercase">
-                      {course.curriculumFileType || 'PDF'}
-                    </div>
-                    <div className="min-w-0">
-                      <h5 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
-                        {course.curriculumFileName || `${course.name} অফিসিয়াল কারিকুলাম ও সিলেবাস`}
-                      </h5>
-                      <p className="text-[11px] text-slate-500">
-                        সরাসরি অ্যাকাডেমি কর্তৃক হালনাগাদকৃত কারিকুলাম {course.curriculumFileSize ? `• ${course.curriculumFileSize}` : ''}
-                      </p>
-                    </div>
+              {/* DYNAMIC CURRICULUM & SYLLABUS DOWNLOAD BANNER (CMS DRIVEN) */}
+              <div className="p-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs uppercase">
+                    {course.curriculumFileType || 'PDF'}
                   </div>
-                  <a
-                    href={course.curriculumFileUrl || course.syllabusPdfUrl || course.landingConfig?.syllabusDownload?.fileUrl}
-                    download={course.curriculumFileName || `${course.name}_syllabus.pdf`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center space-x-1.5 shrink-0 self-stretch sm:self-auto justify-center"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>সিলেবাস ডাউনলোড করুন</span>
-                  </a>
+                  <div className="min-w-0">
+                    <h5 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                      {course.curriculumFileName || `${course.name} অফিসিয়াল কারিকুলাম ও সিলেবাস`}
+                    </h5>
+                    <p className="text-[11px] text-slate-500">
+                      {websiteCmsConfig?.syllabusDownloadConfig?.modalSubtitle || 'সম্পূর্ণ কারিকুলাম, ক্লাস শিডিউল ও প্রজেক্টের তালিকা ডাউনলোড করতে ক্লিক করুন'}
+                    </p>
+                  </div>
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setIsSyllabusModalOpen(true)}
+                  className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-black rounded-xl shadow-xs transition-colors flex items-center space-x-1.5 shrink-0 self-stretch sm:self-auto justify-center cursor-pointer active:scale-98"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>সিলেবাস ডাউনলোড করুন</span>
+                </button>
+              </div>
 
               <div className="space-y-3">
                 {displayModules.map((mod: any, idx: number) => {
@@ -856,6 +854,17 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Dynamic Syllabus Download Lead Magnet Modal */}
+      <SyllabusDownloadModal
+        isOpen={isSyllabusModalOpen}
+        onClose={() => setIsSyllabusModalOpen(false)}
+        course={course}
+        onOpenAdmission={(c) => {
+          setIsSyllabusModalOpen(false);
+          onOpenEnroll(c);
+        }}
+      />
     </div>
   );
 };

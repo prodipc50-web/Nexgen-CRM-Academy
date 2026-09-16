@@ -36,7 +36,12 @@ import {
   FileSpreadsheet,
   Copy,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Hash,
+  Award,
+  Tag,
+  Calendar,
+  Coins
 } from 'lucide-react';
 import {
   DEFAULT_DUE_NOTICE_TEMPLATE,
@@ -50,6 +55,12 @@ import { FraudAndSecuritySettings } from '../settings/FraudAndSecuritySettings';
 import { PaymentGatewaysSettings } from '../settings/PaymentGatewaysSettings';
 import { AutoBackupAndArchiveManager } from '../settings/AutoBackupAndArchiveManager';
 import { StudentTermsManager } from '../settings/StudentTermsManager';
+import { IdPrefixSettingsManager } from '../settings/IdPrefixSettingsManager';
+import { ClassShiftScheduleManager } from '../settings/ClassShiftScheduleManager';
+import { GradingAndExamPolicyManager } from '../settings/GradingAndExamPolicyManager';
+import { PromoCodeManager } from '../settings/PromoCodeManager';
+import { AcademicCalendarHolidayManager } from '../settings/AcademicCalendarHolidayManager';
+import { InstallmentDueRulesManager } from '../settings/InstallmentDueRulesManager';
 import { DatabaseRestoreVerificationModal, BackupPayloadSummary } from '../modals/DatabaseRestoreVerificationModal';
 
 interface SettingsViewProps {
@@ -121,7 +132,25 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     emptyTrash
   } = useAcademy();
 
-  const [activeTab, setActiveTab] = useState<'security' | 'payments' | 'theme' | 'marketing' | 'profile' | 'terms' | 'dropdowns' | 'rbac' | 'audit' | 'backup' | 'notifications'>('marketing');
+  const [activeTab, setActiveTab] = useState<
+    | 'security'
+    | 'payments'
+    | 'theme'
+    | 'marketing'
+    | 'profile'
+    | 'terms'
+    | 'dropdowns'
+    | 'rbac'
+    | 'audit'
+    | 'backup'
+    | 'notifications'
+    | 'idPrefix'
+    | 'shifts'
+    | 'grading'
+    | 'promos'
+    | 'calendar'
+    | 'feeRules'
+  >('marketing');
   const [resetSuccess, setResetSuccess] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -589,10 +618,100 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
           <Building className="w-4 h-4" />
           <span>Academy Profile & Receipts</span>
         </button>
+
+        <button
+          onClick={() => setActiveTab('idPrefix')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'idPrefix'
+              ? 'border-indigo-600 text-indigo-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Hash className="w-4 h-4 text-indigo-600" />
+          <span>আইডি ও রসিদ প্রিফিক্স</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('shifts')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'shifts'
+              ? 'border-teal-600 text-teal-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Clock className="w-4 h-4 text-teal-600" />
+          <span>ক্লাস শিফট ও রুটিন</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('grading')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'grading'
+              ? 'border-amber-600 text-amber-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Award className="w-4 h-4 text-amber-600" />
+          <span>গ্রেডিং ও এক্সাম পলিসি</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('promos')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'promos'
+              ? 'border-purple-600 text-purple-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Tag className="w-4 h-4 text-purple-600" />
+          <span>প্রমো কোড ও স্কলারশিপ</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('calendar')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'calendar'
+              ? 'border-sky-600 text-sky-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Calendar className="w-4 h-4 text-sky-600" />
+          <span>অ্যাকাডেমিক ক্যালেন্ডার ও ছুটি</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('feeRules')}
+          className={`pb-3 border-b-2 transition-all flex items-center space-x-1.5 whitespace-nowrap ${
+            activeTab === 'feeRules'
+              ? 'border-emerald-600 text-emerald-900 font-black'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Coins className="w-4 h-4 text-emerald-600" />
+          <span>কিস্তি ও ফি রুলস</span>
+        </button>
       </div>
 
       {/* TAB: STUDENT TERMS & CONDITIONS */}
       {activeTab === 'terms' && <StudentTermsManager />}
+
+      {/* TAB: ID & VOUCHER PREFIX CONFIG */}
+      {activeTab === 'idPrefix' && <IdPrefixSettingsManager />}
+
+      {/* TAB: CLASS SHIFT & SCHEDULE MANAGER */}
+      {activeTab === 'shifts' && <ClassShiftScheduleManager />}
+
+      {/* TAB: GRADING SCALE & EXAM POLICY MANAGER */}
+      {activeTab === 'grading' && <GradingAndExamPolicyManager />}
+
+      {/* TAB: PROMO COUPONS & SCHOLARSHIPS */}
+      {activeTab === 'promos' && <PromoCodeManager />}
+
+      {/* TAB: ACADEMIC CALENDAR & HOLIDAYS */}
+      {activeTab === 'calendar' && <AcademicCalendarHolidayManager />}
+
+      {/* TAB: INSTALLMENT & DUE FEE RULES */}
+      {activeTab === 'feeRules' && <InstallmentDueRulesManager />}
 
       {/* TAB: NOTIFICATIONS & MESSAGE TEMPLATES */}
       {activeTab === 'notifications' && (

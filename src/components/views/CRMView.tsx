@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Lead, LeadStatus, FollowUpMethod } from '../../types';
 import { exportLeadsSpreadsheet } from '../../utils/spreadsheetExport';
+import { CrmFieldsAndTagsModal } from '../modals/CrmFieldsAndTagsModal';
 import {
   Users,
   PlusCircle,
@@ -30,8 +31,29 @@ import {
   Download,
   RefreshCw,
   Globe,
-  Zap
+  Zap,
+  Tag,
+  Sliders,
+  Layers,
+  Copy,
+  CheckSquare,
+  Square
 } from 'lucide-react';
+
+// Status Normalizer to ensure every lead maps to a valid pipeline column
+export const normalizeLeadStatus = (status?: string): LeadStatus => {
+  if (!status) return 'New';
+  if (status === 'OTP Verified' || status === 'Pending Verification' || status === 'Suspicious' || status === 'Duplicate') return 'New';
+  if (status === 'Demo Attended') return 'Demo Scheduled';
+  if (status === 'Enrolled' || status === 'Confirmed' || status === 'Paid') return 'Admitted';
+  if (status === 'Not Interested' || status === 'Rejected' || status === 'Lost') return 'Lost';
+  if (status === 'Qualified') return 'Interested';
+  const validStatuses: LeadStatus[] = ['New', 'Contacted', 'Interested', 'Demo Scheduled', 'Follow-up', 'Admission Pending', 'Admitted', 'Lost'];
+  if (validStatuses.includes(status as LeadStatus)) {
+    return status as LeadStatus;
+  }
+  return 'New';
+};
 
 interface CRMViewProps {
   onOpenNewLead: () => void;
@@ -54,8 +76,14 @@ export const CRMView: React.FC<CRMViewProps> = ({
     leadSources,
     occupationsList,
     syncIncomingLeadsNow,
-    academySettings
+    academySettings,
+    crmSettings,
+    toggleLeadTag,
+    updateLeadCustomFields
   } = useAcademy();
+
+  const [isFieldsTagsModalOpen, setIsFieldsTagsModalOpen] = useState(false);
+  const [tagFilter, setTagFilter] = useState('all');
 
   // Generate safe dynamic WhatsApp chat URL with institute name and course info
   const getLeadWhatsAppUrl = (lead: Lead) => {
@@ -99,8 +127,111 @@ export const CRMView: React.FC<CRMViewProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [courseFilter, setCourseFilter] = useState<string>('all');
   const [counselorFilter, setCounselorFilter] = useState<string>('all');
+  const [filterDuplicatesOnly, setFilterDuplicatesOnly] = useState(false);
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [whatsAppModalLead, setWhatsAppModalLead] = useState<Lead | null>(null);
+  const [whatsAppCustomText, setWhatsAppCustomText] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+
+  // Phone duplicates map
+  const phoneCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    leads.forEach(l => {
+      const clean = l.phone.replace(/[^0-9]/g, '').slice(-11);
+      if (clean.length >= 10) {
+        map.set(clean, (map.get(clean) || 0) + 1);
+      }
+    });
+    return map;
+  }, [leads]);
+
+  const duplicateLeadsCount = useMemo(() => {
+    return leads.filter(l => {
+      const clean = l.phone.replace(/[^0-9]/g, '').slice(-11);
+      return (phoneCountMap.get(clean) || 0) > 1;
+    }).length;
+  }, [leads, phoneCountMap]);
+
+  const [followUpFilter, setFollowUpFilter] = useState<'all' | 'today' | 'overdue'>('all');
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  const todayFollowUpsCount = useMemo(() => {
+    return leads.filter(l => {
+      const norm = normalizeLeadStatus(l.status);
+      if (norm === 'Admitted' || norm === 'Lost') return false;
+      return l.nextFollowUpDate === todayStr;
+    }).length;
+  }, [leads, todayStr]);
+
+  const overdueFollowUpsCount = useMemo(() => {
+    return leads.filter(l => {
+      const norm = normalizeLeadStatus(l.status);
+      if (norm === 'Admitted' || norm === 'Lost') return false;
+      return Boolean(l.nextFollowUpDate && l.nextFollowUpDate < todayStr);
+    }).length;
+  }, [leads, todayStr]);
+
+  // 4 Pre-built High-Converting WhatsApp Templates for Counselors
+  const getWhatsAppTemplates = (lead: Lead) => {
+    const instName = academySettings?.instituteName || 'Nexgen Academy';
+    const crs = courses.find(c => c.id === lead.interestedCourseId);
+    const crsName = crs?.name || lead.courseName || 'আমাদের প্রফেশনাল আইটি কোর্স';
+
+    return [
+      {
+        id: 't1',
+        title: '📋 কোর্স আউটলাইন ও স্কলারশিপ অফার',
+        message: `আসসালামু আলাইকুম ${lead.name}!\n${instName} থেকে আপনার সাথে যোগাযোগ করছি।\n\nআপনি "${crsName}" কোর্সে আগ্রহ প্রকাশ করেছিলেন। আমাদের বর্তমান ব্যাচে সীমিত সিটে স্পেশাল স্কলারশিপ ও অফার চলছে।\n\nকোর্সের সম্পূর্ণ সিলেবাস, ক্লাস রুটিন ও ডিসকাউন্ট সম্পর্কে বিস্তারিত জানতে এই মেসেজের উত্তর দিন। ধন্যবাদ!`
+      },
+      {
+        id: 't2',
+        title: '🏛️ ১-অন-১ ফ্রি ল্যাব ভিজিট ও ক্যারিয়ার কাউন্সিলিং',
+        message: `প্রিয় ${lead.name},\n${instName}-এর পক্ষ থেকে শুভেচ্ছা!\n\nসরাসরি আমাদের আধুনিক কম্পিউটার ল্যাব এবং অভিজ্ঞ ইন্ডাস্ট্রি মেন্টরদের সাথে দেখা করে ১-অন-১ ফ্রি ক্যারিয়ার গাইডলাইন সেশন নেওয়ার জন্য আপনাকে সাদর আমন্ত্রণ।\n\nআপনি কি এই সপ্তাহে আমাদের ক্যাম্পাসে আসার জন্য সুবিধাজনক সময় জানাতে পারেন?`
+      },
+      {
+        id: 't3',
+        title: '⚡ স্পেশাল স্কলারশিপ ও ডিসকাউন্ট রিমাইন্ডার',
+        message: `আসসালামু আলাইকুম ${lead.name}!\n${instName}-এর "${crsName}" কোর্সের চলতি ব্যাচে আর মাত্র কয়েকটি সিট বাকি রয়েছে।\n\nআজকের মধ্যে যোগাযোগ করলে আপনি বিশেষ স্কলারশিপের আওতায় ভর্তি নিশ্চিত করতে পারবেন। আপনার কোনো প্রশ্ন বা ফি সম্পর্কিত তথ্য জানতে চাইলে এখনই জানান।`
+      },
+      {
+        id: 't4',
+        title: '🎓 দ্রুত ভর্তি নিশ্চিতকরণ ও সিট বুকিং',
+        message: `প্রিয় ${lead.name}!\n${instName}-এ "${crsName}" কোর্সে আপনার পছন্দের ব্যাচে সিট কনফার্মেশনের জন্য যোগাযোগ করছি।\n\nঅনলাইন বা ক্যাম্পাসে সরাসরি এসে সহজ কিস্তিতে ভর্তি হওয়ার সুযোগ রয়েছে। আপনার পছন্দের শিডিউল (অনলাইন/অফলাইন) কনফার্ম করতে আমাদের জানান।`
+      }
+    ];
+  };
+
+  const handleOpenWhatsAppModal = (lead: Lead) => {
+    setWhatsAppModalLead(lead);
+    const templates = getWhatsAppTemplates(lead);
+    setWhatsAppCustomText(templates[0].message);
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!whatsAppModalLead) return;
+    const rawDigits = whatsAppModalLead.phone.replace(/[^0-9]/g, '');
+    const cleanPhone = rawDigits.startsWith('88') ? rawDigits : `88${rawDigits.slice(-11)}`;
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsAppCustomText)}`;
+    window.open(url, '_blank');
+    setWhatsAppModalLead(null);
+  };
+
+  const handleBulkStatusChange = (newStatus: LeadStatus) => {
+    selectedLeadIds.forEach(id => {
+      updateLead(id, { status: newStatus });
+    });
+    setSelectedLeadIds([]);
+  };
+
+  const handleBulkDelete = () => {
+    if (window.confirm(`আপনি কি নিশ্চিত যে নির্বাচিত ${selectedLeadIds.length} জন লিড মুছে ফেলতে চান?`)) {
+      selectedLeadIds.forEach(id => {
+        deleteLead(id);
+      });
+      setSelectedLeadIds([]);
+    }
+  };
 
   const handleManualSync = async () => {
     setIsSyncing(true);
@@ -163,6 +294,8 @@ export const CRMView: React.FC<CRMViewProps> = ({
   const [editComments, setEditComments] = useState('');
   const [editNextDate, setEditNextDate] = useState('');
   const [editNextNotes, setEditNextNotes] = useState('');
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [editCustomFieldValues, setEditCustomFieldValues] = useState<Record<string, any>>({});
 
   // Delete Lead Modal State
   const [deletingLead, setDeletingLead] = useState<Lead | null>(null);
@@ -186,6 +319,8 @@ export const CRMView: React.FC<CRMViewProps> = ({
     setEditComments(lead.comments || '');
     setEditNextDate(lead.nextFollowUpDate || '');
     setEditNextNotes(lead.nextFollowUpNotes || '');
+    setEditTags(Array.isArray(lead.tags) ? [...lead.tags] : []);
+    setEditCustomFieldValues(lead.customFieldValues ? { ...lead.customFieldValues } : {});
   };
 
   const handleSaveEdit = (e: React.FormEvent) => {
@@ -210,7 +345,9 @@ export const CRMView: React.FC<CRMViewProps> = ({
       visitDate: editVisitDate || undefined,
       comments: editComments || undefined,
       nextFollowUpDate: editNextDate || undefined,
-      nextFollowUpNotes: editNextNotes || undefined
+      nextFollowUpNotes: editNextNotes || undefined,
+      tags: editTags,
+      customFieldValues: editCustomFieldValues
     });
 
     setEditingLead(null);
@@ -220,21 +357,6 @@ export const CRMView: React.FC<CRMViewProps> = ({
     if (!deletingLead) return;
     deleteLead(deletingLead.id);
     setDeletingLead(null);
-  };
-
-  // Status Normalizer to ensure every lead maps to a valid pipeline column
-  const normalizeLeadStatus = (status?: string): LeadStatus => {
-    if (!status) return 'New';
-    if (status === 'OTP Verified' || status === 'Pending Verification' || status === 'Suspicious' || status === 'Duplicate') return 'New';
-    if (status === 'Demo Attended') return 'Demo Scheduled';
-    if (status === 'Enrolled' || status === 'Confirmed' || status === 'Paid') return 'Admitted';
-    if (status === 'Not Interested' || status === 'Rejected' || status === 'Lost') return 'Lost';
-    if (status === 'Qualified') return 'Interested';
-    const validStatuses: LeadStatus[] = ['New', 'Contacted', 'Interested', 'Demo Scheduled', 'Follow-up', 'Admission Pending', 'Admitted', 'Lost'];
-    if (validStatuses.includes(status as LeadStatus)) {
-      return status as LeadStatus;
-    }
-    return 'New';
   };
 
   // Filtered Leads
@@ -248,7 +370,17 @@ export const CRMView: React.FC<CRMViewProps> = ({
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter || normStatus === statusFilter;
     const matchesCourse = courseFilter === 'all' || lead.interestedCourseId === courseFilter;
     const matchesCounselor = counselorFilter === 'all' || lead.counselorId === counselorFilter;
-    return matchesSearch && matchesStatus && matchesCourse && matchesCounselor;
+    const matchesTag = tagFilter === 'all' || (Array.isArray(lead.tags) && lead.tags.includes(tagFilter));
+    const cleanPhone = lead.phone.replace(/[^0-9]/g, '').slice(-11);
+    const isDuplicate = (phoneCountMap.get(cleanPhone) || 0) > 1;
+    const matchesDuplicates = !filterDuplicatesOnly || isDuplicate;
+    const matchesFollowUp =
+      followUpFilter === 'all'
+        ? true
+        : followUpFilter === 'today'
+        ? (lead.nextFollowUpDate === todayStr && normStatus !== 'Admitted' && normStatus !== 'Lost')
+        : Boolean(lead.nextFollowUpDate && lead.nextFollowUpDate < todayStr && normStatus !== 'Admitted' && normStatus !== 'Lost');
+    return matchesSearch && matchesStatus && matchesCourse && matchesCounselor && matchesTag && matchesDuplicates && matchesFollowUp;
   });
 
   const pipelineColumns: { status: LeadStatus; label: string; color: string }[] = [
@@ -323,6 +455,32 @@ export const CRMView: React.FC<CRMViewProps> = ({
           >
             <RefreshCw className={`w-4 h-4 text-blue-600 ${isSyncing ? 'animate-spin' : ''}`} />
             <span>{isSyncing ? 'সিঙ্ক হচ্ছে...' : 'অনলাইন লিড সিঙ্ক'}</span>
+          </button>
+
+          {/* Duplicate Leads Filter Button */}
+          <button
+            onClick={() => setFilterDuplicatesOnly(prev => !prev)}
+            className={`flex items-center space-x-1.5 text-xs font-bold px-3 py-2 rounded-xl border transition-colors cursor-pointer ${
+              filterDuplicatesOnly
+                ? 'bg-amber-500 text-white border-amber-600 shadow-md'
+                : duplicateLeadsCount > 0
+                ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300'
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
+            }`}
+            title="ডুপ্লিকেট ফোন নম্বরের লিডগুলো আলাদা করে দেখুন"
+          >
+            <AlertTriangle className={`w-4 h-4 ${filterDuplicatesOnly ? 'text-white' : 'text-amber-600'}`} />
+            <span>ডুপ্লিকেট লিড ({duplicateLeadsCount})</span>
+          </button>
+
+          {/* CRM Tags and Custom Fields Manager */}
+          <button
+            onClick={() => setIsFieldsTagsModalOpen(true)}
+            className="flex items-center space-x-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold px-3 py-2 rounded-xl shadow-2xs transition-colors cursor-pointer"
+            title="লিড ট্যাগ এবং কাস্টম ফিল্ড পরিচালনা করুন"
+          >
+            <Sliders className="w-4 h-4 text-indigo-600" />
+            <span>ট্যাগ ও কাস্টম ফিল্ড</span>
           </button>
 
           {/* Export Leads to Excel / Spreadsheet */}
@@ -415,19 +573,132 @@ export const CRMView: React.FC<CRMViewProps> = ({
           <option value="Admitted">Admitted</option>
           <option value="Lost">Lost</option>
         </select>
+
+        <select
+          value={tagFilter}
+          onChange={e => setTagFilter(e.target.value)}
+          className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 font-bold outline-none text-sm cursor-pointer"
+        >
+          <option value="all">All Tags ({crmSettings?.tags?.length || 0})</option>
+          {(crmSettings?.tags || []).map(t => (
+            <option key={t.id} value={t.name}>
+              🏷️ {t.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Quick Follow-up and Deduplication Filter Chips */}
+        <div className="w-full flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+          <span className="font-bold text-slate-500 text-[11px] uppercase tracking-wider">Quick Action Filters:</span>
+
+          <button
+            type="button"
+            onClick={() => setFollowUpFilter(prev => prev === 'today' ? 'all' : 'today')}
+            className={`px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+              followUpFilter === 'today'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : todayFollowUpsCount > 0
+                ? 'bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+            title="আজকে যাদের সাথে যোগাযোগ বা ফলো-আপ করতে হবে"
+          >
+            <span>🔔 আজকের ফলো-আপ</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${followUpFilter === 'today' ? 'bg-white/20 text-white' : 'bg-blue-200 text-blue-950'}`}>
+              {todayFollowUpsCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setFollowUpFilter(prev => prev === 'overdue' ? 'all' : 'overdue')}
+            className={`px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+              followUpFilter === 'overdue'
+                ? 'bg-rose-600 text-white shadow-xs'
+                : overdueFollowUpsCount > 0
+                ? 'bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-200'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+            title="যেসব লিডের ফলো-আপের তারিখ পার হয়ে গেছে"
+          >
+            <span>⚠️ ওভারডিউ ফলো-আপ</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${followUpFilter === 'overdue' ? 'bg-white/20 text-white' : 'bg-rose-200 text-rose-950'}`}>
+              {overdueFollowUpsCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setFilterDuplicatesOnly(prev => !prev)}
+            className={`px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+              filterDuplicatesOnly
+                ? 'bg-amber-600 text-white shadow-xs'
+                : duplicateLeadsCount > 0
+                ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+            title="একই ফোন নম্বরে থাকা ডুপ্লিকেট লিডসমূহ"
+          >
+            <span>👥 ডুপ্লিকেট লিড</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${filterDuplicatesOnly ? 'bg-white/20 text-white' : 'bg-amber-200 text-amber-950'}`}>
+              {duplicateLeadsCount}
+            </span>
+          </button>
+
+          {(followUpFilter !== 'all' || filterDuplicatesOnly || tagFilter !== 'all' || statusFilter !== 'all' || courseFilter !== 'all' || counselorFilter !== 'all' || searchTerm) && (
+            <button
+              type="button"
+              onClick={() => {
+                setFollowUpFilter('all');
+                setFilterDuplicatesOnly(false);
+                setTagFilter('all');
+                setStatusFilter('all');
+                setCourseFilter('all');
+                setCounselorFilter('all');
+                setSearchTerm('');
+              }}
+              className="px-2 py-1 text-slate-500 hover:text-rose-600 font-semibold text-xs transition-colors"
+            >
+              ✕ রিসেট ফিল্টার
+            </button>
+          )}
+        </div>
       </div>
 
       {/* KANBAN BOARD VIEW */}
       {viewMode === 'kanban' && (
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-300 min-h-[560px]">
-          {pipelineColumns.map(col => {
-            const columnLeads = filteredLeads.filter(l => normalizeLeadStatus(l.status) === col.status);
+        <div className="space-y-3">
+          {/* Mobile Stage Quick Switcher Bar */}
+          <div className="flex sm:hidden items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+            <span className="text-slate-400 font-semibold text-[11px] shrink-0">স্টেজ:</span>
+            {pipelineColumns.map(col => {
+              const count = filteredLeads.filter(l => normalizeLeadStatus(l.status) === col.status).length;
+              return (
+                <button
+                  key={col.status}
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById(`kanban-col-${col.status.replace(/\s+/g, '-')}`);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-blue-50 text-slate-700 font-bold whitespace-nowrap text-[11px] shrink-0 border border-slate-200 transition-colors"
+                >
+                  {col.label} ({count})
+                </button>
+              );
+            })}
+          </div>
 
-            return (
-              <div
-                key={col.status}
-                className="w-72 shrink-0 bg-slate-100/70 border border-slate-200 rounded-2xl p-3 flex flex-col max-h-[720px]"
-              >
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-300 min-h-[560px]">
+            {pipelineColumns.map(col => {
+              const columnLeads = filteredLeads.filter(l => normalizeLeadStatus(l.status) === col.status);
+
+              return (
+                <div
+                  key={col.status}
+                  id={`kanban-col-${col.status.replace(/\s+/g, '-')}`}
+                  className="w-72 shrink-0 bg-slate-100/70 border border-slate-200 rounded-2xl p-3 flex flex-col max-h-[720px]"
+                >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
                   <div className="flex items-center space-x-2">
@@ -450,16 +721,36 @@ export const CRMView: React.FC<CRMViewProps> = ({
                     return (
                       <div
                         key={lead.id}
-                        className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-indigo-300 transition-all space-y-2.5 relative group"
+                        className={`bg-white p-3.5 rounded-xl border shadow-2xs hover:shadow-md transition-all space-y-2.5 relative group ${
+                          selectedLeadIds.includes(lead.id) ? 'border-blue-500 ring-2 ring-blue-200' : 'border-slate-200/80 hover:border-indigo-300'
+                        }`}
                       >
-                        {/* Top: Name & Code */}
+                        {/* Top: Checkbox, Name & Code */}
                         <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="text-sm font-bold text-slate-900 leading-tight">
-                              {lead.name}
-                            </h4>
-                            <div className="text-xs font-mono text-blue-700 font-semibold mt-0.5">
-                              {lead.leadCode} • {lead.phone}
+                          <div className="flex items-start space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedLeadIds(prev =>
+                                  prev.includes(lead.id) ? prev.filter(id => id !== lead.id) : [...prev, lead.id]
+                                );
+                              }}
+                              className="mt-0.5 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                              title="লিড নির্বাচন করুন"
+                            >
+                              {selectedLeadIds.includes(lead.id) ? (
+                                <CheckSquare className="w-4 h-4 text-blue-600" />
+                              ) : (
+                                <Square className="w-4 h-4 text-slate-300" />
+                              )}
+                            </button>
+                            <div>
+                              <h4 className="text-sm font-bold text-slate-900 leading-tight">
+                                {lead.name}
+                              </h4>
+                              <div className="text-xs font-mono text-blue-700 font-semibold mt-0.5">
+                                {lead.leadCode} • {lead.phone}
+                              </div>
                             </div>
                           </div>
 
@@ -577,14 +868,51 @@ export const CRMView: React.FC<CRMViewProps> = ({
                             </div>
                           )}
 
-                          {lead.isDuplicate && (
+                          {/* Duplicate Detection Badge */}
+                          {((phoneCountMap.get(lead.phone.replace(/[^0-9]/g, '').slice(-11)) || 0) > 1 || lead.isDuplicate) && (
                             <div className="pt-0.5">
-                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold border border-amber-300">
+                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black border border-amber-300">
                                 <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
-                                <span>পুনরায় আবেদন (Re-applied)</span>
+                                <span>⚠️ ডুপ্লিকেট লিড ({phoneCountMap.get(lead.phone.replace(/[^0-9]/g, '').slice(-11)) || 2})</span>
                               </span>
                             </div>
                           )}
+
+                          {/* Dynamic Tags on Card */}
+                          {lead.tags && lead.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 pt-1 border-t border-slate-200/60">
+                              {lead.tags.map(tName => {
+                                const tagObj = crmSettings?.tags?.find(t => t.name === tName);
+                                const colorCls = tagObj?.color === 'red' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                  tagObj?.color === 'amber' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                                  tagObj?.color === 'emerald' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                                  tagObj?.color === 'blue' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                                  tagObj?.color === 'purple' ? 'bg-purple-50 text-purple-800 border-purple-200' :
+                                  'bg-indigo-50 text-indigo-700 border-indigo-200';
+                                return (
+                                  <span
+                                    key={tName}
+                                    className={`inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold border ${colorCls}`}
+                                  >
+                                    <Tag className="w-2.5 h-2.5" />
+                                    <span>{tName}</span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Dynamic Custom Fields configured for Lead Table / Card */}
+                          {crmSettings?.customFields?.filter(f => f.showInLeadTable && lead.customFieldValues?.[f.key] !== undefined && lead.customFieldValues?.[f.key] !== '').map(f => {
+                            const val = lead.customFieldValues![f.key];
+                            const displayVal = typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val);
+                            return (
+                              <div key={f.id} className="text-[10px] text-slate-600 bg-white/90 px-2 py-1 rounded-md border border-slate-200 flex items-center justify-between">
+                                <span className="font-semibold text-slate-500">{f.label}:</span>
+                                <span className="font-bold text-slate-800 truncate ml-1">{displayVal}</span>
+                              </div>
+                            );
+                          })}
                         </div>
 
                         {/* Visitor Comments / What Visitor Said */}
@@ -617,15 +945,14 @@ export const CRMView: React.FC<CRMViewProps> = ({
                               <span>Log ({leadFollowUps.length})</span>
                             </button>
 
-                            <a
-                              href={getLeadWhatsAppUrl(lead)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="p-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors inline-flex items-center"
-                              title="WhatsApp-এ সরাসরি মেসেজ দিন"
+                            <button
+                              type="button"
+                              onClick={() => handleOpenWhatsAppModal(lead)}
+                              className="p-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors inline-flex items-center cursor-pointer"
+                              title="1-Click WhatsApp মেসেজ ও টেমপ্লেট পাঠান"
                             >
                               <MessageCircle className="w-3.5 h-3.5" />
-                            </a>
+                            </button>
                           </div>
 
                           {lead.status !== 'Admitted' && (
@@ -653,16 +980,39 @@ export const CRMView: React.FC<CRMViewProps> = ({
               </div>
             );
           })}
+          </div>
         </div>
       )}
 
       {/* TABLE VIEW */}
       {viewMode === 'table' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div className="space-y-3">
+          {/* Desktop Table View (Hidden on mobile < md) */}
+          <div className="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[10px]">
                 <tr>
+                  <th className="py-3 px-3 w-10 text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedLeadIds.length === filteredLeads.length) {
+                          setSelectedLeadIds([]);
+                        } else {
+                          setSelectedLeadIds(filteredLeads.map(l => l.id));
+                        }
+                      }}
+                      className="text-slate-500 hover:text-slate-800 cursor-pointer"
+                      title={selectedLeadIds.length === filteredLeads.length ? 'সকল আনচেক করুন' : 'সবগুলো সিলেক্ট করুন'}
+                    >
+                      {selectedLeadIds.length > 0 && selectedLeadIds.length === filteredLeads.length ? (
+                        <CheckSquare className="w-4 h-4 text-blue-600" />
+                      ) : (
+                        <Square className="w-4 h-4 text-slate-400" />
+                      )}
+                    </button>
+                  </th>
                   <th className="py-3 px-4">Lead Code & Name</th>
                   <th className="py-3 px-4">Visit Date & Remarks</th>
                   <th className="py-3 px-4">Phone / Email</th>
@@ -680,10 +1030,58 @@ export const CRMView: React.FC<CRMViewProps> = ({
                   const counselor = staffList.find(s => s.id === lead.counselorId);
 
                   return (
-                    <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={lead.id} className={`hover:bg-slate-50 transition-colors ${selectedLeadIds.includes(lead.id) ? 'bg-blue-50/50' : ''}`}>
+                      <td className="py-3 px-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedLeadIds(prev =>
+                              prev.includes(lead.id) ? prev.filter(id => id !== lead.id) : [...prev, lead.id]
+                            );
+                          }}
+                          className="text-slate-500 hover:text-slate-800 cursor-pointer"
+                        >
+                          {selectedLeadIds.includes(lead.id) ? (
+                            <CheckSquare className="w-4 h-4 text-blue-600" />
+                          ) : (
+                            <Square className="w-4 h-4 text-slate-300" />
+                          )}
+                        </button>
+                      </td>
                       <td className="py-3 px-4">
                         <div className="font-bold text-slate-900">{lead.name}</div>
                         <div className="font-mono text-[10px] text-blue-600">{lead.leadCode}</div>
+                        {lead.tags && lead.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {lead.tags.map(tName => {
+                              const tagObj = crmSettings?.tags?.find(t => t.name === tName);
+                              const colorCls = tagObj?.color === 'red' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                tagObj?.color === 'amber' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                                tagObj?.color === 'emerald' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                                tagObj?.color === 'blue' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                                tagObj?.color === 'purple' ? 'bg-purple-50 text-purple-800 border-purple-200' :
+                                'bg-indigo-50 text-indigo-700 border-indigo-200';
+                              return (
+                                <span
+                                  key={tName}
+                                  className={`inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold border ${colorCls}`}
+                                >
+                                  {tName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {crmSettings?.customFields?.filter(f => f.showInLeadTable && lead.customFieldValues?.[f.key] !== undefined && lead.customFieldValues?.[f.key] !== '').map(f => {
+                          const val = lead.customFieldValues![f.key];
+                          const displayVal = typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val);
+                          return (
+                            <div key={f.id} className="text-[9px] text-slate-600 mt-0.5 flex items-center space-x-1">
+                              <span className="font-semibold text-slate-400">{f.label}:</span>
+                              <span className="font-bold text-slate-700">{displayVal}</span>
+                            </div>
+                          );
+                        })}
                       </td>
                       <td className="py-3 px-4 max-w-[200px]">
                         <div className="text-[11px] font-bold text-slate-800 flex items-center space-x-1">
@@ -701,16 +1099,23 @@ export const CRMView: React.FC<CRMViewProps> = ({
                       <td className="py-3 px-4 text-slate-700">
                         <div className="font-semibold flex items-center space-x-1.5">
                           <span>{lead.phone}</span>
-                          <a
-                            href={getLeadWhatsAppUrl(lead)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-emerald-600 hover:text-emerald-700 p-0.5"
-                            title="WhatsApp মেসেজ পাঠান"
+                          <button
+                            type="button"
+                            onClick={() => handleOpenWhatsAppModal(lead)}
+                            className="p-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                            title="1-Click WhatsApp মেসেজ ও টেমপ্লেট পাঠান"
                           >
                             <MessageCircle className="w-3.5 h-3.5" />
-                          </a>
+                          </button>
                         </div>
+                        {((phoneCountMap.get(lead.phone.replace(/[^0-9]/g, '').slice(-11)) || 0) > 1 || lead.isDuplicate) && (
+                          <div className="mt-0.5">
+                            <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                              <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
+                              <span>ডুপ্লিকেট ({phoneCountMap.get(lead.phone.replace(/[^0-9]/g, '').slice(-11)) || 2})</span>
+                            </span>
+                          </div>
+                        )}
                         {lead.email && <div className="text-[10px] text-slate-400">{lead.email}</div>}
                         {lead.address && (
                           <div className="text-[10px] text-slate-600 flex items-center space-x-1 mt-0.5" title={lead.address}>
@@ -812,6 +1217,175 @@ export const CRMView: React.FC<CRMViewProps> = ({
             </table>
           </div>
         </div>
+
+        {/* Mobile Lead Card List (Optimized for Small Screens - No Horizontal Scroll) */}
+        <div className="block md:hidden space-y-3">
+          {filteredLeads.length === 0 ? (
+            <div className="p-8 text-center bg-white rounded-2xl border border-dashed border-slate-200 text-slate-500 text-xs">
+              কোনো লিড পাওয়া যায়নি। ফিল্টার পরিবর্তন করে দেখুন।
+            </div>
+          ) : (
+            filteredLeads.map(lead => {
+              const crs = courses.find(c => c.id === lead.interestedCourseId);
+              const counselor = staffList.find(s => s.id === lead.counselorId);
+              const leadFollowUps = followUps.filter(f => f.leadId === lead.id);
+              const intentBadge = getLeadIntentBadge(lead);
+              const isSelected = selectedLeadIds.includes(lead.id);
+
+              return (
+                <div
+                  key={lead.id}
+                  className={`bg-white rounded-2xl border p-4 shadow-2xs space-y-3 transition-all ${
+                    isSelected ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/90'
+                  }`}
+                >
+                  {/* Header Row: Checkbox, Name, LeadCode, Status Selector */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start space-x-2.5 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedLeadIds(prev =>
+                            prev.includes(lead.id) ? prev.filter(id => id !== lead.id) : [...prev, lead.id]
+                          );
+                        }}
+                        className="mt-0.5 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer shrink-0"
+                      >
+                        {isSelected ? (
+                          <CheckSquare className="w-4 h-4 text-blue-600" />
+                        ) : (
+                          <Square className="w-4 h-4 text-slate-300" />
+                        )}
+                      </button>
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-bold text-slate-900 leading-tight truncate">
+                          {lead.name}
+                        </h4>
+                        <span className="font-mono text-[11px] text-blue-600 font-semibold block">
+                          {lead.leadCode}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-1 shrink-0">
+                      <select
+                        value={normalizeLeadStatus(lead.status)}
+                        onChange={e => handleStatusChange(lead.id, e.target.value as LeadStatus)}
+                        className="bg-slate-50 border border-slate-200 font-bold rounded-lg px-2 py-1 text-slate-800 outline-none text-[11px] cursor-pointer"
+                      >
+                        <option value="New">New</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="Interested">Interested</option>
+                        <option value="Demo Scheduled">Demo Scheduled</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Admission Pending">Admission Pending</option>
+                        <option value="Admitted">Admitted</option>
+                        <option value="Lost">Lost</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(lead)}
+                        className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                        title="Edit Lead"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeletingLead(lead)}
+                        className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="Delete Lead"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Contact & Phone row with 1-click Call & WhatsApp */}
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs">
+                    <div className="font-bold text-slate-800 flex items-center space-x-1.5 truncate mr-2">
+                      <PhoneCall className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                      <span className="truncate">{lead.phone}</span>
+                    </div>
+                    <div className="flex items-center space-x-1.5 shrink-0">
+                      <a
+                        href={`tel:${lead.phone}`}
+                        className="px-2.5 py-1 bg-white hover:bg-slate-100 text-blue-600 border border-slate-200 rounded-lg font-bold text-[11px] flex items-center space-x-1 shadow-2xs"
+                      >
+                        <span>কল করুন</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenWhatsAppModal(lead)}
+                        className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shadow-2xs cursor-pointer"
+                        title="1-Click WhatsApp মেসেজ পাঠান"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Course & Counselor Details */}
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-indigo-700 truncate mr-2">
+                        {crs?.name || 'General Inquiry'}
+                      </span>
+                      {intentBadge && (
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border shrink-0 ${intentBadge.className}`}>
+                          {intentBadge.label}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>কাউন্সেলর: <strong className="text-slate-700">{counselor?.name || 'Unassigned'}</strong></span>
+                      <span>সোর্স: <strong className="text-slate-700">{lead.leadSource || 'Walk-in'}</strong></span>
+                    </div>
+                  </div>
+
+                  {/* Visitor Remarks (if any) */}
+                  {lead.comments && (
+                    <div className="p-2 bg-blue-50/70 border border-blue-100 rounded-xl text-[11px] text-slate-700 italic">
+                      "{lead.comments}"
+                    </div>
+                  )}
+
+                  {/* Follow-up Date Banner (if any) */}
+                  {lead.nextFollowUpDate && (
+                    <div className="flex items-center space-x-1.5 text-[11px] text-amber-900 bg-amber-50 px-2.5 py-1 rounded-lg font-bold border border-amber-200">
+                      <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>Next Follow-up: <strong>{lead.nextFollowUpDate}</strong></span>
+                    </div>
+                  )}
+
+                  {/* Mobile Bottom Action Bar */}
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onOpenFollowUp(lead.id)}
+                      className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold rounded-xl text-xs flex items-center space-x-1 transition-colors cursor-pointer"
+                    >
+                      <PhoneCall className="w-3 h-3 text-amber-700" />
+                      <span>Log Call ({leadFollowUps.length})</span>
+                    </button>
+
+                    {lead.status !== 'Admitted' && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenAdmissionWithLead(lead)}
+                        className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                      >
+                        <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
+                        <span>Express Admit</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
       )}
 
       {/* EDIT LEAD MODAL */}
@@ -1058,6 +1632,136 @@ export const CRMView: React.FC<CRMViewProps> = ({
                 />
               </div>
 
+              {/* Edit Tags */}
+              {crmSettings?.tags && crmSettings.tags.length > 0 && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1">
+                    <Tag className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Lead Tags (ট্যাগসমূহ)</span>
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {crmSettings.tags.map(t => {
+                      const isSel = editTags.includes(t.name);
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => {
+                            setEditTags(prev =>
+                              prev.includes(t.name) ? prev.filter(x => x !== t.name) : [...prev, t.name]
+                            );
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all flex items-center space-x-1 cursor-pointer ${
+                            isSel
+                              ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                              : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                          }`}
+                        >
+                          <Tag className="w-3 h-3" />
+                          <span>{t.name}</span>
+                          {isSel && <CheckCircle2 className="w-3 h-3 ml-0.5" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Edit Custom Fields */}
+              {crmSettings?.customFields && crmSettings.customFields.length > 0 && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-3">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center space-x-1">
+                    <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Custom Fields (কাস্টম ফিল্ড)</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {crmSettings.customFields.map(cf => {
+                      const val = editCustomFieldValues[cf.key] ?? cf.defaultValue ?? '';
+                      if (cf.type === 'boolean') {
+                        return (
+                          <div key={cf.id} className="flex items-center space-x-2 pt-2">
+                            <input
+                              type="checkbox"
+                              id={`edit-cf-${cf.id}`}
+                              checked={Boolean(val)}
+                              onChange={e =>
+                                setEditCustomFieldValues(prev => ({
+                                  ...prev,
+                                  [cf.key]: e.target.checked
+                                }))
+                              }
+                              className="w-4 h-4 rounded-md text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                            />
+                            <label htmlFor={`edit-cf-${cf.id}`} className="text-xs font-bold text-slate-700 cursor-pointer">
+                              {cf.label} {cf.required && <span className="text-rose-500">*</span>}
+                            </label>
+                          </div>
+                        );
+                      }
+                      if (cf.type === 'select') {
+                        return (
+                          <div key={cf.id}>
+                            <label className="block text-slate-600 text-xs font-bold mb-1">
+                              {cf.label} {cf.required && <span className="text-rose-500">*</span>}
+                            </label>
+                            <select
+                              required={cf.required}
+                              value={val}
+                              onChange={e =>
+                                setEditCustomFieldValues(prev => ({
+                                  ...prev,
+                                  [cf.key]: e.target.value
+                                }))
+                              }
+                              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
+                            >
+                              <option value="">সিলেক্ট করুন...</option>
+                              {(cf.options || []).map((opt, idx) => (
+                                <option key={idx} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={cf.id} className={cf.type === 'textarea' ? 'sm:col-span-2' : ''}>
+                          <label className="block text-slate-600 text-xs font-bold mb-1">
+                            {cf.label} {cf.required && <span className="text-rose-500">*</span>}
+                          </label>
+                          {cf.type === 'textarea' ? (
+                            <textarea
+                              rows={2}
+                              required={cf.required}
+                              value={val}
+                              onChange={e =>
+                                setEditCustomFieldValues(prev => ({
+                                  ...prev,
+                                  [cf.key]: e.target.value
+                                }))
+                              }
+                              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
+                            />
+                          ) : (
+                            <input
+                              type={cf.type === 'number' ? 'number' : cf.type === 'date' ? 'date' : 'text'}
+                              required={cf.required}
+                              value={val}
+                              onChange={e =>
+                                setEditCustomFieldValues(prev => ({
+                                  ...prev,
+                                  [cf.key]: cf.type === 'number' ? Number(e.target.value) : e.target.value
+                                }))
+                              }
+                              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="pt-3 border-t border-slate-200 flex items-center justify-end space-x-2">
                 <button
                   type="button"
@@ -1115,6 +1819,158 @@ export const CRMView: React.FC<CRMViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Floating Bulk Action Bar */}
+      {selectedLeadIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center flex-wrap gap-4 animate-in slide-in-from-bottom-5">
+          <div className="flex items-center space-x-2 font-bold text-sm">
+            <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
+              {selectedLeadIds.length}
+            </span>
+            <span>জন লিড নির্বাচিত</span>
+          </div>
+
+          <div className="h-4 w-px bg-slate-700 hidden sm:block" />
+
+          {/* Bulk Status Update */}
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-slate-400">স্ট্যাটাস পরিবর্তন:</span>
+            <select
+              onChange={(e) => {
+                if (e.target.value) handleBulkStatusChange(e.target.value as LeadStatus);
+              }}
+              defaultValue=""
+              className="bg-slate-800 border border-slate-700 text-white rounded-lg px-2.5 py-1 text-xs font-semibold outline-none cursor-pointer"
+            >
+              <option value="" disabled>স্ট্যাটাস নির্বাচন করুন</option>
+              <option value="New">New</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Interested">Interested</option>
+              <option value="Demo Scheduled">Demo Scheduled</option>
+              <option value="Follow-up">Follow-up</option>
+              <option value="Admission Pending">Admission Pending</option>
+              <option value="Lost">Lost / Closed</option>
+            </select>
+          </div>
+
+          {/* Bulk Delete */}
+          <button
+            type="button"
+            onClick={handleBulkDelete}
+            className="flex items-center space-x-1 bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>মুছে ফেলুন</span>
+          </button>
+
+          {/* Deselect */}
+          <button
+            type="button"
+            onClick={() => setSelectedLeadIds([])}
+            className="text-xs text-slate-400 hover:text-white underline cursor-pointer ml-2"
+          >
+            বাতিল
+          </button>
+        </div>
+      )}
+
+      {/* 1-Click WhatsApp Personalized Template Modal */}
+      {whatsAppModalLead && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="bg-emerald-600 text-white p-4 flex items-center justify-between">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm sm:text-base leading-tight">1-Click WhatsApp মেসেজ পাঠান</h3>
+                  <p className="text-emerald-100 text-xs font-medium">প্রাপক: {whatsAppModalLead.name} ({whatsAppModalLead.phone})</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWhatsAppModalLead(null)}
+                className="p-1 rounded-lg hover:bg-white/10 text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                  টেমপ্লেট নির্বাচন করুন
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {getWhatsAppTemplates(whatsAppModalLead).map(tmpl => (
+                    <button
+                      key={tmpl.id}
+                      type="button"
+                      onClick={() => setWhatsAppCustomText(tmpl.message)}
+                      className="text-left p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all cursor-pointer group"
+                    >
+                      <div className="text-xs font-bold text-slate-800 group-hover:text-emerald-800">
+                        {tmpl.title}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  মেসেজ প্রিভিউ ও এডিট করুন
+                </label>
+                <textarea
+                  rows={6}
+                  value={whatsAppCustomText}
+                  onChange={(e) => setWhatsAppCustomText(e.target.value)}
+                  className="w-full text-xs leading-relaxed text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:border-emerald-500 outline-none resize-none font-sans"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(whatsAppCustomText);
+                    alert('টেক্সট কপি করা হয়েছে!');
+                  }}
+                  className="inline-flex items-center space-x-1 text-xs text-slate-600 hover:text-slate-900 font-semibold cursor-pointer"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>টেক্সট কপি করুন</span>
+                </button>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setWhatsAppModalLead(null)}
+                    className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
+                  >
+                    বন্ধ করুন
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSendWhatsApp}
+                    className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2 rounded-xl shadow-md transition-colors cursor-pointer"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>WhatsApp-এ সরাসরি পাঠান</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CRM TAGS & CUSTOM FIELDS MANAGEMENT MODAL */}
+      <CrmFieldsAndTagsModal
+        isOpen={isFieldsTagsModalOpen}
+        onClose={() => setIsFieldsTagsModalOpen(false)}
+      />
     </div>
   );
 };

@@ -9,6 +9,15 @@ import { CourseDetailsModal } from './CourseDetailsModal';
 import { BlogPostModal } from './BlogPostModal';
 import { PolicyViewerModal } from './PolicyViewerModal';
 import { MobileNavDrawer } from './MobileNavDrawer';
+import { TopOfferRibbon } from './TopOfferRibbon';
+import { LeadCapturePopupModal } from './LeadCapturePopupModal';
+import { HiringPartnersSection } from './HiringPartnersSection';
+import { FloatingActionWidget } from './FloatingActionWidget';
+import { SyllabusDownloadModal } from './SyllabusDownloadModal';
+import { CampusTourModal } from './CampusTourModal';
+import { SocialProofTicker } from './SocialProofTicker';
+import { PlacementsShowcaseSection } from './PlacementsShowcaseSection';
+import { CampusLocationMapBox } from './CampusLocationMapBox';
 import {
   Home,
   Phone,
@@ -59,7 +68,10 @@ import {
   Compass,
   Laptop,
   Edit,
-  ChevronRight
+  ChevronRight,
+  Download,
+  Flame,
+  Building2
 } from 'lucide-react';
 import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage, WebsiteSectionVisibility } from '../../types';
 import { HeroBannerSlider } from './HeroBannerSlider';
@@ -96,7 +108,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
     websiteFaqs,
     websiteBlogs,
     academySettings,
-    isAuthenticated
+    isAuthenticated,
+    addLead,
+    submitPublicLead,
+    batches,
+    placements
   } = useAcademy();
 
   // Bilingual Language State
@@ -119,6 +135,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
   const [selectedCourseForAdmission, setSelectedCourseForAdmission] = useState<Course | null>(null);
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState<Course | null>(null);
+  const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState<Course | null>(null);
+  const [isCampusTourOpen, setIsCampusTourOpen] = useState(false);
   const [activeSeminarForReg, setActiveSeminarForReg] = useState<SeminarWorkshop | null>(null);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<WebsiteGalleryItem | null>(null);
   const [selectedBlogForReading, setSelectedBlogForReading] = useState<WebsiteBlogPost | null>(null);
@@ -301,8 +319,16 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-website-body antialiased selection:bg-indigo-600 selection:text-white flex flex-col">
-      {/* PROMO BANNER (IF ENABLED IN CMS) */}
-      {websiteCmsConfig.promoBanner?.enabled && (
+      {/* TOP STICKY OFFER RIBBON (CMS MANAGED) */}
+      <TopOfferRibbon
+        config={websiteCmsConfig.topOfferRibbon}
+        onOpenAdmission={() => setIsAdmissionOpen(true)}
+        onScrollToCourses={() => document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' })}
+        whatsappNumber={websiteCmsConfig.floatingActionWidget?.whatsappNumber || academySettings.primarySupportPhone}
+      />
+
+      {/* PROMO BANNER (FALLBACK IF TOP RIBBON IS DISABLED) */}
+      {!websiteCmsConfig.topOfferRibbon?.enabled && websiteCmsConfig.promoBanner?.enabled && (
         <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 text-white text-xs py-2 px-4 text-center font-bold flex items-center justify-center space-x-2 shadow-inner">
           <Sparkles className="w-4 h-4 text-amber-300 animate-spin" />
           <span>{websiteCmsConfig.promoBanner.title || 'Special 40% Scholarship Discount for New Students!'}</span>
@@ -447,6 +473,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <a href="#blog" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Blog</a>
             <a href="#gallery" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Gallery</a>
             <a href="#reviews" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Reviews</a>
+            {sectionVisibility.placements !== false && (
+              <a href="#placements" className="hover:text-emerald-600 transition-colors flex items-center space-x-1 text-emerald-700 whitespace-nowrap">
+                <Briefcase className="w-3.5 h-3.5" />
+                <span>Placements</span>
+              </a>
+            )}
             <a href="#verify-certificate" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-emerald-700 whitespace-nowrap">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Verify</span>
@@ -454,8 +486,18 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <a href="#contact" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Contact</a>
           </nav>
 
-          {/* Right Action Controls: Online Admission CTA + Mobile Hamburger */}
+          {/* Right Action Controls: Campus Tour + Online Admission CTA + Mobile Hamburger */}
           <div className="flex items-center space-x-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsCampusTourOpen(true)}
+              className="hidden lg:flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl border border-emerald-200 transition-colors whitespace-nowrap cursor-pointer"
+              title="Book Free 1-on-1 Campus Tour & Lab Visit"
+            >
+              <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>ক্যাম্পাস ভিজিট</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -539,8 +581,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 </div>
 
                 {/* Hero Search & Category Quick Filter Bar */}
-                <div className="bg-slate-800/90 border border-slate-700 p-2.5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-stretch gap-2.5">
-                  <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 shrink-0">
+                <div className="bg-slate-800/90 border border-slate-700 p-2 sm:p-2.5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-stretch gap-2">
+                  <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 shrink-0 min-h-[44px]">
                     <BookOpen className="w-4 h-4 text-indigo-400 shrink-0" />
                     <select
                       value={selectedCategory}
@@ -549,7 +591,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                         const el = document.getElementById('courses');
                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                       }}
-                      className="bg-transparent text-sm font-bold text-slate-200 focus:outline-none cursor-pointer"
+                      className="bg-transparent text-xs sm:text-sm font-bold text-slate-200 focus:outline-none cursor-pointer w-full sm:w-auto"
                     >
                       <option value="All" className="bg-slate-900 text-white">All Categories (সব বিভাগ)</option>
                       {categories.map((cat) => (
@@ -558,20 +600,20 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     </select>
                   </div>
 
-                  <div className="flex-1 flex items-center space-x-2 bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5">
+                  <div className="flex-1 flex items-center space-x-2 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 min-h-[44px]">
                     <Search className="w-4 h-4 text-slate-400 shrink-0" />
                     <input
                       type="text"
                       value={courseSearchQuery}
                       onChange={(e) => setCourseSearchQuery(e.target.value)}
-                      placeholder="Search courses (e.g. Video Editing, Web, AI, Graphic...)"
-                      className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 focus:outline-none font-medium"
+                      placeholder="Search courses (e.g. Video, Web, AI, Graphic...)"
+                      className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-slate-400 focus:outline-none font-medium"
                     />
                     {courseSearchQuery && (
                       <button
                         type="button"
                         onClick={() => setCourseSearchQuery('')}
-                        className="text-slate-400 hover:text-white text-xs px-1 cursor-pointer"
+                        className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -580,42 +622,61 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
                   <a
                     href="#courses"
-                    className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-1.5 shrink-0"
+                    className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-1.5 shrink-0 min-h-[44px] active:scale-98"
                   >
                     <Search className="w-4 h-4" />
                     <span>Search</span>
                   </a>
                 </div>
+
+                {/* Mobile Quick Tags */}
+                <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
+                  <span className="text-slate-400 font-medium shrink-0">জনপ্রিয়:</span>
+                  {['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing'].map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        setCourseSearchQuery(tag);
+                        const el = document.getElementById('courses');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600 text-slate-300 hover:text-white border border-slate-700/60 font-medium whitespace-nowrap transition-colors cursor-pointer"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Stats Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-800">
-                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3 border-t border-slate-800">
+                <div className="p-2.5 sm:p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
                   <span className="block text-xl sm:text-2xl font-black text-amber-400">
                     {websiteCmsConfig.heroStats?.totalTrained || '8,500+'}
                   </span>
-                  <span className="text-xs text-slate-300 font-medium">Students Trained</span>
+                  <span className="text-[11px] sm:text-xs text-slate-300 font-medium">Students Trained</span>
                 </div>
 
-                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
+                <div className="p-2.5 sm:p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
                   <span className="block text-xl sm:text-2xl font-black text-emerald-400">
                     {websiteCmsConfig.heroStats?.successRate || '96.4%'}
                   </span>
-                  <span className="text-xs text-slate-300 font-medium">Completion Rate</span>
+                  <span className="text-[11px] sm:text-xs text-slate-300 font-medium">Completion Rate</span>
                 </div>
 
-                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
+                <div className="p-2.5 sm:p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
                   <span className="block text-xl sm:text-2xl font-black text-indigo-400">
                     {websiteCmsConfig.heroStats?.expertTrainers || '28+'}
                   </span>
-                  <span className="text-xs text-slate-300 font-medium">Industry Mentors</span>
+                  <span className="text-[11px] sm:text-xs text-slate-300 font-medium">Industry Mentors</span>
                 </div>
 
-                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
+                <div className="p-2.5 sm:p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
                   <span className="block text-xl sm:text-2xl font-black text-rose-400">
                     {websiteCmsConfig.heroStats?.jobPlacementRatio || '89.2%'}
                   </span>
-                  <span className="text-xs text-slate-300 font-medium">Job Placements</span>
+                  <span className="text-[11px] sm:text-xs text-slate-300 font-medium">Job Placements</span>
                 </div>
               </div>
             </div>
@@ -1111,12 +1172,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                         </span>
                       </div>
 
-                      {/* Course Title */}
-                      <div>
-                        <h3 className="text-base sm:text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug line-clamp-2">
+                      {/* Course Title with balanced line-wrap and fixed height to align all cards */}
+                      <div className="min-h-[3.75rem] flex flex-col justify-start">
+                        <h3 className="text-base sm:text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug line-clamp-2 [text-wrap:balance]">
                           {c.name}
                         </h3>
-                        <p className="text-[11px] text-slate-500 font-medium mt-1">
+                        <p className="text-[11px] text-slate-500 font-medium mt-1 truncate">
                           {c.category}
                         </p>
                       </div>
@@ -1169,32 +1230,64 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                         </div>
                       </div>
 
-                      {/* Dual Action Buttons */}
+                      {/* Live Batch Date & Urgency Pill */}
+                      {(() => {
+                        const upcomingBatch = (batches || []).find(b => b.courseId === c.id && b.status === 'Upcoming');
+                        const batchDate = upcomingBatch?.startDate || c.landingConfig?.nextBatchStartDate || '১৫ অক্টোবর ২০২৬';
+                        const remainingSeats = upcomingBatch
+                          ? Math.max(2, (upcomingBatch.maxStudents || 25) - (upcomingBatch.enrolledStudents || 21))
+                          : (c.landingConfig?.remainingSeats || 4);
+
+                        return (
+                          <div className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-400/40 text-[11px] text-amber-900 font-bold">
+                            <span className="flex items-center space-x-1 truncate mr-1">
+                              <Calendar className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                              <span className="truncate">ব্যাচ: <strong>{batchDate}</strong></span>
+                            </span>
+                            <span className="flex items-center space-x-1 text-rose-600 bg-white px-1.5 py-0.5 rounded-md border border-rose-200 shadow-2xs font-black shrink-0 text-[10px]">
+                              <Flame className="w-3 h-3 text-rose-500" />
+                              <span>{remainingSeats}টি সিট বাকি</span>
+                            </span>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Action Buttons: Syllabus + View Details + Enroll */}
                       <div className="space-y-2 pt-1">
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCourseForSyllabus(c)}
+                            className="px-2 py-2.5 min-h-[44px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] sm:text-xs rounded-xl transition-colors text-center flex items-center justify-center space-x-1 cursor-pointer border border-indigo-100 active:scale-98"
+                            title="Download Syllabus PDF"
+                          >
+                            <Download className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                            <span>সিলেবাস</span>
+                          </button>
+
                           <button
                             type="button"
                             onClick={() => setSelectedCourseForDetails(c)}
-                            className="px-2.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-colors text-center flex items-center justify-center space-x-1 cursor-pointer"
+                            className="px-2 py-2.5 min-h-[44px] bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] sm:text-xs rounded-xl transition-colors text-center flex items-center justify-center space-x-1 cursor-pointer active:scale-98"
                           >
-                            <BookOpen className="w-3.5 h-3.5 text-slate-600" />
-                            <span>View Details</span>
+                            <BookOpen className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                            <span>Details</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => handleOpenEnroll(c)}
-                            className="px-2.5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-98 text-white font-black text-xs rounded-xl shadow-md transition-all text-center flex items-center justify-center space-x-1 cursor-pointer"
+                            className="px-2 py-2.5 min-h-[44px] bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-98 text-white font-black text-[11px] sm:text-xs rounded-xl shadow-md transition-all text-center flex items-center justify-center space-x-1 cursor-pointer"
                           >
-                            <Zap className="w-3.5 h-3.5 text-amber-300" />
-                            <span>Enroll Now</span>
+                            <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                            <span>Enroll</span>
                           </button>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }))}
-                          className="w-full py-2 px-3 bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-blue-500/10 hover:from-amber-500/20 hover:to-indigo-500/20 text-indigo-900 border border-indigo-200/80 rounded-xl text-xs font-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-2xs"
+                          className="w-full min-h-[44px] py-2 px-3 bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-blue-500/10 hover:from-amber-500/20 hover:to-indigo-500/20 text-indigo-900 border border-indigo-200/80 rounded-xl text-xs font-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-2xs active:scale-98"
                         >
                           <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                           <span>ল্যান্ডিং পেজ ও অফার দেখুন</span>
@@ -2025,7 +2118,22 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       </section>
       )}
 
-      {/* 12. PUBLIC CERTIFICATE VERIFICATION ENGINE */}
+      {/* 11.5 ALUMNI CAREER PLACEMENTS & FREELANCING MILESTONES */}
+      {sectionVisibility.placements !== false && (
+        <PlacementsShowcaseSection
+          onOpenAdmission={() => setIsAdmissionOpen(true)}
+        />
+      )}
+
+      {/* 12. HIRING PARTNERS & CORPORATE RECRUITERS SHOWCASE */}
+      {sectionVisibility.hiringPartners !== false && (
+        <HiringPartnersSection
+          config={websiteCmsConfig.hiringPartnersConfig}
+          onOpenAdmission={() => setIsAdmissionOpen(true)}
+        />
+      )}
+
+      {/* 13. PUBLIC CERTIFICATE VERIFICATION ENGINE */}
       {sectionVisibility.verifyCertificate !== false && (
         <CertificateVerificationSection onOpenStaffLogin={onOpenStaffLogin} />
       )}
@@ -2182,8 +2290,18 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
-                <span className="text-slate-400">Direct WhatsApp Help?</span>
+              <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <a
+                  href={websiteCmsConfig.googleMapShareUrl || 'https://share.google/9W8K1XZHLbZxFpF8G'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-md transition-all hover:scale-105"
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>গুগল ম্যাপে লোকেশন দেখুন</span>
+                  <ExternalLink className="w-3 h-3 opacity-80" />
+                </a>
+
                 <a
                   href={getWhatsAppDirectUrl(
                     socials.whatsappSupportNumber || academySettings.primarySupportPhone || '01798444444',
@@ -2191,7 +2309,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                   )}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center space-x-1"
+                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-md transition-all hover:scale-105"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   <span>Chat on WhatsApp</span>
@@ -2199,13 +2317,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               </div>
             </div>
 
-            {/* Interactive Google Map (7 cols) */}
-            <div className="lg:col-span-7 bg-slate-100 rounded-3xl overflow-hidden border border-slate-200 min-h-[340px] relative shadow-inner">
-              <iframe
-                title="Nexgen Academy Campus Location"
-                src={googleMapEmbedUrl}
-                className="w-full h-full min-h-[340px] border-0"
-                loading="lazy"
+            {/* Interactive Google Map & Location Box (7 cols) */}
+            <div className="lg:col-span-7">
+              <CampusLocationMapBox
+                embedUrl={websiteCmsConfig.googleMapEmbedUrl}
+                shareUrl={websiteCmsConfig.googleMapShareUrl || 'https://share.google/9W8K1XZHLbZxFpF8G'}
+                address={officeAddress}
+                directions={campusDirections}
+                instituteName={academySettings.instituteName || 'Nexgen Computer Academy'}
               />
             </div>
           </div>
@@ -2485,71 +2604,81 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         </div>
       )}
 
-      {/* 1-CLICK FLOATING WHATSAPP & HOTLINE QUICK CONNECT (Unified & CMS-Controlled) */}
-      {(websiteCmsConfig?.marketing?.enableFloatingWhatsApp !== false) && (() => {
-        const floatingWhatsAppNum =
-          websiteCmsConfig?.marketing?.floatingWhatsAppNumber ||
+      {/* 100% DYNAMIC LEAD CAPTURE & SCHOLARSHIP POPUP (CMS CONTROLLED) */}
+      <LeadCapturePopupModal
+        config={websiteCmsConfig.leadCapturePopup}
+        courses={courses}
+        onSubmitLead={async (payload) => {
+          const leadSourceStr = payload.source || 'Website Popup Voucher';
+          const selectedCourseObj = courses.find(c => c.id === payload.courseId);
+          const todayDate = new Date().toISOString().split('T')[0];
+          const newLeadData = {
+            fullName: payload.fullName,
+            studentName: payload.fullName,
+            name: payload.fullName,
+            phone: payload.phone,
+            email: payload.email || '',
+            courseId: payload.courseId || (courses[0]?.id || ''),
+            courseName: selectedCourseObj?.name || payload.courseId || '',
+            interestedCourseId: payload.courseId || (courses[0]?.id || ''),
+            source: leadSourceStr,
+            leadSource: leadSourceStr,
+            notes: payload.notes || `[Website Popup] Promo Voucher Claimed`,
+            status: 'New' as const,
+            counselorId: 'st-03',
+            counselorName: 'Online Desk (Tanvir Ahmed)',
+            occupation: 'Student / Professional',
+            educationLevel: 'HSC / Graduate',
+            visitDate: todayDate,
+            firstContactDate: todayDate,
+            comments: `[Popup Voucher] ${payload.notes || ''}`
+          };
+          addLead(newLeadData);
+          if (submitPublicLead) {
+            submitPublicLead(newLeadData).catch(err => console.warn('Background lead sync notice:', err));
+          }
+          return true;
+        }}
+      />
+
+      {/* FLOATING ACTION & MULTI-CHANNEL QUICK CONNECT WIDGET (CMS CONTROLLED) */}
+      <FloatingActionWidget
+        config={websiteCmsConfig.floatingActionWidget}
+        onOpenAdmission={() => setIsAdmissionOpen(true)}
+        defaultPhone={
+          websiteCmsConfig.marketing?.floatingWhatsAppNumber ||
           socials.whatsappSupportNumber ||
           academySettings.primarySupportPhone ||
-          multiplePhones.find(p => p.isWhatsapp)?.number ||
-          '01798444444';
-        const floatingHotlineNum =
-          academySettings.primarySupportPhone ||
-          websiteCmsConfig?.marketing?.floatingWhatsAppNumber ||
-          multiplePhones.find(p => p.isHotline)?.number ||
-          multiplePhones[0]?.number ||
-          '01798444444';
-        const welcomeText =
-          websiteCmsConfig?.marketing?.floatingWhatsAppWelcomeText ||
-          (language === 'bn'
-            ? `হ্যালো ${academySettings.instituteName || 'Academy'}! আমি কোর্স ভর্তি ও স্কলারশিপ সম্পর্কে জানতে চাই।`
-            : `Hello ${academySettings.instituteName || 'Academy'}! I want to know about course admission & scholarship.`);
-
-        return (
-          <aside aria-label="Quick contact" className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end space-y-2.5">
-            {/* WhatsApp Floating Button (Icon on mobile, full pill on desktop) */}
-            <a
-              href={getWhatsAppDirectUrl(floatingWhatsAppNum, welcomeText)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                trackMetaPixelEvent('Contact', {
-                  channel: 'WhatsApp Floating Button',
-                  phone: floatingWhatsAppNum
-                }, websiteCmsConfig?.marketing?.metaPixelId);
-              }}
-              className="group bg-emerald-500 hover:bg-emerald-600 text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl shadow-emerald-600/40 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2 border-2 border-white cursor-pointer"
-              title="WhatsApp Admission Help"
-            >
-              <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                <MessageCircle className="w-5 h-5 fill-white text-emerald-500" />
-              </div>
-              <span className="hidden sm:inline font-bold text-xs">
-                {language === 'bn' ? 'হোয়াটসঅ্যাপ ভর্তি সহায়তা' : 'WhatsApp Admission Help'}
-              </span>
-            </a>
-
-            {/* Direct Call Hotline (Phone icon on mobile, full pill with number on desktop) */}
-            {floatingHotlineNum && (
-              <a
-                href={`tel:${floatingHotlineNum}`}
-                className="group flex items-center bg-slate-900/95 hover:bg-slate-900 text-white p-3 sm:px-3.5 sm:py-2 rounded-full shadow-lg border border-slate-700 hover:scale-105 active:scale-95 transition-all text-xs font-bold space-x-2 cursor-pointer"
-                title={`Call Hotline: ${floatingHotlineNum}`}
-              >
-                <Phone className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
-                <span className="hidden sm:inline text-slate-200 group-hover:text-white">
-                  Hotline: {floatingHotlineNum}
-                </span>
-              </a>
-            )}
-          </aside>
-        );
-      })()}
+          '01798444444'
+        }
+        instituteName={academySettings.instituteName}
+      />
 
       {/* TOP NOTICE & PROMO BANNER CMS EDIT MODAL */}
       <TopNoticeTickerModal
         isOpen={isTopNoticeModalOpen}
         onClose={() => setIsTopNoticeModalOpen(false)}
+      />
+
+      {/* SOCIAL PROOF REAL-TIME ADMISSIONS & INQUIRY TICKER */}
+      <SocialProofTicker />
+
+      {/* DYNAMIC SYLLABUS DOWNLOAD LEAD MAGNET MODAL */}
+      <SyllabusDownloadModal
+        isOpen={!!selectedCourseForSyllabus}
+        onClose={() => setSelectedCourseForSyllabus(null)}
+        course={selectedCourseForSyllabus}
+        onOpenAdmission={(c) => {
+          setSelectedCourseForAdmission(c);
+          setIsAdmissionOpen(true);
+        }}
+      />
+
+      {/* FREE CAMPUS TOUR & PHYSICAL LAB COUNSELING BOOKING MODAL */}
+      <CampusTourModal
+        isOpen={isCampusTourOpen}
+        onClose={() => setIsCampusTourOpen(false)}
+        courses={courses}
       />
     </div>
   );

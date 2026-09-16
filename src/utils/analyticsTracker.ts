@@ -19,6 +19,11 @@ export interface UtmParams {
   utmCampaign?: string;
   utmContent?: string;
   utmTerm?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
   fbclid?: string;
   gclid?: string;
   referrer?: string;
@@ -43,12 +48,23 @@ export function getCapturedUtmParams(): UtmParams {
     const hasUtm = urlParams.has('utm_source') || urlParams.has('utm_campaign') || !!fbclid || !!gclid;
 
     if (hasUtm) {
+      const sourceVal = urlParams.get('utm_source') || (fbclid ? 'facebook_ads' : (gclid ? 'google_ads' : undefined));
+      const mediumVal = urlParams.get('utm_medium') || (fbclid ? 'cpc' : undefined);
+      const campaignVal = urlParams.get('utm_campaign') || undefined;
+      const contentVal = urlParams.get('utm_content') || undefined;
+      const termVal = urlParams.get('utm_term') || undefined;
+
       const utmData: UtmParams = {
-        utmSource: urlParams.get('utm_source') || (fbclid ? 'facebook_ads' : (gclid ? 'google_ads' : undefined)),
-        utmMedium: urlParams.get('utm_medium') || (fbclid ? 'cpc' : undefined),
-        utmCampaign: urlParams.get('utm_campaign') || undefined,
-        utmContent: urlParams.get('utm_content') || undefined,
-        utmTerm: urlParams.get('utm_term') || undefined,
+        utmSource: sourceVal,
+        utmMedium: mediumVal,
+        utmCampaign: campaignVal,
+        utmContent: contentVal,
+        utmTerm: termVal,
+        utm_source: sourceVal,
+        utm_medium: mediumVal,
+        utm_campaign: campaignVal,
+        utm_content: contentVal,
+        utm_term: termVal,
         fbclid: fbclid,
         gclid: gclid,
         referrer: document.referrer || 'direct',

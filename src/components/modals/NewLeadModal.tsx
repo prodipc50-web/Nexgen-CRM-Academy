@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { OccupationType, LeadStatus } from '../../types';
-import { X, UserPlus, Phone, BookOpen, Calendar, CheckCircle2 } from 'lucide-react';
+import { X, UserPlus, Phone, BookOpen, Calendar, CheckCircle2, Tag, Layers } from 'lucide-react';
 
 interface NewLeadModalProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface NewLeadModalProps {
 
 export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) => {
   const {
+    leads,
     courses,
     batches,
     staffList,
@@ -17,8 +18,13 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
     occupationsList,
     educationLevelsList,
     leadSourcesList,
+    crmSettings,
     addLead
   } = useAcademy();
+
+  const dynamicSources = (crmSettings?.leadSources && crmSettings.leadSources.length > 0)
+    ? crmSettings.leadSources
+    : (leadSourcesList || []);
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -31,7 +37,7 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
   const [interestedCourseId, setInterestedCourseId] = useState(courses[0]?.id || '');
   const [interestedBatchId, setInterestedBatchId] = useState('');
   const [preferredTime, setPreferredTime] = useState('Evening');
-  const [leadSource, setLeadSource] = useState(leadSourcesList[0] || 'Facebook Ads');
+  const [leadSource, setLeadSource] = useState(dynamicSources[0] || 'Facebook Ads');
   const [campaignId, setCampaignId] = useState('');
   const [counselorId, setCounselorId] = useState(staffList.find(s => s.role === 'COUNSELOR')?.id || staffList[0]?.id || '');
   const [counselorName, setCounselorName] = useState(staffList.find(s => s.role === 'COUNSELOR')?.name || staffList[0]?.name || '');
@@ -42,7 +48,19 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
   const [requirements, setRequirements] = useState('');
   const [nextFollowUpDate, setNextFollowUpDate] = useState(new Date(Date.now() + 86400000).toISOString().split('T')[0]);
   const [nextFollowUpNotes, setNextFollowUpNotes] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
   const [formError, setFormError] = useState('');
+
+  // Real-time duplicate phone check
+  const cleanPhoneDigits = phone.replace(/[^0-9]/g, '').slice(-11);
+  const duplicateLead = cleanPhoneDigits.length >= 10
+    ? leads.find(l => {
+        const existingClean = l.phone.replace(/[^0-9]/g, '').slice(-11);
+        const existingAltClean = (l.altPhone || '').replace(/[^0-9]/g, '').slice(-11);
+        return existingClean === cleanPhoneDigits || existingAltClean === cleanPhoneDigits;
+      })
+    : null;
 
   if (!isOpen) return null;
 
@@ -89,7 +107,9 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
       budget: budget || undefined,
       status,
       nextFollowUpDate: nextFollowUpDate || undefined,
-      nextFollowUpNotes: nextFollowUpNotes || undefined
+      nextFollowUpNotes: nextFollowUpNotes || undefined,
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
+      customFieldValues: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined
     });
 
     onClose();
@@ -129,6 +149,26 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
               >
                 ✕
               </button>
+            </div>
+          )}
+
+          {duplicateLead && (
+            <div className="p-3.5 bg-amber-50 border border-amber-300 text-amber-950 rounded-xl flex items-start space-x-3 text-xs animate-in fade-in">
+              <span className="text-lg leading-none shrink-0">⚠️</span>
+              <div className="flex-1 space-y-1">
+                <div className="font-bold flex items-center justify-between">
+                  <span>এই ফোন নম্বরে ইতিমধ্যে একজন লিড সিস্টেমে এন্ট্রি করা আছে!</span>
+                  <span className="px-2 py-0.5 bg-amber-200 text-amber-900 rounded font-mono text-[10px]">
+                    {duplicateLead.leadCode}
+                  </span>
+                </div>
+                <p className="text-slate-700 text-[11px]">
+                  নাম: <strong className="text-slate-900">{duplicateLead.name}</strong> • স্ট্যাটাস: <span className="font-bold text-indigo-700">{duplicateLead.status}</span> • কোর্স: {courses.find(c => c.id === duplicateLead.interestedCourseId)?.name || 'N/A'} • ফোন: <span className="font-mono font-semibold">{duplicateLead.phone}</span>
+                </p>
+                <p className="text-[10.5px] text-amber-800 italic">
+                  💡 পরামর্শ: পুনরায় নতুন লিড যুক্ত না করে আগের লিডটির হিস্ট্রি বা ফলো-আপ আপডেট করতে পারেন।
+                </p>
+              </div>
             </div>
           )}
 
@@ -310,10 +350,10 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
                   onChange={e => setLeadSource(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                 >
-                  {leadSourcesList.map(src => (
+                  {dynamicSources.map(src => (
                     <option key={src} value={src}>{src}</option>
                   ))}
-                  {!leadSourcesList.includes(leadSource) && leadSource && (
+                  {!dynamicSources.includes(leadSource) && leadSource && (
                     <option value={leadSource}>{leadSource}</option>
                   )}
                 </select>
@@ -355,6 +395,154 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
               </div>
             </div>
           </div>
+
+          {/* Dynamic Tags Selector */}
+          {crmSettings?.tags && crmSettings.tags.length > 0 && (
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+              <div className="font-semibold text-slate-800 text-xs flex items-center space-x-1.5 uppercase tracking-wider">
+                <Tag className="w-3.5 h-3.5 text-indigo-600" />
+                <span>লিড ট্যাগ নির্বাচন করুন (Tags)</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {crmSettings.tags.map(tag => {
+                  const isSelected = selectedTags.includes(tag.name);
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTags(prev =>
+                          prev.includes(tag.name)
+                            ? prev.filter(t => t !== tag.name)
+                            : [...prev, tag.name]
+                        );
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center space-x-1 cursor-pointer ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Tag className="w-3 h-3" />
+                      <span>{tag.name}</span>
+                      {isSelected && <CheckCircle2 className="w-3 h-3 ml-0.5" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Dynamic Custom Fields Section */}
+          {crmSettings?.customFields && crmSettings.customFields.length > 0 && (
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+              <div className="font-semibold text-slate-800 text-xs flex items-center space-x-1.5 uppercase tracking-wider">
+                <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                <span>অতিরিক্ত কাস্টম ফিল্ড ডেটা (Custom Fields)</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {crmSettings.customFields.map(field => {
+                  const val = customFieldValues[field.key] ?? field.defaultValue ?? '';
+
+                  if (field.type === 'boolean') {
+                    return (
+                      <div key={field.id} className="flex items-center space-x-2 pt-2">
+                        <input
+                          type="checkbox"
+                          id={`cf-${field.id}`}
+                          checked={Boolean(val)}
+                          onChange={e =>
+                            setCustomFieldValues(prev => ({
+                              ...prev,
+                              [field.key]: e.target.checked
+                            }))
+                          }
+                          className="w-4 h-4 rounded-md text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                        />
+                        <label
+                          htmlFor={`cf-${field.id}`}
+                          className="text-xs font-bold text-slate-700 cursor-pointer"
+                        >
+                          {field.label} {field.required && <span className="text-rose-500">*</span>}
+                        </label>
+                      </div>
+                    );
+                  }
+
+                  if (field.type === 'select') {
+                    return (
+                      <div key={field.id}>
+                        <label className="block text-slate-600 text-xs font-bold mb-1">
+                          {field.label} {field.required && <span className="text-rose-500">*</span>}
+                        </label>
+                        <select
+                          required={field.required}
+                          value={val}
+                          onChange={e =>
+                            setCustomFieldValues(prev => ({
+                              ...prev,
+                              [field.key]: e.target.value
+                            }))
+                          }
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
+                        >
+                          <option value="">সিলেক্ট করুন...</option>
+                          {(field.options || []).map((opt, oIdx) => (
+                            <option key={oIdx} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  }
+
+                  if (field.type === 'textarea') {
+                    return (
+                      <div key={field.id} className="sm:col-span-2">
+                        <label className="block text-slate-600 text-xs font-bold mb-1">
+                          {field.label} {field.required && <span className="text-rose-500">*</span>}
+                        </label>
+                        <textarea
+                          rows={2}
+                          required={field.required}
+                          placeholder={field.placeholder || ''}
+                          value={val}
+                          onChange={e =>
+                            setCustomFieldValues(prev => ({
+                              ...prev,
+                              [field.key]: e.target.value
+                            }))
+                          }
+                          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
+                        />
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={field.id}>
+                      <label className="block text-slate-600 text-xs font-bold mb-1">
+                        {field.label} {field.required && <span className="text-rose-500">*</span>}
+                      </label>
+                      <input
+                        type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+                        required={field.required}
+                        placeholder={field.placeholder || ''}
+                        value={val}
+                        onChange={e =>
+                          setCustomFieldValues(prev => ({
+                            ...prev,
+                            [field.key]: field.type === 'number' ? Number(e.target.value) : e.target.value
+                          }))
+                        }
+                        className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Follow-up Scheduler */}
           <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3.5 space-y-3">

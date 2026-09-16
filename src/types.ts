@@ -63,6 +63,100 @@ export interface PaymentAccountConfig {
   isActive: boolean;
 }
 
+export interface IdPrefixConfig {
+  studentPrefix: string; // e.g. 'NCA-{YEAR}-' or 'NCA-STU-'
+  admissionPrefix: string; // e.g. 'NCA-ADM-'
+  receiptPrefix: string; // e.g. 'MR-26-' or 'MR-'
+  certificatePrefix: string; // e.g. 'CERT-NCA-'
+  batchPrefix: string; // e.g. 'NCA-B-'
+  expensePrefix: string; // e.g. 'NCA-EXP-'
+  digitPadding: number; // e.g. 3 or 4 digits
+  includeYearToken: boolean; // whether to inject current year
+}
+
+export interface ClassShiftSlot {
+  id: string;
+  name: string;
+  shiftType: 'Morning' | 'Afternoon' | 'Evening' | 'Night' | 'Weekend';
+  startTime: string;
+  endTime: string;
+  isActive: boolean;
+}
+
+export interface ClassDayPattern {
+  id: string;
+  name: string;
+  shortCode: string;
+  days: string[];
+  isActive: boolean;
+}
+
+export interface ScheduleManagerConfig {
+  shifts: ClassShiftSlot[];
+  dayPatterns: ClassDayPattern[];
+}
+
+export interface GradingRule {
+  id: string;
+  grade: string;
+  minMarks: number;
+  maxMarks: number;
+  gpa: number;
+  evaluation: string;
+  colorBadge: string;
+}
+
+export interface ExamPolicyConfig {
+  gradingRules: GradingRule[];
+  minPassMark: number;
+  minAttendancePercentForAdmit: number;
+  examControllerName: string;
+  examControllerTitle: string;
+  courseCoordinatorName?: string;
+  verificationBaseUrl?: string;
+}
+
+export interface PromoCoupon {
+  id: string;
+  code: string;
+  title: string;
+  discountType: 'fixed' | 'percentage';
+  discountValue: number;
+  minCourseFee?: number;
+  applicableCourseIds?: string[];
+  validUntil?: string;
+  usageLimit?: number;
+  usedCount: number;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface AcademicHoliday {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  holidayType: 'Government' | 'Institutional' | 'Religious' | 'Academic Break';
+  affectsClasses: boolean;
+  notes?: string;
+}
+
+export interface AcademicCalendarConfig {
+  weekendDays: ('Friday' | 'Saturday' | 'Sunday')[];
+  holidays: AcademicHoliday[];
+  academicYear: string;
+}
+
+export interface InstallmentFeeRules {
+  defaultInstallmentCount: number;
+  reminderNoticeDaysBefore: number;
+  overdueAlertIntervalDays: number[];
+  lateFeePenaltyEnabled: boolean;
+  lateFeeAmount: number;
+  gracePeriodDays: number;
+  strictAdmissionFreezeAfterDays?: number;
+}
+
 export interface AcademySettings {
   instituteName: string;
   tagline: string;
@@ -116,6 +210,14 @@ export interface AcademySettings {
 
   // Database Archiving & Storage Cleanup Policy
   dataCleanupPolicy?: DataCleanupPolicy;
+
+  // Dynamic Management Configurations
+  idPrefixConfig?: IdPrefixConfig;
+  scheduleConfig?: ScheduleManagerConfig;
+  examPolicyConfig?: ExamPolicyConfig;
+  promoCoupons?: PromoCoupon[];
+  academicCalendar?: AcademicCalendarConfig;
+  feeRules?: InstallmentFeeRules;
 
   // Backward compatibility & convenience aliases
   phone?: string;
@@ -225,6 +327,7 @@ export interface Lead {
   interestedCourseId: string;
   courseId?: string; // Optional convenience alias
   courseName?: string;
+  interestedCourse?: string; // Optional convenience alias
   interestedBatchId?: string;
   preferredTime?: string;
   preferredSchedule?: string;
@@ -248,6 +351,7 @@ export interface Lead {
   visitDate: string;
   firstContactDate: string;
   comments?: string;
+  notes?: string;
   requirements?: string;
   message?: string;
   budget?: number;
@@ -263,8 +367,41 @@ export interface Lead {
   lostReason?: string;
   nextFollowUpDate?: string;
   nextFollowUpNotes?: string;
+  tags?: string[];
+  priority?: 'Low' | 'Medium' | 'High' | 'Urgent';
+  customFieldValues?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CrmLeadTag {
+  id: string;
+  name: string;
+  color: 'red' | 'amber' | 'emerald' | 'blue' | 'indigo' | 'purple' | 'rose' | 'slate' | string;
+  description?: string;
+  isSystem?: boolean;
+}
+
+export type CrmCustomFieldType = 'text' | 'number' | 'select' | 'date' | 'boolean' | 'textarea';
+
+export interface CrmCustomFieldDefinition {
+  id: string;
+  label: string;
+  key: string;
+  type: CrmCustomFieldType;
+  placeholder?: string;
+  options?: string[];
+  required?: boolean;
+  defaultValue?: string | number | boolean;
+  showInLeadTable?: boolean;
+  category?: 'General' | 'Marketing' | 'Academic' | 'Billing';
+}
+
+export interface CrmSettingsConfig {
+  tags: CrmLeadTag[];
+  customFields: CrmCustomFieldDefinition[];
+  leadSources: string[];
+  lostReasons: string[];
 }
 
 export type StudentStatus = 'Active' | 'At Risk' | 'Dropped' | 'Completed' | 'Alumni' | 'On Hold' | (string & {});
@@ -620,6 +757,13 @@ export interface SyllabusDownloadConfig {
   requireAddress?: boolean;
   requireOccupation?: boolean;
   requireSchedule?: boolean;
+  modalTitle?: string;
+  modalSubtitle?: string;
+  requirePhone?: boolean;
+  requireEmail?: boolean;
+  submitButtonText?: string;
+  successMessage?: string;
+  instantDownloadFallback?: boolean;
 }
 
 export interface CourseLandingPageConfig {
@@ -645,6 +789,7 @@ export interface CourseLandingPageConfig {
   showBatchCountdown?: boolean;
   nextBatchStartDate?: string;
   availableSeats?: number;
+  remainingSeats?: number;
   customDiscountBadge?: string;
 
   // Pain Points vs Modern Office Reality (Problem - Solution)
@@ -890,6 +1035,8 @@ export interface Batch {
   recordingDriveUrl?: string; // Recordings archive drive link
   onlinePlatform?: string; // Zoom / Meet / Teams / Lab
   seatCapacity: number;
+  maxStudents?: number;
+  enrolledStudents?: number;
   status: BatchStatus;
   notes?: string;
 }
@@ -1208,7 +1355,7 @@ export interface StudentPlacement {
   marketplace?: 'Upwork' | 'Fiverr' | 'Local Company' | 'Remote Global' | 'Freelancer.com' | 'Direct Client' | 'Other';
   storyReview?: string;
   portfolioUrl?: string;
-  status: 'Active' | 'Verified' | 'Promoted';
+  status: 'Active' | 'Verified' | 'Promoted' | 'Inactive';
   createdAt?: string;
 }
 
@@ -1651,6 +1798,8 @@ export interface WebsiteCmsConfig {
   campusDirections?: string;
   officeHours: string;
   googleMapEmbedUrl: string;
+  googleMapShareUrl?: string;
+  googleMapDirectUrl?: string;
 
   // Legacy fallbacks for compatibility
   whatsappSupportNumber: string;
@@ -1699,6 +1848,136 @@ export interface WebsiteCmsConfig {
 
   // 8. Section Visibility Controls (Show/Hide any section on the public site)
   sectionVisibility?: WebsiteSectionVisibility;
+
+  // 9. Top Sticky Offer Ribbon Bar
+  topOfferRibbon?: TopOfferRibbonConfig;
+
+  // 10. Lead Generation Popup / Offer Modal
+  leadCapturePopup?: LeadCapturePopupConfig;
+
+  // 11. Hiring Partners & Corporate Recruiters Showcase
+  hiringPartnersConfig?: HiringPartnersSectionConfig;
+
+  // 12. Floating Action Widget (WhatsApp, Hotline, Admission)
+  floatingActionWidget?: FloatingActionWidgetConfig;
+
+  // 13. Social Proof Real-time Enrollment Ticker
+  socialProofTicker?: SocialProofTickerConfig;
+  socialProofConfig?: SocialProofTickerConfig;
+
+  // 14. Free Campus Tour & Counseling Booking
+  campusTourConfig?: CampusTourConfig;
+
+  // 15. Syllabus Download Lead Magnet Config
+  syllabusDownloadConfig?: SyllabusDownloadLeadMagnetConfig | SyllabusDownloadConfig;
+
+  // 16. Alumni Job Placements Showcase Section Config
+  placementsSectionConfig?: SectionHeadingConfig;
+}
+
+export interface SocialProofTickerItem {
+  id: string;
+  studentName: string;
+  location: string;
+  actionType: 'enrolled' | 'inquired' | 'booked_tour' | 'downloaded_syllabus' | 'visited' | string;
+  courseName: string;
+  timeAgo: string;
+}
+
+export interface SocialProofTickerConfig {
+  enabled: boolean;
+  intervalSeconds?: number; // e.g. 12
+  displayIntervalSeconds?: number;
+  displayDurationSeconds?: number; // e.g. 5
+  position?: 'bottom_left' | 'bottom_right' | 'bottom-left' | 'bottom-right';
+  customActivities?: SocialProofTickerItem[];
+  items?: SocialProofTickerItem[];
+}
+
+export interface CampusTourConfig {
+  enabled: boolean;
+  title?: string;
+  subtitle?: string;
+  modalTitle?: string;
+  modalSubtitle?: string;
+  badgeText?: string;
+  availableDays?: string | string[];
+  availableTimeSlots?: string[];
+  timeSlots?: string[];
+  ctaButtonText?: string;
+  notificationPhone?: string;
+}
+
+export interface SyllabusDownloadLeadMagnetConfig {
+  enabled: boolean;
+  modalTitle: string;
+  modalSubtitle: string;
+  requirePhone: boolean;
+  requireEmail: boolean;
+  buttonText?: string;
+  submitButtonText?: string;
+  successMessage?: string;
+  instantDownloadFallback?: boolean;
+}
+
+export interface TopOfferRibbonConfig {
+  enabled: boolean;
+  badgeText: string; // e.g. "🎉 স্পেশাল স্কলারশিপ অফার"
+  message: string; // e.g. "পবিত্র ঈদ উপলক্ষে সকল আইটি কোর্সে ৩০% পর্যন্ত স্কলারশিপ ছাড়! সীমিত আসন বাকি।"
+  couponCode?: string; // e.g. "EID2026"
+  buttonText: string; // e.g. "ভর্তি আবেদন করুন"
+  actionType: 'open_admission' | 'copy_coupon' | 'scroll_courses' | 'whatsapp';
+  customLink?: string;
+  bgColor?: string; // e.g. "from-amber-600 via-rose-600 to-indigo-700"
+  textColor?: string;
+  expiresAt?: string; // e.g. "2026-10-31" or "আর মাত্র ৩ দিন বাকি"
+  dismissible: boolean;
+}
+
+export interface LeadCapturePopupConfig {
+  enabled: boolean;
+  title: string; // e.g. "🎓 ফ্রি ক্যারিয়ার গাইডলাইন ও স্কলারশিপ ভাউচার!"
+  subtitle: string; // e.g. "আপনার মোবাইল নম্বর দিন, আমাদের অভিজ্ঞ কাউন্সেলর সরাসরি কল করে সর্বোচ্চ স্কলারশিপ নিশ্চিত করবেন।"
+  badgeText?: string; // e.g. "🔥 সীমিত আসন • Batch 2026"
+  discountText?: string; // e.g. "৳২,০০০ পর্যন্ত নিশ্চিত স্কলারশিপ"
+  submitButtonText: string; // e.g. "আমার স্কলারশিপ কুপন পাঠান"
+  successMessage: string; // e.g. "অভিনন্দন! আপনার তথ্য সফলভাবে গৃহীত হয়েছে। শীঘ্রই কাউন্সেলর কল করবেন।"
+  triggerType: 'delay' | 'scroll' | 'exit_intent';
+  delaySeconds: number; // default 8
+  scrollPercentage: number; // default 35
+  imageUrl?: string;
+  showCourseSelect: boolean;
+  showEmailField: boolean;
+}
+
+export interface HiringPartnerItem {
+  id: string;
+  name: string; // e.g. "Brain Station 23", "Daraz", "Pathao", "Walton", "BJIT", "BTEB"
+  logoUrl: string;
+  category: 'Corporate Recruiter' | 'Tech Partner' | 'Govt Accreditation' | 'Industry Affiliate';
+  websiteUrl?: string;
+  hiredCount?: number; // e.g. 45+
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface HiringPartnersSectionConfig {
+  enabled: boolean;
+  sectionTag: string; // e.g. "TOP RECRUITERS & CORPORATE AFFILIATIONS"
+  heading: string; // e.g. "যেসব শীর্ষ প্রতিষ্ঠানে আমাদের শিক্ষার্থীরা কর্মরত"
+  subtitle: string; // e.g. "আমাদের প্রশিক্ষণপ্রাপ্ত শিক্ষার্থীরা দেশ-বিদেশের খ্যাতিমান আইটি প্রতিষ্ঠান ও করপোরেট হাউজে সফলতার সাথে কাজ করছেন।"
+  partners: HiringPartnerItem[];
+}
+
+export interface FloatingActionWidgetConfig {
+  enabled: boolean;
+  whatsappNumber: string; // e.g. "01798444444"
+  whatsappMessage: string; // e.g. "হ্যালো! Nexgen Computer Academy এর কোর্স ও ভর্তি সংক্রান্ত তথ্য জানতে চাচ্ছি।"
+  callNumber: string; // e.g. "01798444444"
+  showCallButton: boolean;
+  showAdmissionButton: boolean;
+  showScrollToTop: boolean;
+  position: 'bottom_right' | 'bottom_left';
 }
 
 export interface UpcomingBatchesCardConfig {
@@ -1798,6 +2077,8 @@ export interface WebsiteSectionVisibility {
   seminars: boolean;
   gallery: boolean;
   reviews: boolean;
+  hiringPartners?: boolean;
+  placements?: boolean;
   verifyCertificate: boolean;
   noticesAndFaq: boolean;
   contactAndMap: boolean;

@@ -21,7 +21,8 @@ import {
   Smartphone,
   Layers,
   Users,
-  Search
+  Search,
+  ShieldAlert
 } from 'lucide-react';
 import { CmsHeroTab } from './cms/CmsHeroTab';
 import { CmsCoursesTab } from './cms/CmsCoursesTab';
@@ -39,6 +40,8 @@ import { CmsStudentPortalTab } from './cms/CmsStudentPortalTab';
 import { CmsNotificationsTab } from './cms/CmsNotificationsTab';
 import { CmsSeoTab } from './cms/CmsSeoTab';
 import { CmsSectionsTab } from './cms/CmsSectionsTab';
+import { CmsOffersPopupsTab } from './cms/CmsOffersPopupsTab';
+import { CmsSecurityShieldTab } from './cms/CmsSecurityShieldTab';
 
 interface WebsiteCMSViewProps {
   onOpenPublicWebsite?: () => void;
@@ -55,6 +58,8 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
   const { academySettings } = useAcademy();
 
   const [activeTab, setActiveTab] = useState<
+    | 'offers_popups'
+    | 'security_shield'
     | 'seo'
     | 'sections'
     | 'hero'
@@ -81,6 +86,8 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
   };
 
   const navTabs = [
+    { id: 'offers_popups', label: 'Offers, Popups & Partners', icon: Sparkles, count: null, isHot: true, isNew: true },
+    { id: 'security_shield', label: 'Cyber Security & Anti-Bot Shield', icon: ShieldAlert, count: null, isHot: true, isNew: true },
     { id: 'sections', label: 'Page Sections & Layout', icon: Layout, count: null, isHot: true, isNew: true },
     { id: 'seo', label: 'SEO & Local Search Hub', icon: Search, count: null, isHot: true, isPhase4: true },
     { id: 'hero', label: 'Hero & Banner Slider', icon: Layers, count: null, isHot: false },
@@ -192,6 +199,8 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
 
       {/* Tab Content Display */}
       <div>
+        {activeTab === 'offers_popups' && <CmsOffersPopupsTab onSuccessToast={triggerToast} />}
+        {activeTab === 'security_shield' && <CmsSecurityShieldTab onSuccessToast={triggerToast} />}
         {activeTab === 'sections' && <CmsSectionsTab onSuccessToast={triggerToast} />}
         {activeTab === 'seo' && <CmsSeoTab onSaveToast={triggerToast} />}
         {activeTab === 'hero' && <CmsHeroTab onSuccessToast={triggerToast} />}

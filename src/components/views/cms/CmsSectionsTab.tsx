@@ -321,6 +321,8 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
                 seminars: true,
                 gallery: true,
                 reviews: true,
+                placements: true,
+                hiringPartners: true,
                 verifyCertificate: true,
                 noticesAndFaq: true,
                 contactAndMap: true,
@@ -330,7 +332,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Show All 16 Sections</span>
+            <span>Show All 18 Sections</span>
           </button>
         </div>
 
@@ -348,10 +350,12 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             { key: 'seminars', label: '10. Free Career Seminars', desc: 'ফ্রি সেমিনার ও অনলাইন ওয়ার্কশপ' },
             { key: 'gallery', label: '11. Campus Life Photo Gallery', desc: 'ল্যাব ও ক্লাসরুমের বাস্তব ছবি' },
             { key: 'reviews', label: '12. Student Reviews & Stories', desc: 'শিক্ষার্থীদের রেটিং ও ক্যারিয়ার সাকসেস' },
-            { key: 'verifyCertificate', label: '13. Certificate Verification', desc: 'ডিজিটাল কিউআর/আইডি যাচাইকরণ' },
-            { key: 'noticesAndFaq', label: '14. Notices & FAQ Accordion', desc: 'নোটিশ বোর্ড ও সাধারণ প্রশ্নোত্তর' },
-            { key: 'contactAndMap', label: '15. Multi-Channel Contact & Map', desc: 'ক্যাম্পাস ঠিকানা ও গুগল ম্যাপ' },
-            { key: 'footer', label: '16. Footer & Legal Policies', desc: 'ওয়েবসাইট ফুটার ও পলিসি লিংকস' }
+            { key: 'placements', label: '13. Alumni Job Placements', desc: 'সফল শিক্ষার্থীদের জব ও ফ্রিল্যান্সিং মাইলস্টোন' },
+            { key: 'hiringPartners', label: '14. Hiring Partners & Recruiters', desc: 'শীর্ষ আইটি কোম্পানি ও সরকারি স্বীকৃতি লোগো' },
+            { key: 'verifyCertificate', label: '15. Certificate Verification', desc: 'ডিজিটাল কিউআর/আইডি যাচাইকরণ' },
+            { key: 'noticesAndFaq', label: '16. Notices & FAQ Accordion', desc: 'নোটিশ বোর্ড ও সাধারণ প্রশ্নোত্তর' },
+            { key: 'contactAndMap', label: '17. Multi-Channel Contact & Map', desc: 'ক্যাম্পাস ঠিকানা ও গুগল ম্যাপ' },
+            { key: 'footer', label: '18. Footer & Legal Policies', desc: 'ওয়েবসাইট ফুটার ও পলিসি লিংকস' }
           ].map(sec => {
             const isChecked = visibility[sec.key as keyof WebsiteSectionVisibility] ?? true;
             return (
