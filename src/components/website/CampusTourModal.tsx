@@ -31,7 +31,7 @@ export const CampusTourModal: React.FC<CampusTourModalProps> = ({
   courses,
   initialCourseId
 }) => {
-  const { addLead, academySettings, websiteCmsConfig } = useAcademy();
+  const { addLead, submitPublicLead, academySettings, websiteCmsConfig } = useAcademy();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -81,27 +81,46 @@ export const CampusTourModal: React.FC<CampusTourModalProps> = ({
       const utmParams = getCapturedUtmParams();
 
       const matchingCourse = courses.find(c => c.name === selectedCourse || c.id === selectedCourse);
-      addLead({
+      const leadPayload = {
         name: name.trim(),
+        studentName: name.trim(),
+        fullName: name.trim(),
         phone: phone.trim(),
         interestedCourseId: matchingCourse?.id || courses[0]?.id || 'crs-1',
+        courseId: matchingCourse?.id || courses[0]?.id || 'crs-1',
         courseName: matchingCourse?.name || selectedCourse,
         interestedCourse: selectedCourse,
-        occupation: 'Student',
+        occupation: 'Student' as any,
         educationLevel: 'Not Specified',
         counselorId: '',
         visitDate: new Date().toISOString().split('T')[0],
         firstContactDate: new Date().toISOString().split('T')[0],
         leadSource: 'Campus Tour Request',
         source: 'Campus Tour Request',
-        status: 'New',
-        priority: 'Urgent',
+        status: 'New' as const,
+        priority: 'Urgent' as const,
         notes: `ক্যাম্পাস ট্যুর ও কাউন্সেলিং বুক করেছেন। তারিখ: ${visitDate} (${timeSlot})। সফরকারী: ${visitorType}।`,
+        comments: `ক্যাম্পাস ট্যুর বুকিং। তারিখ: ${visitDate} (${timeSlot})। সফরকারী: ${visitorType}।`,
         utmSource: utmParams.utm_source || 'campus_tour_popup',
         utmMedium: utmParams.utm_medium,
         utmCampaign: utmParams.utm_campaign,
         tags: ['Campus Tour', 'Offline Counseling', 'VIP Lead']
-      });
+      };
+
+      addLead(leadPayload);
+
+      if (submitPublicLead) {
+        submitPublicLead(leadPayload).catch(e => console.warn('Campus tour cloud sync notice:', e));
+      }
+
+      if (typeof window !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('nexgen_leads_sync');
+          bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+          bc.close();
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+      }
 
       // Track Pixel
       const pixelId = websiteCmsConfig?.marketing?.metaPixelId;

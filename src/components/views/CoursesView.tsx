@@ -462,10 +462,10 @@ export const CoursesView: React.FC = () => {
                   </div>
 
                   {/* Bottom Fee & Batches Strip */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div 
                       onClick={() => handleOpenEdit(course)}
-                      className="cursor-pointer group"
+                      className="cursor-pointer group flex items-center justify-between sm:block"
                       title="Click to Update Course Price & Fees"
                     >
                       <div className="text-[11px] text-slate-400 line-through">
@@ -477,40 +477,40 @@ export const CoursesView: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
                       <button
                         onClick={() => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course } }))}
-                        className="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-colors flex items-center space-x-1 border border-indigo-200/60"
+                        className="flex-1 sm:flex-initial justify-center px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition-colors flex items-center space-x-1 border border-indigo-200/60"
                         title="লাইভ ল্যান্ডিং পেজ প্রিভিউ দেখুন (Live Preview)"
                       >
-                        <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                        <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                         <span>Preview</span>
                       </button>
 
                       <button
                         onClick={() => setCustomizerCourse(course)}
-                        className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition-colors flex items-center space-x-1 border border-emerald-200/60"
+                        className="flex-1 sm:flex-initial justify-center px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition-colors flex items-center space-x-1 border border-emerald-200/60"
                         title="ল্যান্ডিং পেজ কনটেন্ট, অফার ফি ও WhatsApp/Messenger বাটন কাস্টমাইজ করুন"
                       >
-                        <Layout className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Edit Landing</span>
+                        <Layout className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="whitespace-nowrap">Edit Landing</span>
                       </button>
 
                       <button
                         onClick={() => setAdLinkCourse(course)}
-                        className="px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs transition-colors flex items-center space-x-1 border border-purple-200/60"
+                        className="flex-1 sm:flex-initial justify-center px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs transition-colors flex items-center space-x-1 border border-purple-200/60"
                         title="Generate Facebook Ad / Campaign Landing Link"
                       >
-                        <Target className="w-3.5 h-3.5 text-purple-600" />
+                        <Target className="w-3.5 h-3.5 text-purple-600 shrink-0" />
                         <span>Ad Link</span>
                       </button>
 
                       <button
                         onClick={() => handleOpenEdit(course)}
-                        className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors flex items-center space-x-1 shadow-2xs"
+                        className="flex-1 sm:flex-initial justify-center px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors flex items-center space-x-1 shadow-2xs"
                         title="Update Course Price, Duration, Classes, Hours & Curriculum"
                       >
-                        <Edit className="w-3.5 h-3.5" />
+                        <Edit className="w-3.5 h-3.5 shrink-0" />
                         <span>Edit</span>
                       </button>
                     </div>

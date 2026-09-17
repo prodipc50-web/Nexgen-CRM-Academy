@@ -640,22 +640,22 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
               {courses.slice(0, 5).map(crs => (
                 <div
                   key={crs.id}
-                  className="p-3 bg-slate-50 hover:bg-indigo-50/40 rounded-xl border border-slate-200/80 transition-colors flex items-center justify-between gap-3"
+                  className="p-3 bg-slate-50 hover:bg-indigo-50/40 rounded-xl border border-slate-200/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 w-full sm:w-auto flex-1">
                     <p className="text-xs font-bold text-slate-900 truncate">{crs.name}</p>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 mt-0.5">
                       {crs.duration} • Fee: ৳{crs.offerFee?.toLocaleString() || crs.regularFee?.toLocaleString()}
                     </p>
                   </div>
 
-                  <div className="flex items-center space-x-1.5 shrink-0">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 w-full sm:w-auto shrink-0">
                     <button
                       onClick={() => setCustomizerCourse(crs)}
-                      className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition-colors flex items-center space-x-1"
+                      className="flex-1 sm:flex-initial justify-center px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition-colors flex items-center space-x-1"
                       title="ল্যান্ডিং পেজ কনটেন্ট, অফার ফি ও বাটন এডিট করুন"
                     >
-                      <Layers className="w-3.5 h-3.5 text-emerald-600" />
+                      <Layers className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>Edit Content</span>
                     </button>
 
@@ -663,17 +663,17 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
                       onClick={() => {
                         window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: crs } }));
                       }}
-                      className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-colors flex items-center space-x-1"
+                      className="flex-1 sm:flex-initial justify-center px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-colors flex items-center space-x-1"
                     >
-                      <Eye className="w-3.5 h-3.5" />
+                      <Eye className="w-3.5 h-3.5 shrink-0" />
                       <span>Preview</span>
                     </button>
 
                     <button
                       onClick={() => setSelectedCourseForAd(crs)}
-                      className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-colors flex items-center space-x-1.5"
+                      className="flex-1 sm:flex-initial justify-center px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-colors flex items-center space-x-1.5"
                     >
-                      <Target className="w-3.5 h-3.5" />
+                      <Target className="w-3.5 h-3.5 shrink-0" />
                       <span>Get Ad Link</span>
                     </button>
                   </div>

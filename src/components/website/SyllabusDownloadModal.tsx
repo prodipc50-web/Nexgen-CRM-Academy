@@ -29,7 +29,7 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
   course,
   onOpenAdmission
 }) => {
-  const { addLead, websiteCmsConfig } = useAcademy();
+  const { addLead, submitPublicLead, websiteCmsConfig } = useAcademy();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -73,11 +73,14 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
     try {
       const utmParams = getCapturedUtmParams();
       
-      addLead({
+      const leadPayload = {
         name: name.trim(),
+        studentName: name.trim(),
+        fullName: name.trim(),
         phone: phone.trim(),
         email: email.trim() || undefined,
         interestedCourseId: course.id,
+        courseId: course.id,
         courseName: course.name,
         interestedCourse: course.name,
         occupation: (occupation as any) || 'Student',
@@ -87,14 +90,30 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
         firstContactDate: new Date().toISOString().split('T')[0],
         leadSource: 'Website Syllabus Download',
         source: 'Website Syllabus Download',
-        status: 'New',
-        priority: 'High',
+        status: 'New' as const,
+        priority: 'High' as const,
         notes: `সিলেবাস ডাউনলোড করেছেন। পেশা: ${occupation}। ব্যাচ পছন্দ: ${preferredBatch}.`,
+        comments: `সিলেবাস ডাউনলোড করেছেন। পেশা: ${occupation}। ব্যাচ পছন্দ: ${preferredBatch}.`,
         utmSource: utmParams.utm_source || 'direct_website',
         utmMedium: utmParams.utm_medium,
         utmCampaign: utmParams.utm_campaign,
         tags: ['Syllabus Download', course.category || 'General']
-      });
+      };
+
+      addLead(leadPayload);
+
+      if (submitPublicLead) {
+        submitPublicLead(leadPayload).catch(e => console.warn('Syllabus download cloud sync notice:', e));
+      }
+
+      if (typeof window !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('nexgen_leads_sync');
+          bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+          bc.close();
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+      }
 
       // Track Meta Pixel Event
       const pixelId = websiteCmsConfig?.marketing?.metaPixelId;

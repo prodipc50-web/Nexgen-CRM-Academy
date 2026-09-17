@@ -50,7 +50,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
   onOpenEnroll
 }) => {
   const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
-  const { staffList, websiteReviews, websiteGallery, websiteFaqs, websiteCmsConfig, academySettings, addLead } = useAcademy();
+  const { staffList, websiteReviews, websiteGallery, websiteFaqs, websiteCmsConfig, academySettings, addLead, submitPublicLead } = useAcademy();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'schedules' | 'trainers' | 'reviews' | 'gallery' | 'faqs'>('overview');
   const [expandedFaqIndex, setExpandedFaqIndex] = useState<number | null>(0);
@@ -184,25 +184,45 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
     const utms = getCapturedUtmParams();
     const today = new Date().toISOString().split('T')[0];
 
-    addLead({
+    const leadPayload = {
       name: leadName.trim(),
+      studentName: leadName.trim(),
+      fullName: leadName.trim(),
       phone: leadPhone.trim(),
       email: leadEmail.trim() || undefined,
-      occupation: 'Student',
+      occupation: 'Student' as any,
       educationLevel: 'HSC / Graduate',
       counselorId: 'counselor-online',
       interestedCourseId: course.id,
+      courseId: course.id,
+      courseName: course.name,
       leadSource: utms.utmSource ? `Website Modal (${utms.utmSource})` : 'Website Course Details Modal',
+      source: utms.utmSource ? `Website Modal (${utms.utmSource})` : 'Website Course Details Modal',
       campaignId: utms.utmCampaign,
       utmSource: utms.utmSource,
       utmMedium: utms.utmMedium,
       utmCampaign: utms.utmCampaign,
-      status: 'New',
+      status: 'New' as const,
       counselorName: 'Online Admission Desk',
       visitDate: today,
       firstContactDate: today,
       comments: `Course Details Modal Inquiry. Selected Schedule: ${selectedSchedule || 'Any'}. Message: ${leadMessage || 'Interested in admission.'}`
-    });
+    };
+
+    addLead(leadPayload);
+
+    if (submitPublicLead) {
+      submitPublicLead(leadPayload).catch(e => console.warn('Course details cloud sync notice:', e));
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel('nexgen_leads_sync');
+        bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+        bc.close();
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+    }
 
     trackMetaPixelEvent(
       'Lead',
