@@ -124,7 +124,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 280, mass: 0.9 }}
-            className="relative w-full max-w-[340px] xs:max-w-[380px] h-full bg-white shadow-2xl flex flex-col z-10 overflow-hidden border-l border-slate-200"
+            className="relative w-full max-w-[85vw] sm:max-w-[380px] h-full bg-white shadow-2xl flex flex-col z-10 overflow-hidden border-l border-slate-200"
           >
             {/* 1. Drawer Header */}
             <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between border-b border-indigo-900/50 shrink-0">

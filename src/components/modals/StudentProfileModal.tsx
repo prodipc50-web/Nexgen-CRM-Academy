@@ -550,8 +550,8 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 )}
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                <table className="w-full text-left text-xs">
+              <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
+                <table className="w-full min-w-[440px] text-left text-xs">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-[10px]">
                     <tr>
                       <th className="py-2.5 px-3">Receipt #</th>
@@ -605,8 +605,8 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 </span>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden max-h-60 overflow-y-auto">
-                <table className="w-full text-left text-xs">
+              <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto max-h-60 overflow-y-auto">
+                <table className="w-full min-w-[360px] text-left text-xs">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-[10px]">
                     <tr>
                       <th className="py-2 px-3">Date</th>

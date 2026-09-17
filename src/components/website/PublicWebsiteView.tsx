@@ -341,20 +341,26 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* 1. TOP ANNOUNCEMENT BAR & MULTI-HOTLINES */}
-      <div className="bg-slate-950 text-slate-300 text-xs border-b border-slate-800">
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-2 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div className="bg-slate-950 text-slate-300 text-xs border-b border-slate-800 w-full overflow-hidden">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-3 sm:px-6 lg:px-10 py-1.5 sm:py-2 flex flex-col md:flex-row items-center justify-between gap-2">
           {/* Ticker / Notice */}
-          <div className="flex items-center space-x-2 overflow-hidden text-[11px] sm:text-xs">
-            <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+          <div className="w-full md:w-auto flex-1 min-w-0 flex items-center space-x-2 overflow-hidden text-[11px] sm:text-xs">
+            <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 text-[10px] sm:text-[11px]">
               Notice
             </span>
-            <span className="truncate text-slate-300">
-              {websiteCmsConfig.topNoticeTicker || 'Admission open for upcoming weekend & evening batches!'}
-            </span>
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <p
+                onClick={() => setIsTopNoticeModalOpen(true)}
+                className="truncate text-slate-300 hover:text-white transition-colors cursor-pointer"
+                title={websiteCmsConfig.topNoticeTicker || 'Admission open for upcoming weekend & evening batches!'}
+              >
+                {websiteCmsConfig.topNoticeTicker || 'Admission open for upcoming weekend & evening batches!'}
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => setIsTopNoticeModalOpen(true)}
-              className="p-1 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded transition-colors shrink-0"
+              className="p-1 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded transition-colors shrink-0 cursor-pointer"
               title="এডিট করুন: টপ নোটিশ ও প্রমো ব্যানার (Edit Notice Ticker & Promo Banner)"
             >
               <Edit className="w-3 h-3" />
@@ -362,14 +368,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
 
           {/* Quick Contact & Staff Access */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0 text-xs">
+          <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-1.5 sm:gap-2.5 shrink-0 text-xs overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none">
             <a
               href={`tel:${multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}`}
-              className="flex items-center space-x-1 hover:text-amber-400 font-bold transition-colors whitespace-nowrap"
+              className="flex items-center space-x-1 hover:text-amber-400 font-bold transition-colors whitespace-nowrap shrink-0 text-[11px] sm:text-xs"
             >
               <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span className="hidden md:inline">Hotline: {multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}</span>
-              <span className="md:hidden">{multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}</span>
+              <span className="hidden sm:inline">Hotline: {multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}</span>
+              <span className="sm:hidden">{multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}</span>
             </a>
 
             <span className="text-slate-700 hidden sm:inline">|</span>
@@ -378,7 +384,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <button
               type="button"
               onClick={() => setLanguage(l => (l === 'bn' ? 'en' : 'bn'))}
-              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-lg border border-slate-700 transition-colors flex items-center space-x-1 whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-lg border border-slate-700 transition-colors flex items-center space-x-1 whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs"
               title="Toggle Language / ভাষা পরিবর্তন"
             >
               <span>{language === 'bn' ? 'English' : 'বাংলা'}</span>
@@ -389,11 +395,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenStudentPortal}
-                className="flex items-center space-x-1.5 px-2.5 py-1 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 hover:text-white border border-indigo-700/50 rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer"
+                className="flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 hover:text-white border border-indigo-700/50 rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs"
                 title="Student ID, Ledger & Certificate Portal"
               >
                 <GraduationCap className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                <span>{language === 'bn' ? 'স্টুডেন্ট পোর্টাল' : 'Student Portal'}</span>
+                <span>{language === 'bn' ? 'স্টুডেন্ট পোর্টাল' : 'Student'}</span>
               </button>
             )}
 
@@ -401,10 +407,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <button
               type="button"
               onClick={onOpenStaffLogin}
-              className="flex items-center space-x-1.5 px-2.5 py-1 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer"
+              className="flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs"
             >
               <LogIn className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-              <span>{isAuthenticated ? 'ERP Portal' : 'Staff Login'}</span>
+              <span>{isAuthenticated ? 'ERP' : 'Staff Login'}</span>
             </button>
 
             {/* Quick Admin CMS Edit Button (If logged in) */}
@@ -412,10 +418,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenCmsAdmin}
-                className="flex items-center space-x-1 px-2 py-1 bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 rounded-lg transition-colors font-bold"
+                className="flex items-center space-x-1 px-2 py-0.5 bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 rounded-lg transition-colors font-bold text-[11px] shrink-0"
                 title="Edit website texts, courses & gallery in CMS"
               >
-                <Sliders className="w-3.5 h-3.5" />
+                <Sliders className="w-3 h-3" />
                 <span className="hidden sm:inline">CMS</span>
               </button>
             )}
@@ -508,8 +514,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               title="Online Admission Application Portal"
             >
               <Zap className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-amber-300 shrink-0" />
-              <span className="hidden xs:inline">Online Admission</span>
-              <span className="xs:hidden">Admission</span>
+              <span className="hidden sm:inline">Online Admission</span>
+              <span className="sm:hidden">Admission</span>
               <span className="hidden sm:inline"> (ভর্তি)</span>
             </button>
 
@@ -1042,7 +1048,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             </div>
 
             {/* Course Search Box */}
-            <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 min-w-[260px]">
+            <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 w-full sm:w-auto sm:min-w-[260px]">
               <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <input
                 type="text"

@@ -61,7 +61,7 @@ export const TopOfferRibbon: React.FC<TopOfferRibbonProps> = ({
     >
       <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-2">
         {/* Left / Center Message & Badge */}
-        <div className="flex items-center flex-wrap gap-2 text-center sm:text-left justify-center sm:justify-start flex-1 min-w-[280px]">
+        <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 text-center sm:text-left justify-center sm:justify-start flex-1 min-w-0 w-full sm:w-auto">
           {/* Badge */}
           {config.badgeText && (
             <span className="inline-flex items-center space-x-1 bg-white/20 hover:bg-white/30 backdrop-blur-xs px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wide uppercase border border-white/30 shadow-2xs shrink-0">

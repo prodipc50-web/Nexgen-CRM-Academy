@@ -2826,16 +2826,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           <span className="text-amber-300 font-black text-sm">ফি: ৳{(course.offerFee ?? course.regularFee ?? 0).toLocaleString()}</span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
           {/* Mobile WhatsApp */}
           <a
             href={whatsAppUrl}
             target="_blank"
             rel="noreferrer"
             onClick={handleWhatsAppClick}
-            className="min-h-[44px] py-2.5 px-2 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-xs font-bold whitespace-nowrap"
+            className="min-h-[44px] py-2 px-1 sm:px-2 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] sm:text-xs font-bold whitespace-nowrap"
           >
-            <MessageCircle className="w-4 h-4 fill-white shrink-0" />
+            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white shrink-0" />
             <span>WhatsApp</span>
           </a>
 
@@ -2845,18 +2845,18 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             target="_blank"
             rel="noreferrer"
             onClick={handleMessengerClick}
-            className="min-h-[44px] py-2.5 px-2 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-xs font-bold whitespace-nowrap"
+            className="min-h-[44px] py-2 px-1 sm:px-2 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-md flex items-center justify-center space-x-1 text-[11px] sm:text-xs font-bold whitespace-nowrap"
           >
-            <Smartphone className="w-4 h-4 shrink-0" />
+            <Smartphone className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             <span>Messenger</span>
           </a>
 
           {/* Mobile Admission */}
           <button
             onClick={() => setIsAdmissionOpen(true)}
-            className="min-h-[44px] py-2.5 px-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-xs rounded-xl shadow-lg active:scale-95 flex items-center justify-center space-x-1 cursor-pointer whitespace-nowrap"
+            className="min-h-[44px] py-2 px-1 sm:px-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-[11px] sm:text-xs rounded-xl shadow-lg active:scale-95 flex items-center justify-center space-x-1 cursor-pointer whitespace-nowrap"
           >
-            <GraduationCap className="w-4 h-4 shrink-0" />
+            <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             <span>ভর্তি আবেদন</span>
           </button>
         </div>

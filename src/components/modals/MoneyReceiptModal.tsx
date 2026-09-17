@@ -835,8 +835,8 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
             </div>
 
             {/* Payment Item Table */}
-            <div className="border border-slate-300 rounded-xl print:rounded-lg overflow-hidden text-xs print:text-[11px]">
-              <table className="w-full text-left">
+            <div className="border border-slate-300 rounded-xl print:rounded-lg overflow-x-auto text-xs print:text-[11px]">
+              <table className="w-full min-w-[320px] text-left">
                 <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
                   <tr>
                     <th className="py-2 print:py-1 px-4 print:px-3">Description</th>

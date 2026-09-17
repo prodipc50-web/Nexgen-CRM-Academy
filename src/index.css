@@ -19,12 +19,25 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   font-family: var(--font-bangla);
   color: #0f172a;
   line-height: 1.65;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+}
+
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
 }
 
 /* Ensure Bengali text scales optically and maintains comfortable line-height for all diacritics */
