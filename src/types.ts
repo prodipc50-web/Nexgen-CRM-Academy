@@ -264,7 +264,11 @@ export type FollowUpMethod = ContactMethod;
 
 export type FollowUpResult =
   | 'Interested'
+  | 'Demo Scheduled'
+  | 'Admission Pending'
   | 'Call Back Later'
+  | 'Call Later / Reschedule'
+  | 'No Answer'
   | 'Wants Discount'
   | 'Wants Different Batch'
   | 'Family Discussion'

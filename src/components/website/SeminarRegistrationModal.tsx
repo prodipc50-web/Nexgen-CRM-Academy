@@ -19,7 +19,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   onClose,
   seminar
 }) => {
-  const { addLead, submitPublicLead, syncIncomingLeadsNow, registerLeadToSeminar, websiteCmsConfig, academySettings } = useAcademy();
+  const { addLead, submitPublicLead, syncIncomingLeadsNow, registerLeadToSeminar, websiteCmsConfig, academySettings, staffList } = useAcademy();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -71,6 +71,14 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
         console.warn('Seminar server sync fallback handled:', err);
       });
 
+      // Dynamic Counselor Allocation
+      const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+        staffList.find(s => s.role === 'COUNSELOR') ||
+        staffList.find(s => s.status === 'Active') ||
+        staffList[0];
+      const counselorId = activeCounselor?.id || 'st-desk';
+      const counselorName = activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk';
+
       // 2. Client-side registration
       const newLead = addLead({
         name: name.trim(),
@@ -88,8 +96,8 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
         utmTerm: utms.utmTerm,
         deviceType: device,
         locationCity: 'Dhaka',
-        counselorId: 'st-03',
-        counselorName: 'Admissions Desk (Tanvir Ahmed)',
+        counselorId,
+        counselorName,
         visitDate: seminar.date || todayDate,
         firstContactDate: todayDate,
         status: 'Demo Scheduled',

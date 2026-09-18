@@ -70,9 +70,12 @@ export const CRMView: React.FC<CRMViewProps> = ({
     leads,
     updateLead,
     deleteLead,
+    mergeLeads,
     courses,
     staffList,
     followUps,
+    addFollowUp,
+    currentUser,
     leadSources,
     occupationsList,
     syncIncomingLeadsNow,
@@ -84,6 +87,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
   const [isFieldsTagsModalOpen, setIsFieldsTagsModalOpen] = useState(false);
   const [tagFilter, setTagFilter] = useState('all');
+  const [isCopied, setIsCopied] = useState(false);
 
   // Generate safe dynamic WhatsApp chat URL with institute name and course info
   const getLeadWhatsAppUrl = (lead: Lead) => {
@@ -214,6 +218,29 @@ export const CRMView: React.FC<CRMViewProps> = ({
     const cleanPhone = rawDigits.startsWith('88') ? rawDigits : `88${rawDigits.slice(-11)}`;
     const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsAppCustomText)}`;
     window.open(url, '_blank');
+
+    // Auto-record interaction in CRM Follow-up history
+    addFollowUp({
+      leadId: whatsAppModalLead.id,
+      date: new Date().toISOString().split('T')[0],
+      method: 'WhatsApp',
+      contactMethod: 'WhatsApp',
+      result: 'Interested',
+      staffName: currentUser?.name || 'Counselor Desk',
+      counselorId: currentUser?.id,
+      conversationSummary: `WhatsApp মেসেজ পাঠানো হয়েছে: "${whatsAppCustomText.slice(0, 80)}..."`,
+      notes: whatsAppCustomText,
+      nextAction: 'Follow-up on WhatsApp reply'
+    });
+
+    // If lead was in 'New' stage, mark as 'Contacted'
+    if (whatsAppModalLead.status === 'New') {
+      updateLead(whatsAppModalLead.id, { status: 'Contacted' });
+    }
+
+    setSyncFeedback(`WhatsApp মেসেজ পাঠানো এবং CRM হিস্ট্রিতে রেকর্ড করা হয়েছে (${whatsAppModalLead.name})`);
+    setTimeout(() => setSyncFeedback(null), 4000);
+
     setWhatsAppModalLead(null);
   };
 
@@ -221,7 +248,34 @@ export const CRMView: React.FC<CRMViewProps> = ({
     selectedLeadIds.forEach(id => {
       updateLead(id, { status: newStatus });
     });
+    setSyncFeedback(`নির্বাচিত ${selectedLeadIds.length} জন লিডের স্ট্যাটাস "${newStatus}" করা হয়েছে`);
+    setTimeout(() => setSyncFeedback(null), 4000);
     setSelectedLeadIds([]);
+  };
+
+  const handleBulkAssignCounselor = (counselorId: string) => {
+    const counselor = staffList.find(s => s.id === counselorId);
+    if (!counselor) return;
+    selectedLeadIds.forEach(id => {
+      updateLead(id, { counselorId: counselor.id, counselorName: counselor.name });
+    });
+    setSyncFeedback(`নির্বাচিত ${selectedLeadIds.length} জন লিডকে "${counselor.name}"-এর নিকট বরাদ্দ করা হয়েছে`);
+    setTimeout(() => setSyncFeedback(null), 4000);
+    setSelectedLeadIds([]);
+  };
+
+  const handleMergeSelectedLeads = () => {
+    if (selectedLeadIds.length < 2) return;
+    const [leadAId, leadBId] = selectedLeadIds;
+    const leadA = leads.find(l => l.id === leadAId);
+    const leadB = leads.find(l => l.id === leadBId);
+    if (!leadA || !leadB) return;
+    if (window.confirm(`আপনি কি নিশ্চিত যে "${leadB.name}" (${leadB.leadCode || leadB.phone})-কে "${leadA.name}" (${leadA.leadCode || leadA.phone})-এর সাথে একীভূত (Merge) করতে চান? সমস্ত কমেন্ট, ট্যাগ ও ফলো-আপ হিস্ট্রি একীভূত করা হবে।`)) {
+      mergeLeads(leadAId, leadBId);
+      setSelectedLeadIds([]);
+      setSyncFeedback(`সফলভাবে "${leadB.name}"-কে "${leadA.name}"-এর সাথে একীভূত করা হয়েছে`);
+      setTimeout(() => setSyncFeedback(null), 4500);
+    }
   };
 
   const handleBulkDelete = () => {
@@ -253,7 +307,12 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
   // Real-time automatic synchronization when leads are submitted anywhere
   useEffect(() => {
-    const handleIncoming = () => {
+    const handleIncoming = (e: any) => {
+      const addedLead = e?.detail;
+      if (addedLead?.name) {
+        setSyncFeedback(`সফলভাবে নতুন লিড যুক্ত হয়েছে: "${addedLead.name}" (${addedLead.leadCode || ''})`);
+        setTimeout(() => setSyncFeedback(null), 5000);
+      }
       syncIncomingLeadsNow().catch(() => {});
     };
 
@@ -264,6 +323,10 @@ export const CRMView: React.FC<CRMViewProps> = ({
       bc = new BroadcastChannel('nexgen_leads_sync');
       bc.onmessage = (msg) => {
         if (msg.data?.type === 'LEAD_SUBMITTED') {
+          if (msg.data?.lead?.name) {
+            setSyncFeedback(`সফলভাবে নতুন লিড যুক্ত হয়েছে: "${msg.data.lead.name}" (${msg.data.lead.leadCode || ''})`);
+            setTimeout(() => setSyncFeedback(null), 5000);
+          }
           syncIncomingLeadsNow().catch(() => {});
         }
       };
@@ -327,6 +390,9 @@ export const CRMView: React.FC<CRMViewProps> = ({
     e.preventDefault();
     if (!editingLead || !editName.trim() || !editPhone.trim()) return;
 
+    const matchedCourse = courses.find(c => c.id === editCourseId);
+    const matchedCounselor = staffList.find(s => s.id === editCounselorId);
+
     updateLead(editingLead.id, {
       name: editName.trim(),
       phone: editPhone.trim(),
@@ -339,8 +405,10 @@ export const CRMView: React.FC<CRMViewProps> = ({
       preferredLearningMode: editLearningMode,
       learningMode: editLearningMode,
       interestedCourseId: editCourseId,
+      courseName: matchedCourse?.name || editingLead.courseName,
       leadSource: editLeadSource,
       counselorId: editCounselorId,
+      counselorName: matchedCounselor?.name || editingLead.counselorName,
       status: editStatus,
       visitDate: editVisitDate || undefined,
       comments: editComments || undefined,
@@ -1853,6 +1921,36 @@ export const CRMView: React.FC<CRMViewProps> = ({
             </select>
           </div>
 
+          {/* Bulk Counselor Assignment */}
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-slate-400">কাউন্সেলর বরাদ্দ:</span>
+            <select
+              onChange={(e) => {
+                if (e.target.value) handleBulkAssignCounselor(e.target.value);
+              }}
+              defaultValue=""
+              className="bg-slate-800 border border-slate-700 text-white rounded-lg px-2.5 py-1 text-xs font-semibold outline-none cursor-pointer"
+            >
+              <option value="" disabled>কাউন্সেলর নির্বাচন করুন</option>
+              {staffList.filter(s => s.status === 'Active').map(s => (
+                <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Merge Selected Leads (if 2 leads selected) */}
+          {selectedLeadIds.length === 2 && (
+            <button
+              type="button"
+              onClick={handleMergeSelectedLeads}
+              className="flex items-center space-x-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              title="নির্বাচিত ২টি ডুপ্লিকেট লিডের তথ্য একীভূত করুন"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>একীভূত (Merge)</span>
+            </button>
+          )}
+
           {/* Bulk Delete */}
           <button
             type="button"
@@ -1935,12 +2033,22 @@ export const CRMView: React.FC<CRMViewProps> = ({
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(whatsAppCustomText);
-                    alert('টেক্সট কপি করা হয়েছে!');
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 2500);
                   }}
-                  className="inline-flex items-center space-x-1 text-xs text-slate-600 hover:text-slate-900 font-semibold cursor-pointer"
+                  className="inline-flex items-center space-x-1.5 text-xs text-slate-600 hover:text-slate-900 font-semibold cursor-pointer px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
                 >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>টেক্সট কপি করুন</span>
+                  {isCopied ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span className="text-emerald-700 font-bold">কপি সম্পন্ন হয়েছে!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>টেক্সট কপি করুন</span>
+                    </>
+                  )}
                 </button>
 
                 <div className="flex items-center space-x-2">

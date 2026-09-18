@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { OccupationType, LeadStatus } from '../../types';
 import { X, UserPlus, Phone, BookOpen, Calendar, CheckCircle2, Tag, Layers } from 'lucide-react';
@@ -52,9 +52,54 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
   const [formError, setFormError] = useState('');
 
-  // Real-time duplicate phone check
+  // Reset all fields to clear initial state
+  const resetForm = () => {
+    setName('');
+    setPhone('');
+    setAltPhone('');
+    setEmail('');
+    setAddress('');
+    setInstitution('');
+    setInterestedBatchId('');
+    setPreferredTime('Evening');
+    setCampaignId('');
+    setBudget(12000);
+    setStatus('New');
+    setVisitDate(new Date().toISOString().split('T')[0]);
+    setComments('');
+    setRequirements('');
+    setNextFollowUpDate(new Date(Date.now() + 86400000).toISOString().split('T')[0]);
+    setNextFollowUpNotes('');
+    setSelectedTags([]);
+    setCustomFieldValues({});
+    setFormError('');
+    if (courses.length > 0) {
+      setInterestedCourseId(courses[0].id);
+    }
+    const defCounselor = staffList.find(s => s.role === 'COUNSELOR') || staffList[0];
+    if (defCounselor) {
+      setCounselorId(defCounselor.id);
+      setCounselorName(defCounselor.name);
+    }
+  };
+
+  // Reset form each time the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
+
+  // Ensure course is populated if loaded asynchronously
+  useEffect(() => {
+    if (!interestedCourseId && courses.length > 0) {
+      setInterestedCourseId(courses[0].id);
+    }
+  }, [courses, interestedCourseId]);
+
+  // Real-time duplicate phone check (only trigger once full 11 digits are entered)
   const cleanPhoneDigits = phone.replace(/[^0-9]/g, '').slice(-11);
-  const duplicateLead = cleanPhoneDigits.length >= 10
+  const duplicateLead = cleanPhoneDigits.length >= 11
     ? leads.find(l => {
         const existingClean = l.phone.replace(/[^0-9]/g, '').slice(-11);
         const existingAltClean = (l.altPhone || '').replace(/[^0-9]/g, '').slice(-11);
@@ -68,13 +113,14 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
     e.preventDefault();
     setFormError('');
 
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
       setFormError('অনুগ্রহ করে লিডের পূর্ণ নাম লিখুন।');
       return;
     }
     const cleanDigits = phone.replace(/[^0-9]/g, '');
-    if (cleanDigits.length < 10) {
-      setFormError('অনুগ্রহ করে সঠিক মোবাইল নম্বর প্রদান করুন (কমপক্ষে ১১ ডিজিট)।');
+    if (cleanDigits.length < 11) {
+      setFormError('অনুগ্রহ করে সঠিক মোবাইল নম্বর প্রদান করুন (কমপক্ষে ১১ ডিজিট, যেমন: 017XXXXXXXX)।');
       return;
     }
     if (!interestedCourseId) {
@@ -83,17 +129,19 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
     }
 
     const todayStr = new Date().toISOString().split('T')[0];
+    const selectedCourse = courses.find(c => c.id === interestedCourseId);
 
     addLead({
-      name,
-      phone,
-      altPhone: altPhone || undefined,
-      email: email || undefined,
-      address: address || undefined,
+      name: trimmedName,
+      phone: phone.trim(),
+      altPhone: altPhone.trim() || undefined,
+      email: email.trim() || undefined,
+      address: address.trim() || undefined,
       occupation,
       educationLevel,
-      institution: institution || undefined,
+      institution: institution.trim() || undefined,
       interestedCourseId,
+      courseName: selectedCourse?.name,
       interestedBatchId: interestedBatchId || undefined,
       preferredTime,
       leadSource,
@@ -102,16 +150,17 @@ export const NewLeadModal: React.FC<NewLeadModalProps> = ({ isOpen, onClose }) =
       counselorName: counselorName.trim() || staffList.find(s => s.id === counselorId)?.name || undefined,
       visitDate: visitDate || todayStr,
       firstContactDate: visitDate || todayStr,
-      comments: comments || undefined,
-      requirements: requirements || undefined,
+      comments: comments.trim() || undefined,
+      requirements: requirements.trim() || undefined,
       budget: budget || undefined,
       status,
       nextFollowUpDate: nextFollowUpDate || undefined,
-      nextFollowUpNotes: nextFollowUpNotes || undefined,
+      nextFollowUpNotes: nextFollowUpNotes.trim() || undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
       customFieldValues: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined
     });
 
+    resetForm();
     onClose();
   };
 

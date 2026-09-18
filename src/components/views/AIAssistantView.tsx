@@ -73,7 +73,7 @@ export const AIAssistantView: React.FC = () => {
     {
       id: 'welcome',
       sender: 'assistant',
-      text: `Hello **${currentUser.name}**! 👋 I am your **Nexgen AI Operations Intelligence Assistant** powered by Gemini 3.7.\n\nI have real-time access to the entire academy database (${students.length} students, ${leads.length} leads, ${batches.length} batches, ৳${stats.totalDue.toLocaleString()} in dues, and ৳${stats.monthCollection.toLocaleString()} in monthly revenue).\n\n📷 **Multimodal Enabled:** You can now **upload screenshots, student forms, payment slips, or PDF documents** (using the paperclip icon or drag & drop), and ask me to analyze them!`,
+      text: `Hello **${currentUser.name}**! 👋 I am your **Nexgen AI Operations Intelligence Assistant** powered by Gemini Multimodal.\n\nআমি বাংলা, English এবং Banglish—সব ভাষাতেই আপনার সাথে কথা বলতে এবং একাডেমির ডেটা বিশ্লেষণ করতে পারি (${students.length} students, ${leads.length} leads, ${batches.length} batches, ৳${stats.totalDue.toLocaleString()} in dues, and ৳${stats.monthCollection.toLocaleString()} in monthly revenue).\n\n📷 **Multimodal Enabled:** You can chat with me, ask operational questions, or **upload screenshots, student forms, payment slips, or PDF documents** (using the paperclip icon or drag & drop), and ask me to analyze them!`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -156,9 +156,30 @@ export const AIAssistantView: React.FC = () => {
   };
 
   const generateLocalAnalyticsFallback = (query: string, attachedCount: number): string => {
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
 
-    if (q.includes('whatsapp') || q.includes('chat') || q.includes('button')) {
+    // Friendly conversational greeting / chit-chat detection (Bangla, Banglish, English)
+    const isGreetingOrChat = /^(hi|hello|hey|kemon|ki khobor|bhalo|valo|chat|kotha|tmi|tumi|apni|assalamu|salam)/i.test(q) ||
+      q.includes('kemon acho') || q.includes('kemon achis') || q.includes('chat korte') || q.includes('kotha bolte') ||
+      q.includes('help me') || q.includes('can you chat') || q.includes('ki obostha');
+
+    if (isGreetingOrChat) {
+      return `### 👋 হ্যালো ${currentUser.name}! 
+
+আমি আপনার **Nexgen AI Operations Copilot**। 
+
+হ্যাঁ, আমি আপনার সাথে বাংলা, ইংরেজি এবং বাংলিশ—সব ভাষাতেই চ্যাট করতে একদম প্রস্তুত! 😊 
+
+আমি আপনাকে যে বিষয়গুলোতে সাহায্য করতে পারি:
+- 💬 **যেকোনো প্রশ্ন বা আলোচনা:** কোর্স, শিডিউল, কারিকুলাম নিয়ে পরামর্শ।
+- 💰 **ফি ও বকেয়া কালেকশন:** বকেয়া থাকা স্টুডেন্টদের তালিকা ও সুন্দর হোয়াটসঅ্যাপ রিমাইন্ডার মেসেজ।
+- 📈 **CRM ও লিড ফলো-আপ:** ভর্তি সংক্রান্ত কাউন্সেলিং ও কনভার্সন ট্র্যাকিং।
+- 📷 **মাল্টিমোডাল ফাইল ও স্ক্রিনশট:** যেকোনো ফি রিসিট, ভর্তি ফর্ম বা সিস্টেমের স্ক্রিনশট আপলোড করে এনালাইসিস।
+
+বলুন, আপনাকে কীভাবে সাহায্য করতে পারি?`;
+    }
+
+    if (q.includes('whatsapp') || q.includes('wa link') || q.includes('chat button')) {
       const currentSupport = websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings.primarySupportPhone || '01798444444';
       return `### 📱 WhatsApp Direct Chat Link Configuration Guide
 
@@ -215,12 +236,7 @@ ${overdueList.length > 0 ? overdueList.join('\n') : '- No active overdue student
       return `### 📎 File / Screenshot Received
 
 I have received and stored your **${attachedCount} attachment(s)** for analysis.
-
-*Tip for Production Deployments on Vercel:*
-To enable deep multimodal vision reasoning with **Gemini 3.7 Flash** on your deployed Vercel site:
-1. Go to your **Vercel Project Dashboard > Settings > Environment Variables**.
-2. Add a variable named **\`GEMINI_API_KEY\`** with your Google AI Studio API key.
-3. Trigger a redeploy (or push a new commit via GitHub).`;
+You can ask me to extract student details, verify payment transaction IDs, or explain any error shown in the image.`;
     }
 
     return `### 🤖 Nexgen Operations Intelligence Assistant
@@ -312,7 +328,9 @@ Feel free to ask specific questions about student progress, fee collections, cou
         body: JSON.stringify({
           query: query || 'Analyze attached file(s)',
           userRole: currentUser.role,
+          instituteName: academySettings.instituteName,
           academyContext,
+          history: messages.slice(-8).map(m => ({ id: m.id, sender: m.sender, text: m.text })),
           attachments: currentAttachments.map(a => ({
             name: a.name,
             mimeType: a.mimeType,
@@ -384,7 +402,7 @@ Feel free to ask specific questions about student progress, fee collections, cou
             <div className="flex items-center space-x-2">
               <h2 className="text-lg font-black tracking-tight">Nexgen AI Operations Copilot</h2>
               <span className="text-[10px] font-bold bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-400/30">
-                Gemini 3.7 Flash • Multimodal
+                Gemini Intelligence • Multimodal
               </span>
             </div>
             <p className="text-xs text-indigo-200/80">

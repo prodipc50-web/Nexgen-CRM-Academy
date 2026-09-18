@@ -878,6 +878,14 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       ? 'Course Landing Free Counseling'
       : 'Course Landing Seat Booking';
 
+    // Dynamic Counselor Allocation from active staff
+    const assignedCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+      staffList.find(s => s.role === 'COUNSELOR') ||
+      staffList.find(s => s.status === 'Active') ||
+      staffList[0];
+    const resolvedCounselorId = assignedCounselor?.id || 'st-desk';
+    const resolvedCounselorName = assignedCounselor ? `${assignedCounselor.name} (${assignedCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk';
+
     try {
       // 1. Immediately register in CRM state with status 'New' so it appears right at the top of New Inquiries
       addLead({
@@ -902,8 +910,8 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         locationCity: addressText || 'Dhaka',
         occupation: 'Student',
         educationLevel: 'HSC / Graduate',
-        counselorId: 'st-03',
-        counselorName: 'Admissions Desk (Tanvir Ahmed)',
+        counselorId: resolvedCounselorId,
+        counselorName: resolvedCounselorName,
         visitDate: today,
         firstContactDate: today,
         status: 'New',

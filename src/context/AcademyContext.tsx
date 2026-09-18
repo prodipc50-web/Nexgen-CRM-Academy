@@ -240,6 +240,7 @@ interface AcademyContextType {
   addLead: (lead: Omit<Lead, 'id' | 'leadCode' | 'createdAt' | 'updatedAt'>) => Lead;
   updateLead: (id: string, updates: Partial<Lead>) => void;
   deleteLead: (id: string) => void;
+  mergeLeads: (primaryId: string, secondaryId: string) => void;
   syncIncomingLeadsNow: () => Promise<number>;
   submitPublicLead: (payload: {
     fullName?: string;
@@ -306,7 +307,7 @@ interface AcademyContextType {
   toggleLeadTag: (leadId: string, tagName: string) => void;
   updateLeadCustomFields: (leadId: string, values: Record<string, any>) => void;
 
-  addFollowUp: (followUp: Omit<FollowUp, 'id' | 'createdAt'>) => void;
+  addFollowUp: (followUp: Omit<FollowUp, 'id' | 'createdAt'> & { newLeadStatus?: LeadStatus }) => void;
 
     createAdmission: (params: {
     studentData: Partial<Student>;
@@ -2220,13 +2221,27 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const id = `ld-${Date.now()}`;
     const leadCode = `NCA-LD-${1040 + leads.length + 1}`;
     const now = new Date().toISOString();
+    const crs = courses.find(c => c.id === leadData.interestedCourseId);
+    
+    // Dynamic Counselor Allocation
+    const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+      staffList.find(s => s.role === 'COUNSELOR') ||
+      staffList.find(s => s.status === 'Active') ||
+      staffList[0];
+    const resolvedCounselorId = leadData.counselorId || activeCounselor?.id || 'st-desk';
+    const resolvedCounselorName = leadData.counselorName || (activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk');
+
     const newLead: Lead = {
       ...leadData,
+      counselorId: resolvedCounselorId,
+      counselorName: resolvedCounselorName,
+      courseName: leadData.courseName || crs?.name || 'General Course',
       id,
       leadCode,
       createdAt: now,
       updatedAt: now
     };
+
     setLeads(prev => {
       const next = [newLead, ...prev];
       try {
@@ -2234,6 +2249,51 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       } catch {}
       return next;
     });
+
+    // Auto-create initial follow-up task if follow-up date or notes are scheduled
+    if (newLead.nextFollowUpDate || newLead.nextFollowUpNotes) {
+      const followUpId = `flw-${Date.now()}`;
+      const newFollowUp: FollowUp = {
+        id: followUpId,
+        leadId: id,
+        date: newLead.visitDate || now.split('T')[0],
+        nextFollowUpDate: newLead.nextFollowUpDate,
+        staffName: newLead.counselorName || currentUser?.name || 'Admissions Desk',
+        contactMethod: 'Phone',
+        result: 'Interested',
+        conversationSummary: `নতুন লিড এন্ট্রি: ${newLead.name} (${newLead.courseName}). মন্তব্য: ${newLead.comments || 'নতুন লিড যুক্ত হয়েছে'}`,
+        notes: newLead.nextFollowUpNotes || 'Initial counseling follow-up call',
+        nextAction: newLead.nextFollowUpNotes || 'Counseling Call',
+        status: 'Pending',
+        createdAt: now
+      };
+      setFollowUps(prev => {
+        const nextFlw = [newFollowUp, ...prev];
+        try {
+          localStorage.setItem(`${STORAGE_KEY}_follow_ups`, JSON.stringify(nextFlw));
+        } catch {}
+        return nextFlw;
+      });
+    }
+
+    // Sync to backend store in background so other staff or tabs can access it
+    fetch('/api/leads/staff-add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-staff-auth': 'nexgen-staff-auth-secure'
+      },
+      body: JSON.stringify({ lead: newLead })
+    }).catch(e => console.warn('Could not sync staff lead to server:', e));
+
+    // Broadcast across open tabs and trigger real-time event
+    try {
+      const bc = new BroadcastChannel('nexgen_leads_sync');
+      bc.postMessage({ type: 'LEAD_SUBMITTED', lead: newLead });
+      bc.close();
+    } catch {}
+    window.dispatchEvent(new CustomEvent('incoming-lead-submitted', { detail: newLead }));
+
     logAudit('Lead Created', 'CRM', id, `Added new lead "${newLead.name}" (${newLead.phone})`);
     return newLead;
   };
@@ -2272,6 +2332,59 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return next;
     });
     logAudit('Lead Moved to Trash', 'CRM', id, `Moved lead "${target.name}" to trash`);
+  };
+
+  const mergeLeads = (primaryId: string, secondaryId: string) => {
+    const primary = leads.find(l => l.id === primaryId);
+    const secondary = leads.find(l => l.id === secondaryId);
+    if (!primary || !secondary) return;
+
+    // Combine comments
+    const mergedComments = [
+      primary.comments,
+      secondary.comments ? `[মার্জকৃত নোট - ${secondary.leadCode || secondary.name}]: ${secondary.comments}` : null
+    ].filter(Boolean).join('\n\n');
+
+    // Combine tags
+    const mergedTags = Array.from(new Set([...(primary.tags || []), ...(secondary.tags || [])]));
+
+    // Combine alternate phone & contact info if missing
+    const mergedAltPhone = primary.altPhone || (secondary.phone !== primary.phone ? secondary.phone : secondary.altPhone);
+    const mergedEmail = primary.email || secondary.email;
+    const mergedAddress = primary.address || secondary.address;
+    const mergedInstitution = primary.institution || secondary.institution;
+
+    // Update primary
+    const updatedPrimary: Lead = {
+      ...primary,
+      altPhone: mergedAltPhone,
+      email: mergedEmail,
+      address: mergedAddress,
+      institution: mergedInstitution,
+      comments: mergedComments || undefined,
+      tags: mergedTags.length > 0 ? mergedTags : undefined,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Re-point all follow-ups from secondary to primary
+    setFollowUps(prev => {
+      const next = prev.map(f => f.leadId === secondaryId ? { ...f, leadId: primaryId } : f);
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_follow_ups`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    // Update leads: replace primary with updated, and remove secondary
+    setLeads(prev => {
+      const next = prev.map(l => l.id === primaryId ? updatedPrimary : l).filter(l => l.id !== secondaryId);
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    logAudit('Leads Merged', 'CRM', primaryId, `Merged lead "${secondary.name}" (${secondary.leadCode}) into "${primary.name}" (${primary.leadCode})`);
   };
 
   const updateCrmSettings = (patch: Partial<CrmSettingsConfig>) => {
@@ -2611,6 +2724,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Fallback: If network failed or offline, save locally to ensure no lead loss
       const fallbackId = `ld-${Date.now()}`;
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+        staffList.find(s => s.role === 'COUNSELOR') ||
+        staffList.find(s => s.status === 'Active') ||
+        staffList[0];
+      const fallbackCounselorId = activeCounselor?.id || 'st-desk';
+      const fallbackCounselorName = activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk';
+
       const fallbackLead: Lead = {
         id: fallbackId,
         leadCode: `NCA-LD-${randomSuffix}`,
@@ -2631,8 +2751,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         utmSource: payload.utmSource,
         utmMedium: payload.utmMedium,
         utmCampaign: payload.utmCampaign,
-        counselorId: 'st-03',
-        counselorName: 'Admissions Desk (Tanvir Ahmed)',
+        counselorId: fallbackCounselorId,
+        counselorName: fallbackCounselorName,
         visitDate: new Date().toISOString().split('T')[0],
         firstContactDate: new Date().toISOString().split('T')[0],
         comments: payload.comments || payload.message,
@@ -2659,7 +2779,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const addFollowUp = (followUpData: Omit<FollowUp, 'id' | 'createdAt'>) => {
+  const addFollowUp = (followUpData: Omit<FollowUp, 'id' | 'createdAt'> & { newLeadStatus?: LeadStatus }) => {
     const id = `flw-${Date.now()}`;
     const newFollowUp: FollowUp = {
       ...followUpData,
@@ -2668,11 +2788,31 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
     setFollowUps(prev => [newFollowUp, ...prev]);
 
-    // Update lead's next follow-up and status if provided
+    // Compute appropriate new status based on follow-up result
+    const currentLead = leads.find(l => l.id === followUpData.leadId);
+    let computedStatus: LeadStatus = currentLead?.status || 'Follow-up';
+
+    if (followUpData.newLeadStatus) {
+      computedStatus = followUpData.newLeadStatus;
+    } else if (followUpData.result === 'Admitted') {
+      computedStatus = 'Admitted';
+    } else if (followUpData.result === 'Not Interested') {
+      computedStatus = 'Lost';
+    } else if (followUpData.result === 'Demo Scheduled') {
+      computedStatus = 'Demo Scheduled';
+    } else if (followUpData.result === 'Admission Pending') {
+      computedStatus = 'Admission Pending';
+    } else if (followUpData.result === 'Interested') {
+      computedStatus = 'Interested';
+    } else if (currentLead && currentLead.status === 'New') {
+      computedStatus = 'Contacted';
+    }
+
+    // Update lead's next follow-up and status
     updateLead(followUpData.leadId, {
       nextFollowUpDate: followUpData.nextFollowUpDate,
       nextFollowUpNotes: followUpData.nextAction,
-      status: followUpData.result === 'Admitted' ? 'Admitted' : followUpData.result === 'Not Interested' ? 'Not Interested' : 'Follow-up'
+      status: computedStatus
     });
 
     logAudit('Follow-up Recorded', 'CRM / Follow-up', id, `Recorded follow-up for lead with result: ${followUpData.result}`);
@@ -5556,6 +5696,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addLead,
         updateLead,
         deleteLead,
+        mergeLeads,
         crmSettings,
         updateCrmSettings,
         addLeadTag,

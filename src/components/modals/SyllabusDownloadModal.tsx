@@ -34,7 +34,7 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
   landingConfig,
   config
 }) => {
-  const { addLead, submitPublicLead, syncIncomingLeadsNow, academySettings } = useAcademy();
+  const { addLead, submitPublicLead, syncIncomingLeadsNow, academySettings, staffList } = useAcademy();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -223,6 +223,14 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
         console.warn('Syllabus lead server sync fallback:', err);
       });
 
+      // Dynamic Counselor Allocation
+      const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+        staffList.find(s => s.role === 'COUNSELOR') ||
+        staffList.find(s => s.status === 'Active') ||
+        staffList[0];
+      const counselorId = activeCounselor?.id || 'st-desk';
+      const counselorName = activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk';
+
       // 2. Create Lead in CRM with high conversion enrichment
       const newLeadData: any = {
         name: name.trim(),
@@ -241,8 +249,8 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
         source: 'Landing Page Curriculum Download',
         landingPage: `/courses/${course.slug || course.id}`,
         status: 'New',
-        counselorId: 'st-03',
-        counselorName: 'Admissions Desk (Tanvir Ahmed)',
+        counselorId,
+        counselorName,
         comments: commentsText,
         visitDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),

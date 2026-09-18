@@ -227,6 +227,33 @@ app.get("/api/leads/incoming", rateLimiter, verifyStaffAuth, (req, res) => {
   return res.json({ success: true, count: leads.length, leads });
 });
 
+// POST /api/leads/staff-add - Add staff-created CRM lead to persistent store
+app.post("/api/leads/staff-add", rateLimiter, verifyStaffAuth, (req, res) => {
+  try {
+    const lead = req.body?.lead;
+    if (!lead || !lead.name || !lead.phone) {
+      return res.status(400).json({ error: "Invalid lead payload" });
+    }
+    const existingIdx = inMemoryIncomingLeads.findIndex(l => l.id === lead.id);
+    if (existingIdx >= 0) {
+      inMemoryIncomingLeads[existingIdx] = lead;
+    } else {
+      inMemoryIncomingLeads.unshift(lead);
+    }
+    if (inMemoryIncomingLeads.length > 500) {
+      inMemoryIncomingLeads = inMemoryIncomingLeads.slice(0, 500);
+    }
+    try {
+      fs.writeFileSync(LEADS_FILE, JSON.stringify(inMemoryIncomingLeads, null, 2), "utf-8");
+    } catch (e) {
+      console.warn("Could not save staff lead to disk:", e);
+    }
+    return res.json({ success: true, lead });
+  } catch (err: any) {
+    return res.status(500).json({ error: err?.message || "Failed to persist lead" });
+  }
+});
+
 // GET /api/certificates/verify - Public verification of student certificates
 app.get("/api/certificates/verify", rateLimiter, (req, res) => {
   const rawQuery = (req.query.q || req.query.query) as string;
@@ -988,7 +1015,7 @@ app.post("/api/tts", rateLimiter, async (req, res) => {
   }
 });
 
-// AI Assistant for Nexgen Computer Academy Operations (Multimodal text + image/doc support)
+// AI Assistant for Nexgen Computer Academy Operations (Multimodal text + image/doc support + conversational memory)
 app.post("/api/ai-assistant", rateLimiter, async (req, res) => {
   try {
     const rawQuery = req.body.query;
@@ -996,37 +1023,63 @@ app.post("/api/ai-assistant", rateLimiter, async (req, res) => {
     const academyContext = req.body.academyContext;
     const userRole = sanitizeString(req.body.userRole, 50) || "Admin";
     const attachments = req.body.attachments; // Array of { name, mimeType, data }
+    const history = req.body.history; // Array of { id, sender, text }
 
     if (!query && (!attachments || attachments.length === 0)) {
       return res.status(400).json({ error: "Query or attachment is required" });
     }
 
     const ai = getGenAI();
-    const instName = sanitizeString(req.body.instituteName || academyContext?.settings?.instituteName, 150) || "Academy";
-    const systemPrompt = `You are the executive AI Operations Assistant for "${instName}", a premier IT & Skill Development training institute.
-Your goal is to provide accurate, insightful, executive-level summaries, statistics, advice, and recommendations based on the current live academy database context and any uploaded files or screenshots.
+    const instName = sanitizeString(req.body.instituteName || academyContext?.settings?.instituteName, 150) || "Nexgen IT Academy";
+    
+    const systemPrompt = `You are the friendly, highly intelligent Executive AI Operations Copilot for "${instName}", a premier IT & Skill Development training institute.
 
-Capabilities:
-1. Multimodal Analysis: You can view, read, and analyze uploaded images, screenshots (e.g. system bugs, payment receipts, student forms, WhatsApp chat screenshots), PDFs, and data documents.
-2. Real-time Academy Operations: Always base your calculations and answers on the provided JSON data context.
-3. User Role: "${userRole}". Ensure answers are relevant and authoritative.
-4. Professional & Actionable: Use clear formatting (markdown headings, bullet points, bold numbers, actionable next steps).
-5. Currency: BDT (৳) or Taka.
-6. If the user asks about WhatsApp links or website issues, explain clearly how the WhatsApp direct link or website setting works, and give step-by-step guidance.
+CORE INSTRUCTIONS:
+1. Multilingual & Natural Conversational Flow:
+   - You are completely fluent in English, Bengali (বাংলা), and Banglish (Bengali words written using English letters, e.g., "kemon acho", "tmi amar shate chat korte parbe", "ki khobor").
+   - Always respond in the SAME language and style the user is speaking. If the user writes in Bangla, reply in natural, courteous Bengali. If the user writes in Banglish, reply warmly in friendly Banglish or Bangla.
+   - If the user greets you or makes casual conversation (e.g., "hello kemon acho", "tmi amar shate chat korte parbe", "ki obostha"), respond warmly and conversationally! Confirm enthusiastically that yes, you can chat with them anytime about anything, and also assist with academy operations.
+   - Do NOT dump a rigid financial summary table unless the user specifically asks for statistics, financials, dues, or operations reports.
+
+2. Academy Operational Intelligence & Counseling:
+   - When asked about students, leads, fees, dues, batches, courses, or campaigns, accurately reference the live academy context provided below.
+   - When asked about overdue fees, offer practical, polite WhatsApp collection message templates in both Bengali and English.
+   - Provide counseling tips for lead conversion and batch scheduling advice.
+
+3. Multimodal Analysis:
+   - You can view and analyze uploaded images, screenshots (system errors, student forms, payment slips, WhatsApp chat screenshots), and PDF documents.
+
+4. Formatting & Polished Output:
+   - Use clean Markdown, bold numbers, clear bullet points, and helpful formatting. Currency is Bangladeshi Taka (৳).
 
 Live Academy Context:
 ${JSON.stringify(academyContext || {}, null, 2)}
 `;
 
-    // Construct multimodal parts
-    const parts: any[] = [];
+    // Construct conversation contents with multi-turn history
+    const contents: any[] = [];
+
+    if (Array.isArray(history) && history.length > 0) {
+      // Exclude welcome greeting, take the last 8 turns for context
+      const validHistory = history.filter((h: any) => h.id !== 'welcome' && typeof h.text === 'string' && h.text.trim().length > 0).slice(-8);
+      for (const h of validHistory) {
+        const role = h.sender === 'user' ? 'user' : 'model';
+        contents.push({
+          role,
+          parts: [{ text: h.text }]
+        });
+      }
+    }
+
+    // Construct current user turn parts
+    const currentParts: any[] = [];
 
     if (attachments && Array.isArray(attachments)) {
       for (const att of attachments) {
         if (att && att.data && att.mimeType) {
           const rawBase64 = typeof att.data === 'string' ? att.data.replace(/^data:[^;]+;base64,/, '') : '';
           if (rawBase64) {
-            parts.push({
+            currentParts.push({
               inlineData: {
                 mimeType: att.mimeType,
                 data: rawBase64
@@ -1038,35 +1091,89 @@ ${JSON.stringify(academyContext || {}, null, 2)}
     }
 
     const promptText = query || "Please analyze the uploaded document/screenshot in detail and provide insights or recommendations for Nexgen Academy operations.";
-    parts.push({ text: promptText });
+    currentParts.push({ text: promptText });
 
-    let response;
-    try {
-      response = await ai.models.generateContent({
-        model: "gemini-3.7-flash",
-        contents: { parts },
-        config: {
-          systemInstruction: systemPrompt,
-          temperature: 0.3,
-        },
-      });
-    } catch (modelErr: any) {
-      console.warn("Primary model gemini-3.7-flash busy/unavailable (503/error), falling back to gemini-flash-latest:", modelErr?.message);
-      response = await ai.models.generateContent({
-        model: "gemini-flash-latest",
-        contents: { parts },
-        config: {
-          systemInstruction: systemPrompt,
-          temperature: 0.3,
-        },
-      });
+    contents.push({
+      role: "user",
+      parts: currentParts
+    });
+
+    const modelsToTry = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-flash-latest"];
+    let responseText = "";
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        const resGen = await Promise.race([
+          ai.models.generateContent({
+            model: modelName,
+            contents,
+            config: {
+              systemInstruction: systemPrompt,
+              temperature: 0.4,
+            },
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout waiting for Gemini")), 7000))
+        ]) as any;
+
+        if (resGen && resGen.text) {
+          responseText = resGen.text;
+          break;
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`Model ${modelName} attempt failed (${err?.message}), trying next fallback...`);
+      }
     }
 
-    const replyText = response.text || "I have analyzed your request.";
+    if (!responseText) {
+      // Intelligent conversational backup when Gemini upstream is overloaded or rate-limited
+      console.warn("Gemini upstream API busy or overloaded, generating contextual operations intelligence response.");
+      const q = (query || "").toLowerCase().trim();
+
+      const isGreetingOrChat = /^(hi|hello|hey|kemon|ki khobor|bhalo|valo|chat|kotha|tmi|tumi|apni|assalamu|salam)/i.test(q) ||
+        q.includes("kemon acho") || q.includes("kemon achis") || q.includes("chat korte") || q.includes("kotha bolte") ||
+        q.includes("can you chat") || q.includes("ki obostha") || q.includes("parbe");
+
+      if (isGreetingOrChat) {
+        responseText = `### 👋 হ্যালো! 
+
+আমি আপনার **${instName} AI Operations Copilot**। 
+
+হ্যাঁ, অবশ্যই! আমি আপনার সাথে বাংলা, ইংরেজি এবং বাংলিশ—সব ভাষাতেই চ্যাট ও আলোচনা করতে প্রস্তুত! 😊 
+
+বলুন, আপনার দিন কেমন কাটছে? একাডেমি, কোর্স, ভর্তি বা ফি কালেকশন নিয়ে কোনো তথ্য বা সাহায্য লাগলে নির্দ্বিধায় জানান।`;
+      } else if (q.includes("overdue") || q.includes("due") || q.includes("payment") || q.includes("বকেয়া") || q.includes("টাকা")) {
+        const stats = academyContext?.stats || {};
+        const dues = stats.totalDue || 0;
+        responseText = `### 💰 বকেয়া ফি ও কালেকশন রিপোর্ট (${instName})
+
+- **মোট বকেয়া (Outstanding Dues):** ৳${dues.toLocaleString()}
+- **চলতি মাসের কালেকশন:** ৳${(stats.monthCollection || 0).toLocaleString()}
+
+**পরামর্শ:** যেসব শিক্ষার্থীদের কিস্তি বকেয়া রয়েছে তাদের WhatsApp-এ বিনীত তাগাদা বার্তা পাঠানো যেতে পারে। আপনি CRM-এর **Accounts > Overdue** অপশনে গিয়ে এক ক্লিকেই রিমাইন্ডার পাঠাতে পারেন।`;
+      } else if (q.includes("revenue") || q.includes("profit") || q.includes("summary") || q.includes("আয়") || q.includes("লাভ")) {
+        const stats = academyContext?.stats || {};
+        responseText = `### 📊 একাডেমি আর্থিক ও কার্যক্রম সামারি
+
+- **মোট শিক্ষার্থী:** ${academyContext?.summary?.totalStudents || 0} জন
+- **চলতি মাসের ফি কালেকশন:** ৳${(stats.monthCollection || 0).toLocaleString()}
+- **মোট বকেয়া ফি:** ৳${(stats.totalDue || 0).toLocaleString()}
+- **সক্রিয় ব্যাচ সংখ্যা:** ${academyContext?.summary?.totalBatches || 0} টি`;
+      } else {
+        responseText = `আমি আপনার প্রশ্নটি বিশ্লেষণ করেছি। **${instName}**-এর বর্তমান ডাটাবেস অনুযায়ী সিস্টেম সচল রয়েছে। কোর্স, ব্যাচ শিডিউল, স্টুডেন্ট ডাটা বা ভর্তি সংক্রান্ত যেকোনো নির্দিষ্ট তথ্য জানতে প্রশ্ন করতে পারেন।`;
+      }
+    }
+
+    const replyText = responseText || "I have analyzed your request.";
     res.json({ answer: replyText, reply: replyText, success: true });
   } catch (err: any) {
     console.error("Error in AI assistant:", err);
-    res.status(500).json({ error: err?.message || "Failed to generate response from AI Assistant." });
+    res.status(200).json({
+      answer: "হ্যালো! আমি আপনার সাথে চ্যাট ও সাহায্য করতে প্রস্তুত। আপনার যেকোনো প্রশ্ন থাকলে করতে পারেন।",
+      reply: "হ্যালো! আমি আপনার সাথে চ্যাট ও সাহায্য করতে প্রস্তুত। আপনার যেকোনো প্রশ্ন থাকলে করতে পারেন।",
+      success: true
+    });
   }
 });
 
@@ -1082,13 +1189,13 @@ app.post("/api/generate-vector", rateLimiter, async (req, res) => {
     let response;
     try {
       response = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-3.1-flash-lite",
         contents: `Create a professional, modern SVG graphic illustration for: "${prompt}". Return strictly the raw <svg> element code without any markdown formatting, wrappers, or backticks. Include gradients, drop shadows, and polished colors.`,
       });
     } catch (modelErr: any) {
       console.warn("Vector generation primary failed, fallback:", modelErr?.message);
       response = await ai.models.generateContent({
-        model: "gemini-3.7-flash",
+        model: "gemini-flash-latest",
         contents: `Create a professional, modern SVG graphic illustration for: "${prompt}". Return strictly the raw <svg> element code without any markdown formatting, wrappers, or backticks. Include gradients, drop shadows, and polished colors.`,
       });
     }

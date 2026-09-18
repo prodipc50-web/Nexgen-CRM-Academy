@@ -22,7 +22,7 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
   preselectedCourse,
   defaultCourseId
 }) => {
-  const { courses, addLead, submitPublicLead, syncIncomingLeadsNow, academySettings } = useAcademy();
+  const { courses, addLead, submitPublicLead, syncIncomingLeadsNow, academySettings, staffList } = useAcademy();
   const initialCourseId = preselectedCourse?.id || defaultCourseId || courses[0]?.id || '';
   const [formData, setFormData] = useState({
     name: '',
@@ -92,6 +92,14 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
       const commentsText = `Online Admission Application. Mode: ${formData.learningMode}, Schedule: ${formData.preferredSchedule}, Address: ${formData.address || 'N/A'}. bKash/TrxID: ${formData.trxId || 'Pending Desk Verification'}. Note: ${formData.notes || 'None'}. Campaign: ${utms.utmCampaign || 'organic'}`;
       const leadSourceStr = utms.utmSource ? `Ad: ${utms.utmSource} (Online Admission)` : 'Website Online Admission';
 
+      // Dynamic Counselor Allocation
+      const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+        staffList.find(s => s.role === 'COUNSELOR') ||
+        staffList.find(s => s.status === 'Active') ||
+        staffList[0];
+      const counselorId = activeCounselor?.id || 'st-desk';
+      const counselorName = activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk';
+
       // 1. Immediately register lead into CRM directly with status 'New' and full course & attribution data
       const leadEntry = addLead({
         name: formData.name.trim(),
@@ -117,8 +125,8 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         utmTerm: utms.utmTerm,
         deviceType: device,
         locationCity: formData.address || 'Dhaka',
-        counselorId: 'st-03',
-        counselorName: 'Admissions Desk (Tanvir Ahmed)',
+        counselorId,
+        counselorName,
         visitDate: todayDate,
         firstContactDate: todayDate,
         status: 'New',

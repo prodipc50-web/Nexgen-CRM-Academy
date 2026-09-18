@@ -112,7 +112,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
     addLead,
     submitPublicLead,
     batches,
-    placements
+    placements,
+    staffList
   } = useAcademy();
 
   // Bilingual Language State
@@ -2618,6 +2619,15 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           const leadSourceStr = payload.source || 'Website Popup Voucher';
           const selectedCourseObj = courses.find(c => c.id === payload.courseId);
           const todayDate = new Date().toISOString().split('T')[0];
+
+          // Dynamic counselor resolution
+          const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+            staffList.find(s => s.role === 'COUNSELOR') ||
+            staffList.find(s => s.status === 'Active') ||
+            staffList[0];
+          const counselorId = activeCounselor?.id || 'st-desk';
+          const counselorName = activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk';
+
           const newLeadData = {
             fullName: payload.fullName,
             studentName: payload.fullName,
@@ -2631,8 +2641,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             leadSource: leadSourceStr,
             notes: payload.notes || `[Website Popup] Promo Voucher Claimed`,
             status: 'New' as const,
-            counselorId: 'st-03',
-            counselorName: 'Online Desk (Tanvir Ahmed)',
+            counselorId,
+            counselorName,
             occupation: 'Student / Professional',
             educationLevel: 'HSC / Graduate',
             visitDate: todayDate,
