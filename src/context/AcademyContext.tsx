@@ -1218,9 +1218,10 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
               const merged = cat.courses.map((remoteC: Course) => {
                 const localC = prev.find(p => p.id === remoteC.id || p.code === remoteC.code);
                 if (!localC) return remoteC;
-                const remoteT = new Date(remoteC.updatedAt || 0).getTime();
+                const remoteT = new Date(remoteC.updatedAt || cat.updatedAt || 0).getTime();
                 const localT = new Date(localC.updatedAt || 0).getTime();
-                return localT >= remoteT ? localC : remoteC;
+                const isLocalRecent = (Date.now() - lastLocalMutationTimestamp.current) < 15000;
+                return (isLocalRecent && localT > remoteT) ? localC : remoteC;
               });
               for (const lc of prev) {
                 if (!merged.some(m => m.id === lc.id || m.code === lc.code)) {
@@ -1287,9 +1288,10 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 const merged = data.courses.map((remoteC: Course) => {
                   const localC = prev.find(p => p.id === remoteC.id || p.code === remoteC.code);
                   if (!localC) return remoteC;
-                  const remoteT = new Date(remoteC.updatedAt || 0).getTime();
+                  const remoteT = new Date(remoteC.updatedAt || data.updatedAt || 0).getTime();
                   const localT = new Date(localC.updatedAt || 0).getTime();
-                  return localT >= remoteT ? localC : remoteC;
+                  const isLocalRecent = (Date.now() - lastLocalMutationTimestamp.current) < 15000;
+                  return (isLocalRecent && localT > remoteT) ? localC : remoteC;
                 });
                 for (const lc of prev) {
                   if (!merged.some(m => m.id === lc.id || m.code === lc.code)) {
@@ -1729,18 +1731,19 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Write strictly separated public and private documents with 8s safety timeout
       const writePromises: Promise<any>[] = [];
 
-      // Write to Cloud Firestore only when Firebase Auth session is active
-      const hasFirebaseAuth = Boolean(firebaseUser || auth.currentUser);
-      if (hasFirebaseAuth) {
-        writePromises.push(
-          setDoc(doc(db, 'academy_data', 'public_catalog'), cleanPublicPayload, { merge: true })
-        );
+      // Always push public website catalog to Cloud Firestore for instant PC and mobile sync
+      writePromises.push(
+        setDoc(doc(db, 'academy_data', 'public_catalog'), cleanPublicPayload, { merge: true }).catch(err => {
+          console.warn('Public catalog Firestore sync notice:', err?.message || err);
+        })
+      );
 
-        if (isAuthenticated) {
-          writePromises.push(
-            setDoc(doc(db, 'academy_data', 'crm_private_data'), cleanCrmPayload, { merge: true })
-          );
-        }
+      // Write private CRM data to Cloud Firestore when staff session is active
+      const hasFirebaseAuth = Boolean(firebaseUser || auth.currentUser);
+      if (hasFirebaseAuth && isAuthenticated) {
+        writePromises.push(
+          setDoc(doc(db, 'academy_data', 'crm_private_data'), cleanCrmPayload, { merge: true })
+        );
       }
 
       // Dual-layer server sync: also push to local server for instant multi-device sync
@@ -3458,6 +3461,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updatedAt: nowIso
       })
     }).catch(e => console.warn('Direct catalog push notice:', e));
+
+    // Direct push to Firestore public_catalog for real-time mobile updates
+    try {
+      setDoc(doc(db, 'academy_data', 'public_catalog'), {
+        courses: nextCourses,
+        updatedAt: nowIso
+      }, { merge: true }).catch(e => console.warn('Direct Firestore catalog push notice:', e));
+    } catch {}
 
     logAudit('Course Updated', 'Courses', id, `Updated course details & fees for ID: ${id}`);
     setTimeout(() => {

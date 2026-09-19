@@ -281,7 +281,7 @@
         "st-05",
         "st-07"
       ],
-      "discount": 1500,
+      "discount": 3500,
       "durationUnit": "Months",
       "code": "NCA-OFC-01",
       "totalClasses": 36,
@@ -300,10 +300,10 @@
       ],
       "description": "Master MS Word, Excel, PowerPoint, Google Workspace, Bangla/English typing, combined with modern AI productivity workflows (ChatGPT, Gemini, Copilot).",
       "rating": 4.9,
-      "offerFee": 6200,
+      "offerFee": 4500,
       "reviewsCount": 310,
       "totalHours": 54,
-      "regularFee": 8500,
+      "regularFee": 8000,
       "status": "Active",
       "createdAt": "2026-01-05T10:00:00.000Z",
       "minInstallmentAmount": 2500,
@@ -377,7 +377,8 @@
       ],
       "thumbnailUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80",
       "shortName": "Office & AI Apps",
-      "courseType": "Offline"
+      "courseType": "Offline",
+      "updatedAt": "2026-09-19T07:56:37.853Z"
     },
     {
       "rating": 4.9,
@@ -980,7 +981,7 @@
       "requiredSkillLevel": "No Prior Knowledge"
     }
   ],
-  "updatedAt": "2026-09-06T08:53:42.022Z",
+  "updatedAt": "2026-09-19T07:56:37.854Z",
   "categories": [
     "Computer & Office",
     "Graphic Design",
