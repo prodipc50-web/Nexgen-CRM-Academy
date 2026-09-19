@@ -1174,7 +1174,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 <div className="flex items-center justify-between gap-2 text-xs font-bold text-amber-300">
                   <span className="flex items-center gap-1.5 min-w-0">
                     <Flame className="w-4 h-4 text-rose-400 animate-pulse shrink-0" />
-                    <span className="truncate">বিশেষ অফার ও স্কলারশিপ সিট শেষ হতে বাকি:</span>
+                    <span className="text-[11px] sm:text-xs leading-snug">বিশেষ অফার ও স্কলারশিপ সিট শেষ হতে বাকি:</span>
                   </span>
                   <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap shrink-0">
                     সীমিত আসন
@@ -1562,51 +1562,51 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       </header>
 
       {/* SECTION 1.5: QUICK SNAPSHOT INFO BAR */}
-      <section className="bg-slate-900/60 border-y border-slate-800/80 py-8 px-4 sm:px-6 lg:px-10">
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="edtech-card-glow rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 text-left shadow-xs min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center shrink-0 border border-indigo-500/30">
-              <Clock className="w-5 h-5" />
+      <section className="bg-slate-900/60 border-y border-slate-800/80 py-6 sm:py-8 px-3 sm:px-6 lg:px-10">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div className="edtech-card-glow rounded-2xl p-3 sm:p-5 flex items-start sm:items-center space-x-2.5 sm:space-x-3.5 text-left shadow-xs min-w-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center shrink-0 border border-indigo-500/30 mt-0.5 sm:mt-0">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">কোর্স মেয়াদ ও সেশন</span>
-              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">
+              <span className="text-[11px] sm:text-xs text-slate-300 font-bold uppercase tracking-wider block leading-tight">কোর্স মেয়াদ ও সেশন</span>
+              <p className="text-xs sm:text-base font-black text-white mt-1 sm:mt-0.5 leading-snug break-words">
                 {landingConfig.quickSnapshot?.duration || `${course.durationMonths || 3} মাস`} / {landingConfig.quickSnapshot?.totalSessions || '২৪টি ল্যাব'}
               </p>
             </div>
           </div>
 
-          <div className="edtech-card-glow rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 text-left shadow-xs min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-500/30">
-              <Laptop className="w-5 h-5" />
+          <div className="edtech-card-glow rounded-2xl p-3 sm:p-5 flex items-start sm:items-center space-x-2.5 sm:space-x-3.5 text-left shadow-xs min-w-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-500/30 mt-0.5 sm:mt-0">
+              <Laptop className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">ল্যাব ও কম্পিউটার</span>
-              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">
+              <span className="text-[11px] sm:text-xs text-slate-300 font-bold uppercase tracking-wider block leading-tight">ল্যাব ও কম্পিউটার</span>
+              <p className="text-xs sm:text-base font-black text-white mt-1 sm:mt-0.5 leading-snug break-words">
                 {landingConfig.quickSnapshot?.batchSize || '১ শিক্ষার্থী = ১ পিসি'}
               </p>
             </div>
           </div>
 
-          <div className="edtech-card-glow rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 text-left shadow-xs min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/30">
-              <Briefcase className="w-5 h-5" />
+          <div className="edtech-card-glow rounded-2xl p-3 sm:p-5 flex items-start sm:items-center space-x-2.5 sm:space-x-3.5 text-left shadow-xs min-w-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/30 mt-0.5 sm:mt-0">
+              <Briefcase className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">লাইভ প্রজেক্ট</span>
-              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">
+              <span className="text-[11px] sm:text-xs text-slate-300 font-bold uppercase tracking-wider block leading-tight">লাইভ প্রজেক্ট</span>
+              <p className="text-xs sm:text-base font-black text-white mt-1 sm:mt-0.5 leading-snug break-words">
                 {landingConfig.quickSnapshot?.projectsCount || '১০+ রিয়েল ফাইল'}
               </p>
             </div>
           </div>
 
-          <div className="edtech-card-glow rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 text-left shadow-xs min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0 border border-purple-500/30">
-              <ShieldCheck className="w-5 h-5" />
+          <div className="edtech-card-glow rounded-2xl p-3 sm:p-5 flex items-start sm:items-center space-x-2.5 sm:space-x-3.5 text-left shadow-xs min-w-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0 border border-purple-500/30 mt-0.5 sm:mt-0">
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block truncate">সাপোর্ট ও ব্যাকআপ</span>
-              <p className="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">
+              <span className="text-[11px] sm:text-xs text-slate-300 font-bold uppercase tracking-wider block leading-tight">সাপোর্ট ও ব্যাকআপ</span>
+              <p className="text-xs sm:text-base font-black text-white mt-1 sm:mt-0.5 leading-snug break-words">
                 {landingConfig.quickSnapshot?.supportType || 'লাইফটাইম সাপোর্ট'}
               </p>
             </div>
@@ -3247,17 +3247,17 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               {socialTickerItems[currentTickerIndex]?.name?.charAt(0) || '✓'}
             </div>
 
-            <div className="space-y-0.5 pr-2 overflow-hidden">
-              <div className="flex items-center space-x-1.5">
-                <span className="text-xs font-black text-white truncate">
+            <div className="space-y-0.5 pr-2 min-w-0">
+              <div className="flex items-center space-x-1.5 min-w-0">
+                <span className="text-xs font-black text-white">
                   {socialTickerItems[currentTickerIndex]?.name}
                 </span>
-                <span className="text-[10px] text-slate-400">• {socialTickerItems[currentTickerIndex]?.timeAgo}</span>
+                <span className="text-[10px] text-slate-400 shrink-0">• {socialTickerItems[currentTickerIndex]?.timeAgo}</span>
               </div>
-              <p className="text-[11px] text-emerald-400 font-semibold leading-tight line-clamp-1">
+              <p className="text-[11px] text-emerald-400 font-semibold leading-tight">
                 {socialTickerItems[currentTickerIndex]?.actionText || 'স্কলারশিপ ব্যাচে সিট বুক করেছেন'}
               </p>
-              <span className="text-[10px] text-slate-400 block truncate">
+              <span className="text-[10px] text-slate-400 block">
                 📍 {socialTickerItems[currentTickerIndex]?.location}
               </span>
             </div>

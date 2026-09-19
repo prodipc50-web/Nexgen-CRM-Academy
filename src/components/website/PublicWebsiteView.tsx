@@ -1207,31 +1207,31 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       </div>
 
                       {/* 4-Metric Grid Box (Matching Reference Design) */}
-                      <div className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-100 grid grid-cols-2 gap-2 text-xs">
-                        <div className="space-y-0.5">
+                      <div className="p-3 bg-slate-50/90 rounded-2xl border border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                        <div className="space-y-0.5 min-w-0">
                           <span className="text-[10px] text-slate-400 font-semibold block">Class</span>
-                          <span className="font-bold text-slate-800 block truncate">
+                          <span className="font-bold text-slate-800 block text-[11px] sm:text-xs leading-snug break-words">
                             {c.totalClasses || 36} Classes
                           </span>
                         </div>
 
-                        <div className="space-y-0.5">
+                        <div className="space-y-0.5 min-w-0">
                           <span className="text-[10px] text-slate-400 font-semibold block">Duration</span>
-                          <span className="font-bold text-slate-800 block truncate">
+                          <span className="font-bold text-slate-800 block text-[11px] sm:text-xs leading-snug break-words">
                             {c.duration}
                           </span>
                         </div>
 
-                        <div className="space-y-0.5 pt-1.5 border-t border-slate-200/60">
+                        <div className="space-y-0.5 pt-1.5 border-t border-slate-200/60 min-w-0">
                           <span className="text-[10px] text-slate-400 font-semibold block">Projects</span>
-                          <span className="font-bold text-indigo-700 block truncate">
+                          <span className="font-bold text-indigo-700 block text-[11px] sm:text-xs leading-snug break-words">
                             {projects} Real Projects
                           </span>
                         </div>
 
-                        <div className="space-y-0.5 pt-1.5 border-t border-slate-200/60">
+                        <div className="space-y-0.5 pt-1.5 border-t border-slate-200/60 min-w-0">
                           <span className="text-[10px] text-slate-400 font-semibold block">Student Joined</span>
-                          <span className="font-bold text-emerald-700 block truncate">
+                          <span className="font-bold text-emerald-700 block text-[11px] sm:text-xs leading-snug break-words">
                             {students}+ Students
                           </span>
                         </div>
@@ -1246,14 +1246,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                           : (c.landingConfig?.remainingSeats || 4);
 
                         return (
-                          <div className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-400/40 text-[11px] text-amber-900 font-bold">
-                            <span className="flex items-center space-x-1 truncate mr-1">
+                          <div className="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-400/40 text-[11px] text-amber-900 font-bold">
+                            <span className="flex items-center space-x-1 min-w-0">
                               <Calendar className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                              <span className="truncate">ব্যাচ: <strong>{batchDate}</strong></span>
+                              <span className="text-[10px] sm:text-[11px] leading-tight">ব্যাচ: <strong>{batchDate}</strong></span>
                             </span>
                             <span className="flex items-center space-x-1 text-rose-600 bg-white px-1.5 py-0.5 rounded-md border border-rose-200 shadow-2xs font-black shrink-0 text-[10px]">
                               <Flame className="w-3 h-3 text-rose-500" />
-                              <span>{remainingSeats}টি সিট বাকি</span>
+                              <span>{remainingSeats}টি বাকি</span>
                             </span>
                           </div>
                         );
