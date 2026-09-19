@@ -90,6 +90,30 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
     signatoryTitle: academySettings.idCardSignatoryTitle || 'Authorized Signature / Seal'
   });
 
+  const handlePrint = () => {
+    executeCleanPrint({
+      documentTitle: `Official_Receipt_${receiptData.receiptNumber}_${(receiptData.studentName || 'Student').replace(/\s+/g, '_')}`,
+      size: printFormat === 'pos58' ? 'pos58' : printFormat === 'pos80' ? 'pos80' : 'a4',
+      orientation: 'portrait',
+      margin: (printFormat === 'pos80' || printFormat === 'pos58') ? '0mm' : '5mm'
+    });
+  };
+
+  // Keyboard Shortcuts (Esc to close, Ctrl+P to print)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
+        e.preventDefault();
+        handlePrint();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, receiptData, printFormat]);
+
   // Sync state whenever payment, admission or academy settings change
   useEffect(() => {
     if (payment) {
@@ -146,30 +170,6 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
       </div>
     );
   }
-
-  const handlePrint = () => {
-    executeCleanPrint({
-      documentTitle: `Official_Receipt_${receiptData.receiptNumber}_${(receiptData.studentName || 'Student').replace(/\s+/g, '_')}`,
-      size: printFormat === 'pos58' ? 'pos58' : printFormat === 'pos80' ? 'pos80' : 'a4',
-      orientation: 'portrait',
-      margin: (printFormat === 'pos80' || printFormat === 'pos58') ? '0mm' : '5mm'
-    });
-  };
-
-  // Keyboard Shortcuts (Esc to close, Ctrl+P to print)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
-        e.preventDefault();
-        handlePrint();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, receiptData, printFormat]);
 
   const handleSendWhatsAppReceipt = () => {
     const phone = receiptData.studentPhone;

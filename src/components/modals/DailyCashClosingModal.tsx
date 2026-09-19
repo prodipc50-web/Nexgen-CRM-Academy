@@ -50,6 +50,29 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
   const [cashierNotes, setCashierNotes] = useState('');
   const [isCountingStarted, setIsCountingStarted] = useState<boolean>(false);
 
+  const handlePrint = () => {
+    executeCleanPrint({
+      documentTitle: `Daily_Cash_Closing_${selectedDate}`,
+      size: 'a4',
+      orientation: 'portrait',
+      margin: '5mm'
+    });
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
+        e.preventDefault();
+        handlePrint();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, selectedDate]);
+
   if (!isOpen) return null;
 
   // Change date by offset days
@@ -95,29 +118,6 @@ export const DailyCashClosingModal: React.FC<DailyCashClosingModalProps> = ({
   );
 
   const cashDiscrepancy = isCountingStarted ? (countedPhysicalCash - expectedCashInDrawer) : 0;
-
-  const handlePrint = () => {
-    executeCleanPrint({
-      documentTitle: `Daily_Cash_Closing_${selectedDate}`,
-      size: 'a4',
-      orientation: 'portrait',
-      margin: '5mm'
-    });
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && isOpen) {
-        e.preventDefault();
-        handlePrint();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, selectedDate]);
 
   const handleDenominationChange = (denom: number, val: string) => {
     setIsCountingStarted(true);

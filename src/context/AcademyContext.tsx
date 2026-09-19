@@ -2323,7 +2323,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         data: target,
         title: `Lead: ${target.name} (${target.leadCode})`,
         deletedAt: new Date().toISOString(),
-        deletedBy: currentUser.name
+        deletedBy: currentUser?.name || 'Admin'
       },
       ...prev
     ]);

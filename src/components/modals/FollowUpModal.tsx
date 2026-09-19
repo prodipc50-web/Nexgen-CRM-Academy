@@ -30,7 +30,7 @@ export const FollowUpModal: React.FC<FollowUpModalProps> = ({ isOpen, onClose, l
     addFollowUp({
       leadId: lead.id,
       staffName: currentUser?.name || 'Counselor',
-      counselorId: currentUser.id,
+      counselorId: currentUser?.id,
       date,
       method,
       contactMethod: method,

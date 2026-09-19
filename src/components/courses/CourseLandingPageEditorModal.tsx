@@ -90,10 +90,6 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
   const { updateCourse, syncToCloudNow, websiteCmsConfig, academySettings, isAuthenticated, currentUser } = useAcademy();
   const canEdit = Boolean(isAuthenticated && currentUser && ['SUPER_ADMIN', 'ADMIN', 'BRANCH_MANAGER'].includes(currentUser.role));
 
-  if (!isOpen || !canEdit) {
-    return null;
-  }
-
   const defaultPhone = academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01798444444';
   const defaultAddress = academySettings?.officialAddress || '১৪/বি, গার্ডেন রোড, কাজী নজরুল ইসলাম সরণি, ফার্মগেট, ঢাকা-১২১৫';
 
@@ -504,7 +500,7 @@ export const CourseLandingPageEditorModal: React.FC<CourseLandingPageEditorModal
     setSecondaryKeywords(secondaryKeywords.filter((_, i) => i !== index));
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !canEdit) return null;
 
   // Pain point handlers
   const handleAddPainPoint = () => {
