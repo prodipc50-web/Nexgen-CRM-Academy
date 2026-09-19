@@ -356,10 +356,10 @@ export const LeadForm: React.FC<LeadFormProps> = ({
         if (typeof window !== 'undefined') {
           try {
             const bc = new BroadcastChannel('nexgen_leads_sync');
-            bc.postMessage({ type: 'LEAD_SUBMITTED', timestamp: Date.now() });
+            bc.postMessage({ type: 'LEAD_SUBMITTED', lead: result.lead, timestamp: Date.now() });
             bc.close();
           } catch (e) {}
-          window.dispatchEvent(new CustomEvent('incoming-lead-submitted'));
+          window.dispatchEvent(new CustomEvent('incoming-lead-submitted', { detail: result.lead }));
         }
 
         if (syncIncomingLeadsNow) {
