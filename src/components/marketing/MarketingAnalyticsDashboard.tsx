@@ -96,7 +96,10 @@ export const MarketingAnalyticsDashboard: React.FC<MarketingAnalyticsDashboardPr
   const handleSave = () => {
     updateWebsiteCmsConfig({
       ...websiteCmsConfig,
-      marketing: config
+      marketing: {
+        ...(websiteCmsConfig?.marketing || {}),
+        ...config
+      }
     });
     setIsSaved(true);
     notify('Marketing & Meta Pixel configuration saved successfully!');

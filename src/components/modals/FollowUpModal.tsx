@@ -44,7 +44,7 @@ export const FollowUpModal: React.FC<FollowUpModalProps> = ({ isOpen, onClose, l
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs print:hidden">
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 max-h-[90vh]">
         {/* Header */}
         <div className="p-4 bg-indigo-950 text-white flex items-center justify-between">

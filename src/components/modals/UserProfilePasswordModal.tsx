@@ -136,7 +136,7 @@ export const UserProfilePasswordModal: React.FC<UserProfilePasswordModalProps> =
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+      <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150 print:hidden">
         <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-slate-100 space-y-5">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">

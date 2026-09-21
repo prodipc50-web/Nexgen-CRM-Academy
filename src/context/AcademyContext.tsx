@@ -107,7 +107,14 @@ import {
   INITIAL_WEBSITE_BLOGS
 } from '../data/websiteSeedData';
 import { DEFAULT_THEME_CONFIG, applyThemeToDom } from '../data/themePresets';
-import { initGoogleAnalytics, DEFAULT_GA4_MEASUREMENT_ID } from '../utils/analyticsTracker';
+import {
+  initGoogleAnalytics,
+  DEFAULT_GA4_MEASUREMENT_ID,
+  initMetaPixel,
+  initGoogleTagManager,
+  initTikTokPixel,
+  setActiveMarketingConfig
+} from '../utils/analyticsTracker';
 
 interface AcademyContextType {
   currentUser: UserProfile;
@@ -620,10 +627,21 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return INITIAL_STAFF;
   });
 
-  const [categories, setCategories] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_categories`);
-    return saved ? JSON.parse(saved) : INITIAL_COURSE_CATEGORIES;
-  });
+  const safeParseLocalStorage = <T,>(key: string, fallback: T): T => {
+    try {
+      const saved = localStorage.getItem(key);
+      if (!saved) return fallback;
+      const parsed = JSON.parse(saved);
+      return parsed !== null && parsed !== undefined ? parsed : fallback;
+    } catch (e) {
+      console.warn(`[AcademyContext] Safe fallback used for key "${key}"`, e);
+      return fallback;
+    }
+  };
+
+  const [categories, setCategories] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_categories`, INITIAL_COURSE_CATEGORIES)
+  );
 
   const mergeCoursesWithDefaults = (coursesList: Course[]): Course[] => {
     return coursesList.map(c => {
@@ -655,81 +673,66 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return INITIAL_COURSES;
   });
 
-  const [batches, setBatches] = useState<Batch[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_batches`);
-    return saved ? JSON.parse(saved) : INITIAL_BATCHES;
-  });
+  const [batches, setBatches] = useState<Batch[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_batches`, INITIAL_BATCHES)
+  );
 
-  const [rooms, setRooms] = useState<Room[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_rooms`);
-    return saved ? JSON.parse(saved) : INITIAL_ROOMS;
-  });
+  const [rooms, setRooms] = useState<Room[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_rooms`, INITIAL_ROOMS)
+  );
 
-  const [campaigns, setCampaigns] = useState<MarketingCampaign[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_campaigns`);
-    return saved ? JSON.parse(saved) : INITIAL_CAMPAIGNS;
-  });
+  const [campaigns, setCampaigns] = useState<MarketingCampaign[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_campaigns`, INITIAL_CAMPAIGNS)
+  );
 
-  const [leads, setLeads] = useState<Lead[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_leads`);
-    return saved ? JSON.parse(saved) : INITIAL_LEADS;
-  });
+  const [leads, setLeads] = useState<Lead[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_leads`, INITIAL_LEADS)
+  );
 
-  const [followUps, setFollowUps] = useState<FollowUp[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_followups`);
-    return saved ? JSON.parse(saved) : INITIAL_FOLLOWUPS;
-  });
+  const [followUps, setFollowUps] = useState<FollowUp[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_followups`, INITIAL_FOLLOWUPS)
+  );
 
-  const [students, setStudents] = useState<Student[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_students`);
-    return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
-  });
+  const [students, setStudents] = useState<Student[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_students`, INITIAL_STUDENTS)
+  );
 
-  const [admissions, setAdmissions] = useState<Admission[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_admissions`);
-    return saved ? JSON.parse(saved) : INITIAL_ADMISSIONS;
-  });
+  const [admissions, setAdmissions] = useState<Admission[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_admissions`, INITIAL_ADMISSIONS)
+  );
 
-  const [payments, setPayments] = useState<Payment[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_payments`);
-    return saved ? JSON.parse(saved) : INITIAL_PAYMENTS;
-  });
+  const [payments, setPayments] = useState<Payment[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_payments`, INITIAL_PAYMENTS)
+  );
 
-  const [attendance, setAttendance] = useState<AttendanceRecord[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_attendance`);
-    return saved ? JSON.parse(saved) : INITIAL_ATTENDANCE;
-  });
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_attendance`, INITIAL_ATTENDANCE)
+  );
 
-  const [schedules, setSchedules] = useState<ClassSchedule[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_schedules`);
-    return saved ? JSON.parse(saved) : INITIAL_SCHEDULE;
-  });
+  const [schedules, setSchedules] = useState<ClassSchedule[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_schedules`, INITIAL_SCHEDULE)
+  );
 
-  const [exams, setExams] = useState<Exam[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_exams`);
-    return saved ? JSON.parse(saved) : INITIAL_EXAMS;
-  });
+  const [exams, setExams] = useState<Exam[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_exams`, INITIAL_EXAMS)
+  );
 
-  const [examResults, setExamResults] = useState<ExamResult[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_exam_results`);
-    return saved ? JSON.parse(saved) : INITIAL_EXAM_RESULTS;
-  });
+  const [examResults, setExamResults] = useState<ExamResult[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_exam_results`, INITIAL_EXAM_RESULTS)
+  );
 
-  const [certificates, setCertificates] = useState<Certificate[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_certificates`);
-    return saved ? JSON.parse(saved) : INITIAL_CERTIFICATES;
-  });
+  const [certificates, setCertificates] = useState<Certificate[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_certificates`, INITIAL_CERTIFICATES)
+  );
   const [publicCertificates, setPublicCertificates] = useState<any[]>([]);
 
-  const [expenses, setExpenses] = useState<Expense[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_expenses`);
-    return saved ? JSON.parse(saved) : INITIAL_EXPENSES;
-  });
+  const [expenses, setExpenses] = useState<Expense[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_expenses`, INITIAL_EXPENSES)
+  );
 
-  const [assets, setAssets] = useState<AssetInventory[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_assets`);
-    return saved ? JSON.parse(saved) : INITIAL_ASSETS;
-  });
+  const [assets, setAssets] = useState<AssetInventory[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_assets`, INITIAL_ASSETS)
+  );
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_audit`);
@@ -749,27 +752,23 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return INITIAL_AUDIT_LOGS;
   });
 
-  const [trashItems, setTrashItems] = useState<TrashItem[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_trash`);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [trashItems, setTrashItems] = useState<TrashItem[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_trash`, [])
+  );
 
   // Placements & Career Cell State
-  const [placements, setPlacements] = useState<StudentPlacement[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_placements`);
-    return saved ? JSON.parse(saved) : INITIAL_PLACEMENTS;
-  });
+  const [placements, setPlacements] = useState<StudentPlacement[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_placements`, INITIAL_PLACEMENTS)
+  );
 
   // Assignments & Project Showcase State
-  const [assignments, setAssignments] = useState<Assignment[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_assignments`);
-    return saved ? JSON.parse(saved) : INITIAL_ASSIGNMENTS;
-  });
+  const [assignments, setAssignments] = useState<Assignment[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_assignments`, INITIAL_ASSIGNMENTS)
+  );
 
-  const [assignmentSubmissions, setAssignmentSubmissions] = useState<AssignmentSubmission[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_submissions`);
-    return saved ? JSON.parse(saved) : INITIAL_ASSIGNMENT_SUBMISSIONS;
-  });
+  const [assignmentSubmissions, setAssignmentSubmissions] = useState<AssignmentSubmission[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_submissions`, INITIAL_ASSIGNMENT_SUBMISSIONS)
+  );
 
   // Seminars & Workshops State
   const [seminars, setSeminars] = useState<SeminarWorkshop[]>(() => {
@@ -1099,6 +1098,64 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     localStorage.setItem(`${STORAGE_KEY}_academy_settings`, JSON.stringify(academySettings));
   }, [academySettings]);
+
+  // Helper to generate consistent, unique, collision-proof sequence codes using academySettings prefixes
+  const generateSequenceCode = (
+    type: 'student' | 'admission' | 'receipt' | 'certificate' | 'expense',
+    existingCodes: (string | undefined | null)[]
+  ): string => {
+    const currentYear = new Date().getFullYear().toString();
+    const currentYY = currentYear.substring(2);
+    const cfg = academySettings?.idPrefixConfig;
+
+    let prefix = '';
+    let padLength = 3;
+    let baseOffset = 1;
+
+    switch (type) {
+      case 'student':
+        prefix = cfg?.studentPrefix || 'NCA-STU-{YEAR}-';
+        padLength = 3;
+        baseOffset = 1;
+        break;
+      case 'admission':
+        prefix = cfg?.admissionPrefix || 'NCA-ADM-{YEAR}-';
+        padLength = 3;
+        baseOffset = 101;
+        break;
+      case 'receipt':
+        prefix = cfg?.receiptPrefix || 'NCA-REC-{YEAR}-';
+        padLength = 4;
+        baseOffset = 8801;
+        break;
+      case 'certificate':
+        prefix = cfg?.certificatePrefix || 'NCA-CERT-{YEAR}-';
+        padLength = 4;
+        baseOffset = 8941;
+        break;
+      case 'expense':
+        prefix = cfg?.expensePrefix || 'NCA-EXP-{YEAR}-';
+        padLength = 3;
+        baseOffset = 501;
+        break;
+    }
+
+    // Replace dynamic year tokens
+    prefix = prefix
+      .replace(/\{YEAR\}/g, currentYear)
+      .replace(/\{YYYY\}/g, currentYear)
+      .replace(/\{YY\}/g, currentYY);
+
+    const cleanExisting = new Set(existingCodes.filter(Boolean));
+    let seq = existingCodes.length + baseOffset;
+    let candidate = `${prefix}${String(seq).padStart(padLength, '0')}`;
+    while (cleanExisting.has(candidate)) {
+      seq += 1;
+      candidate = `${prefix}${String(seq).padStart(padLength, '0')}`;
+    }
+
+    return candidate;
+  };
 
   // --- INACTIVITY AUTO-LOCK SYSTEM ---
   const [isSessionLocked, setIsSessionLocked] = useState<boolean>(false);
@@ -1622,13 +1679,49 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, []);
 
-  // Dynamically initialize Google Analytics 4 (Real GA4 Measurement ID: G-VYNS03M91Z)
+  // Dynamically initialize all active marketing trackers (Meta Pixel, GA4, GTM, TikTok, Google Ads)
   useEffect(() => {
-    if (websiteCmsConfig?.marketing?.googleAnalyticsEnabled !== false) {
-      const gaId = websiteCmsConfig?.marketing?.googleAnalyticsId || DEFAULT_GA4_MEASUREMENT_ID;
+    const m = websiteCmsConfig?.marketing;
+    if (!m) return;
+
+    setActiveMarketingConfig({
+      metaPixelId: m.metaPixelId,
+      googleAnalyticsId: m.googleAnalyticsId || DEFAULT_GA4_MEASUREMENT_ID,
+      googleTagManagerId: m.googleTagManagerId,
+      tiktokPixelId: m.tiktokPixelId,
+      googleAdsConversionId: m.googleAdsConversionId,
+      googleAdsConversionLabel: m.googleAdsConversionLabel,
+      googleAdsEnabled: m.googleAdsEnabled
+    });
+
+    if (m.googleAnalyticsEnabled !== false) {
+      const gaId = m.googleAnalyticsId || DEFAULT_GA4_MEASUREMENT_ID;
       initGoogleAnalytics(gaId);
     }
-  }, [websiteCmsConfig?.marketing?.googleAnalyticsId, websiteCmsConfig?.marketing?.googleAnalyticsEnabled]);
+
+    if (m.metaPixelEnabled !== false && m.metaPixelId) {
+      initMetaPixel(m.metaPixelId);
+    }
+
+    if (m.googleTagManagerEnabled !== false && m.googleTagManagerId) {
+      initGoogleTagManager(m.googleTagManagerId);
+    }
+
+    if (m.tiktokPixelId) {
+      initTikTokPixel(m.tiktokPixelId);
+    }
+  }, [
+    websiteCmsConfig?.marketing?.googleAnalyticsId,
+    websiteCmsConfig?.marketing?.googleAnalyticsEnabled,
+    websiteCmsConfig?.marketing?.metaPixelId,
+    websiteCmsConfig?.marketing?.metaPixelEnabled,
+    websiteCmsConfig?.marketing?.googleTagManagerId,
+    websiteCmsConfig?.marketing?.googleTagManagerEnabled,
+    websiteCmsConfig?.marketing?.tiktokPixelId,
+    websiteCmsConfig?.marketing?.googleAdsConversionId,
+    websiteCmsConfig?.marketing?.googleAdsConversionLabel,
+    websiteCmsConfig?.marketing?.googleAdsEnabled
+  ]);
 
   // 3. Helper to manually or programmatically push segregated state to Firestore
   const syncToCloudNow = async (forceImmediate = false): Promise<boolean> => {
@@ -2881,7 +2974,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       createdStudent = students.find(s => s.id === studentId)!;
     } else {
       studentId = `stu-${Date.now()}`;
-      const studentCode = `NCA-STU-2026-${String(students.length + 1).padStart(3, '0')}`;
+      const studentCode = generateSequenceCode('student', students.map(s => s.studentCode));
       createdStudent = {
         id: studentId,
         studentCode,
@@ -2926,7 +3019,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     // 2. Create Admission Record
     const admissionId = `adm-${Date.now()}`;
-    const admissionCode = `NCA-ADM-2026-${String(admissions.length + 101).padStart(3, '0')}`;
+    const admissionCode = generateSequenceCode('admission', admissions.map(a => a.admissionCode));
     const newAdmission: Admission = {
       id: admissionId,
       admissionCode,
@@ -2958,12 +3051,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let newPayment: Payment | undefined;
     if (paid > 0) {
       const paymentId = `pay-${Date.now()}`;
-      let receiptSeq = 8800 + payments.length + 1;
-      let receiptNumber = `NCA-REC-2026-${receiptSeq}`;
-      while (payments.some(p => p.receiptNumber === receiptNumber)) {
-        receiptSeq += 1;
-        receiptNumber = `NCA-REC-2026-${receiptSeq}`;
-      }
+      const receiptNumber = generateSequenceCode('receipt', payments.map(p => p.receiptNumber));
       newPayment = {
         id: paymentId,
         receiptNumber,
@@ -3011,13 +3099,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const previousPayments = payments.filter(p => p.admissionId === admissionId);
     const newInstallmentNum = previousPayments.length + 1;
     const paymentId = `pay-${Date.now()}`;
-    
-    let receiptSeq = 8800 + payments.length + 1;
-    let receiptNumber = `NCA-REC-2026-${receiptSeq}`;
-    while (payments.some(p => p.receiptNumber === receiptNumber)) {
-      receiptSeq += 1;
-      receiptNumber = `NCA-REC-2026-${receiptSeq}`;
-    }
+    const receiptNumber = generateSequenceCode('receipt', payments.map(p => p.receiptNumber));
     const now = new Date().toISOString();
 
     const newPayment: Payment = {
@@ -3720,8 +3802,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     status?: 'Issued' | 'Draft' | 'Revoked';
   }): Certificate => {
     const id = `crt-${Date.now()}`;
-    const certNum = 8940 + certificates.length + 1;
-    const certificateCode = certificateNumber || `NCA-CERT-2026-${certNum}`;
+    const certificateCode = certificateNumber || generateSequenceCode('certificate', certificates.map(c => c.certificateNumber || c.certificateCode));
     const verificationId = `https://nexgenacademy.edu/verify/${certificateCode}`;
     const trainer = staffList.find(s => s.role === 'TRAINER') || CURRENT_USER;
 
@@ -3760,7 +3841,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // --- EXPENSES ---
   const addExpense = (expenseData: Omit<Expense, 'id' | 'expenseCode' | 'createdAt'>): Expense => {
     const id = `exp-${Date.now()}`;
-    const expenseCode = `NCA-EXP-2026-${500 + expenses.length + 1}`;
+    const expenseCode = generateSequenceCode('expense', expenses.map(e => e.expenseCode));
     const newExpense: Expense = {
       ...expenseData,
       id,

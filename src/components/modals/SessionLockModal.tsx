@@ -27,7 +27,7 @@ export const SessionLockModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 print:hidden">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full text-center text-slate-100 animate-in fade-in zoom-in-95 duration-200">
         <div className="flex justify-center mb-4">
           <div className="relative">

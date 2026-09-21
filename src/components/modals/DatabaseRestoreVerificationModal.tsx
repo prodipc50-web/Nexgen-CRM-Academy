@@ -169,7 +169,7 @@ export const DatabaseRestoreVerificationModal: React.FC<DatabaseRestoreVerificat
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto print:hidden"
       onClick={onClose}
     >
       <div

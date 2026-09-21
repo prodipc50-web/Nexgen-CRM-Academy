@@ -26,6 +26,7 @@ export interface UtmParams {
   utm_term?: string;
   fbclid?: string;
   gclid?: string;
+  ttclid?: string;
   referrer?: string;
   landingPage?: string;
   capturedAt?: string;
@@ -45,11 +46,12 @@ export function getCapturedUtmParams(): UtmParams {
     const urlParams = new URLSearchParams(window.location.search);
     const fbclid = urlParams.get('fbclid') || undefined;
     const gclid = urlParams.get('gclid') || undefined;
-    const hasUtm = urlParams.has('utm_source') || urlParams.has('utm_campaign') || !!fbclid || !!gclid;
+    const ttclid = urlParams.get('ttclid') || undefined;
+    const hasUtm = urlParams.has('utm_source') || urlParams.has('utm_campaign') || !!fbclid || !!gclid || !!ttclid;
 
     if (hasUtm) {
-      const sourceVal = urlParams.get('utm_source') || (fbclid ? 'facebook_ads' : (gclid ? 'google_ads' : undefined));
-      const mediumVal = urlParams.get('utm_medium') || (fbclid ? 'cpc' : undefined);
+      const sourceVal = urlParams.get('utm_source') || (fbclid ? 'facebook_ads' : (gclid ? 'google_ads' : (ttclid ? 'tiktok_ads' : undefined)));
+      const mediumVal = urlParams.get('utm_medium') || (fbclid || gclid || ttclid ? 'cpc' : undefined);
       const campaignVal = urlParams.get('utm_campaign') || undefined;
       const contentVal = urlParams.get('utm_content') || undefined;
       const termVal = urlParams.get('utm_term') || undefined;
@@ -67,6 +69,7 @@ export function getCapturedUtmParams(): UtmParams {
         utm_term: termVal,
         fbclid: fbclid,
         gclid: gclid,
+        ttclid: ttclid,
         referrer: document.referrer || 'direct',
         landingPage: window.location.pathname + window.location.search,
         capturedAt: new Date().toISOString()
@@ -104,10 +107,50 @@ export function getDeviceType(): 'Mobile' | 'Desktop' | 'Tablet' {
   return 'Desktop';
 }
 
+// Track active marketing & pixel IDs across application lifecycle
+let activeMetaPixelId: string | null = null;
+let activeGa4MeasurementId: string = DEFAULT_GA4_MEASUREMENT_ID;
+let activeGtmId: string | null = null;
+let activeTikTokPixelId: string | null = null;
+let activeGoogleAdsConfig: { conversionId?: string; conversionLabel?: string; enabled?: boolean } = {};
+
+export function setActiveMarketingConfig(config: {
+  metaPixelId?: string;
+  googleAnalyticsId?: string;
+  googleTagManagerId?: string;
+  tiktokPixelId?: string;
+  googleAdsConversionId?: string;
+  googleAdsConversionLabel?: string;
+  googleAdsEnabled?: boolean;
+}) {
+  if (config.metaPixelId) activeMetaPixelId = config.metaPixelId;
+  if (config.googleAnalyticsId) activeGa4MeasurementId = config.googleAnalyticsId;
+  if (config.googleTagManagerId) activeGtmId = config.googleTagManagerId;
+  if (config.tiktokPixelId) activeTikTokPixelId = config.tiktokPixelId;
+  activeGoogleAdsConfig = {
+    conversionId: config.googleAdsConversionId,
+    conversionLabel: config.googleAdsConversionLabel,
+    enabled: config.googleAdsEnabled
+  };
+}
+
+export function getActiveMarketingConfig() {
+  return {
+    metaPixelId: activeMetaPixelId,
+    googleAnalyticsId: activeGa4MeasurementId,
+    googleTagManagerId: activeGtmId,
+    tiktokPixelId: activeTikTokPixelId,
+    googleAdsConversionId: activeGoogleAdsConfig.conversionId,
+    googleAdsConversionLabel: activeGoogleAdsConfig.conversionLabel,
+    googleAdsEnabled: activeGoogleAdsConfig.enabled
+  };
+}
+
 // Initialize real Meta Pixel script dynamically in the browser
 export function initMetaPixel(pixelId: string) {
   if (typeof window === 'undefined' || !pixelId) return;
   const w = window as any;
+  activeMetaPixelId = pixelId;
   if (w._metaPixelInitialized === pixelId) return;
 
   try {
@@ -136,8 +179,120 @@ export function initMetaPixel(pixelId: string) {
   }
 }
 
-// Track active GA4 measurement ID
-let activeGa4MeasurementId: string = DEFAULT_GA4_MEASUREMENT_ID;
+/**
+ * Initialize Google Tag Manager (GTM) dynamically in the browser.
+ * Injects the standard GTM container script into the document head and initializes dataLayer.
+ */
+export function initGoogleTagManager(gtmId: string) {
+  if (typeof window === 'undefined' || !gtmId) return;
+  const w = window as any;
+  activeGtmId = gtmId;
+  if (w._gtmInitialized === gtmId) return;
+
+  try {
+    w.dataLayer = w.dataLayer || [];
+    w.dataLayer.push({
+      'gtm.start': new Date().getTime(),
+      event: 'gtm.js'
+    });
+
+    const existingScript = document.querySelector(`script[src*="googletagmanager.com/gtm.js?id="]`);
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtm.js?id=${gtmId}`;
+      const firstScript = document.getElementsByTagName('script')[0];
+      if (firstScript && firstScript.parentNode) {
+        firstScript.parentNode.insertBefore(script, firstScript);
+      } else {
+        document.head.appendChild(script);
+      }
+    }
+
+    w._gtmInitialized = gtmId;
+    console.log(`[GTM Initialized] Container ID: ${gtmId}`);
+  } catch (err) {
+    console.warn('GTM initialization error:', err);
+  }
+}
+
+/**
+ * Pushes custom events directly to Google Tag Manager dataLayer
+ */
+export function pushGtmEvent(eventName: string, params: Record<string, any> = {}) {
+  if (typeof window === 'undefined') return;
+  const w = window as any;
+  try {
+    w.dataLayer = w.dataLayer || [];
+    w.dataLayer.push({
+      event: eventName,
+      ...params,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    console.warn('GTM event push failed:', err);
+  }
+}
+
+/**
+ * Initialize TikTok Pixel dynamically in the browser.
+ */
+export function initTikTokPixel(pixelId: string) {
+  if (typeof window === 'undefined' || !pixelId) return;
+  const w = window as any;
+  activeTikTokPixelId = pixelId;
+  if (w._tiktokInitialized === pixelId) return;
+
+  try {
+    if (!w.ttq) {
+      w.TiktokAnalyticsObject = 'ttq';
+      const ttq: any = (w.ttq = w.ttq || []);
+      ttq.methods = [
+        'page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once',
+        'ready', 'alias', 'group', 'enableCookie', 'disableCookie'
+      ];
+      ttq.setAndDefer = function (t: any, e: any) {
+        t[e] = function () {
+          t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+        };
+      };
+      for (let i = 0; i < ttq.methods.length; i++) {
+        ttq.setAndDefer(ttq, ttq.methods[i]);
+      }
+      ttq.load = function (e: string) {
+        const n = document.createElement('script');
+        n.type = 'text/javascript';
+        n.async = true;
+        n.src = `https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=${e}&lib=ttq`;
+        const r = document.getElementsByTagName('script')[0];
+        r?.parentNode?.insertBefore(n, r);
+      };
+    }
+
+    w.ttq.load(pixelId);
+    w.ttq.page();
+    w._tiktokInitialized = pixelId;
+    console.log(`[TikTok Pixel Initialized] ID: ${pixelId}`);
+  } catch (err) {
+    console.warn('TikTok Pixel initialization error:', err);
+  }
+}
+
+/**
+ * Dispatches events to TikTok Pixel (e.g. ViewContent, SubmitForm, Contact)
+ */
+export function trackTikTokEvent(eventName: string, params: Record<string, any> = {}) {
+  if (typeof window === 'undefined') return;
+  const w = window as any;
+  try {
+    if (w.ttq && typeof w.ttq.track === 'function') {
+      w.ttq.track(eventName, params);
+      console.log(`[TikTok Pixel Event Tracked] ${eventName}:`, params);
+    }
+  } catch (err) {
+    console.warn('TikTok event tracking error:', err);
+  }
+}
 
 /**
  * Initialize Google Analytics 4 (GA4) dynamically in the browser.
@@ -538,8 +693,9 @@ export function trackMetaPixelEvent(
   }
 
   try {
-    if (pixelId) {
-      initMetaPixel(pixelId);
+    const effectivePixelId = pixelId || activeMetaPixelId;
+    if (effectivePixelId) {
+      initMetaPixel(effectivePixelId);
     }
 
     const w = window as any;
@@ -548,10 +704,48 @@ export function trackMetaPixelEvent(
       w.fbq('track', eventName, params, { eventID: eventId });
       console.log(`[Meta Pixel Event Tracked] ${eventName} (EventID: ${eventId}):`, params);
     } else {
-      console.log(`[Meta Pixel Simulation] ${eventName} (Pixel ID: ${pixelId || 'Configured'}, EventID: ${eventId}):`, params);
+      console.log(`[Meta Pixel Simulation] ${eventName} (Pixel ID: ${effectivePixelId || 'Configured'}, EventID: ${eventId}):`, params);
     }
 
-    // 2. Mirror to Google Analytics 4 (GA4) with standard event mapping & PII sanitization
+    // 2. Mirror to Google Tag Manager (dataLayer) with standard event structure
+    pushGtmEvent(eventName, {
+      ...params,
+      event_id: eventId,
+      pixel_id: effectivePixelId
+    });
+
+    // 3. Mirror to TikTok Pixel
+    if (eventName === 'PageView') {
+      trackTikTokEvent('ViewContent', { page_title: params.page_title, url: params.url });
+    } else if (eventName === 'ViewContent') {
+      trackTikTokEvent('ViewContent', {
+        content_id: params.content_ids?.[0] || params.course_id,
+        content_name: params.content_name || params.course_name,
+        content_type: 'product',
+        value: params.value,
+        currency: params.currency || 'BDT'
+      });
+    } else if (eventName === 'InitiateCheckout') {
+      trackTikTokEvent('InitiateCheckout', {
+        content_id: params.content_ids?.[0] || params.course_id,
+        content_name: params.content_name || params.course_name,
+        value: params.value,
+        currency: params.currency || 'BDT'
+      });
+    } else if (eventName === 'Lead') {
+      trackTikTokEvent('SubmitForm', {
+        content_name: params.content_name || params.course_name,
+        value: params.value,
+        currency: params.currency || 'BDT'
+      });
+    } else if (eventName === 'Contact') {
+      trackTikTokEvent('Contact', {
+        channel: params.channel,
+        course_name: params.course_name
+      });
+    }
+
+    // 4. Mirror to Google Analytics 4 (GA4) with standard event mapping & PII sanitization
     if (eventName === 'PageView') {
       trackGa4PageView({
         pageTitle: params.page_title,
@@ -614,7 +808,22 @@ export function trackMetaPixelEvent(
       });
     }
 
-    // 3. Server-side Conversions API (CAPI) Dispatch
+    // 5. Fire Google Ads Conversion Tracking on conversion events if configured
+    if (
+      activeGoogleAdsConfig.enabled &&
+      activeGoogleAdsConfig.conversionId &&
+      activeGoogleAdsConfig.conversionLabel &&
+      (eventName === 'Lead' || eventName === 'InitiateCheckout' || eventName === 'Contact')
+    ) {
+      trackGoogleAdsConversion(
+        activeGoogleAdsConfig.conversionId,
+        activeGoogleAdsConfig.conversionLabel,
+        params.value || 0,
+        params.currency || 'BDT'
+      );
+    }
+
+    // 6. Server-side Conversions API (CAPI) Dispatch
     const utms = getCapturedUtmParams();
     if (triggerCapi) {
       dispatchCapiEventToServer({
@@ -627,7 +836,7 @@ export function trackMetaPixelEvent(
           name: userData?.name || params.name,
           externalId: userData?.externalId || params.leadId || params.studentId
         },
-        pixelId,
+        pixelId: effectivePixelId || undefined,
         sourceUrl: window.location.href,
         fbclid: utms.fbclid,
         utmSource: utms.utmSource,
@@ -635,8 +844,8 @@ export function trackMetaPixelEvent(
       });
     }
 
-    // 4. Save event to local activity session for ERP Live Analytics Dashboard
-    recordLocalMarketingEvent(eventName, { ...params, eventId, channel: 'Pixel + CAPI + GA4' });
+    // 7. Save event to local activity session for ERP Live Analytics Dashboard
+    recordLocalMarketingEvent(eventName, { ...params, eventId, channel: 'Pixel + GTM + GA4 + CAPI' });
   } catch (err) {
     console.warn('Analytics event tracking error:', err);
   }

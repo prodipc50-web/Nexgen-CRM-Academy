@@ -73,7 +73,7 @@ export const AdLinkGeneratorModal: React.FC<AdLinkGeneratorModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 print:hidden"
       onClick={onClose}
     >
       <div

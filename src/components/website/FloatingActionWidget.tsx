@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MessageCircle, Phone, ArrowUp, GraduationCap } from 'lucide-react';
 import { FloatingActionWidgetConfig } from '../../types';
 import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
+import { trackMetaPixelEvent } from '../../utils/analyticsTracker';
 
 interface FloatingActionWidgetProps {
   config?: FloatingActionWidgetConfig;
@@ -67,7 +68,13 @@ export const FloatingActionWidget: React.FC<FloatingActionWidgetProps> = ({
       {config?.showAdmissionButton !== false && (
         <button
           type="button"
-          onClick={onOpenAdmission}
+          onClick={() => {
+            trackMetaPixelEvent('InitiateCheckout', {
+              source: 'floating_action_widget',
+              action: 'admission_click'
+            });
+            onOpenAdmission();
+          }}
           className="group flex items-center bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white p-3 sm:px-4 sm:py-2.5 rounded-full shadow-xl shadow-indigo-600/30 border-2 border-white hover:scale-105 active:scale-95 transition-all text-xs font-black space-x-2 cursor-pointer"
           title="অনলাইন ভর্তি আবেদন"
         >
@@ -80,6 +87,13 @@ export const FloatingActionWidget: React.FC<FloatingActionWidgetProps> = ({
       {config?.showCallButton !== false && callNumber && (
         <a
           href={`tel:${callNumber}`}
+          onClick={() => {
+            trackMetaPixelEvent('Contact', {
+              channel: 'Phone Hotline Direct',
+              position: 'floating_action_widget',
+              phone: callNumber
+            });
+          }}
           className="group flex items-center bg-slate-950/90 hover:bg-slate-900 text-white p-3 sm:px-3.5 sm:py-2 rounded-full shadow-lg border border-slate-700 hover:scale-105 active:scale-95 transition-all text-xs font-bold space-x-2 cursor-pointer"
           title={`Call Hotline: ${callNumber}`}
         >
@@ -96,6 +110,13 @@ export const FloatingActionWidget: React.FC<FloatingActionWidgetProps> = ({
           href={getWhatsAppDirectUrl(whatsappNumber, whatsappMsg)}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => {
+            trackMetaPixelEvent('Contact', {
+              channel: 'WhatsApp Floating Direct',
+              position: 'floating_action_widget',
+              phone: whatsappNumber
+            });
+          }}
           className="group bg-emerald-500 hover:bg-emerald-600 text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-2xl shadow-emerald-600/40 hover:scale-105 active:scale-95 transition-all flex items-center space-x-2 border-2 border-white cursor-pointer"
           title="WhatsApp Support"
         >

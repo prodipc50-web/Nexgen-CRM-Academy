@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { DailyCashClosingModal } from '../modals/DailyCashClosingModal';
+import { downloadCSV, escapeCSV } from '../../utils/spreadsheetExport';
 import {
   TrendingUp,
   Download,
@@ -54,18 +55,14 @@ export const FinancialReportsView: React.FC = () => {
   const exportCSV = () => {
     let csv = `Type,Date,Description / Particulars,Method,Amount (BDT)\n`;
     monthPayments.forEach(p => {
-      csv += `Income,${p.date},Student Fee Collection Receipt ${p.receiptNumber},${p.paymentMethod},${p.amount}\n`;
+      csv += `${escapeCSV('Income')},${escapeCSV(p.date)},${escapeCSV(`Student Fee Collection Receipt ${p.receiptNumber}`)},${escapeCSV(p.paymentMethod)},${p.amount}\n`;
     });
     monthExpenses.forEach(e => {
-      csv += `Expense,${e.date},${e.category} - ${e.paidTo} (${e.description.replace(/,/g, ' ')}),${e.paymentMethod},${e.amount}\n`;
+      const desc = `${e.category || 'General'} - ${e.paidTo || 'Vendor'} (${e.description || 'Expense voucher'})`;
+      csv += `${escapeCSV('Expense')},${escapeCSV(e.date)},${escapeCSV(desc)},${escapeCSV(e.paymentMethod)},${e.amount}\n`;
     });
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Nexgen_Financial_Report_${selectedMonth}.csv`;
-    link.click();
+    downloadCSV(`Nexgen_Financial_Report_${selectedMonth}.csv`, csv);
   };
 
   return (

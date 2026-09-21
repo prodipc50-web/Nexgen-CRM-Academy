@@ -309,7 +309,7 @@ export const SeminarsWorkshopsView: React.FC<SeminarsWorkshopsViewProps> = ({
       {/* Seminars Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredSeminars.map(s => {
-          const seatOccupancy = Math.min(100, Math.round((s.registeredCount / s.capacity) * 100));
+          const seatOccupancy = s.capacity > 0 ? Math.min(100, Math.round((s.registeredCount / s.capacity) * 100)) : 0;
           return (
             <div
               key={s.id}

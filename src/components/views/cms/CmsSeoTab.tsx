@@ -42,8 +42,11 @@ import {
   Star,
   Eye,
   EyeOff,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Play,
+  Zap
 } from 'lucide-react';
+import { trackMetaPixelEvent, DEFAULT_GA4_MEASUREMENT_ID } from '../../../utils/analyticsTracker';
 
 interface CmsSeoTabProps {
   onSaveToast?: (msg: string) => void;
@@ -170,6 +173,7 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
   });
 
   // 301 Redirect Input state
+  const [testEventFeedback, setTestEventFeedback] = useState<string | null>(null);
   const [redirectOldSlug, setRedirectOldSlug] = useState('');
   const [redirectNewSlug, setRedirectNewSlug] = useState('');
 
@@ -1408,43 +1412,210 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
         </div>
       )}
 
-      {/* SUBTAB 5: ANALYTICS & GOOGLE ADS TRACKING HUB */}
+      {/* SUBTAB 5: ANALYTICS, PIXELS & TRACKING HUB */}
       {activeSubTab === 'analytics_hub' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-5">
-              <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-indigo-600" />
-                Google Analytics 4 & Google Ads Conversion Tracking
-              </h3>
+            {/* 1. Meta Pixel & Conversions API */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">f</span>
+                  Meta (Facebook) Pixel & Conversions API (CAPI)
+                </h3>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <span className="text-xs text-slate-600 font-bold">Enable Pixel</span>
+                  <input
+                    type="checkbox"
+                    checked={websiteCmsConfig.marketing?.metaPixelEnabled !== false}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          metaPixelEnabled: e.target.checked
+                        }
+                      })
+                    }
+                    className="w-4 h-4 text-indigo-600 rounded"
+                  />
+                </label>
+              </div>
 
-              {/* GA4 Configuration */}
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-800">Google Analytics 4 (Measurement ID)</label>
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <span className="text-[11px] text-slate-500 font-bold">Enable GA4</span>
-                    <input
-                      type="checkbox"
-                      checked={websiteCmsConfig.marketing?.googleAnalyticsEnabled !== false}
-                      onChange={e =>
-                        updateWebsiteCmsConfig({
-                          ...websiteCmsConfig,
-                          marketing: {
-                            ...(websiteCmsConfig.marketing || {
-                              metaPixelId: '',
-                              metaPixelEnabled: true,
-                              enableAutoUtmCapture: true,
-                              enableExitIntentPopup: true
-                            }),
-                            googleAnalyticsEnabled: e.target.checked
-                          }
-                        })
-                      }
-                      className="w-4 h-4 text-indigo-600 rounded"
-                    />
-                  </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <span className="block text-xs font-bold text-slate-700 mb-1">Meta Pixel ID</span>
+                  <input
+                    type="text"
+                    value={websiteCmsConfig.marketing?.metaPixelId || ''}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            metaPixelEnabled: true,
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          metaPixelId: e.target.value.trim()
+                        }
+                      })
+                    }
+                    placeholder="e.g. 1104860007870196"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Fires browser-side Meta Pixel events (PageView, ViewContent, InitiateCheckout, Lead, Contact).
+                  </p>
                 </div>
+
+                <div>
+                  <span className="block text-xs font-bold text-slate-700 mb-1">CAPI Access Token (Server)</span>
+                  <input
+                    type="password"
+                    value={websiteCmsConfig.marketing?.metaCapiAccessToken || ''}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            metaPixelEnabled: true,
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          metaCapiAccessToken: e.target.value.trim()
+                        }
+                      })
+                    }
+                    placeholder="EAAG..."
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono"
+                  />
+                </div>
+
+                <div>
+                  <span className="block text-xs font-bold text-slate-700 mb-1">CAPI Test Event Code (Optional)</span>
+                  <input
+                    type="text"
+                    value={websiteCmsConfig.marketing?.metaCapiTestEventCode || ''}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            metaPixelEnabled: true,
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          metaCapiTestEventCode: e.target.value.trim()
+                        }
+                      })
+                    }
+                    placeholder="TEST12345"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Google Tag Manager (GTM) */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold text-xs">GTM</span>
+                  Google Tag Manager (GTM)
+                </h3>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <span className="text-xs text-slate-600 font-bold">Enable GTM</span>
+                  <input
+                    type="checkbox"
+                    checked={websiteCmsConfig.marketing?.googleTagManagerEnabled !== false}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            metaPixelEnabled: true,
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          googleTagManagerEnabled: e.target.checked
+                        }
+                      })
+                    }
+                    className="w-4 h-4 text-indigo-600 rounded"
+                  />
+                </label>
+              </div>
+
+              <div>
+                <span className="block text-xs font-bold text-slate-700 mb-1">GTM Container ID</span>
+                <input
+                  type="text"
+                  value={websiteCmsConfig.marketing?.googleTagManagerId || ''}
+                  onChange={e =>
+                    updateWebsiteCmsConfig({
+                      ...websiteCmsConfig,
+                      marketing: {
+                        ...(websiteCmsConfig.marketing || {
+                          metaPixelId: '',
+                          metaPixelEnabled: true,
+                          enableAutoUtmCapture: true,
+                          enableExitIntentPopup: true
+                        }),
+                        googleTagManagerId: e.target.value.trim()
+                      }
+                    })
+                  }
+                  placeholder="GTM-XXXXXXX"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Dynamically injects Google Tag Manager container and pushes events to <code className="text-teal-600 font-mono">window.dataLayer</code>.
+                </p>
+              </div>
+            </div>
+
+            {/* 3. Google Analytics 4 (GA4) */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-amber-500" />
+                  Google Analytics 4 (GA4)
+                </h3>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <span className="text-xs text-slate-600 font-bold">Enable GA4</span>
+                  <input
+                    type="checkbox"
+                    checked={websiteCmsConfig.marketing?.googleAnalyticsEnabled !== false}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            metaPixelEnabled: true,
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          googleAnalyticsEnabled: e.target.checked
+                        }
+                      })
+                    }
+                    className="w-4 h-4 text-indigo-600 rounded"
+                  />
+                </label>
+              </div>
+
+              <div>
+                <span className="block text-xs font-bold text-slate-700 mb-1">GA4 Measurement ID</span>
                 <input
                   type="text"
                   value={websiteCmsConfig.marketing?.googleAnalyticsId || ''}
@@ -1458,119 +1629,267 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
                           enableAutoUtmCapture: true,
                           enableExitIntentPopup: true
                         }),
-                        googleAnalyticsId: e.target.value
+                        googleAnalyticsId: e.target.value.trim()
                       }
                     })
                   }
-                  placeholder="G-XXXXXXXXXX"
-                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  placeholder="G-VYNS03M91Z"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 />
-                <p className="text-[11px] text-slate-500">
-                  Loads the official <code className="text-indigo-600">gtag.js</code> script dynamically.
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Loads official <code className="text-amber-600 font-mono">gtag.js</code>. Default ID: <code className="text-slate-600 font-mono">G-VYNS03M91Z</code>.
                 </p>
               </div>
+            </div>
 
-              {/* Google Ads Configuration */}
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-800">Google Ads Conversion ID & Label</label>
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <span className="text-[11px] text-slate-500 font-bold">Enable Google Ads</span>
-                    <input
-                      type="checkbox"
-                      checked={websiteCmsConfig.marketing?.googleAdsEnabled === true}
-                      onChange={e =>
-                        updateWebsiteCmsConfig({
-                          ...websiteCmsConfig,
-                          marketing: {
-                            ...(websiteCmsConfig.marketing || {
-                              metaPixelId: '',
-                              metaPixelEnabled: true,
-                              enableAutoUtmCapture: true,
-                              enableExitIntentPopup: true
-                            }),
-                            googleAdsEnabled: e.target.checked
-                          }
-                        })
-                      }
-                      className="w-4 h-4 text-indigo-600 rounded"
-                    />
-                  </label>
+            {/* 4. Google Ads Conversion Tracking */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-emerald-600" />
+                  Google Ads Conversion Tracking
+                </h3>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <span className="text-xs text-slate-600 font-bold">Enable Google Ads</span>
+                  <input
+                    type="checkbox"
+                    checked={websiteCmsConfig.marketing?.googleAdsEnabled === true}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            metaPixelEnabled: true,
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          googleAdsEnabled: e.target.checked
+                        }
+                      })
+                    }
+                    className="w-4 h-4 text-indigo-600 rounded"
+                  />
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <span className="block text-xs font-bold text-slate-700 mb-1">Conversion ID</span>
+                  <input
+                    type="text"
+                    value={websiteCmsConfig.marketing?.googleAdsConversionId || ''}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            metaPixelEnabled: true,
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          googleAdsConversionId: e.target.value.trim()
+                        }
+                      })
+                    }
+                    placeholder="AW-123456789"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono"
+                  />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <span className="block text-[11px] font-bold text-slate-600 mb-1">Conversion ID</span>
-                    <input
-                      type="text"
-                      value={websiteCmsConfig.marketing?.googleAdsConversionId || ''}
-                      onChange={e =>
-                        updateWebsiteCmsConfig({
-                          ...websiteCmsConfig,
-                          marketing: {
-                            ...(websiteCmsConfig.marketing || {
-                              metaPixelId: '',
-                              metaPixelEnabled: true,
-                              enableAutoUtmCapture: true,
-                              enableExitIntentPopup: true
-                            }),
-                            googleAdsConversionId: e.target.value
-                          }
-                        })
-                      }
-                      placeholder="AW-123456789"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono"
-                    />
-                  </div>
-                  <div>
-                    <span className="block text-[11px] font-bold text-slate-600 mb-1">Conversion Label</span>
-                    <input
-                      type="text"
-                      value={websiteCmsConfig.marketing?.googleAdsConversionLabel || ''}
-                      onChange={e =>
-                        updateWebsiteCmsConfig({
-                          ...websiteCmsConfig,
-                          marketing: {
-                            ...(websiteCmsConfig.marketing || {
-                              metaPixelId: '',
-                              metaPixelEnabled: true,
-                              enableAutoUtmCapture: true,
-                              enableExitIntentPopup: true
-                            }),
-                            googleAdsConversionLabel: e.target.value
-                          }
-                        })
-                      }
-                      placeholder="abc-XYZ123"
-                      className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono"
-                    />
-                  </div>
+                <div>
+                  <span className="block text-xs font-bold text-slate-700 mb-1">Conversion Label</span>
+                  <input
+                    type="text"
+                    value={websiteCmsConfig.marketing?.googleAdsConversionLabel || ''}
+                    onChange={e =>
+                      updateWebsiteCmsConfig({
+                        ...websiteCmsConfig,
+                        marketing: {
+                          ...(websiteCmsConfig.marketing || {
+                            metaPixelId: '',
+                            metaPixelEnabled: true,
+                            enableAutoUtmCapture: true,
+                            enableExitIntentPopup: true
+                          }),
+                          googleAdsConversionLabel: e.target.value.trim()
+                        }
+                      })
+                    }
+                    placeholder="abc-XYZ123"
+                    className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono"
+                  />
                 </div>
+              </div>
+            </div>
+
+            {/* 5. TikTok Pixel */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-black text-white flex items-center justify-center font-bold text-xs">TT</span>
+                  TikTok Pixel
+                </h3>
+              </div>
+
+              <div>
+                <span className="block text-xs font-bold text-slate-700 mb-1">TikTok Pixel ID</span>
+                <input
+                  type="text"
+                  value={websiteCmsConfig.marketing?.tiktokPixelId || ''}
+                  onChange={e =>
+                    updateWebsiteCmsConfig({
+                      ...websiteCmsConfig,
+                      marketing: {
+                        ...(websiteCmsConfig.marketing || {
+                          metaPixelId: '',
+                          metaPixelEnabled: true,
+                          enableAutoUtmCapture: true,
+                          enableExitIntentPopup: true
+                        }),
+                        tiktokPixelId: e.target.value.trim()
+                      }
+                    })
+                  }
+                  placeholder="CXXXXXXXXXXXXXXXXX"
+                  className="w-full px-4 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-black focus:outline-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Integrates TikTok Pixel via <code className="text-slate-800 font-mono">analytics.tiktok.com/i18n/pixel/events.js</code>.
+                </p>
               </div>
             </div>
           </div>
 
           <div className="lg:col-span-5 space-y-6">
+            {/* Live Test-Firing Event Simulator Console */}
+            <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-xl space-y-4 border border-indigo-900/50">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-black flex items-center gap-2 text-amber-300">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  Live Event Test-Firing Console
+                </h3>
+                <span className="text-[10px] bg-indigo-800/80 px-2 py-0.5 rounded-full font-mono text-indigo-200">
+                  Diagnostics
+                </span>
+              </div>
+              <p className="text-xs text-slate-300">
+                Instantly trigger test events directly in your browser. Verify in Console, Meta Pixel Helper, or Google Tag Assistant:
+              </p>
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackMetaPixelEvent('PageView', {
+                      page_title: 'Admin Diagnostics Test Page',
+                      url: window.location.href,
+                      test_mode: true
+                    });
+                    setTestEventFeedback('PageView event dispatched across active trackers.');
+                  }}
+                  className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold transition-all text-white cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Test PageView</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const sampleCourse = courses[0] || { name: 'Computer Office Application', id: 'course_1' };
+                    trackMetaPixelEvent('ViewContent', {
+                      content_name: sampleCourse.name,
+                      course_id: sampleCourse.id,
+                      value: 5000,
+                      currency: 'BDT',
+                      test_mode: true
+                    });
+                    setTestEventFeedback(`ViewContent dispatched for "${sampleCourse.name}".`);
+                  }}
+                  className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold transition-all text-white cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Test ViewContent</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackMetaPixelEvent('Lead', {
+                      content_name: 'Test Admission Lead',
+                      value: 5000,
+                      currency: 'BDT',
+                      source: 'Admin Diagnostics Test',
+                      test_mode: true
+                    });
+                    setTestEventFeedback('Lead conversion dispatched with CAPI & Ads payload.');
+                  }}
+                  className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold transition-all text-white cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Test Lead Submit</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackMetaPixelEvent('Contact', {
+                      channel: 'WhatsApp Direct',
+                      position: 'diagnostics_test',
+                      test_mode: true
+                    });
+                    setTestEventFeedback('Contact event dispatched for WhatsApp click.');
+                  }}
+                  className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold transition-all text-white cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Test Contact Click</span>
+                </button>
+              </div>
+
+              {testEventFeedback && (
+                <div className="p-3 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-xs text-emerald-200 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    {testEventFeedback}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setTestEventFeedback(null)}
+                    className="text-[10px] text-slate-400 hover:text-white"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Event Taxonomy Box */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-indigo-600" />
-                Standard Event Taxonomy
+                Unified Event Dispatch Architecture
               </h3>
               <p className="text-xs text-slate-500">
-                All public student interactions trigger structured marketing events across Meta, GA4, and Google Ads:
+                A single event trigger automatically coordinates and distributes data across all active platforms:
               </p>
 
               <div className="space-y-2 text-xs">
                 {[
-                  { evt: 'page_view', desc: 'Fires on initial landing and SPA route navigation' },
-                  { evt: 'view_course', desc: 'Fires when viewing course syllabus & details modal' },
-                  { evt: 'lead_form_start', desc: 'Fires when student enters lead application form' },
-                  { evt: 'lead_submit', desc: 'Fires on successful admission registration' },
-                  { evt: 'whatsapp_click', desc: 'Fires when student clicks floating/header WhatsApp' },
-                  { evt: 'phone_click', desc: 'Fires when student clicks official helpline number' }
+                  { evt: 'PageView', platforms: 'Meta Pixel + CAPI + GTM + GA4 + TikTok', desc: 'SPA route navigation & course landings' },
+                  { evt: 'ViewContent', platforms: 'Meta Pixel + CAPI + GTM + GA4 + TikTok', desc: 'Course syllabus view & details modal' },
+                  { evt: 'InitiateCheckout', platforms: 'Meta Pixel + CAPI + GTM + GA4 + Google Ads', desc: 'Admission CTA click or modal open' },
+                  { evt: 'Lead', platforms: 'Meta Pixel + CAPI + GTM + GA4 + Google Ads + TikTok', desc: 'Successful admission application submit' },
+                  { evt: 'Contact', platforms: 'Meta Pixel + CAPI + GTM + GA4 + Google Ads', desc: 'WhatsApp / Call hotline direct click' }
                 ].map((item, idx) => (
-                  <div key={idx} className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
-                    <div className="font-mono font-bold text-indigo-600">{item.evt}</div>
+                  <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-indigo-600">{item.evt}</span>
+                      <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-medium">
+                        {item.platforms}
+                      </span>
+                    </div>
                     <div className="text-[11px] text-slate-500">{item.desc}</div>
                   </div>
                 ))}
@@ -1580,8 +1899,7 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
               <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Zero-PII Policy for GA4:</strong> All personal student data (phone numbers, full names, emails) is
-                  automatically sanitized and never transmitted to Google Analytics.
+                  <strong>Zero-PII & Deduplication:</strong> Meta Pixel & CAPI use matching <code className="text-emerald-700 font-mono">eventID</code> to eliminate duplicate conversions. GA4 automatically strips private student PII.
                 </span>
               </div>
             </div>

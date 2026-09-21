@@ -83,11 +83,18 @@ export const DueManagementView: React.FC<DueManagementViewProps> = ({
     e.preventDefault();
     if (!editingDueAdmission) return;
 
+    const newFinalFee = Number(editFinalFee) || 0;
+    const currentPaid = editingDueAdmission.admission.totalPaid || 0;
+    const newDue = Math.max(0, newFinalFee - currentPaid);
+    const newStatus = newDue === 0 ? 'Paid' : currentPaid > 0 ? 'Partially Paid' : 'Due';
+
     updateAdmission(editingDueAdmission.admission.id, {
       nextPaymentDate: editNextPaymentDate || undefined,
       nextDueDate: editNextPaymentDate || undefined,
-      finalFee: Number(editFinalFee),
-      discount: Number(editDiscount),
+      finalFee: newFinalFee,
+      discount: Number(editDiscount) || 0,
+      due: newDue,
+      paymentStatus: newStatus,
       remarks: editRemarks.trim() || undefined
     });
 

@@ -725,8 +725,21 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     return () => clearInterval(interval);
   }, [isTickerEnabled, socialTickerItems.length, landingConfig.socialProofTickerConfig?.intervalSeconds]);
 
-  // Track ViewContent on mount
+  // Track PageView & ViewContent on mount
   useEffect(() => {
+    // 1. PageView for funnel retargeting
+    trackMetaPixelEvent(
+      'PageView',
+      {
+        page_title: `${course.name} | ${academySettings?.instituteName || 'Academy'}`,
+        url: typeof window !== 'undefined' ? window.location.href : '',
+        course_id: course.id,
+        course_name: course.name
+      },
+      pixelId
+    );
+
+    // 2. Product ViewContent
     trackMetaPixelEvent(
       'ViewContent',
       {
@@ -739,7 +752,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       },
       pixelId
     );
-  }, [course.id, course.name, course.category, course.offerFee, course.regularFee, pixelId]);
+  }, [course.id, course.name, course.category, course.offerFee, course.regularFee, pixelId, academySettings?.instituteName]);
 
   // Assigned Faculty/Trainers
   const allTrainers: TrainerProfile[] = websiteCmsConfig?.trainersList || [];
@@ -970,9 +983,18 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           content_name: course.name,
           form_mode: leadFormMode,
           value: isCounselingMode ? 0 : (course.offerFee || 0),
-          currency: 'BDT'
+          currency: 'BDT',
+          source: leadSourceStr
         },
-        pixelId
+        {
+          pixelId,
+          userData: {
+            name: leadName.trim(),
+            phone: leadPhone.trim(),
+            email: leadEmail.trim()
+          },
+          triggerCapi: true
+        }
       );
 
       setLeadSuccess(true);

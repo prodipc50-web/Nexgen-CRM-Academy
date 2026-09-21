@@ -250,7 +250,8 @@ h1, h2, h3, h4, .text-balance {
   #admission-form-printable,
   #certificate-printable,
   #eod-report-printable,
-  #bulk-id-printable {
+  #bulk-id-printable,
+  #student-terms-official-sheet {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     page-break-after: avoid !important;
