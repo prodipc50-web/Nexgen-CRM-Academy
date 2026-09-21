@@ -4,7 +4,8 @@ import { Certificate } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
 import { ImageUploadCropModal } from '../common/ImageUploadCropModal';
 import { compressImageBase64 } from '../../utils/imageCompressor';
-import { executeCleanPrint } from '../../utils/printHelper';
+import { executeCleanPrint, applyPrintStyles, cleanupPrintStyles } from '../../utils/printHelper';
+import { generateQrDataUrl } from '../../utils/qrHelper';
 import {
   X,
   Printer,
@@ -100,6 +101,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   const [selectedTheme, setSelectedTheme] = useState<CertificateTheme>('gold');
   const [paperSize, setPaperSize] = useState<'a4' | 'letter'>('a4');
   const [paperMargin, setPaperMargin] = useState<'borderless' | 'standard'>('borderless');
+  const [printScale, setPrintScale] = useState<number>(100);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
 
   // Find target certificate
   const certificate = certificateId
@@ -227,13 +230,35 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
     }
   }, [certificate, students, courses, batches, isOpen, academySettings]);
 
+  // Generate offline QR code Data URL reliably
+  useEffect(() => {
+    const targetUrl = certData.verificationUrl || `${typeof window !== 'undefined' ? window.location.origin : ''}/?cert=${encodeURIComponent(certData.certificateSerial)}#verify-certificate`;
+    generateQrDataUrl(targetUrl, { width: 180, margin: 1 })
+      .then(url => setQrCodeDataUrl(url))
+      .catch(() => setQrCodeDataUrl(''));
+  }, [certData.verificationUrl, certData.certificateSerial]);
+
+  // Preemptively inject exact landscape @page print rules when modal is active
+  useEffect(() => {
+    if (isOpen) {
+      applyPrintStyles({
+        orientation: 'landscape',
+        size: paperSize,
+        margin: paperMargin === 'borderless' ? '0mm' : '4mm'
+      });
+    }
+    return () => {
+      cleanupPrintStyles();
+    };
+  }, [isOpen, paperSize, paperMargin]);
+
   // Robust Print Handler
   const handlePrint = () => {
     executeCleanPrint({
       documentTitle: `Certificate_${certData.certificateSerial}_${(certData.studentName || 'Student').replace(/\s+/g, '_')}`,
       size: paperSize,
       orientation: 'landscape',
-      margin: paperMargin === 'borderless' ? '0mm' : '5mm'
+      margin: paperMargin === 'borderless' ? '0mm' : '4mm'
     });
   };
 
@@ -325,63 +350,63 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   // Theme Styling Configuration
   const themeStyles = {
     gold: {
-      border: 'border-amber-600/70',
-      bg: 'bg-amber-50/30',
+      border: 'border-amber-700 print:border-[#b45309]',
+      bg: 'bg-[#fffdf9]',
       watermark: 'text-amber-900',
       tagline: 'text-amber-800',
-      badgeBg: 'bg-amber-100/90 text-amber-950 border-amber-300',
-      titleUnderline: 'border-amber-600/60',
-      courseColor: 'text-indigo-950',
-      gradeBadge: 'bg-amber-50 border-amber-300 text-amber-900',
-      sealBorder: 'border-amber-600 text-amber-700 bg-amber-50/70',
+      badgeBg: 'bg-amber-100 text-amber-950 border-amber-400',
+      titleUnderline: 'border-amber-600',
+      courseColor: 'text-amber-950',
+      gradeBadge: 'bg-amber-50 border-amber-300 text-amber-950',
+      sealBorder: 'border-amber-600 text-amber-800 bg-amber-50',
       divider: 'border-amber-200'
     },
     emerald: {
-      border: 'border-emerald-600/70',
-      bg: 'bg-emerald-50/30',
+      border: 'border-emerald-700 print:border-[#047857]',
+      bg: 'bg-[#f8fdfa]',
       watermark: 'text-emerald-900',
       tagline: 'text-emerald-800',
-      badgeBg: 'bg-emerald-100/90 text-emerald-950 border-emerald-300',
-      titleUnderline: 'border-emerald-600/60',
+      badgeBg: 'bg-emerald-100 text-emerald-950 border-emerald-400',
+      titleUnderline: 'border-emerald-600',
       courseColor: 'text-emerald-950',
-      gradeBadge: 'bg-emerald-50 border-emerald-300 text-emerald-900',
-      sealBorder: 'border-emerald-600 text-emerald-700 bg-emerald-50/70',
+      gradeBadge: 'bg-emerald-50 border-emerald-300 text-emerald-950',
+      sealBorder: 'border-emerald-600 text-emerald-800 bg-emerald-50',
       divider: 'border-emerald-200'
     },
     navy: {
-      border: 'border-indigo-600/70',
-      bg: 'bg-indigo-50/30',
-      watermark: 'text-indigo-900',
-      tagline: 'text-indigo-800',
-      badgeBg: 'bg-indigo-100/90 text-indigo-950 border-indigo-300',
-      titleUnderline: 'border-indigo-600/60',
-      courseColor: 'text-indigo-950',
-      gradeBadge: 'bg-indigo-50 border-indigo-300 text-indigo-900',
-      sealBorder: 'border-indigo-600 text-indigo-700 bg-indigo-50/70',
-      divider: 'border-indigo-200'
+      border: 'border-blue-900 print:border-[#1e3a8a]',
+      bg: 'bg-[#f8faff]',
+      watermark: 'text-blue-950',
+      tagline: 'text-blue-900',
+      badgeBg: 'bg-blue-100 text-blue-950 border-blue-400',
+      titleUnderline: 'border-blue-700',
+      courseColor: 'text-blue-950',
+      gradeBadge: 'bg-blue-50 border-blue-300 text-blue-950',
+      sealBorder: 'border-blue-700 text-blue-900 bg-blue-50',
+      divider: 'border-blue-200'
     },
     crimson: {
-      border: 'border-rose-600/70',
-      bg: 'bg-rose-50/30',
-      watermark: 'text-rose-900',
+      border: 'border-rose-800 print:border-[#be123c]',
+      bg: 'bg-[#fffafb]',
+      watermark: 'text-rose-950',
       tagline: 'text-rose-800',
-      badgeBg: 'bg-rose-100/90 text-rose-950 border-rose-300',
-      titleUnderline: 'border-rose-600/60',
+      badgeBg: 'bg-rose-100 text-rose-950 border-rose-400',
+      titleUnderline: 'border-rose-600',
       courseColor: 'text-rose-950',
-      gradeBadge: 'bg-rose-50 border-rose-300 text-rose-900',
-      sealBorder: 'border-rose-600 text-rose-700 bg-rose-50/70',
+      gradeBadge: 'bg-rose-50 border-rose-300 text-rose-950',
+      sealBorder: 'border-rose-700 text-rose-800 bg-rose-50',
       divider: 'border-rose-200'
     },
     slate: {
-      border: 'border-slate-600/70',
-      bg: 'bg-slate-50/40',
+      border: 'border-slate-800 print:border-[#1e293b]',
+      bg: 'bg-[#fcfcfc]',
       watermark: 'text-slate-900',
       tagline: 'text-slate-700',
-      badgeBg: 'bg-slate-200/90 text-slate-950 border-slate-400',
-      titleUnderline: 'border-slate-600/60',
+      badgeBg: 'bg-slate-200 text-slate-950 border-slate-400',
+      titleUnderline: 'border-slate-600',
       courseColor: 'text-slate-950',
-      gradeBadge: 'bg-slate-100 border-slate-300 text-slate-900',
-      sealBorder: 'border-slate-600 text-slate-700 bg-slate-50/70',
+      gradeBadge: 'bg-slate-100 border-slate-300 text-slate-950',
+      sealBorder: 'border-slate-700 text-slate-800 bg-slate-100',
       divider: 'border-slate-200'
     }
   }[selectedTheme];
@@ -543,6 +568,27 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                 >
                   Standard (5mm)
                 </button>
+              </div>
+            </div>
+
+            {/* Print Scale Selector */}
+            <div className="flex items-center space-x-1.5">
+              <span className="text-slate-400 text-[11px] font-semibold">প্রিন্ট স্কেল:</span>
+              <div className="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700">
+                {[95, 100, 105].map(scaleVal => (
+                  <button
+                    key={scaleVal}
+                    type="button"
+                    onClick={() => setPrintScale(scaleVal)}
+                    className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-colors ${
+                      printScale === scaleVal
+                        ? 'bg-emerald-600 text-white shadow-2xs'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {scaleVal}%
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -1067,8 +1113,12 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
         <div className="overflow-y-auto flex-1 p-2 sm:p-6 bg-slate-100/70 print:bg-white print:p-0 print:m-0 print:overflow-visible">
           {/* Certificate Canvas */}
           <div
-            className={`p-6 sm:p-12 ${themeStyles.bg} text-slate-900 font-serif border-[10px] sm:border-[14px] border-double ${themeStyles.border} rounded-xl relative overflow-hidden bg-white shadow-md print:shadow-none print:m-0 print:border-8 print:p-4 print:max-h-[198mm] print:overflow-hidden transition-colors duration-200 print-landscape-page print-page-a4-landscape`}
+            className={`p-6 sm:p-10 ${themeStyles.bg} text-slate-900 font-serif border-[10px] sm:border-[12px] border-double ${themeStyles.border} rounded-xl relative overflow-hidden bg-white shadow-md print:shadow-none print:m-0 print:border-[8px] print:p-3.5 print:h-[188mm] print:max-h-[188mm] print:overflow-hidden transition-colors duration-200 print-landscape-page print-page-a4-landscape flex flex-col justify-between`}
             id="certificate-printable"
+            style={{
+              transform: printScale !== 100 ? `scale(${printScale / 100})` : undefined,
+              transformOrigin: 'top center'
+            }}
           >
             {/* Subtle Background Watermark */}
             <div
@@ -1093,63 +1143,61 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               )}
             </div>
 
-            <div className="relative z-10 text-center space-y-5 print:space-y-2">
+            <div className="relative z-10 text-center flex flex-col justify-between h-full print:h-full print:space-y-0 space-y-4">
               {/* Header */}
               <div className="space-y-1 print:space-y-0.5">
                 {certData.showLogo && (
-                  <div className="flex justify-center mb-1 print:mb-0.5">
+                  <div className="flex justify-center mb-1 print:mb-0">
                     <NexgenLogo
                       variant="full"
                       size={certData.logoSize || 130}
                       customLogoUrl={certData.customLogoUrl}
-                      className="mx-auto print:max-h-12 print:w-auto"
+                      className="mx-auto print:max-h-11 print:w-auto"
                     />
                   </div>
                 )}
                 <h1 className="text-2xl sm:text-3xl print:text-xl font-black text-slate-900 tracking-wider uppercase">
                   {certData.instituteName}
                 </h1>
-                <p className={`text-xs print:text-[10px] font-sans ${themeStyles.tagline} font-semibold tracking-widest uppercase mt-0.5`}>
+                <p className={`text-xs print:text-[9.5px] font-sans ${themeStyles.tagline} font-semibold tracking-widest uppercase mt-0.5`}>
                   {certData.instituteTagline}
                 </p>
-              </div>
-
-              {/* Certificate Title */}
-              <div className="pt-2 print:pt-0.5">
-                <div className={`inline-block border-b-2 ${themeStyles.titleUnderline} pb-1 print:pb-0.5`}>
-                  <span
-                    style={{ fontSize: `${certData.certTitleSize || 15}px` }}
-                    className={`font-sans font-extrabold uppercase tracking-widest px-6 py-1.5 print:py-1 print:px-4 ${themeStyles.badgeBg} rounded shadow-2xs print:text-xs`}
-                  >
-                    {certData.certTitle}
-                  </span>
+                <div className="pt-2 print:pt-0.5">
+                  <div className={`inline-block border-b-2 ${themeStyles.titleUnderline} pb-1 print:pb-0.5`}>
+                    <span
+                      style={{ fontSize: `${certData.certTitleSize || 15}px` }}
+                      className={`font-sans font-extrabold uppercase tracking-widest px-6 py-1 print:py-0.5 print:px-4 ${themeStyles.badgeBg} rounded shadow-2xs print:text-xs`}
+                    >
+                      {certData.certTitle}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Body Description */}
-              <div className="space-y-2.5 print:space-y-1 font-sans max-w-2xl mx-auto text-slate-700">
-                <p className="text-xs print:text-[11px] italic text-slate-500">{certData.certSubtext}</p>
+              <div className="space-y-2 print:space-y-1 font-sans max-w-2xl mx-auto text-slate-700 my-auto">
+                <p className="text-xs print:text-[10px] italic text-slate-500">{certData.certSubtext}</p>
                 <h2
                   style={{ fontSize: `${certData.studentNameSize || 28}px` }}
                   className="font-serif font-black text-slate-950 tracking-tight print:text-2xl print:py-0.5"
                 >
                   {certData.studentName}
                 </h2>
-                <p className="text-xs print:text-[10px] text-slate-500 font-mono">
+                <p className="text-xs print:text-[9.5px] text-slate-500 font-mono">
                   Student ID: <span className="font-bold text-slate-800">{certData.studentCode}</span>
                 </p>
-                <p className="text-xs print:text-[11px] leading-relaxed pt-1 print:pt-0">
+                <p className="text-xs print:text-[10.5px] leading-relaxed pt-0.5 print:pt-0">
                   {certData.achievementText}
                 </p>
-                <div className="py-1 print:py-0">
+                <div className="py-0.5 print:py-0">
                   <h3 className={`text-lg sm:text-xl print:text-base font-bold font-sans ${themeStyles.courseColor}`}>
                     {certData.courseName}
                   </h3>
-                  <p className="text-xs print:text-[10px] text-slate-600 mt-0.5">
+                  <p className="text-xs print:text-[9.5px] text-slate-600 mt-0.5">
                     {certData.batchText} {certData.durationText ? `| Duration: ${certData.durationText}` : ''}
                   </p>
                 </div>
-                <div className={`inline-flex items-center space-x-2 border px-4 py-1 print:py-0.5 print:px-2.5 rounded-full text-xs print:text-[10px] font-bold ${themeStyles.gradeBadge}`}>
+                <div className={`inline-flex items-center space-x-2 border px-4 py-0.5 print:py-0.5 print:px-2.5 rounded-full text-xs print:text-[9.5px] font-bold ${themeStyles.gradeBadge}`}>
                   <span>Awarded Grade: {certData.grade}</span>
                   <span>•</span>
                   <span>Completed: {certData.completionDate}</span>
@@ -1157,111 +1205,119 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
               </div>
 
               {/* Signatures & Seal */}
-              <div className="pt-6 print:pt-2 grid grid-cols-3 gap-4 items-end text-xs font-sans text-slate-700">
-                <div className="text-center">
-                  <div className="border-b border-slate-400 pb-1 font-semibold text-slate-800">
-                    {certData.instructorName}
+              <div className="space-y-2 print:space-y-1">
+                <div className="pt-4 print:pt-1 grid grid-cols-3 gap-4 items-end text-xs font-sans text-slate-700">
+                  <div className="text-center">
+                    <div className="border-b border-slate-400 pb-1 font-semibold text-slate-800">
+                      {certData.instructorName}
+                    </div>
+                    <div className="text-[10px] print:text-[9px] text-slate-500 mt-1">{certData.instructorTitle}</div>
                   </div>
-                  <div className="text-[10px] text-slate-500 mt-1">{certData.instructorTitle}</div>
-                </div>
 
-                {/* Seal */}
-                <div className="flex flex-col items-center">
-                  {certData.showSeal ? (
-                    certData.customSealUrl ? (
-                      <div className="w-20 h-20 flex items-center justify-center">
-                        <img
-                          src={certData.customSealUrl}
-                          alt="Official Seal"
-                          referrerPolicy="no-referrer"
-                          className="w-20 h-20 object-contain drop-shadow-xs select-none"
-                        />
-                      </div>
+                  {/* Seal */}
+                  <div className="flex flex-col items-center">
+                    {certData.showSeal ? (
+                      certData.customSealUrl ? (
+                        <div className="w-18 h-18 print:w-14 print:h-14 flex items-center justify-center">
+                          <img
+                            src={certData.customSealUrl}
+                            alt="Official Seal"
+                            referrerPolicy="no-referrer"
+                            className="w-18 h-18 print:w-14 print:h-14 object-contain drop-shadow-xs select-none"
+                          />
+                        </div>
+                      ) : (
+                        <div className={`w-16 h-16 print:w-13 print:h-13 rounded-full border-2 border-double flex flex-col items-center justify-center font-bold text-[8px] print:text-[7px] uppercase tracking-wider text-center p-1 shadow-xs ${themeStyles.sealBorder}`}>
+                          <span className="text-[7px] print:text-[6px]">★ ★ ★</span>
+                          <span className="leading-tight font-black">{certData.sealText || 'OFFICIAL SEAL'}</span>
+                          <span className="text-[6.5px] print:text-[5.5px] opacity-85">AUTHENTIC</span>
+                        </div>
+                      )
                     ) : (
-                      <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center font-bold text-[9px] uppercase tracking-wider text-center p-1 shadow-xs ${themeStyles.sealBorder}`}>
-                        {certData.sealText}
-                      </div>
-                    )
-                  ) : (
-                    <div className="w-16 h-16" />
-                  )}
-                  <div className="text-[9px] font-mono text-slate-400 mt-1">
-                    Cert #{certData.certificateSerial}
-                  </div>
-                </div>
-
-                <div className="text-center">
-                  <div className="border-b border-slate-400 pb-1 flex flex-col items-center justify-end min-h-[48px]">
-                    {certData.customSignatureUrl ? (
-                      <img
-                        src={certData.customSignatureUrl}
-                        alt="Authorized Signature"
-                        referrerPolicy="no-referrer"
-                        className="max-h-11 max-w-[130px] object-contain mb-0.5 select-none"
-                      />
-                    ) : (
-                      <div className="font-semibold text-slate-800 font-serif italic text-sm">
-                        {certData.directorName}
-                      </div>
+                      <div className="w-16 h-16 print:w-13 print:h-13" />
                     )}
-                  </div>
-                  <div className="text-[10px] text-slate-500 mt-1 font-bold">{certData.directorTitle}</div>
-                </div>
-              </div>
-
-              {/* Bottom Verification Note & Verification QR Code */}
-              {certData.showVerification && (
-                <div className={`pt-4 print:pt-1 border-t ${themeStyles.divider} flex flex-col sm:flex-row items-center justify-between text-[10px] font-sans text-slate-500 gap-2 print:gap-1`}>
-                  <div className="flex items-center space-x-2.5">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=2&data=${encodeURIComponent(
-                        certData.verificationUrl || `${typeof window !== 'undefined' ? window.location.origin : ''}/?cert=${encodeURIComponent(certData.certificateSerial)}#verify-certificate`
-                      )}`}
-                      alt="Verification QR Code"
-                      className="w-12 h-12 bg-white border border-slate-300 rounded p-0.5 shadow-2xs shrink-0"
-                    />
-                    <div className="text-left">
-                      <div className="flex items-center space-x-1 font-bold text-slate-700">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Online Authenticity Verification</span>
-                      </div>
-                      <span className="font-mono text-[9px] text-slate-400 block max-w-sm truncate">
-                        {certData.verificationUrl}
-                      </span>
-                      <div className="flex items-center space-x-1.5 mt-1 print:hidden">
-                        <a
-                          href={certData.verificationUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center space-x-1 px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded text-[10px] border border-emerald-200 transition-colors"
-                          title="Verify live on public website"
-                        >
-                          <ExternalLink className="w-2.5 h-2.5" />
-                          <span>Test QR Link</span>
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (certData.verificationUrl) {
-                              navigator.clipboard.writeText(certData.verificationUrl);
-                              setCopiedLink(true);
-                              setTimeout(() => setCopiedLink(false), 2000);
-                            }
-                          }}
-                          className="inline-flex items-center space-x-1 px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded text-[10px] border border-slate-300 transition-colors"
-                        >
-                          {copiedLink ? <Check className="w-2.5 h-2.5 text-emerald-600" /> : <Copy className="w-2.5 h-2.5 text-slate-500" />}
-                          <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
-                        </button>
-                      </div>
+                    <div className="text-[9px] print:text-[8px] font-mono text-slate-400 mt-1">
+                      Cert #{certData.certificateSerial}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span>Issue Date: <strong className="text-slate-800 font-semibold">{certData.issueDate}</strong></span>
-                    <span className="block text-[9px] text-slate-400">Nexgen Academic Credentials Registry</span>
+
+                  <div className="text-center">
+                    <div className="border-b border-slate-400 pb-1 flex flex-col items-center justify-end min-h-[44px] print:min-h-[36px]">
+                      {certData.customSignatureUrl ? (
+                        <img
+                          src={certData.customSignatureUrl}
+                          alt="Authorized Signature"
+                          referrerPolicy="no-referrer"
+                          className="max-h-11 print:max-h-9 max-w-[130px] object-contain mb-0.5 select-none"
+                        />
+                      ) : (
+                        <div className="font-semibold text-slate-800 font-serif italic text-sm print:text-xs">
+                          {certData.directorName}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-[10px] print:text-[9px] text-slate-500 mt-1 font-bold">{certData.directorTitle}</div>
                   </div>
                 </div>
-              )}
+
+                {/* Bottom Verification Note & Verification QR Code */}
+                {certData.showVerification && (
+                  <div className={`pt-2 print:pt-1 border-t ${themeStyles.divider} flex flex-col sm:flex-row items-center justify-between text-[10px] print:text-[9px] font-sans text-slate-500 gap-2 print:gap-1`}>
+                    <div className="flex items-center space-x-2.5">
+                      {qrCodeDataUrl ? (
+                        <img
+                          src={qrCodeDataUrl}
+                          alt="Verification QR Code"
+                          className="w-11 h-11 print:w-10 print:h-10 bg-white border border-slate-300 rounded p-0.5 shadow-2xs shrink-0 print:border-slate-400"
+                        />
+                      ) : (
+                        <div className="w-11 h-11 print:w-10 print:h-10 bg-slate-100 border border-slate-300 rounded flex items-center justify-center shrink-0">
+                          <ShieldCheck className="w-5 h-5 text-slate-400" />
+                        </div>
+                      )}
+                      <div className="text-left">
+                        <div className="flex items-center space-x-1 font-bold text-slate-700">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 print:text-slate-800" />
+                          <span>Online Authenticity Verification</span>
+                        </div>
+                        <span className="font-mono text-[9px] text-slate-400 block max-w-sm truncate">
+                          {certData.verificationUrl}
+                        </span>
+                        <div className="flex items-center space-x-1.5 mt-1 print:hidden">
+                          <a
+                            href={certData.verificationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded text-[10px] border border-emerald-200 transition-colors"
+                            title="Verify live on public website"
+                          >
+                            <ExternalLink className="w-2.5 h-2.5" />
+                            <span>Test QR Link</span>
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (certData.verificationUrl) {
+                                navigator.clipboard.writeText(certData.verificationUrl);
+                                setCopiedLink(true);
+                                setTimeout(() => setCopiedLink(false), 2000);
+                              }
+                            }}
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded text-[10px] border border-slate-300 transition-colors"
+                          >
+                            {copiedLink ? <Check className="w-2.5 h-2.5 text-emerald-600" /> : <Copy className="w-2.5 h-2.5 text-slate-500" />}
+                            <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span>Issue Date: <strong className="text-slate-800 font-semibold">{certData.issueDate}</strong></span>
+                      <span className="block text-[9px] text-slate-400">Nexgen Academic Credentials Registry</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -197,21 +197,24 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
           <!DOCTYPE html>
           <html>
             <head>
-              <title>Student Certificate - ${academySettings?.instituteName || 'Academy'}</title>
+              <title>Verified Certificate - ${academySettings?.instituteName || 'Academy'}</title>
               <style>
-                @page { size: landscape; margin: 0; }
-                body { margin: 0; padding: 20px; display: flex; align-items: center; justify-content: center; height: 100vh; background: #fff; box-sizing: border-box; }
-                img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-radius: 8px; }
+                @page { size: A4 landscape; margin: 0; }
+                * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+                img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+                @media print {
+                  body { margin: 0; padding: 0; }
+                  img { box-shadow: none !important; border-radius: 0 !important; }
+                }
               </style>
             </head>
             <body>
-              <img src="${imageUrl}" />
+              <img src="${imageUrl}" alt="Verified Certificate" onload="window.print(); setTimeout(() => window.close(), 1000);" />
             </body>
           </html>
         `);
         printWin.document.close();
-        printWin.focus();
-        setTimeout(() => printWin.print(), 350);
       }
     } else {
       window.print();

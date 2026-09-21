@@ -79,6 +79,7 @@ import { TopNoticeTickerModal } from './TopNoticeTickerModal';
 import { getTranslation } from '../../utils/translations';
 import {
   trackMetaPixelEvent,
+  trackUnifiedMarketingEvent,
   getCapturedUtmParams,
   getDeviceType
 } from '../../utils/analyticsTracker';
@@ -152,17 +153,28 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
     applySeoMetadata(seoMeta);
   }, [academySettings, websiteCmsConfig]);
 
-  // Auto-capture UTM params and fire Meta Pixel PageView
+  // Auto-capture UTM params and fire Unified Marketing PageView (Meta, GA4, GTM, Google Ads)
   React.useEffect(() => {
     const utms = getCapturedUtmParams();
-    const pixelId = websiteCmsConfig?.marketing?.metaPixelId;
-    if (websiteCmsConfig?.marketing?.metaPixelEnabled) {
-      trackMetaPixelEvent('PageView', {
-        page_title: 'Nexgen Academy - IT Training Institute',
-        url: window.location.href,
-        ...utms
-      }, pixelId);
-    }
+    const marketing = websiteCmsConfig?.marketing;
+    const pageTitle = websiteCmsConfig?.seo?.metaTitle || `${academySettings.instituteName || 'Nexgen Computer Academy'} - IT Training Institute`;
+    
+    trackUnifiedMarketingEvent('page_view', {
+      page_title: pageTitle,
+      page_location: window.location.href,
+      page_path: window.location.pathname,
+      institute_name: academySettings.instituteName,
+      ...utms
+    }, {
+      pixelId: marketing?.metaPixelId,
+      metaPixelEnabled: marketing?.metaPixelEnabled !== false,
+      metaCapiEnabled: marketing?.metaCapiEnabled,
+      googleAnalyticsId: marketing?.googleAnalyticsId,
+      googleAnalyticsEnabled: marketing?.googleAnalyticsEnabled !== false,
+      googleAdsConversionId: marketing?.googleAdsConversionId,
+      googleAdsConversionLabel: marketing?.googleAdsConversionLabel,
+      googleAdsEnabled: marketing?.googleAdsEnabled
+    });
 
     // Exit intent handler (mouse leaves top boundary on desktop)
     const handleMouseLeave = (e: MouseEvent) => {
@@ -177,7 +189,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
     return () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [websiteCmsConfig?.marketing?.metaPixelEnabled, websiteCmsConfig?.marketing?.metaPixelId]);
+  }, [websiteCmsConfig?.marketing, websiteCmsConfig?.seo?.metaTitle, academySettings.instituteName]);
 
   // Filtered Courses
   const filteredCourses = courses.filter(c => {
@@ -223,32 +235,58 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const handleOpenEnroll = (course: Course) => {
     setSelectedCourseForAdmission(course);
     setIsAdmissionOpen(true);
-    trackMetaPixelEvent('InitiateCheckout', {
-      content_name: course.name,
-      content_category: course.category,
-      content_ids: [course.id],
+    const m = websiteCmsConfig?.marketing;
+    trackUnifiedMarketingEvent('enroll_click', {
+      course_id: course.id,
+      course_name: course.name,
+      course_category: course.category,
       value: course.offerFee || course.regularFee || 0,
       currency: 'BDT'
-    }, websiteCmsConfig?.marketing?.metaPixelId);
+    }, {
+      pixelId: m?.metaPixelId,
+      metaPixelEnabled: m?.metaPixelEnabled !== false,
+      metaCapiEnabled: m?.metaCapiEnabled,
+      googleAnalyticsId: m?.googleAnalyticsId,
+      googleAnalyticsEnabled: m?.googleAnalyticsEnabled !== false,
+      googleAdsConversionId: m?.googleAdsConversionId,
+      googleAdsConversionLabel: m?.googleAdsConversionLabel,
+      googleAdsEnabled: m?.googleAdsEnabled
+    });
   };
 
   const handleOpenCourseDetails = (course: Course) => {
     setSelectedCourseForDetails(course);
-    trackMetaPixelEvent('ViewContent', {
-      content_name: course.name,
-      content_category: course.category,
-      content_ids: [course.id],
+    const m = websiteCmsConfig?.marketing;
+    trackUnifiedMarketingEvent('view_course', {
+      course_id: course.id,
+      course_name: course.name,
+      course_category: course.category,
       value: course.offerFee || course.regularFee || 0,
       currency: 'BDT'
-    }, websiteCmsConfig?.marketing?.metaPixelId);
+    }, {
+      pixelId: m?.metaPixelId,
+      metaPixelEnabled: m?.metaPixelEnabled !== false,
+      metaCapiEnabled: m?.metaCapiEnabled,
+      googleAnalyticsId: m?.googleAnalyticsId,
+      googleAnalyticsEnabled: m?.googleAnalyticsEnabled !== false
+    });
   };
 
   const handleOpenSeminar = (seminar: SeminarWorkshop) => {
     setActiveSeminarForReg(seminar);
-    trackMetaPixelEvent('Lead', {
+    const m = websiteCmsConfig?.marketing;
+    trackUnifiedMarketingEvent('lead_submit', {
+      seminar_id: seminar.id,
+      seminar_title: seminar.title,
       content_name: seminar.title,
       content_category: 'Seminar Registration'
-    }, websiteCmsConfig?.marketing?.metaPixelId);
+    }, {
+      pixelId: m?.metaPixelId,
+      metaPixelEnabled: m?.metaPixelEnabled !== false,
+      metaCapiEnabled: m?.metaCapiEnabled,
+      googleAnalyticsId: m?.googleAnalyticsId,
+      googleAnalyticsEnabled: m?.googleAnalyticsEnabled !== false
+    });
   };
 
   const socials = websiteCmsConfig.socialLinks || {

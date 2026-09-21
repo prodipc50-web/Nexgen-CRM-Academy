@@ -18,12 +18,17 @@ import {
   MapPin,
   Globe,
   MessageCircle,
-  FileText
+  FileText,
+  Scissors,
+  ZoomIn,
+  ZoomOut,
+  Copy
 } from 'lucide-react';
 import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
 import { numberToWordsEnglish } from '../../utils/numberToWords';
 import { replaceShortcodes } from '../../utils/templateShortcodes';
-import { executeCleanPrint } from '../../utils/printHelper';
+import { executeCleanPrint, applyPrintStyles, cleanupPrintStyles } from '../../utils/printHelper';
+import { generateQrDataUrl } from '../../utils/qrHelper';
 
 interface MoneyReceiptModalProps {
   isOpen: boolean;
@@ -39,7 +44,10 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
   const { payments, admissions, students, courses, batches, academySettings, updateAcademySettings } = useAcademy();
   const [showEditor, setShowEditor] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [printFormat, setPrintFormat] = useState<'a4' | 'pos80' | 'pos58'>('a4');
+  const [printFormat, setPrintFormat] = useState<'a4' | 'a4-dual' | 'pos80' | 'pos58'>('a4-dual');
+  const [printScale, setPrintScale] = useState<number>(100);
+  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [posQrDataUrl, setPosQrDataUrl] = useState<string>('');
 
   // Handle ESC key press to close modal
   useEffect(() => {
@@ -98,6 +106,33 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
       margin: (printFormat === 'pos80' || printFormat === 'pos58') ? '0mm' : '5mm'
     });
   };
+
+  // Preemptively apply print stylesheet for clean page sizing
+  useEffect(() => {
+    if (isOpen) {
+      applyPrintStyles({
+        orientation: 'portrait',
+        size: printFormat === 'pos58' ? 'pos58' : printFormat === 'pos80' ? 'pos80' : 'a4',
+        margin: (printFormat === 'pos80' || printFormat === 'pos58') ? '0mm' : '5mm'
+      });
+    }
+    return () => {
+      cleanupPrintStyles();
+    };
+  }, [isOpen, printFormat]);
+
+  // Generate offline QR code tokens
+  useEffect(() => {
+    const a4QrContent = `VERIFIED_RECEIPT|${receiptData.receiptNumber}|Student:${receiptData.studentName}|ID:${receiptData.studentCode}|BDT:${receiptData.paidAmount}|Due:${receiptData.dueBalance}|Date:${receiptData.date}|${receiptData.instituteName}`;
+    generateQrDataUrl(a4QrContent, { width: 140, margin: 1 })
+      .then(url => setQrDataUrl(url))
+      .catch(() => setQrDataUrl(''));
+
+    const posQrContent = `REC:${receiptData.receiptNumber}|BDT:${receiptData.paidAmount}|ID:${receiptData.studentCode}|${receiptData.date}`;
+    generateQrDataUrl(posQrContent, { width: 100, margin: 1 })
+      .then(url => setPosQrDataUrl(url))
+      .catch(() => setPosQrDataUrl(''));
+  }, [receiptData.receiptNumber, receiptData.studentName, receiptData.studentCode, receiptData.paidAmount, receiptData.dueBalance, receiptData.date, receiptData.instituteName]);
 
   // Keyboard Shortcuts (Esc to close, Ctrl+P to print)
   useEffect(() => {
@@ -251,6 +286,240 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
     });
   };
 
+  // Render a single receipt slip (used for both single A4 and 2-in-1 Dual A4)
+  const renderReceiptSlip = (
+    copyLabel: string,
+    copyBadgeClass: string,
+    isDual: boolean = false
+  ) => {
+    return (
+      <div className={`bg-white text-slate-900 font-sans ${isDual ? 'space-y-2 p-3 print:p-2 border border-slate-200 rounded-xl print:rounded-none' : 'space-y-4 print:space-y-2.5 p-4 sm:p-6 print:p-2'} rounded-xl print:rounded-none`}>
+        {/* Header Banner */}
+        <div className="flex items-start justify-between border-b-2 border-indigo-900 pb-2 print:pb-1.5">
+          <div>
+            <div className="flex items-center space-x-2.5">
+              <NexgenLogo variant="crest" size={isDual ? 38 : 46} />
+              <div>
+                <h2 className={`${isDual ? 'text-base sm:text-lg' : 'text-xl'} font-black text-indigo-950 uppercase tracking-tight print:text-base leading-tight`}>
+                  {receiptData.instituteName}
+                </h2>
+                <p className={`${isDual ? 'text-[10px]' : 'text-[11px]'} text-slate-600 font-bold tracking-wide print:text-[9.5px]`}>
+                  {receiptData.tagline}
+                </p>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-600 mt-1 print:mt-0.5 font-medium print:text-[8.5px] leading-tight">
+              <strong className="text-indigo-950">{receiptData.campusName}</strong>: {receiptData.address} | Hotline: <strong className="text-slate-900 font-mono">{receiptData.hotlinePhone}</strong>
+            </p>
+          </div>
+
+          <div className="text-right shrink-0">
+            <span className={`inline-block border text-[11px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider print:py-0.5 ${copyBadgeClass}`}>
+              {copyLabel}
+            </span>
+            <div className="text-[10.5px] text-slate-600 mt-1 print:mt-0.5 space-y-0.5 print:text-[9.5px]">
+              <div>
+                <span className="font-semibold text-slate-500">Receipt No: </span>
+                <span className="font-mono font-bold text-slate-900">{receiptData.receiptNumber}</span>
+              </div>
+              <div>
+                <span className="font-semibold text-slate-500">Date: </span>
+                <span className="font-bold text-slate-800">{receiptData.date}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Student & Course Details */}
+        <div className={`grid grid-cols-2 gap-3 print:gap-2 bg-slate-50 p-2.5 print:p-2 rounded-lg border border-slate-200 text-xs ${isDual ? 'print:text-[9.5px]' : 'print:text-[10.5px]'}`}>
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-1">
+              <span className="text-slate-500 text-[10.5px] print:text-[9px]">Student:</span>
+              <span className="font-bold text-slate-900 text-xs print:text-[10.5px]">{receiptData.studentName || 'Student Name'}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="text-slate-500 text-[10.5px] print:text-[9px]">ID / Code:</span>
+              <span className="font-mono font-bold text-indigo-700">{receiptData.studentCode || 'NCA-STU-001'}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="text-slate-500 text-[10.5px] print:text-[9px]">Phone:</span>
+              <span className="font-medium text-slate-800 font-mono">{receiptData.studentPhone || 'N/A'}</span>
+            </div>
+          </div>
+
+          <div className="space-y-0.5">
+            <div>
+              <span className="text-slate-500 text-[10.5px] print:text-[9px]">Course: </span>
+              <span className="font-bold text-slate-900">{receiptData.courseName || 'Professional Course'}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 text-[10.5px] print:text-[9px]">Batch: </span>
+              <span className="font-bold text-slate-800">{receiptData.batchNumber || 'Batch-01'}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 text-[10.5px] print:text-[9px]">Admission No: </span>
+              <span className="font-mono text-slate-700">{receiptData.admissionCode || 'ADM-001'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Item Table */}
+        <div className={`border border-slate-300 rounded-lg overflow-x-auto text-xs ${isDual ? 'print:text-[9.5px]' : 'print:text-[11px]'}`}>
+          <table className="w-full min-w-[300px] text-left">
+            <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
+              <tr>
+                <th className="py-1.5 print:py-1 px-3">Description</th>
+                <th className="py-1.5 print:py-1 px-3">Method & Ref</th>
+                <th className="py-1.5 print:py-1 px-3 text-right">Paid Amount (৳)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              <tr>
+                <td className="py-2 print:py-1.5 px-3">
+                  <div className="font-bold text-slate-900">
+                    {receiptData.paymentDescription}
+                  </div>
+                  <div className="text-[10.5px] print:text-[9px] text-slate-500">{receiptData.paymentNote}</div>
+                </td>
+                <td className="py-2 print:py-1.5 px-3 text-slate-700">
+                  <div className="font-semibold">{receiptData.paymentMethod}</div>
+                  {receiptData.transactionId && (
+                    <div className="font-mono text-[9.5px] text-slate-500">Trx: {receiptData.transactionId}</div>
+                  )}
+                </td>
+                <td className="py-2 print:py-1.5 px-3 text-right font-black text-sm print:text-xs text-slate-900">
+                  ৳{receiptData.paidAmount.toLocaleString()}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* In Words & Financial Breakdown */}
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-3 print:gap-2">
+          <div className="space-y-1.5 flex-1 w-full">
+            <div className={`text-xs ${isDual ? 'print:text-[9px]' : 'print:text-[10px]'} bg-slate-50 p-2 print:p-1.5 rounded-lg border border-slate-200`}>
+              <span className="font-bold text-slate-700">Amount in Words (কথায়): </span>
+              <span className="font-semibold text-indigo-950 italic">
+                {numberToWordsEnglish(receiptData.paidAmount)}
+              </span>
+            </div>
+
+            <div className="flex items-center space-x-2.5 p-1.5 bg-slate-50/70 rounded-lg border border-slate-200">
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt="Receipt Verification QR"
+                  className={`${isDual ? 'w-10 h-10' : 'w-12 h-12 print:w-11 print:h-11'} rounded border border-slate-300 p-0.5 bg-white shrink-0 shadow-2xs`}
+                />
+              ) : (
+                <div className={`${isDual ? 'w-10 h-10' : 'w-12 h-12'} rounded border border-slate-300 bg-white flex items-center justify-center shrink-0`}>
+                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                </div>
+              )}
+              <div className="text-[10px] print:text-[8.5px] text-slate-500 space-y-0.5">
+                <div className="font-bold text-emerald-800 flex items-center space-x-1">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  <span>Official QR Verification Token</span>
+                </div>
+                <div className="text-slate-600">Scan QR to verify academic fee collection record.</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Financial Breakdown */}
+          <div className={`w-full sm:w-64 bg-slate-50 border border-slate-200 rounded-lg p-2.5 print:p-2 space-y-0.5 text-xs ${isDual ? 'print:text-[9.5px]' : 'print:text-[10.5px]'} shrink-0`}>
+            <div className="flex justify-between text-slate-600">
+              <span>Total Course Fee:</span>
+              <span className="font-semibold text-slate-900">৳{receiptData.totalFee.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>Total Paid (Cumulative):</span>
+              <span className="font-bold text-emerald-700">৳{receiptData.totalPaid.toLocaleString()}</span>
+            </div>
+            <div className="border-t border-slate-300 pt-0.5 flex justify-between font-bold text-slate-900">
+              <span>Due Balance:</span>
+              <span className={`font-black ${receiptData.dueBalance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                ৳{receiptData.dueBalance.toLocaleString()}
+              </span>
+            </div>
+            {receiptData.dueBalance > 0 && receiptData.nextDueDate && (
+              <div className="text-[9px] text-amber-800 bg-amber-50 px-1 py-0.5 rounded border border-amber-200 text-center font-medium mt-0.5">
+                Next Due: {receiptData.nextDueDate}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Custom Printable Receipt Terms / Notes (Rendered in single mode) */}
+        {academySettings.receiptNotes && !isDual && (
+          <div className="bg-slate-50 p-2 print:p-1.5 rounded-lg border border-slate-200 text-[10px] print:text-[8.5px] text-slate-600 space-y-0.5">
+            <div className="font-bold text-slate-800">শর্তাবলী ও নির্দেশিকা (Terms & Instructions):</div>
+            <div className="whitespace-pre-line leading-relaxed">
+              {replaceShortcodes(academySettings.receiptNotes, {
+                institute_name: receiptData.instituteName,
+                campus_name: receiptData.campusName,
+                campus_address: receiptData.address,
+                helpline: receiptData.hotlinePhone,
+                student_name: receiptData.studentName,
+                student_code: receiptData.studentCode,
+                course_name: receiptData.courseName,
+                batch_number: receiptData.batchNumber,
+                paid_amount: receiptData.paidAmount,
+                due_amount: receiptData.dueBalance,
+                receipt_number: receiptData.receiptNumber
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Footer & Signature Stamps */}
+        <div className="pt-3 print:pt-1.5 border-t border-slate-200 grid grid-cols-2 gap-4 items-end text-xs print:text-[9.5px]">
+          <div>
+            <div className="flex items-center space-x-1 text-emerald-700 font-bold text-[10px] print:text-[9px] mb-0.5">
+              <ShieldCheck className="w-3 h-3" />
+              <span>System Generated Official Receipt</span>
+            </div>
+            <p className="text-[9px] print:text-[8px] text-slate-400">
+              Date: {new Date().toLocaleDateString()} | Cashier: {receiptData.collectedBy}
+            </p>
+            {academySettings.institutionSealUrl && (
+              <div className="mt-0.5">
+                <img
+                  src={academySettings.institutionSealUrl}
+                  alt="Official Seal"
+                  className="w-10 h-10 print:w-8 print:h-8 object-contain mix-blend-multiply opacity-90"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="text-right">
+            {academySettings.directorSignatureUrl ? (
+              <div className="inline-block w-40 text-center">
+                <img
+                  src={academySettings.directorSignatureUrl}
+                  alt="Signature"
+                  className="h-7 print:h-6 mx-auto object-contain mix-blend-multiply mb-0.5"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="border-t border-slate-400 pt-0.5 font-semibold text-slate-700 text-xs print:text-[9.5px]">
+                  {receiptData.signatoryTitle}
+                </div>
+              </div>
+            ) : (
+              <div className="inline-block border-b border-slate-400 w-40 text-center pb-0.5 font-semibold text-slate-700 text-xs print:text-[9.5px]">
+                {receiptData.signatoryTitle}
+              </div>
+            )}
+            <div className="text-[9px] print:text-[8px] text-slate-400 mt-0.5">{receiptData.instituteName}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
@@ -282,10 +551,23 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
                     ? 'bg-indigo-600 text-white shadow-xs'
                     : 'text-slate-300 hover:text-white'
                 }`}
-                title="A4 Standard Page Layout"
+                title="A4 Single Full Page Layout"
               >
                 <FileText className="w-3 h-3" />
-                <span>A4</span>
+                <span>A4 Single</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrintFormat('a4-dual')}
+                className={`px-2 py-1 rounded-md text-[11px] font-bold flex items-center space-x-1 transition-all ${
+                  printFormat === 'a4-dual'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+                title="A4 2-in-1 Dual Slip (Student Copy + Office Copy on 1 Page)"
+              >
+                <Scissors className="w-3 h-3 text-amber-300" />
+                <span>2-in-1 Dual</span>
               </button>
               <button
                 type="button"
@@ -313,6 +595,25 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
                 <Printer className="w-3 h-3" />
                 <span>58mm</span>
               </button>
+            </div>
+
+            {/* Print Scale fine-tuning */}
+            <div className="hidden lg:flex items-center space-x-1 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700 text-[11px] text-slate-300">
+              <span className="text-slate-400 text-[10px] uppercase font-bold">Scale:</span>
+              {[90, 95, 100, 105].map(scale => (
+                <button
+                  key={scale}
+                  type="button"
+                  onClick={() => setPrintScale(scale)}
+                  className={`px-1.5 py-0.5 rounded font-mono font-bold text-[10px] transition-colors ${
+                    printScale === scale
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {scale}%
+                </button>
+              ))}
             </div>
 
             <button
@@ -642,6 +943,10 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
                 printFormat === 'pos58' ? 'print-page-pos58' : 'print-page-pos80'
               } leading-snug font-sans space-y-2 rounded-xl print:rounded-none`}
               id="pos-receipt-printable"
+              style={{
+                transform: printScale !== 100 ? `scale(${printScale / 100})` : undefined,
+                transformOrigin: 'top center'
+              }}
             >
               {/* POS Thermal Header */}
               <div className="text-center space-y-0.5">
@@ -737,15 +1042,15 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
                 In Words: {numberToWordsEnglish(receiptData.paidAmount)}
               </div>
 
-              <div className="flex justify-center py-1">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=60x60&margin=0&data=${encodeURIComponent(
-                    `RECEIPT:${receiptData.receiptNumber}|BDT:${receiptData.paidAmount}|${receiptData.studentCode}|${receiptData.date}`
-                  )}`}
-                  alt="Receipt POS QR"
-                  className={printFormat === 'pos58' ? 'w-11 h-11 mx-auto' : 'w-13 h-13 mx-auto'}
-                />
-              </div>
+              {posQrDataUrl && (
+                <div className="flex justify-center py-1">
+                  <img
+                    src={posQrDataUrl}
+                    alt="Receipt POS QR"
+                    className={printFormat === 'pos58' ? 'w-11 h-11 mx-auto' : 'w-13 h-13 mx-auto'}
+                  />
+                </div>
+              )}
 
               <div className="border-t border-dashed border-slate-400 my-1" />
 
@@ -764,225 +1069,36 @@ export const MoneyReceiptModal: React.FC<MoneyReceiptModalProps> = ({
             </div>
           </div>
         ) : (
-          <div className="overflow-y-auto flex-1 p-4 sm:p-7 bg-white text-slate-900 font-sans space-y-4 print:space-y-2 print:p-0 print:m-0 print-page-a4" id="money-receipt-printable">
-            {/* Header Banner */}
-            <div className="flex items-start justify-between border-b-2 border-indigo-900 pb-3 print:pb-1.5">
-              <div>
-                <div className="flex items-center space-x-3">
-                  <NexgenLogo variant="crest" size={50} />
-                  <div>
-                    <h2 className="text-xl font-black text-indigo-950 uppercase tracking-tight print:text-lg">
-                      {receiptData.instituteName}
-                    </h2>
-                    <p className="text-[11px] text-slate-600 font-bold tracking-wide print:text-[10px]">
-                      {receiptData.tagline}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-[10px] text-slate-600 mt-1.5 print:mt-1 font-medium print:text-[9px]">
-                  <strong className="text-indigo-950">{receiptData.campusName}</strong>: {receiptData.address} | Hotline: <strong className="text-slate-900 font-mono">{receiptData.hotlinePhone}</strong> | <span className="font-mono text-indigo-700">{receiptData.website}</span>
-                </p>
-              </div>
-
-              <div className="text-right">
-                <span className="inline-block bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-black px-3 py-1 rounded-lg uppercase tracking-wider print:py-0.5">
-                  Money Receipt
-                </span>
-                <div className="text-[11px] text-slate-600 mt-1.5 print:mt-1 space-y-0.5 print:text-[10px]">
-                  <div>
-                    <span className="font-semibold text-slate-500">Receipt No: </span>
-                    <span className="font-mono font-bold text-slate-900">{receiptData.receiptNumber}</span>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-500">Date: </span>
-                    <span className="font-bold text-slate-800">{receiptData.date}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Student & Course Details */}
-            <div className="grid grid-cols-2 gap-4 print:gap-2 bg-slate-50/80 p-3.5 print:p-2 rounded-xl print:rounded-lg border border-slate-200 text-xs print:text-[10.5px]">
-              <div className="space-y-1">
-                <div>
-                  <span className="text-slate-500 text-[11px] print:text-[10px]">Student Name:</span>
-                  <div className="font-bold text-slate-900 text-sm print:text-xs">{receiptData.studentName || 'Student Name'}</div>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[11px] print:text-[10px]">Student ID / Code:</span>
-                  <div className="font-mono font-bold text-indigo-700">{receiptData.studentCode || 'NCA-STU-001'}</div>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[11px] print:text-[10px]">Contact Phone:</span>
-                  <div className="font-medium text-slate-800 font-mono">{receiptData.studentPhone || 'N/A'}</div>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div>
-                  <span className="text-slate-500 text-[11px] print:text-[10px]">Enrolled Course:</span>
-                  <div className="font-bold text-slate-900">{receiptData.courseName || 'Professional Course'}</div>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[11px] print:text-[10px]">Batch & Timing:</span>
-                  <div className="font-bold text-slate-800">{receiptData.batchNumber || 'Batch-01'}</div>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[11px] print:text-[10px]">Admission No:</span>
-                  <div className="font-mono text-slate-700">{receiptData.admissionCode || 'ADM-001'}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Item Table */}
-            <div className="border border-slate-300 rounded-xl print:rounded-lg overflow-x-auto text-xs print:text-[11px]">
-              <table className="w-full min-w-[320px] text-left">
-                <thead className="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
-                  <tr>
-                    <th className="py-2 print:py-1 px-4 print:px-3">Description</th>
-                    <th className="py-2 print:py-1 px-4 print:px-3">Method & Ref</th>
-                    <th className="py-2 print:py-1 px-4 print:px-3 text-right">Paid Amount (৳)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  <tr>
-                    <td className="py-2.5 print:py-1.5 px-4 print:px-3">
-                      <div className="font-bold text-slate-900">
-                        {receiptData.paymentDescription}
-                      </div>
-                      <div className="text-[11px] print:text-[10px] text-slate-500">{receiptData.paymentNote}</div>
-                    </td>
-                    <td className="py-2.5 print:py-1.5 px-4 print:px-3 text-slate-700">
-                      <div className="font-semibold">{receiptData.paymentMethod}</div>
-                      {receiptData.transactionId && (
-                        <div className="font-mono text-[10px] text-slate-500">Trx: {receiptData.transactionId}</div>
-                      )}
-                    </td>
-                    <td className="py-2.5 print:py-1.5 px-4 print:px-3 text-right font-black text-sm print:text-xs text-slate-900">
-                      ৳{receiptData.paidAmount.toLocaleString()}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* In Words & Financial Breakdown */}
-            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 print:gap-3">
-              <div className="space-y-2 print:space-y-1.5 flex-1 w-full">
-                <div className="text-xs print:text-[10.5px] bg-slate-50 p-2.5 print:p-2 rounded-xl print:rounded-lg border border-slate-200">
-                  <span className="font-bold text-slate-700">Amount in Words (কথায়): </span>
-                  <span className="font-semibold text-indigo-950 italic">
-                    {numberToWordsEnglish(receiptData.paidAmount)}
+          <div 
+            className="overflow-y-auto flex-1 p-3 sm:p-5 bg-white text-slate-900 font-sans print:p-0 print:m-0 print-page-a4" 
+            id="money-receipt-printable"
+            style={{
+              transform: printScale !== 100 ? `scale(${printScale / 100})` : undefined,
+              transformOrigin: 'top center'
+            }}
+          >
+            {printFormat === 'a4-dual' ? (
+              <div className="flex flex-col justify-between space-y-3 print:space-y-1">
+                {/* 1. Student Copy */}
+                {renderReceiptSlip('STUDENT COPY / শিক্ষার্থী কপি', 'bg-indigo-50 border-indigo-200 text-indigo-900', true)}
+                
+                {/* Perforated Divider */}
+                <div className="py-1 print:py-0.5 flex items-center justify-center text-[10px] print:text-[8.5px] font-mono text-slate-400 select-none">
+                  <span className="flex-1 border-b border-dashed border-slate-400" />
+                  <span className="px-3 flex items-center space-x-1.5 text-slate-500 font-bold bg-white">
+                    <Scissors className="w-3.5 h-3.5 rotate-90 text-slate-400" />
+                    <span>কাটুন / Cut Along Perforated Line (Student & Office Copy Separator)</span>
                   </span>
+                  <span className="flex-1 border-b border-dashed border-slate-400" />
                 </div>
 
-                <div className="flex items-center space-x-3 p-2 print:p-1.5 bg-slate-50/60 rounded-xl print:rounded-lg border border-slate-200/80">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=0&data=${encodeURIComponent(
-                      `VERIFIED_OFFICIAL_RECEIPT|${receiptData.receiptNumber}|Student:${receiptData.studentName}|BDT ${receiptData.paidAmount}|Date:${receiptData.date}|${receiptData.instituteName}`
-                    )}`}
-                    alt="Receipt Verification QR"
-                    className="w-12 h-12 print:w-11 print:h-11 rounded-lg border border-slate-300 p-0.5 bg-white shrink-0 shadow-2xs"
-                  />
-                  <div className="text-[10px] print:text-[9px] text-slate-500 space-y-0.5">
-                    <div className="font-bold text-emerald-800 flex items-center space-x-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Official Receipt QR Token</span>
-                    </div>
-                    <div className="text-slate-600">Scan QR to instantly verify institutional fee record authenticity.</div>
-                  </div>
-                </div>
+                {/* 2. Office & Accounts Copy */}
+                {renderReceiptSlip('OFFICE & ACCOUNTS COPY / অফিস কপি', 'bg-amber-50 border-amber-300 text-amber-950', true)}
               </div>
-
-              {/* Financial Breakdown & Summary */}
-              <div className="w-full sm:w-72 bg-slate-50 border border-slate-200 rounded-xl print:rounded-lg p-3 print:p-2 space-y-1 print:space-y-0.5 text-xs print:text-[10.5px] shrink-0">
-                <div className="flex justify-between text-slate-600">
-                  <span>Total Course Agreed Fee:</span>
-                  <span className="font-semibold text-slate-900">৳{receiptData.totalFee.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>Total Paid (Cumulative):</span>
-                  <span className="font-bold text-emerald-700">৳{receiptData.totalPaid.toLocaleString()}</span>
-                </div>
-                <div className="border-t border-slate-300 pt-1 flex justify-between font-bold text-slate-900">
-                  <span>Outstanding Due Balance:</span>
-                  <span className={`font-black ${receiptData.dueBalance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    ৳{receiptData.dueBalance.toLocaleString()}
-                  </span>
-                </div>
-                {receiptData.dueBalance > 0 && receiptData.nextDueDate && (
-                  <div className="text-[9.5px] text-amber-800 bg-amber-50 p-1 rounded border border-amber-200 text-center font-medium mt-0.5">
-                    Next Due Date: {receiptData.nextDueDate}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Custom Printable Receipt Terms / Notes */}
-            {academySettings.receiptNotes && (
-              <div className="bg-slate-50 p-2 print:p-1.5 rounded-lg border border-slate-200 text-[10px] print:text-[9px] text-slate-600 space-y-0.5">
-                <div className="font-bold text-slate-800">শর্তাবলী ও নির্দেশিকা (Terms & Instructions):</div>
-                <div className="whitespace-pre-line leading-relaxed">
-                  {replaceShortcodes(academySettings.receiptNotes, {
-                    institute_name: receiptData.instituteName,
-                    campus_name: receiptData.campusName,
-                    campus_address: receiptData.address,
-                    helpline: receiptData.hotlinePhone,
-                    student_name: receiptData.studentName,
-                    student_code: receiptData.studentCode,
-                    course_name: receiptData.courseName,
-                    batch_number: receiptData.batchNumber,
-                    paid_amount: receiptData.paidAmount,
-                    due_amount: receiptData.dueBalance,
-                    receipt_number: receiptData.receiptNumber
-                  })}
-                </div>
-              </div>
+            ) : (
+              /* Single Full A4 Receipt */
+              renderReceiptSlip('OFFICIAL MONEY RECEIPT / অফিসিয়াল মানি রিসিট', 'bg-indigo-50 border-indigo-200 text-indigo-900', false)
             )}
-
-            {/* Footer & Signature Stamps */}
-            <div className="pt-4 print:pt-2 border-t border-slate-200 grid grid-cols-2 gap-8 items-end text-xs print:text-[10px]">
-              <div>
-                <div className="flex items-center space-x-1.5 text-emerald-700 font-bold text-[11px] print:text-[10px] mb-0.5">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Digitally Verified & System Generated</span>
-                </div>
-                <p className="text-[9.5px] print:text-[8.5px] text-slate-400">
-                  Printed on: {new Date().toLocaleDateString()} | Cashier: {receiptData.collectedBy}
-                </p>
-                {academySettings.institutionSealUrl && (
-                  <div className="mt-1">
-                    <img
-                      src={academySettings.institutionSealUrl}
-                      alt="Official Seal"
-                      className="w-12 h-12 print:w-10 print:h-10 object-contain mix-blend-multiply opacity-90"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="text-right">
-                {academySettings.directorSignatureUrl ? (
-                  <div className="inline-block w-48 text-center">
-                    <img
-                      src={academySettings.directorSignatureUrl}
-                      alt="Signature"
-                      className="h-8 print:h-7 mx-auto object-contain mix-blend-multiply mb-0.5"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="border-t border-slate-400 pt-0.5 font-semibold text-slate-700 text-xs print:text-[10px]">
-                      {receiptData.signatoryTitle}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="inline-block border-b border-slate-400 w-48 text-center pb-0.5 font-semibold text-slate-700 text-xs print:text-[10px]">
-                    {receiptData.signatoryTitle}
-                  </div>
-                )}
-                <div className="text-[9.5px] print:text-[8.5px] text-slate-400 mt-0.5">{receiptData.instituteName}</div>
-              </div>
-            </div>
           </div>
         )}
 

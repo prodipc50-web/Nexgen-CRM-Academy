@@ -68,6 +68,9 @@ import { CourseLandingPageEditorModal } from '../courses/CourseLandingPageEditor
 import { SyllabusDownloadModal } from '../modals/SyllabusDownloadModal';
 import {
   trackMetaPixelEvent,
+  trackUnifiedMarketingEvent,
+  trackGa4LandingPageView,
+  trackGa4WhatsAppClick,
   getCapturedUtmParams
 } from '../../utils/analyticsTracker';
 import {
@@ -725,34 +728,58 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     return () => clearInterval(interval);
   }, [isTickerEnabled, socialTickerItems.length, landingConfig.socialProofTickerConfig?.intervalSeconds]);
 
-  // Track PageView & ViewContent on mount
+  // Track PageView & ViewContent & GA4 Landing Page on mount
   useEffect(() => {
-    // 1. PageView for funnel retargeting
-    trackMetaPixelEvent(
-      'PageView',
+    const marketing = websiteCmsConfig?.marketing;
+    const utms = getCapturedUtmParams();
+
+    // 1. Unified PageView (Meta, GA4, GTM)
+    trackUnifiedMarketingEvent(
+      'page_view',
       {
         page_title: `${course.name} | ${academySettings?.instituteName || 'Academy'}`,
-        url: typeof window !== 'undefined' ? window.location.href : '',
+        page_location: typeof window !== 'undefined' ? window.location.href : '',
         course_id: course.id,
-        course_name: course.name
+        course_name: course.name,
+        ...utms
       },
-      pixelId
+      {
+        pixelId,
+        metaPixelEnabled: marketing?.metaPixelEnabled !== false,
+        metaCapiEnabled: marketing?.metaCapiEnabled,
+        googleAnalyticsId: marketing?.googleAnalyticsId,
+        googleAnalyticsEnabled: marketing?.googleAnalyticsEnabled !== false
+      }
     );
 
-    // 2. Product ViewContent
-    trackMetaPixelEvent(
-      'ViewContent',
+    // 2. Product ViewContent & dedicated GA4 landing view
+    trackUnifiedMarketingEvent(
+      'view_course_landing',
       {
-        content_name: course.name,
-        content_category: course.category,
-        content_ids: [course.id],
-        content_type: 'product',
-        value: course.offerFee || course.regularFee,
+        course_id: course.id,
+        course_name: course.name,
+        category: course.category,
+        value: course.offerFee || course.regularFee || 0,
         currency: 'BDT'
       },
-      pixelId
+      {
+        pixelId,
+        metaPixelEnabled: marketing?.metaPixelEnabled !== false,
+        metaCapiEnabled: marketing?.metaCapiEnabled,
+        googleAnalyticsId: marketing?.googleAnalyticsId,
+        googleAnalyticsEnabled: marketing?.googleAnalyticsEnabled !== false
+      }
     );
-  }, [course.id, course.name, course.category, course.offerFee, course.regularFee, pixelId, academySettings?.instituteName]);
+
+    trackGa4LandingPageView({
+      id: course.id,
+      name: course.name,
+      slug: course.slug || course.landingConfig?.slug,
+      category: course.category,
+      regularFee: course.regularFee,
+      offerFee: course.offerFee
+    });
+  }, [course.id, course.name, course.category, course.offerFee, course.regularFee, course.slug, course.landingConfig?.slug, pixelId, academySettings?.instituteName, websiteCmsConfig?.marketing]);
 
   // Assigned Faculty/Trainers
   const allTrainers: TrainerProfile[] = websiteCmsConfig?.trainersList || [];
@@ -835,25 +862,49 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
     'সকাল ৯:০০ টা - রাত ৮:০০ টা (প্রতিদিন খোলা)';
 
   const handleWhatsAppClick = () => {
-    trackMetaPixelEvent(
-      'Contact',
+    const marketing = websiteCmsConfig?.marketing;
+    trackUnifiedMarketingEvent(
+      'whatsapp_click',
       {
         channel: 'WhatsApp Direct',
         course_name: course.name,
+        course_id: course.id,
         phone: rawPhone
       },
-      pixelId
+      {
+        pixelId,
+        metaPixelEnabled: marketing?.metaPixelEnabled !== false,
+        metaCapiEnabled: marketing?.metaCapiEnabled,
+        googleAnalyticsId: marketing?.googleAnalyticsId,
+        googleAnalyticsEnabled: marketing?.googleAnalyticsEnabled !== false,
+        googleAdsConversionId: marketing?.googleAdsConversionId,
+        googleAdsConversionLabel: marketing?.googleAdsConversionLabel,
+        googleAdsEnabled: marketing?.googleAdsEnabled
+      }
     );
+    trackGa4WhatsAppClick({
+      position: 'Course Landing Page CTA',
+      courseName: course.name,
+      courseId: course.id
+    });
   };
 
   const handleMessengerClick = () => {
-    trackMetaPixelEvent(
-      'Contact',
+    const marketing = websiteCmsConfig?.marketing;
+    trackUnifiedMarketingEvent(
+      'messenger_click',
       {
         channel: 'Messenger Direct',
-        course_name: course.name
+        course_name: course.name,
+        course_id: course.id
       },
-      pixelId
+      {
+        pixelId,
+        metaPixelEnabled: marketing?.metaPixelEnabled !== false,
+        metaCapiEnabled: marketing?.metaCapiEnabled,
+        googleAnalyticsId: marketing?.googleAnalyticsId,
+        googleAnalyticsEnabled: marketing?.googleAnalyticsEnabled !== false
+      }
     );
   };
 
@@ -977,23 +1028,32 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         syncIncomingLeadsNow().catch(() => {});
       }
 
-      trackMetaPixelEvent(
-        isCounselingMode ? 'Contact' : 'Lead',
+      const marketing = websiteCmsConfig?.marketing;
+      trackUnifiedMarketingEvent(
+        isCounselingMode ? 'phone_click' : 'lead_submit',
         {
-          content_name: course.name,
+          course_id: course.id,
+          course_name: course.name,
           form_mode: leadFormMode,
           value: isCounselingMode ? 0 : (course.offerFee || 0),
+          fee: course.offerFee || course.regularFee || 0,
           currency: 'BDT',
           source: leadSourceStr
         },
         {
           pixelId,
+          metaPixelEnabled: marketing?.metaPixelEnabled !== false,
+          metaCapiEnabled: marketing?.metaCapiEnabled,
+          googleAnalyticsId: marketing?.googleAnalyticsId,
+          googleAnalyticsEnabled: marketing?.googleAnalyticsEnabled !== false,
+          googleAdsConversionId: marketing?.googleAdsConversionId,
+          googleAdsConversionLabel: marketing?.googleAdsConversionLabel,
+          googleAdsEnabled: marketing?.googleAdsEnabled,
           userData: {
             name: leadName.trim(),
             phone: leadPhone.trim(),
             email: leadEmail.trim()
-          },
-          triggerCapi: true
+          }
         }
       );
 

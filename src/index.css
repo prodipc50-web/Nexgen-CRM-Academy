@@ -130,20 +130,9 @@ h1, h2, h3, h4, .text-balance {
 }
 
 @media print {
-  /* Default A4 Portrait Page Setup */
+  /* Default Page Setup */
   @page {
-    size: A4 portrait;
-    margin: 6mm 6mm;
-  }
-
-  /* Explicit Landscape Page for Certificates */
-  @page landscape-sheet {
-    size: A4 landscape;
-    margin: 6mm;
-  }
-
-  .print-landscape-page {
-    page: landscape-sheet !important;
+    margin: 5mm;
   }
 
   html, body {
@@ -167,6 +156,15 @@ h1, h2, h3, h4, .text-balance {
   #app-workspace-body,
   .erp-workspace-container {
     display: none !important;
+  }
+
+  /* Reset animations that blur printed text */
+  .animate-in,
+  [class*="animate-"],
+  [class*="transition-"] {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 
   /* Reset modal overlays so only the printable document shows cleanly */
@@ -202,13 +200,14 @@ h1, h2, h3, h4, .text-balance {
     box-shadow: none !important;
     border-color: #cbd5e1 !important;
     overflow: visible !important;
+    box-sizing: border-box !important;
   }
 
   .print-page-a4-landscape {
     width: 100% !important;
-    max-width: 297mm !important;
-    max-height: 202mm !important;
-    height: auto !important;
+    max-width: 285mm !important;
+    max-height: 188mm !important;
+    height: 188mm !important;
     margin: 0 auto !important;
     box-sizing: border-box !important;
     page-break-inside: avoid !important;
@@ -222,9 +221,9 @@ h1, h2, h3, h4, .text-balance {
   /* 80mm POS Thermal Receipt Page Setup */
   .print-page-pos80 {
     width: 76mm !important;
-    max-width: 78mm !important;
+    max-width: 76mm !important;
     margin: 0 auto !important;
-    padding: 1mm 1mm !important;
+    padding: 1mm 1.5mm !important;
     font-size: 11px !important;
     line-height: 1.3 !important;
     color: #000000 !important;
@@ -238,6 +237,29 @@ h1, h2, h3, h4, .text-balance {
   .print-page-pos80 * {
     color: #000000 !important;
     text-shadow: none !important;
+    border-color: #000000 !important;
+  }
+
+  /* 58mm Mini POS Thermal Receipt Page Setup */
+  .print-page-pos58 {
+    width: 54mm !important;
+    max-width: 54mm !important;
+    margin: 0 auto !important;
+    padding: 0.5mm 1mm !important;
+    font-size: 9.5px !important;
+    line-height: 1.25 !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    box-shadow: none !important;
+  }
+
+  .print-page-pos58 * {
+    color: #000000 !important;
+    text-shadow: none !important;
+    border-color: #000000 !important;
   }
 
   /* Never break cards or tables across pages */
