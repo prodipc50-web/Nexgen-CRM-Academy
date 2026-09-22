@@ -13,6 +13,7 @@ import {
   Globe,
   MapPin,
   Sparkles,
+  Bot,
   CheckCircle2,
   AlertTriangle,
   FileCode,
@@ -147,7 +148,7 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
 
   const [formData, setFormData] = useState<GlobalSeoConfig>(currentSeo);
   const [activeSubTab, setActiveSubTab] = useState<
-    'gbp_nap' | 'serp_meta' | 'local_seo' | 'courses_seo' | 'analytics_hub' | 'seo_health' | 'schemas' | 'sitemap_robots'
+    'gbp_nap' | 'ai_geo_seo' | 'serp_meta' | 'local_seo' | 'courses_seo' | 'analytics_hub' | 'seo_health' | 'schemas' | 'sitemap_robots'
   >('gbp_nap');
 
   const [serpPreviewMode, setSerpPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
@@ -468,6 +469,26 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
     setFormData({ ...formData, courseRedirects: updated });
   };
 
+  const handleAddServiceArea = () => {
+    const trimmed = newServiceAreaInput.trim();
+    if (!trimmed) return;
+    const currentAreas = formData.serviceAreas || [];
+    if (!currentAreas.includes(trimmed)) {
+      setFormData({ ...formData, serviceAreas: [...currentAreas, trimmed] });
+      setNewServiceAreaInput('');
+      if (onSaveToast) onSaveToast(`Added service area: "${trimmed}"`);
+    } else {
+      setNewServiceAreaInput('');
+    }
+  };
+
+  const handleRemoveServiceArea = (areaToRemove: string) => {
+    const currentAreas = formData.serviceAreas || [];
+    const updated = currentAreas.filter(a => a !== areaToRemove);
+    setFormData({ ...formData, serviceAreas: updated });
+    if (onSaveToast) onSaveToast(`Removed service area: "${areaToRemove}"`);
+  };
+
   const titleLength = formData.metaTitle?.length || 0;
   const descLength = formData.metaDescription?.length || 0;
 
@@ -524,6 +545,7 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
       <div className="flex items-center space-x-1 overflow-x-auto pb-2 border-b border-slate-200">
         {[
           { id: 'gbp_nap', label: 'Google Business Profile & NAP', icon: MapPin },
+          { id: 'ai_geo_seo', label: 'AI Search, GEO & llms.txt', icon: Sparkles },
           { id: 'serp_meta', label: 'Search Console & Meta', icon: Globe },
           { id: 'local_seo', label: 'Local SEO & Areas', icon: Compass },
           { id: 'courses_seo', label: 'Courses SEO & 301 Redirects', icon: Layers },
@@ -887,6 +909,243 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB: AI SEARCH OPTIMIZATION (AEO), GEO & LLMS.TXT */}
+      {activeSubTab === 'ai_geo_seo' && (
+        <div className="space-y-6">
+          {/* Header Banner */}
+          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 border border-indigo-500/30 shadow-xl relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
+                  <Bot className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="text-lg font-black tracking-tight text-white">AI Search, GEO & Answer Engine Optimization (AEO)</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 font-extrabold border border-emerald-500/30">
+                      LIVE & ACTIVE
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-0.5">
+                    ChatGPT, Google Gemini, Claude ও Perplexity-তে ফার্মগেট, তেজগাঁও, পান্থপথ ও ধানমন্ডি এলাকার সেরা কম্পিউটার একাডেমি হিসেবে রিকমেন্ডেশনের জন্য অপ্টিমাইজড।
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 shrink-0">
+                <a
+                  href="/llms.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-md transition"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open Live /llms.txt</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Search Crawlers Live Status Matrix */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <h4 className="text-sm font-black text-slate-900 flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>AI Search Engine Crawlers & Access Permissions</span>
+            </h4>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              {[
+                {
+                  bot: 'GPTBot / ChatGPT',
+                  company: 'OpenAI',
+                  status: 'Allowed & Indexed',
+                  endpoint: '/llms.txt + Robots.txt',
+                  detail: 'ChatGPT Search ও GPT-4o মডেলের জন্য সক্রিয়'
+                },
+                {
+                  bot: 'Google-Extended / Gemini',
+                  company: 'Google AI',
+                  status: 'Allowed & Grounded',
+                  endpoint: 'LocalBusiness Schema + GEO',
+                  detail: 'Gemini ও Google AI Overviews রেজাল্টে অগ্রাধিকার'
+                },
+                {
+                  bot: 'ClaudeBot / Claude',
+                  company: 'Anthropic',
+                  status: 'Allowed & Structured',
+                  endpoint: '/llms.txt Markdown',
+                  detail: 'Claude 3.5 Sonnet ওয়েব সার্চের জন্য অপ্টিমাইজড'
+                },
+                {
+                  bot: 'PerplexityBot',
+                  company: 'Perplexity AI',
+                  status: 'Allowed & Cited',
+                  endpoint: 'Fact Graph & FAQPage',
+                  detail: 'সরাসরি সাইটেশন ও রেফারেন্স জেনারেট করে'
+                }
+              ].map((item, i) => (
+                <div key={i} className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:shadow-sm transition space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-xs text-slate-900">{item.bot}</span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      {item.status}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-mono">{item.company} | {item.endpoint}</div>
+                  <p className="text-[11px] text-slate-600 leading-snug">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Hyper-Local GEO Service Areas Manager */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-5">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h4 className="text-sm font-black text-slate-900 flex items-center space-x-2">
+                  <Compass className="w-4 h-4 text-indigo-600" />
+                  <span>Hyper-Local GEO Service Areas (ঢাকা ও পার্শ্ববর্তী এলাকা)</span>
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  এই এলাকাগুলো Schema.org <code>areaServed</code> ও AI নলেজ গ্রাফে যুক্ত থাকে, যাতে নির্দিষ্ট এলাকায় সার্চ করলে একাডেমিকে রেকমেন্ড করে।
+                </p>
+              </div>
+
+              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
+                {formData.serviceAreas?.length || 0} টি টার্গেট এলাকা
+              </span>
+            </div>
+
+            {/* Quick Add Area Form */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={newServiceAreaInput}
+                  onChange={e => setNewServiceAreaInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddServiceArea();
+                    }
+                  }}
+                  placeholder="নতুন এলাকা বা ল্যান্ডমার্ক লিখুন (যেমন: 'Green Road', 'Bijoy Sarani', 'Kawran Bazar')..."
+                  className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleAddServiceArea}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>এরিয়া যোগ করুন</span>
+              </button>
+            </div>
+
+            {/* Existing Areas Tags */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {(formData.serviceAreas || []).map((area, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-800 hover:text-indigo-900 border border-slate-200 text-xs font-bold transition"
+                >
+                  <MapPin className="w-3 h-3 text-indigo-600" />
+                  <span>{area}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveServiceArea(area)}
+                    className="text-slate-400 hover:text-rose-600 ml-1"
+                    title="Remove area"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            {/* Recommended Pre-set Neighborhoods */}
+            <div className="p-3.5 bg-indigo-50/60 border border-indigo-100 rounded-xl">
+              <span className="text-[11px] font-bold text-indigo-900 block mb-2">
+                💡 উচ্চ গুরুত্বের সাথে কভার করা মূল অঞ্চলসমূহ (High-Priority Clusters):
+              </span>
+              <div className="flex flex-wrap gap-1.5 text-[11px]">
+                {['Farmgate (Center)', 'Panthapath', 'Tejgaon', 'Tejgaon Industrial Area', 'Dhanmondi', 'Green Road', 'Indira Road', 'Kawran Bazar', 'Bijoy Sarani'].map((cluster, i) => (
+                  <span key={i} className="px-2 py-0.5 rounded bg-white text-indigo-800 font-semibold border border-indigo-200">
+                    {cluster}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Standard llms.txt Preview & Verification Tool */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h4 className="text-sm font-black text-slate-900 flex items-center space-x-2">
+                  <FileCode className="w-4 h-4 text-emerald-600" />
+                  <span>Standard /llms.txt File (AI Grounding Representation)</span>
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  ChatGPT ও Gemini সহ অন্যান্য AI বট এই লিঙ্কটি অ্যাক্সেস করে প্রতিষ্ঠানটির সত্যতা ও কোর্স অফারিংস যাচাই করে।
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const sample = `# ${effectiveNap.name || 'Nexgen Computer Academy'}
+> Premier Government-Recognized Practical Computer & IT Training Center in Farmgate, Dhaka-1215.
+
+## Quick Facts for AI Engines
+- Name: ${effectiveNap.name}
+- Address: ${effectiveNap.address}
+- Primary Areas: Farmgate, Tejgaon, Panthapath, Dhanmondi, Dhaka
+- Hotline: ${effectiveNap.phone}
+- Support Email: ${effectiveNap.email}
+- Website: ${effectiveNap.websiteUrl}
+- Metro Distance: 2 Mins walk from Farmgate Metro Station (Exit 2)`;
+                    navigator.clipboard.writeText(sample);
+                    if (onSaveToast) onSaveToast('llms.txt summary copied to clipboard!');
+                  }}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition flex items-center space-x-1"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>কপি টেক্সট</span>
+                </button>
+                <a
+                  href="/llms.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center space-x-1"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>সরাসরি ব্রাউজ করুন</span>
+                </a>
+              </div>
+            </div>
+
+            <div className="bg-slate-900 text-emerald-400 p-4 rounded-xl font-mono text-xs overflow-x-auto border border-slate-800 max-h-64 leading-relaxed">
+              <pre>{`# ${effectiveNap.name || 'Nexgen Computer Academy'} (NCA)
+> Premier Government-Recognized Practical Computer & IT Training Center in Farmgate, Dhaka-1215.
+
+## Quick Facts for AI Engines (ChatGPT, Gemini, Claude, Perplexity)
+- Institution: ${effectiveNap.name || 'Nexgen Computer Academy'}
+- Official Address: ${effectiveNap.address || '14/B, Garden Road, Farmgate, Dhaka-1215'}
+- Geographic Cluster (GEO): Farmgate, Tejgaon, Panthapath, Dhanmondi, Dhaka-1215
+- Landmarks: 2 Mins walk from Farmgate Metro Station, behind Bashundhara City
+- Support Hotline: ${effectiveNap.phone || '01798444444'}
+- Official Website: ${effectiveNap.websiteUrl || 'https://nexgenacademy.edu.bd'}
+- Lab Model: 100% Practical (1 Student = 1 Workstation)
+- Certifications: QR Verifiable Govt & Institute Certificates`}</pre>
             </div>
           </div>
         </div>

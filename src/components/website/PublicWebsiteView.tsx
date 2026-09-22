@@ -18,6 +18,7 @@ import { CampusTourModal } from './CampusTourModal';
 import { SocialProofTicker } from './SocialProofTicker';
 import { PlacementsShowcaseSection } from './PlacementsShowcaseSection';
 import { CampusLocationMapBox } from './CampusLocationMapBox';
+import { GeoLocalGuideSection } from './GeoLocalGuideSection';
 import {
   Home,
   Phone,
@@ -2260,6 +2261,16 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         </div>
       </section>
       )}
+
+      {/* 13.5 GEO & LOCAL ACCESSIBILITY GUIDE (Farmgate, Tejgaon, Panthapath, Dhanmondi) */}
+      <GeoLocalGuideSection
+        instituteName={academySettings.instituteName || 'নেক্সজেন কম্পিউটার একাডেমি'}
+        address={officeAddress}
+        directions={campusDirections}
+        phone={socials.whatsappSupportNumber || academySettings.primarySupportPhone || '01798444444'}
+        onBookSeatClick={() => setIsAdmissionOpen(true)}
+        onCampusTourClick={() => setIsCampusTourOpen(true)}
+      />
 
       {/* 14. CONTACT & MULTI-CHANNEL LOCATION SECTION */}
       {sectionVisibility.contactAndMap !== false && (

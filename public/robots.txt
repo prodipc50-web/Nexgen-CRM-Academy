@@ -1,10 +1,45 @@
+# Nexgen Computer Academy Robots.txt
+# Optimized for Google, Bing, ChatGPT, Claude, Gemini, Perplexity, and Apple Intelligence
+
 User-agent: *
 Allow: /
 Allow: /#courses
 Allow: /#admission
 Allow: /#verify-certificate
+Allow: /llms.txt
 Disallow: /api/
 Disallow: /api/leads/
 Disallow: /api/crm/
+Disallow: /admin
+Disallow: /erp
+
+# AI Search Engine Crawlers & Assistants (Explicitly Allowed)
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+Allow: /llms.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+
+User-agent: Applebot-Extended
+Allow: /
+Allow: /llms.txt
 
 Sitemap: /sitemap.xml
+

@@ -45,21 +45,22 @@ export function getHomepageSeoMetadata(
   const title = seo?.metaTitle || `${instituteName} - Best Computer Training Center in Farmgate, Dhaka`;
   const metaDescription =
     seo?.metaDescription ||
-    `${instituteName} in Farmgate, Dhaka offers 100% practical lab training for Computer Office Application, Advanced Excel, Web Dev, Graphic Design & Digital Marketing with job placement assistance.`;
+    `${instituteName} at Farmgate, Dhaka (close to Panthapath, Tejgaon & Dhanmondi). 100% practical lab training in Computer Office Application, Advanced Excel, Web Dev & Freelancing with verifiable certification.`;
 
-  const keywords = seo?.keywords && seo.keywords.length > 0
-    ? seo.keywords
-    : [
-        'Computer Course in Farmgate',
-        'Computer Training Center in Farmgate',
-        'Computer Course in Dhaka',
-        'Computer Office Application Course',
-        'Advanced Excel Course in Farmgate',
-        'Best IT Training Institute in Farmgate',
-        'Computer Training in Farmgate',
-        'AI Computer Course',
-        'Practical Computer Training'
-      ];
+  const defaultKeywords = [
+    'Computer Course in Farmgate',
+    'Computer Training Center in Farmgate',
+    'Computer Training in Tejgaon',
+    'Computer Institute near Panthapath',
+    'Computer Course in Dhanmondi',
+    'Best Computer Training Center in Farmgate Dhaka',
+    'Computer Office Application Course',
+    'Advanced Excel Course in Farmgate',
+    'Practical IT Training Center Farmgate',
+    'MS Office Training Farmgate Tejgaon Panthapath'
+  ];
+
+  const keywords = seo?.keywords && seo.keywords.length > 0 ? seo.keywords : defaultKeywords;
 
   const canonicalUrl = `${baseUrl.replace(/\/+$/, '')}/`;
   const ogTitle = seo?.ogTitle || title;
@@ -236,12 +237,53 @@ export function getLocalBusinessSchema(
     ],
     areaServed: [
       { '@type': 'AdministrativeArea', name: 'Farmgate' },
-      { '@type': 'AdministrativeArea', name: 'Panthapath' },
       { '@type': 'AdministrativeArea', name: 'Tejgaon' },
+      { '@type': 'AdministrativeArea', name: 'Tejgaon Industrial Area' },
+      { '@type': 'AdministrativeArea', name: 'Panthapath' },
       { '@type': 'AdministrativeArea', name: 'Dhanmondi' },
+      { '@type': 'AdministrativeArea', name: 'Green Road' },
+      { '@type': 'AdministrativeArea', name: 'Indira Road' },
+      { '@type': 'AdministrativeArea', name: 'Kawran Bazar' },
       { '@type': 'AdministrativeArea', name: 'Bijoy Sarani' },
       { '@type': 'AdministrativeArea', name: 'Dhaka' },
       { '@type': 'Country', name: 'Bangladesh' }
+    ],
+    knowsAbout: [
+      'Computer Office Application',
+      'Advanced MS Excel',
+      'Data Analysis',
+      'Web Design and Development',
+      'Graphic Design and Multimedia',
+      'Digital Marketing and SEO',
+      'AI Prompt Engineering and Productivity',
+      'Freelancing and Remote Job Skills'
+    ],
+    amenityFeature: [
+      {
+        '@type': 'LocationFeatureSpecification',
+        name: 'Dedicated 1-to-1 High Spec PC Workstation',
+        value: true
+      },
+      {
+        '@type': 'LocationFeatureSpecification',
+        name: 'Farmgate Metro Rail Station Access (2 Mins Walk)',
+        value: true
+      },
+      {
+        '@type': 'LocationFeatureSpecification',
+        name: 'Direct Access from Dhanmondi, Panthapath & Tejgaon',
+        value: true
+      },
+      {
+        '@type': 'LocationFeatureSpecification',
+        name: 'Government Verifiable QR Code Certificate',
+        value: true
+      },
+      {
+        '@type': 'LocationFeatureSpecification',
+        name: 'Lifetime Practical Lab Support',
+        value: true
+      }
     ],
     sameAs: sameAs.length > 0 ? sameAs : undefined
   };
@@ -423,13 +465,19 @@ export function applySeoMetadata(meta: SeoMetadataPayload): void {
   if (meta.metaDescription) setMetaTag('name', 'description', meta.metaDescription);
   if (meta.keywords && meta.keywords.length > 0) setMetaTag('name', 'keywords', meta.keywords.join(', '));
   setMetaTag('name', 'robots', meta.noIndex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  
+  // AI Bot specific directives (AEO & GEO indexing)
+  setMetaTag('name', 'googlebot', meta.noIndex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large');
+  setMetaTag('name', 'gptbot', meta.noIndex ? 'noindex' : 'index, follow');
+  setMetaTag('name', 'claudebot', meta.noIndex ? 'noindex' : 'index, follow');
+  setMetaTag('name', 'perplexitybot', meta.noIndex ? 'noindex' : 'index, follow');
   setMetaTag('name', 'author', meta.author || 'Academy');
 
-  // Geo Meta Tags (Local SEO)
+  // Geo Meta Tags (Local SEO & GEO Positioning)
   setMetaTag('name', 'geo.region', 'BD-13');
-  setMetaTag('name', 'geo.placename', 'Farmgate, Dhaka');
-  setMetaTag('name', 'geo.position', '23.7527;90.3887');
-  setMetaTag('name', 'ICBM', '23.7527, 90.3887');
+  setMetaTag('name', 'geo.placename', 'Farmgate, Tejgaon, Panthapath, Dhanmondi, Dhaka, Bangladesh');
+  setMetaTag('name', 'geo.position', '23.7570;90.3887');
+  setMetaTag('name', 'ICBM', '23.7570, 90.3887');
 
   // Open Graph
   if (meta.ogTitle || meta.title) setMetaTag('property', 'og:title', meta.ogTitle || meta.title);
