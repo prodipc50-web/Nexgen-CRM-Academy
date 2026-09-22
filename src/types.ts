@@ -157,6 +157,18 @@ export interface InstallmentFeeRules {
   strictAdmissionFreezeAfterDays?: number;
 }
 
+export interface CampusBranch {
+  id: string;
+  name: string;
+  shortCode: string;
+  address: string;
+  phone: string;
+  email?: string;
+  mapUrl?: string;
+  isMainBranch: boolean;
+  isActive: boolean;
+}
+
 export interface AcademySettings {
   instituteName: string;
   tagline: string;
@@ -204,6 +216,7 @@ export interface AcademySettings {
   // Staff Session & Data Export Security
   sessionAutoLockMinutes?: number; // 0 = disabled, 15, 30, 60
   exportSecurityPasswordRequired?: boolean;
+  exportSecurityPassword?: string;
 
   // Automated Backup Schedule Configuration
   autoBackupConfig?: AutoBackupConfig;
@@ -219,13 +232,15 @@ export interface AcademySettings {
   academicCalendar?: AcademicCalendarConfig;
   feeRules?: InstallmentFeeRules;
 
+  // Multi-Campus & Branches
+  branches?: CampusBranch[];
+
   // Backward compatibility & convenience aliases
   phone?: string;
   whatsapp?: string;
   whatsappNumber?: string;
   name?: string;
   instituteCode?: string;
-  branches?: any[];
 }
 
 export type LeadStatus =
@@ -337,6 +352,8 @@ export interface Lead {
   preferredSchedule?: string;
   preferredLearningMode?: 'Offline' | 'Online Live' | 'Hybrid';
   learningMode?: 'Offline' | 'Online Live' | 'Hybrid';
+  branch?: string;
+  preferredBranch?: string;
   leadSource: string;
   source?: string;
   landingPage?: string;
@@ -449,6 +466,7 @@ export interface Student {
   emergencyContact?: string;
   counselorId?: string;
   counselorName?: string; // Manual Counselor Name
+  branch?: string; // Campus Branch
   studentGoal: StudentGoal;
   status: StudentStatus;
   dropReason?: string;
@@ -1067,6 +1085,7 @@ export interface Admission {
   studentId: string;
   courseId: string;
   batchId: string;
+  branch?: string; // Campus Branch
   learningMode?: 'Offline' | 'Online Live' | 'Hybrid';
   admissionType?: 'In-Person / Office' | 'Online Admission';
   admissionDate: string;

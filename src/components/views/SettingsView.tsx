@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Lock,
   Eye,
+  EyeOff,
   Edit3,
   Trash2,
   ListFilter,
@@ -41,8 +42,10 @@ import {
   Award,
   Tag,
   Calendar,
-  Coins
+  Coins,
+  Star
 } from 'lucide-react';
+import { CampusBranch } from '../../types';
 import {
   DEFAULT_DUE_NOTICE_TEMPLATE,
   DEFAULT_WELCOME_NOTICE_TEMPLATE,
@@ -182,6 +185,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     receiptNotes: academySettings.receiptNotes || '১. ভর্তির ফি ও টিউশন ফি অফেরতযোগ্য ও অহস্তান্তরযোগ্য।\n২. নির্ধারিত কিস্তির তারিখের মধ্যে ফি পরিশোধ কাম্য।\n৩. এই রসিদটি কম্পিউটার জেনারেটেড ও সুরক্ষিত।',
     sessionAutoLockMinutes: academySettings.sessionAutoLockMinutes ?? 0,
     exportSecurityPasswordRequired: academySettings.exportSecurityPasswordRequired ?? false,
+    exportSecurityPassword: academySettings.exportSecurityPassword || '',
+    branches: (academySettings.branches && academySettings.branches.length > 0) ? academySettings.branches : [],
     messageTemplates: {
       dueNoticeTemplate: academySettings.messageTemplates?.dueNoticeTemplate || DEFAULT_DUE_NOTICE_TEMPLATE,
       admissionWelcomeTemplate: academySettings.messageTemplates?.admissionWelcomeTemplate || DEFAULT_WELCOME_NOTICE_TEMPLATE,
@@ -194,6 +199,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
   });
 
   const [newHelplineInput, setNewHelplineInput] = useState('');
+  const [showExportPassword, setShowExportPassword] = useState(false);
+
+  // Multi-Branch Management State
+  const [isAddingBranch, setIsAddingBranch] = useState(false);
+  const [editingBranchId, setEditingBranchId] = useState<string | null>(null);
+  const [branchForm, setBranchForm] = useState<CampusBranch>({
+    id: '',
+    name: '',
+    shortCode: '',
+    address: '',
+    phone: '',
+    email: '',
+    mapUrl: '',
+    isMainBranch: false,
+    isActive: true
+  });
 
   useEffect(() => {
     setProfileForm({
@@ -214,6 +235,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
       receiptNotes: academySettings.receiptNotes || '১. ভর্তির ফি ও টিউশন ফি অফেরতযোগ্য ও অহস্তান্তরযোগ্য।\n২. নির্ধারিত কিস্তির তারিখের মধ্যে ফি পরিশোধ কাম্য।\n৩. এই রসিদটি কম্পিউটার জেনারেটেড ও সুরক্ষিত।',
       sessionAutoLockMinutes: academySettings.sessionAutoLockMinutes ?? 0,
       exportSecurityPasswordRequired: academySettings.exportSecurityPasswordRequired ?? false,
+      exportSecurityPassword: academySettings.exportSecurityPassword || '',
+      branches: (academySettings.branches && academySettings.branches.length > 0) ? academySettings.branches : [],
       messageTemplates: {
         dueNoticeTemplate: academySettings.messageTemplates?.dueNoticeTemplate || DEFAULT_DUE_NOTICE_TEMPLATE,
         admissionWelcomeTemplate: academySettings.messageTemplates?.admissionWelcomeTemplate || DEFAULT_WELCOME_NOTICE_TEMPLATE,
@@ -225,6 +248,76 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
       taglineFontSize: academySettings.taglineFontSize || 11
     });
   }, [academySettings]);
+
+  const handleStartAddBranch = () => {
+    setBranchForm({
+      id: `branch-${Date.now()}`,
+      name: '',
+      shortCode: '',
+      address: '',
+      phone: profileForm.primarySupportPhone || '01798444444',
+      email: profileForm.officialEmail || '',
+      mapUrl: '',
+      isMainBranch: (profileForm.branches?.length || 0) === 0,
+      isActive: true
+    });
+    setEditingBranchId(null);
+    setIsAddingBranch(true);
+  };
+
+  const handleStartEditBranch = (branch: CampusBranch) => {
+    setBranchForm({ ...branch });
+    setEditingBranchId(branch.id);
+    setIsAddingBranch(true);
+  };
+
+  const handleSaveBranch = () => {
+    if (!branchForm.name.trim()) {
+      alert('অনুগ্রহ করে ব্রাঞ্চের নাম লিখুন');
+      return;
+    }
+    const currentBranches = profileForm.branches || [];
+    let updatedBranches: CampusBranch[];
+    const willBeMain = branchForm.isMainBranch;
+
+    if (editingBranchId) {
+      updatedBranches = currentBranches.map(b => {
+        if (b.id === editingBranchId) {
+          return { ...branchForm };
+        }
+        return willBeMain ? { ...b, isMainBranch: false } : b;
+      });
+    } else {
+      const newB: CampusBranch = {
+        ...branchForm,
+        id: branchForm.id || `branch-${Date.now()}`,
+        shortCode: branchForm.shortCode || branchForm.name.substring(0, 3).toUpperCase()
+      };
+      const prepared = willBeMain ? currentBranches.map(b => ({ ...b, isMainBranch: false })) : [...currentBranches];
+      updatedBranches = [...prepared, newB];
+    }
+
+    setProfileForm(prev => ({
+      ...prev,
+      branches: updatedBranches,
+      campusName: willBeMain ? branchForm.name : prev.campusName
+    }));
+    setIsAddingBranch(false);
+    setEditingBranchId(null);
+  };
+
+  const handleDeleteBranch = (branchId: string) => {
+    const target = profileForm.branches?.find(b => b.id === branchId);
+    if (!target) return;
+    if (confirm(`আপনি কি নিশ্চিতভাবে "${target.name}" ব্রাঞ্চটি তালিকা থেকে মুছে ফেলতে চান?`)) {
+      const currentBranches = profileForm.branches || [];
+      const updated = currentBranches.filter(b => b.id !== branchId);
+      setProfileForm(prev => ({
+        ...prev,
+        branches: updated
+      }));
+    }
+  };
 
   const handleAddHelpline = () => {
     const trimmed = newHelplineInput.trim();
@@ -1620,11 +1713,27 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
             </div>
 
             {/* Certificate Verification URL Base Configuration */}
-            <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200">
-              <label className="block text-emerald-950 font-bold mb-1 flex items-center space-x-1.5 text-sm">
-                <Shield className="w-4 h-4 text-emerald-600" />
-                <span>Certificate Online Verification Base URL (অনলাইন ভেরিফিকেশন লিংক)</span>
-              </label>
+            <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="block text-emerald-950 font-bold flex items-center space-x-1.5 text-sm">
+                  <Shield className="w-4 h-4 text-emerald-600" />
+                  <span>Certificate Online Verification Base URL (অনলাইন ভেরিফিকেশন লিংক)</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://nexgenacademy.edu.bd';
+                    setProfileForm(prev => ({
+                      ...prev,
+                      certificateVerificationBaseUrl: `${currentOrigin}/?cert=`
+                    }));
+                  }}
+                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-[11px] rounded-lg shadow-xs inline-flex items-center space-x-1 transition-colors self-start sm:self-auto cursor-pointer"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>⚡ বর্তমান লাইভ ডোমেন সেট করুন (Use Current URL)</span>
+                </button>
+              </div>
               <input
                 type="text"
                 placeholder="https://nexgenacademy.edu.bd/verify/"
@@ -1632,9 +1741,215 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                 onChange={e => setProfileForm({ ...profileForm, certificateVerificationBaseUrl: e.target.value })}
                 className="w-full bg-white border border-emerald-300 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono text-xs outline-none focus:border-emerald-500"
               />
-              <p className="text-[11px] text-emerald-800 mt-1.5">
-                Certificates will display: <span className="font-mono font-bold">{profileForm.certificateVerificationBaseUrl || 'https://nexgenacademy.edu.bd/verify/'}NCA-CERT-2026-5172</span> (Can also be manually edited in Certificate modal anytime)
+              <p className="text-[11px] text-emerald-800">
+                Certificates will display: <span className="font-mono font-bold">{profileForm.certificateVerificationBaseUrl || 'https://nexgenacademy.edu.bd/verify/'}NCA-CERT-2026-5172</span> (ক্লিক বা কিউআর কোড স্ক্যান করে শিক্ষার্থী সরাসরি সত্যতা যাচাই করতে পারবে)
               </p>
+            </div>
+
+            {/* Multi-Campus & Branch Locations Management */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <label className="font-bold text-slate-900 flex items-center space-x-2 text-sm">
+                    <Building className="w-4 h-4 text-indigo-600" />
+                    <span>Campus Branches & Locations (একাধিক ক্যাম্পাস ও ব্রাঞ্চ পরিচালনা)</span>
+                  </label>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    শিক্ষার্থী ভর্তি, ক্যাম্পাস ট্যুর এবং ল্যান্ডিং পেজে শিক্ষার্থীরা তাদের পছন্দের ব্রাঞ্চ নির্বাচন করতে পারবে।
+                  </p>
+                </div>
+                {!isAddingBranch && (
+                  <button
+                    type="button"
+                    onClick={handleStartAddBranch}
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow-xs inline-flex items-center space-x-1.5 transition-colors self-start sm:self-auto cursor-pointer"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>নতুন ব্রাঞ্চ যোগ করুন (Add Branch)</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Branch Add / Edit Form */}
+              {isAddingBranch && (
+                <div className="bg-white p-4 rounded-2xl border-2 border-indigo-200 shadow-sm space-y-3 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="font-bold text-xs text-indigo-900 flex items-center space-x-1.5">
+                      <Edit3 className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>{editingBranchId ? 'ব্রাঞ্চ তথ্য সম্পাদনা করুন (Edit Branch)' : 'নতুন ক্যাম্পাস / ব্রাঞ্চ যোগ করুন (Add New Branch)'}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => { setIsAddingBranch(false); setEditingBranchId(null); }}
+                      className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <label className="block text-slate-700 font-bold mb-1">ব্রাঞ্চের নাম (Branch Name) *</label>
+                      <input
+                        type="text"
+                        placeholder="যেমন: মিরপুর ক্যাম্পাস (Mirpur-10 Branch)"
+                        value={branchForm.name}
+                        onChange={e => setBranchForm({ ...branchForm, name: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-medium outline-none focus:border-indigo-500 focus:bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-700 font-bold mb-1">শর্ট কোড (Code / Prefix)</label>
+                      <input
+                        type="text"
+                        placeholder="যেমন: MIR / FGT / UTR"
+                        value={branchForm.shortCode}
+                        onChange={e => setBranchForm({ ...branchForm, shortCode: e.target.value.toUpperCase() })}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold uppercase outline-none focus:border-indigo-500 focus:bg-white"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-slate-700 font-bold mb-1">ক্যাম্পাসের পূর্ণ ঠিকানা (Physical Address) *</label>
+                      <input
+                        type="text"
+                        placeholder="যেমন: প্লট ৩, ব্লক এ, মিরপুর-১০ গোলচত্বর, ঢাকা-১২১৬"
+                        value={branchForm.address}
+                        onChange={e => setBranchForm({ ...branchForm, address: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-medium outline-none focus:border-indigo-500 focus:bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-700 font-bold mb-1">হেল্পলাইন / ফোন (Phone)</label>
+                      <input
+                        type="text"
+                        placeholder="যেমন: 01811556677"
+                        value={branchForm.phone}
+                        onChange={e => setBranchForm({ ...branchForm, phone: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-medium outline-none focus:border-indigo-500 focus:bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-700 font-bold mb-1">Google Maps শেয়ার লিংক (ঐচ্ছিক)</label>
+                      <input
+                        type="text"
+                        placeholder="https://maps.google.com/..."
+                        value={branchForm.mapUrl || ''}
+                        onChange={e => setBranchForm({ ...branchForm, mapUrl: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-medium outline-none focus:border-indigo-500 focus:bg-white text-[11px]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                    <div className="flex items-center space-x-4">
+                      <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={branchForm.isMainBranch}
+                          onChange={e => setBranchForm({ ...branchForm, isMainBranch: e.target.checked })}
+                          className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                        />
+                        <span>প্রধান ক্যাম্পাস (Main Campus হিসেবে চিহ্নিত করুন)</span>
+                      </label>
+
+                      <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={branchForm.isActive}
+                          onChange={e => setBranchForm({ ...branchForm, isActive: e.target.checked })}
+                          className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
+                        />
+                        <span>সক্রিয় ব্রাঞ্চ (Active)</span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => { setIsAddingBranch(false); setEditingBranchId(null); }}
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition-colors cursor-pointer"
+                      >
+                        বাতিল
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveBranch}
+                        className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs transition-colors inline-flex items-center space-x-1 cursor-pointer"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>সংরক্ষণ করুন</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Configured Branches List */}
+              <div className="space-y-2.5">
+                {(profileForm.branches || []).map((branch, idx) => (
+                  <div
+                    key={branch.id || idx}
+                    className={`p-3.5 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      branch.isMainBranch
+                        ? 'bg-indigo-50/70 border-indigo-200 shadow-2xs'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-slate-900 text-xs sm:text-sm">{branch.name}</span>
+                        {branch.shortCode && (
+                          <span className="px-1.5 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-mono font-bold rounded">
+                            {branch.shortCode}
+                          </span>
+                        )}
+                        {branch.isMainBranch && (
+                          <span className="px-2 py-0.5 bg-indigo-600 text-white text-[10px] font-bold rounded-full flex items-center space-x-0.5">
+                            <Star className="w-3 h-3 fill-current" />
+                            <span>Main Campus</span>
+                          </span>
+                        )}
+                        {!branch.isActive && (
+                          <span className="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-bold rounded-full">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-slate-500 text-[11px]">
+                        <span className="flex items-center space-x-1">
+                          <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
+                          <span>{branch.address}</span>
+                        </span>
+                        {branch.phone && (
+                          <span className="flex items-center space-x-1 font-mono">
+                            <Phone className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <span>{branch.phone}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-1.5 self-end sm:self-auto shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleStartEditBranch(branch)}
+                        className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                        title="সম্পাদনা করুন"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteBranch(branch.id)}
+                        className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="মুছে ফেলুন"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Multiple Helpline Numbers Management */}
@@ -1809,6 +2124,44 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                     </label>
                   </div>
                   <p className="text-[11px] text-amber-800 mt-1">শিক্ষার্থী ও অর্থনৈতিক তালিকা অননুমোদিত এক্সপোর্ট হওয়া প্রতিরোধ করে।</p>
+
+                  {profileForm.exportSecurityPasswordRequired && (
+                    <div className="mt-2.5 bg-white p-3 rounded-xl border border-amber-300 shadow-2xs space-y-2 animate-in fade-in duration-150">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-amber-950 flex items-center space-x-1.5">
+                          <Lock className="w-3.5 h-3.5 text-amber-600" />
+                          <span>কাস্টম সিকিউরিটি পাসওয়ার্ড (Export Security Password)</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowExportPassword(!showExportPassword)}
+                          className="text-[11px] font-bold text-amber-700 hover:text-amber-900 inline-flex items-center space-x-1 cursor-pointer"
+                        >
+                          {showExportPassword ? (
+                            <>
+                              <EyeOff className="w-3 h-3" />
+                              <span>লুকান</span>
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="w-3 h-3" />
+                              <span>দেখুন</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <input
+                        type={showExportPassword ? 'text' : 'password'}
+                        placeholder="স্প্রেডশিট ডাউনলোডের সিকিউরিটি পাসওয়ার্ড লিখুন"
+                        value={profileForm.exportSecurityPassword || ''}
+                        onChange={e => setProfileForm({ ...profileForm, exportSecurityPassword: e.target.value })}
+                        className="w-full bg-amber-50/50 border border-amber-300 rounded-lg px-3 py-2 text-slate-900 font-mono text-xs font-bold outline-none focus:border-amber-600 focus:bg-white"
+                      />
+                      <p className="text-[11px] text-amber-800">
+                        * শিক্ষার্থী, টিউশন ফি বা খরচের স্প্রেডশিট এক্সপোর্ট করার সময় ঠিক এই পাসওয়ার্ডটি চাইবে। (ডিফল্ট: admin123)
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

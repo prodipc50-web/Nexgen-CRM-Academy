@@ -1280,10 +1280,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
                       {/* Live Batch Date & Urgency Pill */}
                       {(() => {
-                        const upcomingBatch = (batches || []).find(b => b.courseId === c.id && b.status === 'Upcoming');
-                        const batchDate = upcomingBatch?.startDate || c.landingConfig?.nextBatchStartDate || '১৫ অক্টোবর ২০২৬';
+                        const upcomingBatch = (batches || []).find(b => (b.courseId === c.id || b.courseId === c.code) && b.status === 'Upcoming');
+                        const batchDate = upcomingBatch?.startDate || c.landingConfig?.nextBatchStartDate || 'নতুন ব্যাচে ভর্তি চলছে';
                         const remainingSeats = upcomingBatch
-                          ? Math.max(2, (upcomingBatch.maxStudents || 25) - (upcomingBatch.enrolledStudents || 21))
+                          ? Math.max(2, (upcomingBatch.seatCapacity || upcomingBatch.maxStudents || 25) - (upcomingBatch.enrolledStudents || 0))
                           : (c.landingConfig?.remainingSeats || 4);
 
                         return (

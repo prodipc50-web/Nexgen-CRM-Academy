@@ -40,8 +40,14 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
     paymentMethodsList,
     bloodGroupsList,
     createAdmission,
-    payments
+    payments,
+    academySettings
   } = useAcademy();
+
+  // Multi-Branch Selection
+  const availableBranches = (academySettings?.branches && academySettings.branches.length > 0)
+    ? academySettings.branches.filter(b => b.isActive !== false)
+    : [];
 
   // Form State
   const [selectedLeadId, setSelectedLeadId] = useState<string>(initialLead?.id || '');
@@ -50,6 +56,11 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
   const [altPhone, setAltPhone] = useState(initialLead?.altPhone || '');
   const [email, setEmail] = useState(initialLead?.email || '');
   const [address, setAddress] = useState(initialLead?.address || '');
+  const [branch, setBranch] = useState<string>(() => {
+    if (initialLead?.branch) return initialLead.branch;
+    const main = availableBranches.find(b => b.isMainBranch);
+    return main?.name || availableBranches[0]?.name || academySettings?.campusName || 'ফার্মগেট মেইন ক্যাম্পাস';
+  });
   const [occupation, setOccupation] = useState<OccupationType>(initialLead?.occupation || occupationsList[0] || 'Student (School / College / University)');
   const [education, setEducation] = useState(initialLead?.educationLevel || educationLevelsList[0] || 'HSC / Higher Secondary (Class 12)');
   const [bloodGroup, setBloodGroup] = useState(bloodGroupsList[0] || 'A+');
@@ -129,6 +140,7 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
       if (initialLead.counselorId) setCounselorId(initialLead.counselorId);
       if (initialLead.counselorName) setCounselorName(initialLead.counselorName);
       if (initialLead.leadSource) setLeadSource(initialLead.leadSource);
+      if (initialLead.branch) setBranch(initialLead.branch);
     }
   }, [initialLead]);
 
@@ -142,6 +154,7 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
       setAltPhone(lead.altPhone || '');
       setEmail(lead.email || '');
       setAddress(lead.address || '');
+      if (lead.branch) setBranch(lead.branch);
       setOccupation(lead.occupation);
       setEducation(lead.educationLevel);
       setInstitution(lead.institution || '');
@@ -199,6 +212,7 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
           altPhone,
           email,
           address,
+          branch,
           occupation,
           education,
           bloodGroup,
@@ -211,6 +225,7 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
         },
         courseId: selectedCourseId,
         batchId: selectedBatchId,
+        branch,
         counselorId,
         counselorName: counselorName.trim() || staffList.find(s => s.id === counselorId)?.name,
         leadSource,
@@ -505,6 +520,29 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
                     🔄 Hybrid (Both)
                   </button>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1">
+                  Campus / Branch (ক্যাম্পাস / ব্রাঞ্চ)
+                </label>
+                <select
+                  value={branch}
+                  onChange={e => setBranch(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                >
+                  {availableBranches.map(b => (
+                    <option key={b.id} value={b.name}>
+                      {b.name} {b.isMainBranch ? '⭐ (Main Campus)' : ''}
+                    </option>
+                  ))}
+                  {availableBranches.length === 0 && (
+                    <option value={academySettings?.campusName || 'ফার্মগেট মেইন ক্যাম্পাস'}>
+                      {academySettings?.campusName || 'ফার্মগেট মেইন ক্যাম্পাস'}
+                    </option>
+                  )}
+                  <option value="Online Campus / Remote">🌐 Online Campus / Remote</option>
+                </select>
               </div>
 
               <div>

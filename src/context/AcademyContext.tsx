@@ -52,6 +52,7 @@ import {
   SeminarWorkshop,
   InstallmentMilestone,
   AcademySettings,
+  CampusBranch,
   WebsiteReview,
   WebsiteGalleryItem,
   WebsiteNotice,
@@ -256,6 +257,8 @@ interface AcademyContextType {
     phone: string;
     email?: string;
     address?: string;
+    branch?: string;
+    preferredBranch?: string;
     education?: string;
     educationLevel?: string;
     institution?: string;
@@ -316,7 +319,7 @@ interface AcademyContextType {
 
   addFollowUp: (followUp: Omit<FollowUp, 'id' | 'createdAt'> & { newLeadStatus?: LeadStatus }) => void;
 
-    createAdmission: (params: {
+  createAdmission: (params: {
     studentData: Partial<Student>;
     courseId: string;
     batchId: string;
@@ -327,6 +330,7 @@ interface AcademyContextType {
     referral?: string;
     learningMode?: 'Offline' | 'Online Live' | 'Hybrid';
     admissionType?: 'In-Person / Office' | 'Online Admission';
+    branch?: string;
     regularFee: number;
     discount: number;
     scholarship: number;
@@ -1026,6 +1030,42 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     ];
   });
 
+  const DEFAULT_CAMPUS_BRANCHES: CampusBranch[] = [
+  {
+    id: 'branch-farmgate',
+    name: 'ফার্মগেট মেইন ক্যাম্পাস (Farmgate Main Campus)',
+    shortCode: 'FGT',
+    address: '14/B Garden Road, Farmgate, Dhaka-1215',
+    phone: '01798444444',
+    email: 'info@nexgenacademy.edu.bd',
+    mapUrl: 'https://share.google/9W8K1XZHLbZxFpF8G',
+    isMainBranch: true,
+    isActive: true
+  },
+  {
+    id: 'branch-mirpur',
+    name: 'মিরপুর ক্যাম্পাস (Mirpur Branch)',
+    shortCode: 'MIR',
+    address: 'Plot 3, Block A, Mirpur-10 Circle, Dhaka-1216',
+    phone: '01811556677',
+    email: 'mirpur@nexgenacademy.edu.bd',
+    mapUrl: '',
+    isMainBranch: false,
+    isActive: true
+  },
+  {
+    id: 'branch-uttara',
+    name: 'উত্তরা ক্যাম্পাস (Uttara Branch)',
+    shortCode: 'UTR',
+    address: 'House 12, Road 4, Sector 7, Uttara, Dhaka-1230',
+    phone: '01711223344',
+    email: 'uttara@nexgenacademy.edu.bd',
+    mapUrl: '',
+    isMainBranch: false,
+    isActive: true
+  }
+];
+
   const [academySettings, setAcademySettings] = useState<AcademySettings>(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_academy_settings`);
     if (saved) {
@@ -1048,6 +1088,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           },
           sessionAutoLockMinutes: parsed.sessionAutoLockMinutes ?? 0,
           exportSecurityPasswordRequired: parsed.exportSecurityPasswordRequired ?? false,
+          exportSecurityPassword: parsed.exportSecurityPassword || '',
+          branches: Array.isArray(parsed.branches) && parsed.branches.length > 0 ? parsed.branches : DEFAULT_CAMPUS_BRANCHES,
           ...parsed,
           campusName: parsed.campusName || 'Farmgate Campus',
           primarySupportPhone: parsed.primarySupportPhone || '01798444444',
@@ -1081,6 +1123,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       },
       sessionAutoLockMinutes: 0,
       exportSecurityPasswordRequired: false,
+      exportSecurityPassword: '',
+      branches: DEFAULT_CAMPUS_BRANCHES,
       logoIconSize: 48,
       logoFontSize: 16,
       taglineFontSize: 11,
@@ -2627,6 +2671,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     phone: string;
     email?: string;
     address?: string;
+    branch?: string;
+    preferredBranch?: string;
     education?: string;
     educationLevel?: string;
     institution?: string;
@@ -2926,6 +2972,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     referral,
     learningMode,
     admissionType,
+    branch,
     regularFee,
     discount,
     scholarship,
@@ -2946,6 +2993,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     referral?: string;
     learningMode?: 'Offline' | 'Online Live' | 'Hybrid';
     admissionType?: 'In-Person / Office' | 'Online Admission';
+    branch?: string;
     regularFee: number;
     discount: number;
     scholarship: number;
@@ -2996,6 +3044,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         emergencyContact: studentData.emergencyContact || studentData.phone,
         counselorId,
         counselorName: counselorName || staffList.find(s => s.id === counselorId)?.name,
+        branch: studentData.branch || branch || academySettings.campusName || 'ফার্মগেট মেইন ক্যাম্পাস',
         studentGoal: studentData.studentGoal || 'Freelancing',
         learningMode: learningMode || studentData.learningMode || 'Offline',
         onlinePortalAccess: studentData.onlinePortalAccess ?? (learningMode === 'Online Live' || learningMode === 'Hybrid'),
@@ -3026,6 +3075,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       studentId: studentId!,
       courseId,
       batchId,
+      branch: studentData.branch || branch || academySettings.campusName || 'ফার্মগেট মেইন ক্যাম্পাস',
       learningMode: learningMode || (batches.find(b => b.id === batchId)?.batchType || 'Offline'),
       admissionType: admissionType || (learningMode === 'Online Live' ? 'Online Admission' : 'In-Person / Office'),
       admissionDate: new Date().toISOString().split('T')[0],

@@ -11,9 +11,10 @@ export const downloadCSV = (filename: string, csvContent: string) => {
       if (raw) {
         const settings = JSON.parse(raw);
         if (settings.exportSecurityPasswordRequired) {
+          const expectedPassword = settings.exportSecurityPassword || 'admin123';
           const entered = window.prompt('🔒 ডেটা সিকিউরিটি: স্প্রেডশিট এক্সপোর্ট করতে সিকিউরিটি পাসওয়ার্ড লিখুন:');
           if (!entered) return;
-          const isAuthorized = entered === 'admin123' || entered === '123456';
+          const isAuthorized = entered === expectedPassword;
           if (!isAuthorized) {
             alert('❌ ভুল পাসওয়ার্ড! এক্সপোর্ট অনুমতি বাতিল করা হয়েছে।');
             return;
@@ -507,9 +508,25 @@ export const verifyExportAuthorization = (
   currentPassword?: string
 ): boolean => {
   if (!exportSecurityPasswordRequired) return true;
-  const entered = window.prompt('🔒 ডেটা সিকিউরিটি: স্প্রেডশিট এক্সপোর্ট করতে আপনার অ্যাকাউন্ট পাসওয়ার্ড লিখুন:');
+  let configuredPassword = currentPassword;
+  try {
+    const keys = Object.keys(localStorage);
+    const settingsKey = keys.find(k => k.endsWith('_academy_settings'));
+    if (settingsKey) {
+      const raw = localStorage.getItem(settingsKey);
+      if (raw) {
+        const settings = JSON.parse(raw);
+        if (settings.exportSecurityPassword) {
+          configuredPassword = settings.exportSecurityPassword;
+        }
+      }
+    }
+  } catch (err) {}
+
+  const entered = window.prompt('🔒 ডেটা সিকিউরিটি: স্প্রেডশিট এক্সপোর্ট করতে আপনার সিকিউরিটি পাসওয়ার্ড লিখুন:');
   if (!entered) return false;
-  if (entered === currentPassword || entered === 'admin123' || entered === '123456') {
+  const targetPassword = configuredPassword || 'admin123';
+  if (entered === targetPassword) {
     return true;
   }
   alert('❌ ভুল পাসওয়ার্ড! এক্সপোর্ট অনুমতি বাতিল করা হয়েছে।');

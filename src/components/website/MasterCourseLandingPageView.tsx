@@ -476,8 +476,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   course: propCourse,
   onBackToFullWebsite
 }) => {
-  const { courses, websiteCmsConfig, staffList, addLead, submitPublicLead, syncIncomingLeadsNow, academySettings, isAuthenticated, currentUser, updateCourse } = useAcademy();
+  const { courses, websiteCmsConfig, staffList, addLead, submitPublicLead, syncIncomingLeadsNow, academySettings, isAuthenticated, currentUser, updateCourse, batches } = useAcademy();
   const course = courses.find(c => c.id === propCourse.id || c.code === propCourse.code || (c.slug && propCourse.slug && c.slug === propCourse.slug)) || propCourse;
+
+  // Dynamic upcoming batch from CRM
+  const upcomingBatch = (batches || []).find(b => (b.courseId === course.id || b.courseId === course.code) && b.status === 'Upcoming');
+  const liveBatchDate = upcomingBatch?.startDate || course.landingConfig?.nextBatchStartDate || 'নতুন ব্যাচে ভর্তি চলছে';
+  const liveAvailableSeats = upcomingBatch
+    ? Math.max(2, (upcomingBatch.seatCapacity || upcomingBatch.maxStudents || 25) - (upcomingBatch.enrolledStudents || 0))
+    : (course.landingConfig?.availableSeats || 6);
 
   // Authorization check: Only authenticated admins/managers can edit landing page contents
   const canEdit = Boolean(
@@ -543,6 +550,17 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
   const [leadPhone, setLeadPhone] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadAddress, setLeadAddress] = useState('');
+
+  // Multi-Branch Selection
+  const availableBranches = (academySettings?.branches && academySettings.branches.length > 0)
+    ? academySettings.branches.filter(b => b.isActive !== false)
+    : [];
+
+  const [leadBranch, setLeadBranch] = useState<string>(() => {
+    const main = availableBranches.find(b => b.isMainBranch);
+    return main?.name || availableBranches[0]?.name || academySettings?.campusName || 'ফার্মগেট মেইন ক্যাম্পাস';
+  });
+
   const [leadSchedule, setLeadSchedule] = useState('উইকেন্ড (শুক্র-শনিবার সকাল ১০:০০ - ১২:০০)');
   const [isCustomSchedule, setIsCustomSchedule] = useState(false);
   const [customScheduleInput, setCustomScheduleInput] = useState('');
@@ -957,6 +975,8 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         phone: leadPhone.trim(),
         email: leadEmail.trim() || undefined,
         address: addressText || undefined,
+        branch: leadBranch,
+        preferredBranch: leadBranch,
         preferredSchedule: effectiveSchedule,
         preferredTime: effectiveSchedule,
         interestedCourseId: course.id,
@@ -979,7 +999,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         visitDate: today,
         firstContactDate: today,
         status: 'New',
-        comments: commentsText
+        comments: `${commentsText} [ক্যাম্পাস: ${leadBranch}]`
       });
 
       // 2. Immediately notify and sync CRM across all tabs and open windows
@@ -1000,6 +1020,8 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
         phone: leadPhone.trim(),
         email: leadEmail.trim() || undefined,
         address: addressText || undefined,
+        branch: leadBranch,
+        preferredBranch: leadBranch,
         courseId: course.id,
         courseName: course.name,
         interestedCourseId: course.id,
@@ -1291,8 +1313,8 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-slate-300 pt-1 font-medium border-t border-slate-800">
-                  <span>পরবর্তী ব্যাচ শুরু: <strong className="text-white">{landingConfig.nextBatchStartDate || '১৫ মে, ২০২৬'}</strong></span>
-                  <span className="text-amber-300 font-black">বাকি সিট: {landingConfig.availableSeats || 8} টি</span>
+                  <span>পরবর্তী ব্যাচ শুরু: <strong className="text-white">{liveBatchDate}</strong>{upcomingBatch?.classDays ? ` (${upcomingBatch.classDays})` : ''}</span>
+                  <span className="text-amber-300 font-black">বাকি সিট: {liveAvailableSeats} টি</span>
                 </div>
               </div>
 
@@ -1512,6 +1534,32 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       className="w-full px-4 py-3 bg-slate-800/90 border border-slate-600 rounded-xl text-sm text-white placeholder:text-slate-400 font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
+
+                  {availableBranches.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-100 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                        <span className="flex items-center space-x-1.5">
+                          <Building className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>পছন্দের ক্যাম্পাস বা ব্রাঞ্চ (Campus / Branch)</span>
+                        </span>
+                        <span className="text-[11px] text-slate-200 font-medium">নিকটস্থ ক্যাম্পাস নির্বাচন করুন</span>
+                      </label>
+                      <select
+                        value={leadBranch}
+                        onChange={e => setLeadBranch(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-800/90 border border-slate-600 rounded-xl text-sm text-white font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      >
+                        {availableBranches.map(b => (
+                          <option key={b.id} value={b.name} className="bg-slate-900 text-white">
+                            {b.name} {b.isMainBranch ? '⭐ (Main Campus)' : ''}
+                          </option>
+                        ))}
+                        <option value="Online Live Batch (সরাসরি লাইভ অনলাইন ব্যাচ)" className="bg-slate-900 text-white">
+                          🌐 সরাসরি লাইভ অনলাইন ব্যাচ (Online Live)
+                        </option>
+                      </select>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-bold text-slate-100 uppercase tracking-wider mb-1.5 flex items-center justify-between">
