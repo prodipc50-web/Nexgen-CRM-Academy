@@ -442,15 +442,18 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               </button>
             )}
 
-            {/* Staff / Admin Portal Button */}
-            <button
-              type="button"
-              onClick={onOpenStaffLogin}
-              className="flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs"
-            >
-              <LogIn className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-              <span>{isAuthenticated ? 'ERP' : 'Staff Login'}</span>
-            </button>
+            {/* Staff / Admin Portal Button - Only show if authenticated */}
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={onOpenStaffLogin}
+                className="flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs shadow-xs"
+                title="Go to ERP Dashboard"
+              >
+                <LogIn className="w-3.5 h-3.5 text-white shrink-0" />
+                <span>ERP</span>
+              </button>
+            ) : null}
 
             {/* Quick Admin CMS Edit Button (If logged in) */}
             {isAuthenticated && onOpenCmsAdmin && (
@@ -2439,8 +2442,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     <li><a href="#seminars" className="hover:text-white">Free Career Seminars</a></li>
                     <li><a href="#verify-certificate" className="hover:text-white">Verify Student Certificate</a></li>
                     <li>
-                      <button type="button" onClick={onOpenStaffLogin} className="hover:text-amber-400 font-bold">
-                        ERP Staff Administration
+                      <button
+                        type="button"
+                        onClick={onOpenStaffLogin}
+                        className="text-slate-400 hover:text-indigo-300 font-medium text-[11px] transition-colors cursor-pointer"
+                      >
+                        {isAuthenticated ? 'ERP Dashboard' : 'Staff Access'}
                       </button>
                     </li>
                   </ul>

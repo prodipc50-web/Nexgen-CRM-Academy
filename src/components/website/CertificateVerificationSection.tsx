@@ -249,18 +249,7 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
               <Upload className="w-4 h-4" />
               <span>ম্যানুয়াল সার্টিফিকেট আপলোড / ক্রপ ও এডিটর</span>
             </button>
-          ) : (
-            onOpenStaffLogin && (
-              <button
-                type="button"
-                onClick={onOpenStaffLogin}
-                className="inline-flex items-center space-x-1.5 px-3 py-1 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-amber-300 text-[11px] font-semibold rounded-lg transition-colors cursor-pointer"
-                title="Staff login to upload and edit certificates"
-              >
-                <span>অ্যাডমিন অপশন: সার্টিফিকেট আপলোড</span>
-              </button>
-            )
-          )}
+          ) : null}
         </div>
 
         <div className="text-center max-w-2xl mx-auto mb-10">

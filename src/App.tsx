@@ -361,8 +361,18 @@ const AcademyAppContent: React.FC = () => {
   if (viewMode === 'website') {
     return (
       <PublicWebsiteView
-        onOpenStaffLogin={() => setViewMode('erp')}
-        onOpenStudentPortal={() => setViewMode('student_portal')}
+        onOpenStaffLogin={() => {
+          if (typeof window !== 'undefined') {
+            window.history.pushState(null, '', '/login');
+          }
+          setViewMode('erp');
+        }}
+        onOpenStudentPortal={() => {
+          if (typeof window !== 'undefined') {
+            window.history.pushState(null, '', '/portal');
+          }
+          setViewMode('student_portal');
+        }}
         onOpenCmsAdmin={() => {
           setViewMode('erp');
           setActiveTab('website_cms');
@@ -373,7 +383,16 @@ const AcademyAppContent: React.FC = () => {
 
   // 4. ERP / CRM Portal Mode — If in ERP mode and not authenticated, present the secure login portal
   if (!isAuthenticated) {
-    return <LoginView onBackToWebsite={() => setViewMode('website')} />;
+    return (
+      <LoginView
+        onBackToWebsite={() => {
+          if (typeof window !== 'undefined') {
+            window.history.pushState(null, '', '/');
+          }
+          setViewMode('website');
+        }}
+      />
+    );
   }
 
   const handleOpenAdmissionWithLead = (lead: Lead) => {

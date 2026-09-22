@@ -11,7 +11,7 @@ export const downloadCSV = (filename: string, csvContent: string) => {
       if (raw) {
         const settings = JSON.parse(raw);
         if (settings.exportSecurityPasswordRequired) {
-          const entered = window.prompt('🔒 ডেটা সিকিউরিটি: স্প্রেডশিট এক্সপোর্ট করতে পাসওয়ার্ড লিখুন (ডিফল্ট: admin123):');
+          const entered = window.prompt('🔒 ডেটা সিকিউরিটি: স্প্রেডশিট এক্সপোর্ট করতে সিকিউরিটি পাসওয়ার্ড লিখুন:');
           if (!entered) return;
           const isAuthorized = entered === 'admin123' || entered === '123456';
           if (!isAuthorized) {

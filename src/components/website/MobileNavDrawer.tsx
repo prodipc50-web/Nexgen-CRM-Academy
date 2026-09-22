@@ -394,48 +394,50 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                 </a>
               </div>
 
-              {/* Portal & Staff Management Links */}
-              <div className="pt-4 space-y-2">
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block px-2 mb-2">
-                  Portal & Admin (প্রশাসনিক এক্সেস)
-                </span>
+              {/* Portal & Staff Management Links (Only if logged in) */}
+              {isAuthenticated && (
+                <div className="pt-4 space-y-2">
+                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block px-2 mb-2">
+                    Staff Workspace (প্রশাসনিক এক্সেস)
+                  </span>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    onOpenStaffLogin();
-                  }}
-                  className="w-full min-h-[48px] px-3.5 py-2.5 rounded-2xl flex items-center justify-between bg-slate-900 hover:bg-indigo-900 text-white font-bold text-sm transition-colors active:scale-[0.98] shadow-xs"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-xl bg-white/10 text-indigo-300 flex items-center justify-center font-bold">
-                      <LogIn className="w-4 h-4" />
-                    </div>
-                    <span>{isAuthenticated ? 'Open ERP Portal (ড্যাশবোর্ড)' : 'Staff Login (স্টাফ পোর্টাল)'}</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
-                </button>
-
-                {isAuthenticated && onOpenCmsAdmin && (
                   <button
                     type="button"
                     onClick={() => {
                       onClose();
-                      onOpenCmsAdmin();
+                      onOpenStaffLogin();
                     }}
-                    className="w-full min-h-[48px] px-3.5 py-2.5 rounded-2xl flex items-center justify-between bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-sm transition-colors active:scale-[0.98]"
+                    className="w-full min-h-[48px] px-3.5 py-2.5 rounded-2xl flex items-center justify-between bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-sm transition-colors active:scale-[0.98] shadow-xs cursor-pointer"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-xs">
-                        <Sliders className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-xl bg-white/10 text-indigo-300 flex items-center justify-center font-bold">
+                        <LogIn className="w-4 h-4" />
                       </div>
-                      <span>Edit Website CMS</span>
+                      <span>Open ERP Portal (ড্যাশবোর্ড)</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-amber-600" />
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
                   </button>
-                )}
-              </div>
+
+                  {onOpenCmsAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenCmsAdmin();
+                      }}
+                      className="w-full min-h-[48px] px-3.5 py-2.5 rounded-2xl flex items-center justify-between bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-sm transition-colors active:scale-[0.98] cursor-pointer"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-xs">
+                          <Sliders className="w-4 h-4" />
+                        </div>
+                        <span>Edit Website CMS</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-amber-600" />
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* Campus Contact & Hotline Assistance */}
               <div className="pt-4 space-y-3">

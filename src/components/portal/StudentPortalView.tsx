@@ -143,14 +143,6 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
     );
   };
 
-  // Demo Login
-  const handleDemoLogin = () => {
-    if (students.length > 0) {
-      setLoggedInStudent(students[0]);
-      setLoginError('');
-    }
-  };
-
   // Current Student Data Aggregation
   const studentAdmissions = useMemo(() => {
     if (!loggedInStudent) return [];
@@ -293,16 +285,7 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
               </button>
             </form>
 
-            <div className="pt-3 border-t border-slate-800 flex flex-col items-center space-y-3">
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                className="w-full py-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-amber-400 font-bold text-xs rounded-xl transition-colors flex items-center justify-center space-x-1.5"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{language === 'bn' ? 'ডেমো শিক্ষার্থী হিসেবে প্রবেশ (১-ক্লিক)' : 'Quick Demo Student Sign In'}</span>
-              </button>
-
+            <div className="pt-3 border-t border-slate-800 flex flex-col items-center space-y-2">
               <p className="text-[11px] text-slate-400 text-center">
                 {language === 'bn' ? 'লগইন সংক্রান্ত যেকোনো সহায়তায় সরাসরি যোগাযোগ করুন:' : 'For student portal help desk:'}{' '}
                 <a href={`tel:${academySettings.primarySupportPhone || '01798444444'}`} className="text-indigo-400 font-bold hover:underline">

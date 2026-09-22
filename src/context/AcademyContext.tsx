@@ -2132,7 +2132,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const isPasswordValid = validPasswords.some(p => p && p.toLowerCase() === cleanPass.toLowerCase());
 
     if (!isPasswordValid) {
-      return { success: false, message: 'Incorrect Password. Please check your credentials (e.g. admin123 or 123456).' };
+      return { success: false, message: 'ভুল পাসওয়ার্ড! সঠিক ক্রেডেনশিয়াল দিয়ে আবার চেষ্টা করুন।' };
     }
 
     // 5. Authenticate with Firebase Authentication at SDK level
