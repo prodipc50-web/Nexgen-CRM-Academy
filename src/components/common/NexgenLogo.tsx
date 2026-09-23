@@ -10,6 +10,9 @@ interface NexgenLogoProps {
   taglineFontSize?: number;
   instituteName?: string;
   tagline?: string;
+  isDarkTheme?: boolean;
+  titleClassName?: string;
+  taglineClassName?: string;
 }
 
 export const NexgenLogo: React.FC<NexgenLogoProps> = ({
@@ -21,7 +24,10 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   titleFontSize,
   taglineFontSize,
   instituteName,
-  tagline
+  tagline,
+  isDarkTheme = false,
+  titleClassName,
+  taglineClassName
 }) => {
   const [logoSrc, setLogoSrc] = useState<string | null>(customLogoUrl || null);
   const [imageError, setImageError] = useState(false);
@@ -426,6 +432,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     const effectiveTagline = tagline || settings.tagline;
     const effectiveTitleSize = titleFontSize || settings.logoFontSize || 16;
     const effectiveTaglineSize = taglineFontSize || settings.taglineFontSize || 11;
+    const isDark = isDarkTheme || className.includes('text-white') || className.includes('dark');
 
     return (
       <div className={`inline-flex items-center space-x-3 ${className}`}>
@@ -438,18 +445,28 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
           <div className="flex items-center space-x-2">
             <span
               style={{ fontSize: `${effectiveTitleSize}px` }}
-              className="font-black text-slate-900 tracking-tight leading-none uppercase"
+              className={`font-black tracking-tight leading-none uppercase ${
+                titleClassName || (isDark ? 'text-white' : 'text-slate-900')
+              }`}
             >
               {effectiveTitle}
             </span>
-            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 px-1.5 py-0.2 rounded-full shrink-0">
+            <span
+              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 border ${
+                isDark
+                  ? 'bg-slate-800 text-indigo-300 border-slate-700'
+                  : 'bg-indigo-50 text-indigo-700 border-indigo-200/60'
+              }`}
+            >
               EST. 2018
             </span>
           </div>
           {showTagline && (
             <p
               style={{ fontSize: `${effectiveTaglineSize}px` }}
-              className="text-slate-500 font-medium leading-tight mt-0.5"
+              className={`font-medium leading-tight mt-1 ${
+                taglineClassName || (isDark ? 'text-slate-400' : 'text-slate-500')
+              }`}
             >
               {effectiveTagline}
             </p>

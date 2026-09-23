@@ -1500,6 +1500,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                 taglineFontSize={profileForm.taglineFontSize}
                 instituteName={profileForm.instituteName}
                 tagline={profileForm.tagline}
+                isDarkTheme={true}
               />
             </div>
           </div>

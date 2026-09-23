@@ -2300,7 +2300,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             {/* Campus Info Card (5 cols) */}
             <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-indigo-950 p-6 sm:p-8 rounded-3xl text-white space-y-6 flex flex-col justify-between shadow-xl">
               <div className="space-y-4">
-                <NexgenLogo variant="horizontal" size={44} />
+                <NexgenLogo variant="horizontal" size={44} isDarkTheme={true} />
 
                 <div className="space-y-4 text-xs pt-2">
                   <div className="flex items-start space-x-3">
@@ -2408,7 +2408,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="space-y-3">
-                <NexgenLogo variant="horizontal" size={40} />
+                <NexgenLogo variant="horizontal" size={40} isDarkTheme={true} />
                 <p className="text-slate-400 text-[11px] leading-relaxed">
                   {footerConfig?.bio || `${academySettings.instituteName || 'Nexgen Computer Academy'} is a premier professional IT training organization based in Dhaka, dedicated to creating industry-grade developers, designers, and freelance leaders.`}
                 </p>

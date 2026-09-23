@@ -71,15 +71,17 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold tracking-wide uppercase mb-4">
-            <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
-            <span>AI Career & Course Decision Engine</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-emerald-400 font-extrabold text-[11px]">ভবিষ্যতমুখী ক্যারিয়ার গাইড</span>
+          <div className="inline-flex items-center flex-wrap justify-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/90 border border-slate-700/80 text-xs font-semibold tracking-wide mb-4 shadow-xs">
+            <div className="flex items-center space-x-1.5 text-amber-400">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="font-bold uppercase tracking-wider text-[11px]">AI Career & Course Decision Engine</span>
+            </div>
+            <span className="w-1 h-1 rounded-full bg-slate-600 hidden sm:inline" />
+            <span className="text-slate-300 font-medium text-[11px]">ভবিষ্যতমুখী ক্যারিয়ার গাইড</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-4 leading-tight">
-            কোন কোর্সটি <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-indigo-300 to-emerald-400">আপনার ক্যারিয়ারের জন্য সেরা?</span>
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-100 mb-4 leading-tight">
+            কোন কোর্সটি <span className="text-amber-400">আপনার ক্যারিয়ারের জন্য সেরা?</span>
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
             গুগল ও এআই সার্চ মডেলগুলোর মতো আপনিও সরাসরি যাচাই করুন কোন কোর্সের সিলেবাসে কী কী সফটওয়্যার টুলস শেখানো হয়, 

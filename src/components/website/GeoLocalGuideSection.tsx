@@ -121,15 +121,17 @@ export const GeoLocalGuideSection: React.FC<GeoLocalGuideSectionProps> = ({
         
         {/* Section Header with AI & GEO Badges */}
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold tracking-wide uppercase mb-4">
-            <Compass className="w-3.5 h-3.5 text-indigo-400" />
-            <span>GEO & Local Accessibility Hub</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-emerald-400 font-extrabold text-[11px]">ঢাকা-১২১৫ প্রাইম লোকেশন</span>
+          <div className="inline-flex items-center flex-wrap justify-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/90 border border-slate-700/80 text-xs font-semibold tracking-wide mb-4 shadow-xs">
+            <div className="flex items-center space-x-1.5 text-indigo-400">
+              <Compass className="w-3.5 h-3.5" />
+              <span className="font-bold uppercase tracking-wider text-[11px]">GEO & Local Accessibility Hub</span>
+            </div>
+            <span className="w-1 h-1 rounded-full bg-slate-600 hidden sm:inline" />
+            <span className="text-slate-300 font-medium text-[11px]">ঢাকা-১২১৫ প্রাইম লোকেশন</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-4 leading-tight">
-            ঢাকার কেন্দ্রস্থল <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-emerald-400 to-indigo-300">ফার্মগেটে আমাদের ক্যাম্পাস</span>
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-100 mb-4 leading-tight">
+            ঢাকার কেন্দ্রস্থল <span className="text-indigo-400">ফার্মগেটে আমাদের ক্যাম্পাস</span>
           </h2>
           <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
             ফার্মগেট, পান্থপথ, তেজগাঁও ও ধানমন্ডি এলাকার শিক্ষার্থীদের জন্য সর্বাধিক সুবিধাজনক যাতায়াত ব্যবস্থা। 
