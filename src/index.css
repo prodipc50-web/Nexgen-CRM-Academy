@@ -157,6 +157,28 @@ h1, h2, h3, h4, .text-balance {
     display: none !important;
   }
 
+  /* When printing portal sheets, completely hide #root so it takes 0 pages and 0 height */
+  body.is-printing-portal-modal > #root,
+  body:has(#student-terms-official-sheet) > #root,
+  body:has(#admission-form-printable) > #root,
+  body:has(#id-card-printable) > #root,
+  body:has(#admit-card-printable) > #root,
+  body:has(#bulk-id-card-sheet) > #root {
+    display: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Universal prevention of blank 100vh page */
+  #root,
+  .min-h-screen {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
   /* Reset animations that blur printed text */
   .animate-in,
   [class*="animate-"],

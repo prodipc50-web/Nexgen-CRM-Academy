@@ -79,6 +79,28 @@ export const applyPrintStyles = (options: PrintOptions = {}) => {
     @media print {
       ${pageCss}
 
+      /* When printing standalone portal modals, completely hide #root so it takes 0 space and 0 pages */
+      body.is-printing-portal-modal > #root,
+      body:has(#student-terms-official-sheet) > #root,
+      body:has(#admission-form-printable) > #root,
+      body:has(#id-card-printable) > #root,
+      body:has(#admit-card-printable) > #root,
+      body:has(#bulk-id-card-sheet) > #root {
+        display: none !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+      }
+
+      /* Prevent any root container from forcing an empty 100vh page */
+      #root,
+      .min-h-screen {
+        min-height: 0 !important;
+        height: auto !important;
+      }
+
       /* Strict containment for landscape documents (Certificates) - Guaranteed 1-page fit */
       ${orientation === 'landscape' ? `
         html, body {
@@ -110,11 +132,41 @@ export const applyPrintStyles = (options: PrintOptions = {}) => {
       ${orientation === 'portrait' && size === 'a4' ? `
         .print-page-a4,
         #money-receipt-printable,
-        #admit-card-printable,
-        #student-terms-official-sheet {
+        #admit-card-printable {
           max-width: 195mm !important;
           margin: 0 auto !important;
           box-sizing: border-box !important;
+        }
+
+        #student-terms-official-sheet {
+          width: 100% !important;
+          max-width: 198mm !important;
+          height: 284mm !important;
+          max-height: 284mm !important;
+          margin: 0 auto !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          page-break-after: avoid !important;
+          page-break-before: avoid !important;
+          overflow: hidden !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: space-between !important;
+        }
+
+        .admission-terms-a4-frame {
+          width: 100% !important;
+          height: 284mm !important;
+          max-height: 284mm !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: space-between !important;
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          overflow: hidden !important;
         }
 
         /* Admission Form: Precise 1-page per sheet containment */
@@ -238,12 +290,25 @@ export const executeCleanPrint = (options: PrintOptions = {}) => {
     document.title = documentTitle;
   }
 
+  // Detect if printing an overlay/portal modal that is outside #root
+  if (typeof document !== 'undefined') {
+    const isPortalModal = !document.getElementById('root')?.contains(
+      document.querySelector('#student-terms-official-sheet, #admission-form-printable, #id-card-printable, #admit-card-printable, #bulk-id-card-sheet')
+    );
+    if (isPortalModal) {
+      document.body.classList.add('is-printing-portal-modal');
+    }
+  }
+
   // Ensure styles are applied before print dialog opens
   applyPrintStyles({ size, orientation, margin });
 
   const restoreAndCleanup = () => {
     if (documentTitle && typeof document !== 'undefined') {
       document.title = originalTitle;
+    }
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('is-printing-portal-modal');
     }
     // Give a short delay before removing style so print renderer is finished
     setTimeout(() => {
