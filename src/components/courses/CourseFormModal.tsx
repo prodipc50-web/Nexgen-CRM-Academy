@@ -53,10 +53,15 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
   initialCourse,
   onOpenCategoryManager
 }) => {
-  const { categories, courses, staffList, addCourse, updateCourse, syncToCloudNow } = useAcademy();
+  const { categories, courses, staffList, addCourse, updateCourse, syncToCloudNow, addStaff, deleteStaff } = useAcademy();
   const isEditing = !!initialCourse;
 
   const [activeTab, setActiveTab] = useState<TabType>('basic');
+
+  // Manual Custom Trainer Creation State
+  const [newTrainerName, setNewTrainerName] = useState('');
+  const [newTrainerDesignation, setNewTrainerDesignation] = useState('Senior Faculty & Industry Specialist');
+  const [showAddTrainerBox, setShowAddTrainerBox] = useState(false);
 
   // Basic Information
   const [code, setCode] = useState('');
@@ -389,12 +394,46 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
     }
   };
 
-  // Trainer Toggle
+  // Trainer Toggle & Management
   const handleToggleTrainer = (staffId: string) => {
     if (trainerIds.includes(staffId)) {
       setTrainerIds(trainerIds.filter(id => id !== staffId));
     } else {
       setTrainerIds([...trainerIds, staffId]);
+    }
+  };
+
+  const handleCreateAndAssignTrainer = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newTrainerName.trim()) return;
+
+    const newStaffId = `staff-${Date.now()}`;
+    const cleanName = newTrainerName.trim();
+    const cleanDesignation = newTrainerDesignation.trim() || 'Senior Faculty';
+
+    // Add to global staff directory
+    addStaff({
+      name: cleanName,
+      role: 'TRAINER',
+      designation: cleanDesignation,
+      email: `${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '')}@nexgenacademy.edu.bd`,
+      phone: '01798444444',
+      salary: 30000,
+      status: 'Active',
+      joinDate: new Date().toISOString().split('T')[0]
+    });
+
+    // Also auto-select for this course
+    setTrainerIds(prev => [...prev, newStaffId]);
+    setNewTrainerName('');
+    setShowAddTrainerBox(false);
+  };
+
+  const handleDeleteTrainerForever = (staffId: string, staffName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm(`Are you sure you want to remove "${staffName}" from academy faculty roster?`)) {
+      deleteStaff(staffId);
+      setTrainerIds(prev => prev.filter(id => id !== staffId));
     }
   };
 
@@ -1394,13 +1433,63 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
             <div className="space-y-5 animate-in fade-in duration-100">
               {/* Assigned Trainers */}
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4 text-indigo-600" />
-                    <span className="font-bold text-slate-900">Assigned Faculty / Trainers</span>
+                    <span className="font-bold text-slate-900">Assigned Faculty / Trainers (অনুষদ / ট্রেইনারবৃন্দ)</span>
                   </div>
-                  <span className="text-[10px] text-slate-400">Select faculty certified to teach this program</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddTrainerBox(!showAddTrainerBox)}
+                    className="self-start sm:self-auto px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg flex items-center space-x-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{showAddTrainerBox ? 'Close Form' : 'নতুন ট্রেইনার নাম লিখুন'}</span>
+                  </button>
                 </div>
+
+                {/* Manual Trainer Name Input Box */}
+                {showAddTrainerBox && (
+                  <div className="p-3 bg-white border border-indigo-200 rounded-xl space-y-2 shadow-xs animate-in fade-in duration-100">
+                    <div className="text-[11px] font-bold text-indigo-900">
+                      সরাসরি ট্রেইনারের নাম ও পদবী লিখে এই কোর্সে অ্যাসাইন করুন:
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={newTrainerName}
+                        onChange={e => setNewTrainerName(e.target.value)}
+                        placeholder="ট্রেইনারের পূর্ণ নাম (যেমন: Md. Asif Rahman)"
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-900"
+                      />
+                      <input
+                        type="text"
+                        value={newTrainerDesignation}
+                        onChange={e => setNewTrainerDesignation(e.target.value)}
+                        placeholder="পদবী (যেমন: Lead Python & AI Trainer)"
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900"
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddTrainerBox(false)}
+                        className="px-3 py-1 text-xs text-slate-600 hover:text-slate-900"
+                      >
+                        বাতিল
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCreateAndAssignTrainer}
+                        disabled={!newTrainerName.trim()}
+                        className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold text-xs rounded-lg shadow-xs flex items-center space-x-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>ট্রেইনার যুক্ত ও অ্যাসাইন করুন</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {staffList.map(staff => {
@@ -1409,29 +1498,39 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
                       <div
                         key={staff.id}
                         onClick={() => handleToggleTrainer(staff.id)}
-                        className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
+                        className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all group ${
                           isSelected
-                            ? 'bg-indigo-50 border-indigo-300 text-indigo-950 font-bold shadow-2xs'
+                            ? 'bg-indigo-50/80 border-indigo-300 text-indigo-950 font-bold shadow-2xs'
                             : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
                         }`}
                       >
-                        <div className="flex items-center space-x-2.5">
+                        <div className="flex items-center space-x-2.5 min-w-0">
                           <img
                             src={staff.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
                             alt={staff.name}
-                            className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                            className="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0"
                           />
-                          <div>
-                            <span className="text-xs font-bold block">{staff.name}</span>
-                            <span className="text-[10px] text-slate-400 font-normal">{staff.designation}</span>
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold block truncate">{staff.name}</span>
+                            <span className="text-[10px] text-slate-400 font-normal block truncate">{staff.designation}</span>
                           </div>
                         </div>
-                        <div
-                          className={`w-5 h-5 rounded-md flex items-center justify-center border ${
-                            isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'
-                          }`}
-                        >
-                          {isSelected && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        <div className="flex items-center space-x-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteTrainerForever(staff.id, staff.name, e)}
+                            title="Delete faculty from roster"
+                            className="p-1 text-slate-300 hover:text-rose-600 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                          <div
+                            className={`w-5 h-5 rounded-md flex items-center justify-center border ${
+                              isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'
+                            }`}
+                          >
+                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5" />}
+                          </div>
                         </div>
                       </div>
                     );

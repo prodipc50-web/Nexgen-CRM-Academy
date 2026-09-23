@@ -19,6 +19,7 @@ import { SocialProofTicker } from './SocialProofTicker';
 import { PlacementsShowcaseSection } from './PlacementsShowcaseSection';
 import { CampusLocationMapBox } from './CampusLocationMapBox';
 import { GeoLocalGuideSection } from './GeoLocalGuideSection';
+import { CourseCareerComparisonSection } from './CourseCareerComparisonSection';
 import {
   Home,
   Phone,
@@ -1352,6 +1353,16 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         </div>
       </section>
       )}
+
+      {/* 4.5 AI COURSE CAREER & DECISION COMPARISON ENGINE */}
+      <CourseCareerComparisonSection
+        courses={courses}
+        onSelectCourseForAdmission={(c) => {
+          setSelectedCourseForAdmission(c);
+          setIsAdmissionOpen(true);
+        }}
+        onExploreCourseDetails={(c) => setSelectedCourseForDetails(c)}
+      />
 
       {/* 5.5. ADMISSION & LEARNING JOURNEY ROADMAP (CMS DRIVEN) */}
       {sectionVisibility.admissionRoadmap !== false && roadmapConfig?.enabled !== false && (

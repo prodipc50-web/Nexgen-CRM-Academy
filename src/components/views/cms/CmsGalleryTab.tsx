@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { ClassroomGalleryPhoto } from '../../../types';
 import {
@@ -11,8 +11,11 @@ import {
   Search,
   Filter,
   CheckCircle,
-  Sparkles
+  Sparkles,
+  Upload,
+  AlertCircle
 } from 'lucide-react';
+import { compressImageFile } from '../../../utils/imageCompressor';
 
 export const CmsGalleryTab: React.FC = () => {
   const {
@@ -27,6 +30,33 @@ export const CmsGalleryTab: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      // Auto compress to max 1280px width, 75% quality (~60KB size)
+      const compressedDataUrl = await compressImageFile(file, {
+        maxWidth: 1280,
+        maxHeight: 1280,
+        quality: 0.75,
+        format: 'image/jpeg'
+      });
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: compressedDataUrl,
+        title: prev.title || file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
+      }));
+    } catch (err) {
+      console.error('Failed to compress image:', err);
+      alert('Could not process image. Please try another image.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const [formData, setFormData] = useState<Omit<ClassroomGalleryPhoto, 'id'>>({
     title: '',
@@ -268,18 +298,80 @@ export const CmsGalleryTab: React.FC = () => {
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label className="block text-[11px] font-black text-slate-700 uppercase mb-1">
-                  Image URL *
+                  Photo Source (পিসি থেকে আপলোড অথবা ওয়েব লিংক) *
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.imageUrl}
-                  onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900"
-                />
+
+                {/* Live Thumbnail Preview */}
+                {formData.imageUrl && (
+                  <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 group">
+                    <img
+                      src={formData.imageUrl}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3 py-1.5 bg-white text-slate-900 font-bold text-xs rounded-xl shadow-lg flex items-center space-x-1.5"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Change Photo</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                        className="px-3 py-1.5 bg-rose-600 text-white font-bold text-xs rounded-xl shadow-lg flex items-center space-x-1.5"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        <span>Remove</span>
+                      </button>
+                    </div>
+
+                    {formData.imageUrl.startsWith('data:image') && (
+                      <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-emerald-600/90 text-white text-[10px] font-bold flex items-center space-x-1">
+                        <Sparkles className="w-3 h-3" />
+                        <span>Auto-Compressed Web Ready (~50KB)</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Upload Buttons & URL Input */}
+                <div className="space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-sm transition"
+                    >
+                      <Upload className="w-4 h-4 text-indigo-200" />
+                      <span>{isUploading ? 'Compressing & Processing...' : 'Upload Photo from PC / Device'}</span>
+                    </button>
+                  </div>
+
+                  {/* Fallback URL Input if user wants to paste online image */}
+                  {!formData.imageUrl.startsWith('data:image') && (
+                    <input
+                      type="text"
+                      value={formData.imageUrl}
+                      onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
+                      placeholder="অথবা সরাসরি ওয়েব ইমেজ লিংক পেস্ট করুন: https://images.unsplash.com/..."
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono"
+                    />
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

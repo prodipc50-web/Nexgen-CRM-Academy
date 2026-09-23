@@ -1008,8 +1008,28 @@ app.get("/llms.txt", (req, res) => {
   const email = inMemoryCatalog?.settings?.officialEmail || "info@nexgenacademy.edu.bd";
   const customOrigin = process.env.PUBLIC_CANONICAL_URL || "https://nexgenacademy.edu.bd";
 
-  const coursesList = inMemoryCatalog?.courses?.filter(c => c.status === 'Active') || [];
-  const coursesFormatted = coursesList.map(c => `- **${c.name}** (${c.code || 'Course'}): ${c.duration || '3 Months'}. Fee: ৳${c.offerFee || c.regularFee || 'Contact'}. Mode: ${c.deliveryMode || 'Practical Lab Offline + Online'}.`).join("\n");
+  const fallbackCourses = [
+    { name: "Computer Office Application with AI", code: "NCA-OFC-01", duration: "3 Months", offerFee: 4500, deliveryMode: "Practical Lab + Online", tools: ["MS Word", "Advanced Excel", "PowerPoint", "ChatGPT", "Avro/Bijoy"], roles: ["Office Executive", "Data Entry Specialist", "Admin Assistant"] },
+    { name: "Advanced Excel, Financial Modeling & MIS", code: "NCA-EXC-02", duration: "2 Months", offerFee: 5000, deliveryMode: "Practical Lab + Online", tools: ["XLOOKUP", "Pivot Table", "Power Query", "Dashboard", "Macros"], roles: ["MIS Executive", "Accounts Executive", "Data Analyst"] },
+    { name: "Professional Graphic Design with AI & Branding", code: "UITB-GD-202", duration: "4 Months", offerFee: 12500, deliveryMode: "Practical Lab + Online", tools: ["Photoshop", "Illustrator", "Figma", "Canva Pro", "Midjourney AI"], roles: ["Brand Identity Designer", "Creative Lead", "Freelancer"] },
+    { name: "Professional Video Editing & Motion Graphics", code: "UITB-VE-109", duration: "3.5 Months", offerFee: 18000, deliveryMode: "Practical Lab + Online", tools: ["Premiere Pro", "After Effects", "CapCut", "Color Grading"], roles: ["Video Editor", "Motion Designer", "Reels Specialist"] },
+    { name: "Digital Marketing, Meta Ads & AI Growth", code: "NCA-DMA-05", duration: "3.5 Months", offerFee: 11500, deliveryMode: "Practical Lab + Online", tools: ["Meta Ads", "Google Ads", "SEO", "Google Analytics 4", "Email Marketing"], roles: ["Digital Marketer", "Media Buyer", "SEO Specialist"] },
+    { name: "Full-Stack Web Design & Development (MERN & Next.js)", code: "NCA-WDD-07", duration: "6 Months", offerFee: 18500, deliveryMode: "Practical Lab + Online", tools: ["React", "Node.js", "Express", "MongoDB", "Tailwind CSS", "Next.js"], roles: ["Full Stack Developer", "Frontend Engineer", "Web Consultant"] },
+    { name: "Data Analytics & Business Intelligence (Python, SQL & Power BI)", code: "NCA-DA-10", duration: "4 Months", offerFee: 14500, deliveryMode: "Practical Lab + Online", tools: ["Python", "SQL", "Power BI", "Pandas", "Excel Power Query"], roles: ["Data Analyst", "BI Specialist", "Reporting Officer"] },
+    { name: "French Language Masterclass (Spoken & DELF Prep)", code: "NCA-LANG-11", duration: "3 Months", offerFee: 8500, deliveryMode: "Practical Lab + Online", tools: ["Alliance Française Standard", "Pronunciation Audio Lab", "DELF A1-B2"], roles: ["French Translator", "Canada PR Applicant", "Embassy Liaison"] },
+    { name: "AutoCAD 2D & 3D Architectural Design & Drafting", code: "NCA-CAD-108", duration: "3 Months", offerFee: 11000, deliveryMode: "Practical Lab + Online", tools: ["AutoCAD 2D", "AutoCAD 3D", "Structural Drafting", "Floor Plans"], roles: ["Draftsman", "Interior Assistant", "CAD Designer"] },
+    { name: "Content Creation, Reels & Social Media Growth", code: "NCA-SM-12", duration: "2.5 Months", offerFee: 9500, deliveryMode: "Practical Lab + Online", tools: ["CapCut Pro", "Premiere", "TikTok Studio", "Meta Business Suite"], roles: ["Content Creator", "Social Media Manager", "Video Strategist"] },
+    { name: "Freelancing & Outsourcing Masterclass", code: "NCA-FL-209", duration: "2 Months", offerFee: 4500, deliveryMode: "Practical Lab + Online", tools: ["Upwork", "Fiverr", "LinkedIn Sales Navigator", "Payoneer"], roles: ["Freelancer", "Agency Owner", "Remote Consultant"] }
+  ];
+
+  const coursesList = (inMemoryCatalog?.courses?.filter((c: any) => c.status === 'Active') || []);
+  const effectiveCourses = coursesList.length >= fallbackCourses.length ? coursesList : fallbackCourses;
+
+  const coursesFormatted = effectiveCourses.map((c: any) => {
+    const tools = c.toolsCovered?.length ? ` Tools: ${c.toolsCovered.join(', ')}.` : (c.tools ? ` Tools: ${c.tools.join(', ')}.` : '');
+    const roles = c.careerRoles?.length ? ` Career Roles: ${c.careerRoles.join(', ')}.` : (c.roles ? ` Career Roles: ${c.roles.join(', ')}.` : '');
+    return `- **${c.name}** (${c.code || 'Course'}): ${c.duration || '3 Months'}. Fee: ৳${c.offerFee || c.regularFee || 'Contact'}. Mode: ${c.deliveryMode || 'Practical Lab Offline + Online'}.${tools}${roles}`;
+  }).join("\n");
 
   const llmsContent = `# ${instName} (NCA)
 > Premier Government-Recognized Practical Computer & IT Training Center in Farmgate, Dhaka-1215.

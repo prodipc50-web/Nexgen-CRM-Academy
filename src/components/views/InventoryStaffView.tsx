@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Staff, HardwareAsset, Room } from '../../types';
 import {
@@ -15,8 +15,12 @@ import {
   X,
   Edit2,
   Trash2,
-  Layers
+  Layers,
+  Upload,
+  Camera,
+  UserCheck
 } from 'lucide-react';
+import { compressLogoOrAvatar } from '../../utils/imageCompressor';
 
 export const InventoryStaffView: React.FC = () => {
   const {
@@ -48,6 +52,24 @@ export const InventoryStaffView: React.FC = () => {
   const [role, setRole] = useState<'ADMIN' | 'MANAGER' | 'COUNSELOR' | 'ACCOUNTS' | 'TRAINER'>('TRAINER');
   const [designation, setDesignation] = useState('Senior Faculty');
   const [salary, setSalary] = useState(30000);
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      const compressed = await compressLogoOrAvatar(file, 400);
+      setAvatarUrl(compressed);
+    } catch (err) {
+      console.error('Error compressing trainer photo:', err);
+      alert('Could not upload photo. Please try another image.');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
 
   // Edit Staff Modal State
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
@@ -59,7 +81,24 @@ export const InventoryStaffView: React.FC = () => {
   const [editStaffRole, setEditStaffRole] = useState<any>('TRAINER');
   const [editStaffDesignation, setEditStaffDesignation] = useState('');
   const [editStaffSalary, setEditStaffSalary] = useState(30000);
+  const [editStaffAvatarUrl, setEditStaffAvatarUrl] = useState('');
   const [editStaffStatus, setEditStaffStatus] = useState<string>('Active');
+  const editPhotoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleEditPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingPhoto(true);
+    try {
+      const compressed = await compressLogoOrAvatar(file, 400);
+      setEditStaffAvatarUrl(compressed);
+    } catch (err) {
+      console.error('Error compressing trainer photo:', err);
+      alert('Could not upload photo. Please try another image.');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
   const [deletingStaff, setDeletingStaff] = useState<Staff | null>(null);
 
   // Add Asset Modal State
@@ -104,6 +143,7 @@ export const InventoryStaffView: React.FC = () => {
       role,
       designation: designation.trim(),
       salary,
+      avatarUrl: avatarUrl || undefined,
       joinDate: new Date().toISOString().split('T')[0],
       status: 'Active'
     });
@@ -114,6 +154,7 @@ export const InventoryStaffView: React.FC = () => {
     setPhone('');
     setStaffUsername('');
     setStaffPassword('123456');
+    setAvatarUrl('');
   };
 
   const openEditStaff = (staff: Staff) => {
@@ -126,6 +167,7 @@ export const InventoryStaffView: React.FC = () => {
     setEditStaffRole(staff.role);
     setEditStaffDesignation(staff.designation);
     setEditStaffSalary(staff.salary || 30000);
+    setEditStaffAvatarUrl(staff.avatarUrl || '');
     setEditStaffStatus(staff.status || 'Active');
   };
 
@@ -142,6 +184,7 @@ export const InventoryStaffView: React.FC = () => {
       role: editStaffRole,
       designation: editStaffDesignation.trim(),
       salary: editStaffSalary,
+      avatarUrl: editStaffAvatarUrl || undefined,
       status: editStaffStatus
     });
 
@@ -338,9 +381,18 @@ export const InventoryStaffView: React.FC = () => {
               className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs hover:border-indigo-300 transition-all space-y-3 relative group"
             >
               <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">{staff.name}</h3>
-                  <span className="text-[11px] text-slate-500">{staff.designation}</span>
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+                    {staff.avatarUrl ? (
+                      <img src={staff.avatarUrl} alt={staff.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Users className="w-5 h-5 text-slate-400" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">{staff.name}</h3>
+                    <span className="text-[11px] text-slate-500">{staff.designation}</span>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-1.5">
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
@@ -494,6 +546,47 @@ export const InventoryStaffView: React.FC = () => {
             </div>
 
             <form onSubmit={handleStaffSubmit} className="p-5 space-y-3.5 text-xs">
+              {/* Trainer / Staff Photo Upload */}
+              <div className="flex items-center space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="relative w-14 h-14 rounded-full bg-slate-200 border-2 border-indigo-200 overflow-hidden shrink-0 flex items-center justify-center">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Users className="w-6 h-6 text-slate-400" />
+                  )}
+                </div>
+                <div className="flex-1 space-y-1">
+                  <span className="block font-bold text-slate-800 text-[11px]">Instructor / Staff Photo (ছবি)</span>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={isUploadingPhoto}
+                      onClick={() => photoInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-[11px] rounded-lg flex items-center space-x-1.5 transition"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>{isUploadingPhoto ? 'Uploading...' : 'Upload from PC'}</span>
+                    </button>
+                    {avatarUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setAvatarUrl('')}
+                        className="text-red-500 hover:text-red-700 text-[11px] font-bold"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-slate-600 font-semibold mb-1">Full Name *</label>
                 <input
@@ -620,6 +713,47 @@ export const InventoryStaffView: React.FC = () => {
             </div>
 
             <form onSubmit={handleSaveStaffEdit} className="p-5 space-y-3.5 text-xs">
+              {/* Trainer / Staff Photo Upload */}
+              <div className="flex items-center space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="relative w-14 h-14 rounded-full bg-slate-200 border-2 border-indigo-200 overflow-hidden shrink-0 flex items-center justify-center">
+                  {editStaffAvatarUrl ? (
+                    <img src={editStaffAvatarUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Users className="w-6 h-6 text-slate-400" />
+                  )}
+                </div>
+                <div className="flex-1 space-y-1">
+                  <span className="block font-bold text-slate-800 text-[11px]">Instructor / Staff Photo (ছবি)</span>
+                  <input
+                    ref={editPhotoInputRef}
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleEditPhotoUpload}
+                    className="hidden"
+                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={isUploadingPhoto}
+                      onClick={() => editPhotoInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-[11px] rounded-lg flex items-center space-x-1.5 transition"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>{isUploadingPhoto ? 'Uploading...' : 'Change Photo'}</span>
+                    </button>
+                    {editStaffAvatarUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setEditStaffAvatarUrl('')}
+                        className="text-red-500 hover:text-red-700 text-[11px] font-bold"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-slate-600 font-semibold mb-1">Full Name *</label>
                 <input

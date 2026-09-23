@@ -254,6 +254,22 @@ export const GeoLocalGuideSection: React.FC<GeoLocalGuideSectionProps> = ({
               </div>
             </div>
 
+            {/* Academic & University Proximity Badges (GEO Entity Grounding) */}
+            <div className="bg-slate-800/50 rounded-xl p-3.5 border border-slate-700/60 space-y-2">
+              <div className="flex items-center space-x-2 text-xs font-bold text-amber-300">
+                <Building className="w-3.5 h-3.5" />
+                <span>নিকটবর্তী বিশ্ববিদ্যালয় ও পলিটেকনিক শিক্ষার্থীদের জন্য সর্বোচ্চ সুবিধা:</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 text-[11px] text-slate-300">
+                <span className="px-2 py-0.5 rounded-md bg-slate-900/80 border border-slate-700 text-slate-200">ঢাকা পলিটেকনিক ইনস্টিটিউট (DPI)</span>
+                <span className="px-2 py-0.5 rounded-md bg-slate-900/80 border border-slate-700 text-slate-200">তেজগাঁও সরকারি কলেজ</span>
+                <span className="px-2 py-0.5 rounded-md bg-slate-900/80 border border-slate-700 text-slate-200">সরকারি বিজ্ঞান কলেজ</span>
+                <span className="px-2 py-0.5 rounded-md bg-slate-900/80 border border-slate-700 text-slate-200">আহছানউল্লা বিজ্ঞান ও প্রযুক্তি (AUST)</span>
+                <span className="px-2 py-0.5 rounded-md bg-slate-900/80 border border-slate-700 text-slate-200">ড্যাফোডিল ও সোবহানবাগ</span>
+                <span className="px-2 py-0.5 rounded-md bg-slate-900/80 border border-slate-700 text-slate-200">গ্রিন রোড মেডিকেল জোন</span>
+              </div>
+            </div>
+
           </div>
 
           {/* Right Column: Campus Location Map (5 cols) */}

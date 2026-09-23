@@ -110,8 +110,6 @@ export const applyPrintStyles = (options: PrintOptions = {}) => {
       ${orientation === 'portrait' && size === 'a4' ? `
         .print-page-a4,
         #money-receipt-printable,
-        #admission-form-printable,
-        #id-card-printable,
         #admit-card-printable {
           max-width: 195mm !important;
           margin: 0 auto !important;
@@ -120,6 +118,47 @@ export const applyPrintStyles = (options: PrintOptions = {}) => {
           page-break-after: avoid !important;
           page-break-before: avoid !important;
           box-sizing: border-box !important;
+        }
+
+        /* Admission Form: Precise 1-page per sheet containment */
+        #admission-form-printable {
+          max-width: 198mm !important;
+          margin: 0 auto !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+        }
+
+        .admission-page-sheet {
+          width: 100% !important;
+          max-width: 196mm !important;
+          max-height: 284mm !important;
+          box-sizing: border-box !important;
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          overflow: hidden !important;
+        }
+
+        .admission-page-break {
+          page-break-after: always !important;
+          break-after: page !important;
+        }
+
+        /* ID Card Print: Professional PVC Standard Format with Cutting Guides */
+        #id-card-printable {
+          max-width: 195mm !important;
+          margin: 15mm auto !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+
+        .pvc-card-boundary {
+          width: 85.6mm !important;
+          height: 54mm !important;
+          box-sizing: border-box !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
       ` : ''}
 

@@ -331,12 +331,26 @@ export function getCourseSchema(
       }))
     : undefined;
 
+  const teachesList: string[] = [
+    ...(course.toolsCovered || []),
+    ...(course.curriculumHighlights || []),
+    ...(course.learningFeatures || []),
+    course.name
+  ];
+
+  const careerRolesList: string[] = [
+    ...(course.careerRoles || []),
+    course.category
+  ];
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Course',
     '@id': `${courseUrl}/#course`,
     name: course.name,
     description: course.description,
+    teaches: teachesList.length > 0 ? teachesList : [course.name, 'Practical Computer Skills'],
+    occupationalCategory: careerRolesList.join(', '),
     provider: {
       '@type': 'EducationalOrganization',
       name: instituteName,
@@ -345,7 +359,7 @@ export function getCourseSchema(
     url: courseUrl,
     image: course.thumbnailUrl || cmsConfig.seo?.ogImageUrl,
     courseCode: course.code,
-    educationalCredentialAwarded: 'Verified Government & Institute Certificate of Practical Completion',
+    educationalCredentialAwarded: course.certificationType || 'Government Recognized & ISO Verifiable QR Code Certificate',
     timeRequired: course.duration ? `P${course.durationMonths || 3}M` : 'P3M',
     totalHistoricalEnrollment: course.studentsJoined || 450,
     aggregateRating: {
@@ -375,7 +389,7 @@ export function getCourseSchema(
           name: `${instituteName} Farmgate Campus`,
           address: {
             '@type': 'PostalAddress',
-            streetAddress: 'Level 4 & 5, Al-Razi Complex, 166/1 Shahid Syed Nazrul Islam Sarani',
+            streetAddress: '14/B, Garden Road, Kazipara',
             addressLocality: 'Farmgate, Dhaka',
             postalCode: '1215',
             addressCountry: 'BD'

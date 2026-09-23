@@ -1023,6 +1023,12 @@ export interface Course {
   // Target Audience
   targetAudience?: string[];
 
+  // Career & AI Outcomes (GEO, AEO & Semantic Search)
+  careerRoles?: string[];
+  toolsCovered?: string[];
+  estimatedSalaryRange?: string;
+  certificationType?: string;
+
   // Dynamic Landing Page & Campaign Variant Customization
   landingConfig?: CourseLandingPageConfig;
 

@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
-import { Save, Info, UserCheck, ShieldCheck, Monitor, Award, Plus, Trash2, Crop, Upload, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { Save, Info, UserCheck, ShieldCheck, Monitor, Award, Plus, Trash2, Crop, Upload, Image as ImageIcon, Sparkles, X } from 'lucide-react';
 import { ImageUploadCropModal } from '../../common/ImageUploadCropModal';
+import { compressLogoOrAvatar } from '../../../utils/imageCompressor';
 
 interface CmsAboutTabProps {
   onSuccessToast: (msg: string) => void;
@@ -49,16 +50,23 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDirectorFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDirectorFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      setFormData(prev => ({ ...prev, directorPhotoUrl: dataUrl }));
-      onSuccessToast('Director photo uploaded! You can now adjust or crop.');
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Compress to max 600px square, 80% quality (~40KB size)
+      const compressed = await compressLogoOrAvatar(file, 600);
+      setFormData(prev => ({ ...prev, directorPhotoUrl: compressed }));
+      onSuccessToast('Director photo uploaded & optimized! You can now adjust or crop.');
+    } catch {
+      // Fallback
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        setFormData(prev => ({ ...prev, directorPhotoUrl: dataUrl }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAddAffiliation = () => {
@@ -211,39 +219,58 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
               </div>
 
               <div className="flex-1 w-full space-y-2">
-                <input
-                  type="text"
-                  value={formData.directorPhotoUrl}
-                  onChange={e => setFormData({ ...formData, directorPhotoUrl: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
-                />
+                {formData.directorPhotoUrl?.startsWith('data:image') ? (
+                  <div className="flex items-center justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs">
+                    <span className="font-bold text-emerald-800 flex items-center space-x-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Local Photo Uploaded & Auto-Compressed (Lightweight)</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, directorPhotoUrl: '' })}
+                      className="text-red-500 hover:text-red-700 p-1 rounded-md hover:bg-red-50"
+                      title="Remove Photo"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value={formData.directorPhotoUrl}
+                    onChange={e => setFormData({ ...formData, directorPhotoUrl: e.target.value })}
+                    placeholder="https://... (Web Image URL or Upload below)"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
+                  />
+                )}
 
                 <div className="flex flex-wrap items-center gap-2">
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                    accept="image/png, image/jpeg, image/webp"
                     onChange={handleDirectorFileUpload}
                     className="hidden"
                   />
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl flex items-center space-x-1.5"
+                    className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl flex items-center space-x-1.5 shadow-sm"
                   >
                     <Upload className="w-3.5 h-3.5 text-indigo-300" />
-                    <span>Upload Local Photo</span>
+                    <span>Upload from PC / Mobile</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsCropModalOpen(true)}
-                    className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs rounded-xl flex items-center space-x-1.5"
-                  >
-                    <Crop className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Crop & Resize Photo</span>
-                  </button>
+                  {formData.directorPhotoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setIsCropModalOpen(true)}
+                      className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs rounded-xl flex items-center space-x-1.5"
+                    >
+                      <Crop className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Crop & Adjust</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

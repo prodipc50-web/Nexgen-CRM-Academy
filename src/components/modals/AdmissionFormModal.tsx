@@ -542,15 +542,15 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
           className="overflow-y-auto flex-1 p-5 sm:p-8 bg-white text-slate-900 font-sans print:p-0 print:m-0 print-page-a4"
           id="admission-form-printable"
         >
-          {/* Page 1: Admission Form Sheet */}
+          {/* Page 1: Admission Form Sheet (Strict Guaranteed 1-Page Fit) */}
           {(activeSheetTab === 'form' || activeSheetTab === 'both') && (
-            <div>
+            <div className={`admission-page-sheet ${activeSheetTab === 'both' ? 'admission-page-break' : ''} flex flex-col justify-between`}>
               {/* Header Banner with Logo & Passport Photo Box */}
-              <div className="flex items-start justify-between border-b-2 border-indigo-950 pb-3">
+              <div className="flex items-start justify-between border-b-2 border-indigo-950 pb-2.5 print:pb-1">
             <div className="flex items-center space-x-3 flex-1">
-              <NexgenLogo variant="crest" size={54} />
+              <NexgenLogo variant="crest" size={50} />
               <div>
-                <h1 className="text-xl font-black text-indigo-950 uppercase tracking-tight leading-none">
+                <h1 className="text-xl print:text-base font-black text-indigo-950 uppercase tracking-tight leading-none">
                   {formData.instituteName}
                 </h1>
                 <p className="text-[10px] text-slate-600 font-bold tracking-wide mt-0.5">
@@ -780,43 +780,43 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
             </div>
           </div>
 
-          {/* 5. Terms, Rules & Student Declaration */}
-          <div className="mt-2 print:mt-1 border border-slate-300 rounded p-2 print:p-1 bg-slate-50/70 text-[10px] print:text-[8.5px] text-slate-700">
+          {/* 5. Terms, Rules & Student Declaration (Guaranteed 1-Page Fit) */}
+          <div className="mt-1.5 print:mt-1 border border-slate-300 rounded p-1.5 print:p-1 bg-slate-50/70 text-[9.5px] print:text-[8px] text-slate-700">
             <span className="font-bold text-slate-900 uppercase tracking-wider block mb-0.5">
-              Code of Conduct & Student Declaration (শর্তাবলি ও শিক্ষার্থীর অঙ্গীকারনামা):
+              Code of Conduct & Student Declaration (শিক্ষার্থীর অঙ্গীকারনামা):
             </span>
-            <div className="whitespace-pre-line leading-relaxed print:leading-snug text-slate-600">
-              {formData.terms}
+            <div className="leading-snug text-slate-600">
+              আমি অঙ্গীকার করছি যে নেক্সজেন কম্পিউটার একাডেমির অভ্যন্তরীণ শৃঙ্খলা, ক্লাস উপস্থিতি এবং ফি সংক্রান্ত সকল নিয়ম মেনে চলব। ভর্তিকৃত ফি অফেরতযোগ্য ও অহস্তান্তরযোগ্য। কোর্স চলাকালীন একাডেমি ও ল্যাব সরঞ্জামের নিরাপত্তা বজায় রাখতে দায়বদ্ধ থাকব। (বিস্তারিত আচরণবিধি ও শর্তাবলী পৃষ্ঠা ২-এ বর্ণিত)।
             </div>
           </div>
 
           {/* 6. Signatures */}
-          <div className="pt-5 print:pt-2 mt-2.5 print:mt-1 border-t border-slate-300 grid grid-cols-3 gap-6 items-end text-center text-xs">
+          <div className="pt-3 print:pt-2 mt-2 print:mt-1 border-t border-slate-300 grid grid-cols-3 gap-4 items-end text-center text-xs">
             <div>
-              <div className="h-6 print:h-5 border-b border-slate-400 w-36 mx-auto mb-1"></div>
-              <span className="text-[10px] print:text-[9px] font-bold text-slate-700 uppercase">Student / Applicant Signature</span>
-              <p className="text-[9px] print:text-[8px] text-slate-400">Date: {formData.admissionDate}</p>
+              <div className="h-5 print:h-4 border-b border-slate-400 w-32 mx-auto mb-1"></div>
+              <span className="text-[9.5px] print:text-[8px] font-bold text-slate-700 uppercase block">Student Signature</span>
+              <p className="text-[8.5px] print:text-[7.5px] text-slate-400">Date: {formData.admissionDate}</p>
             </div>
 
             <div>
-              <div className="h-6 print:h-5 border-b border-slate-400 w-36 mx-auto mb-1 flex items-center justify-center">
-                <span className="text-[11px] print:text-[10px] font-serif italic text-slate-700">{formData.counselorName}</span>
+              <div className="h-5 print:h-4 border-b border-slate-400 w-32 mx-auto mb-1 flex items-center justify-center">
+                <span className="text-[10px] print:text-[8.5px] font-serif italic text-slate-700">{formData.counselorName}</span>
               </div>
-              <span className="text-[10px] print:text-[9px] font-bold text-slate-700 uppercase">{formData.counselorTitle}</span>
-              <p className="text-[9px] print:text-[8px] text-slate-400">Nexgen Computer Academy</p>
+              <span className="text-[9.5px] print:text-[8px] font-bold text-slate-700 uppercase block">{formData.counselorTitle}</span>
+              <p className="text-[8.5px] print:text-[7.5px] text-slate-400">Nexgen Computer Academy</p>
             </div>
 
             <div>
-              <div className="h-6 print:h-5 border-b border-indigo-900 w-40 mx-auto mb-1 flex items-center justify-center">
-                <span className="text-[11px] print:text-[10px] font-serif italic font-bold text-indigo-950">{formData.directorName}</span>
+              <div className="h-5 print:h-4 border-b border-indigo-900 w-36 mx-auto mb-1 flex items-center justify-center">
+                <span className="text-[10px] print:text-[8.5px] font-serif italic font-bold text-indigo-950">{formData.directorName}</span>
               </div>
-              <span className="text-[10px] print:text-[9px] font-black text-indigo-950 uppercase">{formData.directorTitle}</span>
-              <p className="text-[9px] print:text-[8px] text-indigo-800 font-semibold">Official Seal & Approval</p>
+              <span className="text-[9.5px] print:text-[8px] font-black text-indigo-950 uppercase block">{formData.directorTitle}</span>
+              <p className="text-[8.5px] print:text-[7.5px] text-indigo-800 font-semibold">Official Seal & Approval</p>
             </div>
           </div>
 
           {/* Footer note */}
-          <div className="mt-2 print:mt-1 pt-1.5 print:pt-0.5 border-t border-slate-200 text-center text-[9px] print:text-[8px] text-slate-400">
+          <div className="mt-1 print:mt-0.5 pt-1 border-t border-slate-200 text-center text-[8.5px] print:text-[7.5px] text-slate-400">
             Generated via {formData.instituteName} Enterprise Management System • Hotline: {formData.hotlinePhone} • {formData.website}
           </div>
             </div>
@@ -824,7 +824,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
 
           {/* Page Break Separator when both pages are printed/viewed */}
           {activeSheetTab === 'both' && (
-            <div className="print:break-before-page my-6 print:my-0 border-t-2 border-dashed border-slate-300 print:border-none relative flex items-center justify-center print:hidden">
+            <div className="my-6 border-t-2 border-dashed border-slate-300 relative flex items-center justify-center print:hidden">
               <span className="bg-teal-50 text-teal-900 border border-teal-300 px-3.5 py-1 text-[10.5px] font-black uppercase rounded-full tracking-wider shadow-2xs">
                 ↓ Page 2: Student Terms & Conditions (ছাত্র আচরণবিধি ও নিয়মাবলী) ↓
               </span>
@@ -833,7 +833,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
 
           {/* Page 2: Official Student Terms & Conditions Sheet */}
           {(activeSheetTab === 'terms' || activeSheetTab === 'both') && (
-            <div className="pt-2 print:pt-0">
+            <div className="admission-page-sheet flex flex-col justify-between pt-2 print:pt-0">
               {/* Header Banner */}
               <div className="flex items-start justify-between border-b-2 border-teal-900 pb-2.5">
                 <div className="flex items-center space-x-3">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import {
   TopOfferRibbonConfig,
@@ -32,8 +32,12 @@ import {
   Calendar,
   Clock,
   Download,
-  Compass
+  Compass,
+  Upload,
+  X,
+  Image as ImageIcon
 } from 'lucide-react';
+import { compressLogoOrAvatar } from '../../../utils/imageCompressor';
 
 interface CmsOffersPopupsTabProps {
   onSuccessToast: (msg: string) => void;
@@ -151,6 +155,27 @@ export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSucces
   const [partnerCategory, setPartnerCategory] = useState<HiringPartnerItem['category']>('Corporate Recruiter');
   const [partnerHiredCount, setPartnerHiredCount] = useState<number>(20);
   const [partnerWebsite, setPartnerWebsite] = useState('');
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const partnerFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePartnerLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingLogo(true);
+    try {
+      // Compress logo to max 400px square (~25KB)
+      const compressed = await compressLogoOrAvatar(file, 400);
+      setPartnerLogo(compressed);
+      if (!partnerName) {
+        setPartnerName(file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+      }
+    } catch (err) {
+      console.error('Failed to compress partner logo:', err);
+      alert('Could not upload logo. Please try another image.');
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
 
   // Preset logo templates
   const PRESET_PARTNERS = [
@@ -884,16 +909,63 @@ export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSucces
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">লোগো ছবি URL (Image URL) *</label>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      কোম্পানি লোগো (লোগো ছবি) *
+                    </label>
+
+                    {/* Logo Preview */}
+                    {partnerLogo && (
+                      <div className="flex items-center space-x-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                        <div className="w-12 h-12 rounded-lg bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0">
+                          <img src={partnerLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-bold text-slate-700 truncate">
+                            {partnerLogo.startsWith('data:image') ? 'Uploaded Local Logo (Optimized)' : partnerLogo}
+                          </p>
+                          <span className="text-[10px] text-emerald-600 font-bold">লোগো প্রস্তুত</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setPartnerLogo('')}
+                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* File upload input & button */}
                     <input
-                      type="url"
-                      required
-                      value={partnerLogo}
-                      onChange={e => setPartnerLogo(e.target.value)}
-                      placeholder="https://..."
-                      className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 outline-none focus:bg-white focus:border-indigo-600"
+                      ref={partnerFileInputRef}
+                      type="file"
+                      accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                      onChange={handlePartnerLogoUpload}
+                      className="hidden"
                     />
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={isUploadingLogo}
+                        onClick={() => partnerFileInputRef.current?.click()}
+                        className="flex-1 py-2 px-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-500 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-1.5 shadow-sm transition"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-indigo-300" />
+                        <span>{isUploadingLogo ? 'প্রসেসিং হচ্ছে...' : 'পিসি থেকে লোগো আপলোড করুন'}</span>
+                      </button>
+                    </div>
+
+                    {!partnerLogo.startsWith('data:image') && (
+                      <input
+                        type="text"
+                        value={partnerLogo}
+                        onChange={e => setPartnerLogo(e.target.value)}
+                        placeholder="অথবা লোগো URL দিন: https://..."
+                        className="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 outline-none focus:bg-white focus:border-indigo-600"
+                      />
+                    )}
                   </div>
 
                   <div>
