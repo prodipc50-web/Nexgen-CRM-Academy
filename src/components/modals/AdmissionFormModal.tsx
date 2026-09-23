@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAcademy } from '../../context/AcademyContext';
 import { Admission, Student, Course, Batch } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
@@ -223,7 +224,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
       documentTitle: docTitle,
       size: 'a4',
       orientation: 'portrait',
-      margin: '5mm'
+      margin: '4mm'
     });
   };
 
@@ -256,7 +257,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
       onClick={onClose}
@@ -967,6 +968,7 @@ export const AdmissionFormModal: React.FC<AdmissionFormModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

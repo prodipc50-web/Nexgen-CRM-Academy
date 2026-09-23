@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAcademy } from '../../context/AcademyContext';
 import { Student, Course, Batch } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
@@ -176,7 +177,7 @@ export const IdCardAdmitCardModal: React.FC<IdCardAdmitCardModalProps> = ({
 
   if (!isOpen || !student) return null;
 
-  return (
+  return createPortal(
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
       onClick={onClose}
@@ -883,6 +884,7 @@ export const IdCardAdmitCardModal: React.FC<IdCardAdmitCardModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
