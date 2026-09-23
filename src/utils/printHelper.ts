@@ -140,33 +140,28 @@ export const applyPrintStyles = (options: PrintOptions = {}) => {
 
         #student-terms-official-sheet {
           width: 100% !important;
-          max-width: 198mm !important;
-          height: 284mm !important;
-          max-height: 284mm !important;
+          max-width: 196mm !important;
           margin: 0 auto !important;
           padding: 0 !important;
           box-sizing: border-box !important;
           page-break-inside: avoid !important;
           break-inside: avoid !important;
           page-break-after: avoid !important;
+          break-after: avoid !important;
           page-break-before: avoid !important;
-          overflow: hidden !important;
-          display: flex !important;
-          flex-direction: column !important;
-          justify-content: space-between !important;
+          break-before: avoid !important;
         }
 
         .admission-terms-a4-frame {
           width: 100% !important;
-          height: 284mm !important;
-          max-height: 284mm !important;
+          max-width: 196mm !important;
           box-sizing: border-box !important;
-          display: flex !important;
-          flex-direction: column !important;
-          justify-content: space-between !important;
           page-break-inside: avoid !important;
           break-inside: avoid !important;
-          overflow: hidden !important;
+          page-break-after: avoid !important;
+          break-after: avoid !important;
+          page-break-before: avoid !important;
+          break-before: avoid !important;
         }
 
         /* Admission Form: Precise 1-page per sheet containment */

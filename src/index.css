@@ -218,10 +218,20 @@ h1, h2, h3, h4, .text-balance {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     page-break-after: avoid !important;
+    break-after: avoid !important;
     box-shadow: none !important;
-    border-color: #cbd5e1 !important;
     overflow: visible !important;
     box-sizing: border-box !important;
+  }
+
+  #student-terms-official-sheet,
+  .admission-terms-a4-frame {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
   }
 
   .print-page-a4-landscape {
