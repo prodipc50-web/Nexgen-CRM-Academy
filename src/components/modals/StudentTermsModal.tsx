@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useAcademy } from '../../context/AcademyContext';
 import {
   X,
@@ -91,16 +92,23 @@ export const StudentTermsModal: React.FC<StudentTermsModalProps> = ({
   );
   const effectiveDeclaration = declarationText || academySettings?.studentTermsDeclaration || STUDENT_DECLARATION_TEXT;
 
+  const instituteName = academySettings?.instituteName || 'NexGen Computer Academy';
+  const campusName = academySettings?.campusName || 'Farmgate Campus';
+  const officialAddress = academySettings?.officialAddress || '14/B Garden Road, Farmgate, Dhaka-1215';
+  const hotline = academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01798444444';
+  const website = academySettings?.websiteUrl ? academySettings.websiteUrl.replace(/^https?:\/\//, '') : 'nexgenacademy.edu.bd';
+  const signatoryName = academySettings?.idCardSignatoryName || 'Authorized Signatory';
+
   const handlePrint = () => {
     executeCleanPrint({
       documentTitle: `Student_Terms_And_Conditions_${(studentName || 'Student').replace(/\s+/g, '_')}`,
       size: 'a4',
       orientation: 'portrait',
-      margin: '5mm'
+      margin: '4mm'
     });
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible"
       onClick={onClose}
@@ -147,92 +155,93 @@ export const StudentTermsModal: React.FC<StudentTermsModalProps> = ({
         {/* Printable & Interactive Document Container */}
         <div
           id="student-terms-official-sheet"
-          className="overflow-y-auto p-4 sm:p-8 bg-white text-slate-900 font-sans print:p-6 print:m-0 print-page-a4"
+          className="overflow-y-auto p-4 sm:p-8 bg-white text-slate-900 font-sans print:p-0 print:m-0 print-page-a4"
         >
           {/* Header Section */}
-          <div className="border-b-2 border-teal-900 pb-3 mb-4">
+          <div className="border-b-2 border-teal-900 pb-2.5 print:pb-1.5 mb-3 print:mb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-xl bg-teal-900 text-white flex items-center justify-center font-black text-xl tracking-tighter shrink-0">
-                  NG
-                </div>
+                <NexgenLogo variant="crest" size={44} />
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-black text-teal-950 uppercase tracking-tight leading-none">
-                    NexGen Computer Academy
+                  <h1 className="text-xl sm:text-2xl print:text-lg font-black text-teal-950 uppercase tracking-tight leading-none">
+                    {instituteName}
                   </h1>
-                  <p className="text-[11px] text-slate-600 font-bold tracking-wide mt-1">
+                  <p className="text-[11px] print:text-[8px] text-slate-600 font-bold tracking-wide mt-0.5">
                     {STUDENT_TERMS_HEADER_SUBTITLE}
+                  </p>
+                  <p className="text-[9.5px] print:text-[7.5px] text-slate-500 font-medium">
+                    {campusName}: {officialAddress} | Hotline: <strong className="font-mono text-slate-900">{hotline}</strong> | {website}
                   </p>
                 </div>
               </div>
 
-              <div className="text-right hidden sm:block print:block">
-                <div className="bg-teal-900 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded tracking-wider inline-block">
+              <div className="text-right">
+                <div className="bg-teal-900 text-white text-[9.5px] print:text-[8px] font-black uppercase px-2.5 py-0.5 rounded tracking-wider inline-block">
                   Official Terms & Conditions
                 </div>
-                <p className="text-[10px] text-slate-500 font-semibold mt-1">
-                  Document Version 2.6 • Effective 2026
+                <p className="text-[9px] print:text-[7.5px] text-slate-500 font-semibold mt-0.5">
+                  Academic Session 2026
                 </p>
               </div>
             </div>
 
             {/* Document Title Banner */}
-            <div className="mt-3 pt-2.5 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-              <h2 className="text-base sm:text-lg font-black text-teal-950 tracking-tight uppercase">
-                STUDENT TERMS & CONDITIONS
+            <div className="mt-2 pt-2 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1 print:flex-row print:items-center">
+              <h2 className="text-sm sm:text-base print:text-xs font-black text-teal-950 tracking-tight uppercase">
+                STUDENT TERMS & CONDITIONS (ছাত্র আচরণবিধি ও নীতিমালা)
               </h2>
-              <span className="text-xs font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2.5 py-0.5 rounded-full inline-block self-start sm:self-auto">
+              <span className="text-[10px] print:text-[8px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full inline-block self-start sm:self-auto">
                 {STUDENT_TERMS_NOTICE}
               </span>
             </div>
 
             {/* Student Metadata Tag if provided */}
             {(studentName || courseName || studentCode) && (
-              <div className="mt-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div className="mt-2 bg-slate-50 print:bg-white p-2 rounded-lg border border-slate-200 grid grid-cols-2 sm:grid-cols-4 print:grid-cols-4 gap-1.5 text-xs print:text-[8.5px]">
                 <div>
-                  <span className="text-slate-500 text-[10px] block">Student Name:</span>
+                  <span className="text-slate-500 text-[10px] print:text-[7.5px] block">Student Name:</span>
                   <span className="font-bold text-slate-900">{studentName || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[10px] block">Student ID:</span>
+                  <span className="text-slate-500 text-[10px] print:text-[7.5px] block">Student ID:</span>
                   <span className="font-mono font-bold text-teal-900">{studentCode || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[10px] block">Course:</span>
+                  <span className="text-slate-500 text-[10px] print:text-[7.5px] block">Course:</span>
                   <span className="font-bold text-slate-800">{courseName || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[10px] block">Batch / Date:</span>
+                  <span className="text-slate-500 text-[10px] print:text-[7.5px] block">Batch / Date:</span>
                   <span className="font-semibold text-slate-800">{batchNumber || dateStr}</span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Clauses Grid Layout (Matching PDF 2-column aesthetic) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+          {/* Clauses Grid Layout (2-Column Compact Layout for Print) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-2 print:gap-1.5 text-xs print:text-[8px] print:leading-tight">
             {effectiveTerms.map(item => (
               <div
                 key={item.id}
-                className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs hover:border-teal-300 transition-colors flex flex-col"
+                className="border border-slate-200 print:border-slate-300 rounded-xl print:rounded-md overflow-hidden bg-white shadow-2xs print:shadow-none flex flex-col justify-between"
               >
                 {/* Clause Header Ribbon */}
-                <div className="bg-teal-900 text-white px-3 py-1.5 flex items-center space-x-2 shrink-0">
-                  <div className="w-5 h-5 rounded-md bg-teal-800/80 flex items-center justify-center shrink-0">
+                <div className="bg-teal-900 text-white px-2.5 py-1 print:px-1.5 print:py-0.5 flex items-center space-x-1.5 shrink-0">
+                  <div className="w-4 h-4 rounded-md bg-teal-800/80 flex items-center justify-center shrink-0">
                     {getClauseIcon(item.iconName)}
                   </div>
                   <div className="flex-1 flex items-baseline justify-between">
-                    <span className="font-black text-xs tracking-tight">
+                    <span className="font-black text-xs print:text-[8.5px] tracking-tight">
                       {item.numberBn}. {item.titleEn}
                     </span>
-                    <span className="text-[10px] text-teal-200 font-medium">
+                    <span className="text-[10px] print:text-[7.5px] text-teal-200 font-medium">
                       ({item.titleBn})
                     </span>
                   </div>
                 </div>
 
                 {/* Clause Content Body */}
-                <div className="p-3 text-[11px] leading-relaxed text-slate-700 flex-1 flex flex-col justify-between bg-slate-50/30">
+                <div className="p-2.5 print:p-1.5 text-[11px] print:text-[8px] leading-relaxed print:leading-snug text-slate-700 flex-1 flex flex-col justify-between bg-slate-50/30 print:bg-white">
                   <p className="font-medium text-slate-800">
                     {item.details}
                   </p>
@@ -241,21 +250,24 @@ export const StudentTermsModal: React.FC<StudentTermsModalProps> = ({
             ))}
           </div>
 
-          {/* Student Declaration Checkbox Section */}
-          <div className="mt-5 border-2 border-teal-900/30 bg-teal-50/40 rounded-2xl p-3.5 sm:p-4">
-            <div className="flex items-start space-x-3">
+          {/* Student Declaration Section */}
+          <div className="mt-3 print:mt-1.5 border border-teal-900/30 print:border-teal-900/50 bg-teal-50/40 rounded-xl print:rounded-lg p-2.5 print:p-1.5">
+            <div className="flex items-start space-x-2.5">
               <input
                 type="checkbox"
                 id="termsDeclarationCheckbox"
                 checked={isAccepted}
                 onChange={() => onAccept && onAccept()}
-                className="mt-1 w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer"
+                className="mt-0.5 w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer print:hidden"
               />
+              <div className="hidden print:flex w-3.5 h-3.5 border-2 border-teal-900 rounded bg-white items-center justify-center shrink-0 mt-0.5">
+                <span className="text-teal-900 text-[9px] font-black leading-none">✓</span>
+              </div>
               <label htmlFor="termsDeclarationCheckbox" className="cursor-pointer select-none">
-                <span className="font-bold text-xs sm:text-sm text-teal-950 block leading-snug">
+                <span className="font-bold text-xs print:text-[8px] text-teal-950 block leading-snug">
                   {effectiveDeclaration}
                 </span>
-                <span className="text-[11px] text-teal-800 mt-1 block">
+                <span className="text-[10px] print:text-[7px] text-teal-800 mt-0.5 block">
                   ভর্তি চূড়ান্ত করার মাধ্যমে শিক্ষার্থী এই শর্তাবলী মেনে চলার আনুষ্ঠানিক প্রতিশ্রুতি দিচ্ছেন।
                 </span>
               </label>
@@ -263,40 +275,40 @@ export const StudentTermsModal: React.FC<StudentTermsModalProps> = ({
           </div>
 
           {/* Dual Signatures Section */}
-          <div className="pt-8 sm:pt-10 mt-6 border-t-2 border-slate-300 grid grid-cols-2 gap-8 text-center text-xs">
+          <div className="pt-4 print:pt-2 mt-3 print:mt-1 border-t border-slate-300 grid grid-cols-2 gap-8 print:gap-4 text-center text-xs print:text-[8.5px]">
             <div>
-              <div className="h-8 border-b-2 border-slate-400 w-48 sm:w-60 mx-auto mb-1 flex items-end justify-center pb-0.5">
+              <div className="h-6 print:h-5 border-b border-slate-400 w-44 mx-auto mb-1 flex items-end justify-center pb-0.5">
                 {studentName && (
-                  <span className="text-xs font-serif italic text-slate-800">{studentName}</span>
+                  <span className="text-xs print:text-[9px] font-serif italic text-slate-800">{studentName}</span>
                 )}
               </div>
-              <span className="text-[11px] font-bold text-slate-800 uppercase block">
+              <span className="text-[10px] print:text-[8px] font-bold text-slate-800 uppercase block">
                 Student Signature & Date
               </span>
-              <p className="text-[10px] text-slate-400 mt-0.5">শিক্ষার্থীর স্বাক্ষর ও তারিখ</p>
+              <p className="text-[9px] print:text-[7px] text-slate-400">শিক্ষার্থীর স্বাক্ষর ও তারিখ ({dateStr})</p>
             </div>
 
             <div>
-              <div className="h-8 border-b-2 border-teal-900 w-48 sm:w-60 mx-auto mb-1 flex items-end justify-center pb-0.5">
-                <span className="text-xs font-serif italic font-bold text-teal-950">
-                  Authorized Signatory
+              <div className="h-6 print:h-5 border-b border-teal-900 w-48 mx-auto mb-1 flex items-end justify-center pb-0.5">
+                <span className="text-xs print:text-[9px] font-serif italic font-bold text-teal-950">
+                  {signatoryName}
                 </span>
               </div>
-              <span className="text-[11px] font-black text-teal-950 uppercase block">
-                Authorized Signature — NexGen Computer Academy
+              <span className="text-[10px] print:text-[8px] font-black text-teal-950 uppercase block">
+                Authorized Signature — {instituteName}
               </span>
-              <p className="text-[10px] text-teal-700 font-semibold mt-0.5">কর্তৃপক্ষের স্বাক্ষর ও অফিসিয়াল সিল</p>
+              <p className="text-[9px] print:text-[7px] text-teal-700 font-semibold">কর্তৃপক্ষের স্বাক্ষর ও অফিসিয়াল সিল</p>
             </div>
           </div>
 
           {/* Printable Footer */}
-          <div className="mt-6 pt-2 border-t border-slate-200 text-center text-[10px] text-slate-400">
-            NexGen Computer Academy • 14/B Garden Road, Farmgate, Dhaka-1215 • Web: nexgenacademy.edu.bd
+          <div className="mt-3 print:mt-1 pt-1 border-t border-slate-200 text-center text-[9px] print:text-[7.5px] text-slate-400">
+            {instituteName} • {campusName}: {officialAddress} • Hotline: {hotline} • Web: {website}
           </div>
         </div>
 
         {/* Modal Bottom Action Footer (Hidden when printing) */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0 print:hidden">
+        <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 shrink-0 print:hidden">
           <button
             type="button"
             onClick={onClose}
@@ -335,6 +347,7 @@ export const StudentTermsModal: React.FC<StudentTermsModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

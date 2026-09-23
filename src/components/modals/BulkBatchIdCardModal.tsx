@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAcademy } from '../../context/AcademyContext';
 import { Batch, Student } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
@@ -72,7 +73,7 @@ export const BulkBatchIdCardModal: React.FC<BulkBatchIdCardModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible">
       <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden print:max-w-none print:w-full print:h-auto print:max-h-none print:shadow-none print:border-none print:rounded-none print:overflow-visible">
         {/* Modal Header */}
@@ -270,6 +271,7 @@ export const BulkBatchIdCardModal: React.FC<BulkBatchIdCardModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

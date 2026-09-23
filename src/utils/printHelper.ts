@@ -110,13 +110,10 @@ export const applyPrintStyles = (options: PrintOptions = {}) => {
       ${orientation === 'portrait' && size === 'a4' ? `
         .print-page-a4,
         #money-receipt-printable,
-        #admit-card-printable {
+        #admit-card-printable,
+        #student-terms-official-sheet {
           max-width: 195mm !important;
           margin: 0 auto !important;
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-          page-break-after: avoid !important;
-          page-break-before: avoid !important;
           box-sizing: border-box !important;
         }
 
@@ -131,11 +128,9 @@ export const applyPrintStyles = (options: PrintOptions = {}) => {
         .admission-page-sheet {
           width: 100% !important;
           max-width: 196mm !important;
-          max-height: 284mm !important;
           box-sizing: border-box !important;
           page-break-inside: avoid !important;
           break-inside: avoid !important;
-          overflow: hidden !important;
         }
 
         .admission-page-break {
