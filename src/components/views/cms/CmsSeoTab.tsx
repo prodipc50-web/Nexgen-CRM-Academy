@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { Course, GlobalSeoConfig, CourseSlugRedirect } from '../../../types';
 import {
@@ -146,7 +146,22 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
     );
   }, [websiteCmsConfig.seo]);
 
-  const [formData, setFormData] = useState<GlobalSeoConfig>(currentSeo);
+  const [formData, _setFormData] = useState<GlobalSeoConfig>(currentSeo);
+  const hasUserEditedRef = useRef(false);
+
+  const setFormData: React.Dispatch<React.SetStateAction<GlobalSeoConfig>> = (value) => {
+    hasUserEditedRef.current = true;
+    _setFormData(value);
+  };
+
+  // Background sync from Firestore when not actively editing
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+    if (websiteCmsConfig.seo) {
+      _setFormData(websiteCmsConfig.seo);
+    }
+  }, [websiteCmsConfig.seo]);
+
   const [activeSubTab, setActiveSubTab] = useState<
     'gbp_nap' | 'ai_geo_seo' | 'serp_meta' | 'local_seo' | 'courses_seo' | 'analytics_hub' | 'seo_health' | 'schemas' | 'sitemap_robots'
   >('gbp_nap');
@@ -185,8 +200,8 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
   };
 
   const handleSave = () => {
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({
-      ...websiteCmsConfig,
       seo: formData
     });
     if (onSaveToast) onSaveToast('SEO & Google Business Profile Settings saved to database!');

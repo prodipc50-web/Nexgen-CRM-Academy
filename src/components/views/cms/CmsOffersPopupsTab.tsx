@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import {
   TopOfferRibbonConfig,
@@ -45,6 +45,7 @@ interface CmsOffersPopupsTabProps {
 
 export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings } = useAcademy();
+  const hasUserEditedRef = useRef(false);
 
   const [activeSubTab, setActiveSubTab] = useState<
     'ribbon' | 'popup' | 'partners' | 'floating' | 'social_proof' | 'campus_tour' | 'syllabus_magnet'
@@ -138,7 +139,7 @@ export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSucces
 
   // 7. Syllabus Download Lead Magnet State
   const [syllabusConfig, setSyllabusConfig] = useState<SyllabusDownloadConfig>(
-    websiteCmsConfig.syllabusDownloadConfig || {
+    (websiteCmsConfig.syllabusDownloadConfig as SyllabusDownloadConfig) || {
       enabled: true,
       modalTitle: '📥 অফিশিয়াল কোর্স কারিকুলাম ও সিলেবাস ডাউনলোড',
       modalSubtitle: 'আমাদের সম্পূর্ণ কারিকুলাম, ইন্ডাস্ট্রি প্রজেক্ট এবং ক্যারিয়ার রোডম্যাপের বিস্তারিত পিডিএফ সংগ্রহ করুন।',
@@ -146,6 +147,28 @@ export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSucces
       instantDownloadFallback: true
     }
   );
+
+  // Sync with Firestore background updates when user is not actively editing
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+    if (websiteCmsConfig.topOfferRibbon) setRibbonConfig(websiteCmsConfig.topOfferRibbon);
+    if (websiteCmsConfig.leadCapturePopup) setPopupConfig(websiteCmsConfig.leadCapturePopup);
+    if (websiteCmsConfig.hiringPartnersConfig) setPartnersConfig(websiteCmsConfig.hiringPartnersConfig);
+    if (websiteCmsConfig.floatingActionWidget) setFloatingConfig(websiteCmsConfig.floatingActionWidget);
+    if (websiteCmsConfig.socialProofConfig) setSocialProofConfig(websiteCmsConfig.socialProofConfig);
+    if (websiteCmsConfig.campusTourConfig) setCampusTourConfig(websiteCmsConfig.campusTourConfig);
+    if (websiteCmsConfig.syllabusDownloadConfig) {
+      setSyllabusConfig(websiteCmsConfig.syllabusDownloadConfig as SyllabusDownloadConfig);
+    }
+  }, [
+    websiteCmsConfig.topOfferRibbon,
+    websiteCmsConfig.leadCapturePopup,
+    websiteCmsConfig.hiringPartnersConfig,
+    websiteCmsConfig.floatingActionWidget,
+    websiteCmsConfig.socialProofConfig,
+    websiteCmsConfig.campusTourConfig,
+    websiteCmsConfig.syllabusDownloadConfig
+  ]);
 
   // Modal / Form state for partner editing
   const [editingPartner, setEditingPartner] = useState<HiringPartnerItem | null>(null);
@@ -190,16 +213,19 @@ export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSucces
 
   // Save Handlers
   const handleSaveRibbon = () => {
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({ topOfferRibbon: ribbonConfig });
     onSuccessToast('টপ অফার রিবন সেটিংস সফলভাবে সংরক্ষিত হয়েছে!');
   };
 
   const handleSavePopup = () => {
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({ leadCapturePopup: popupConfig });
     onSuccessToast('লিড ক্যাপচার অফার পপআপ সেটিংস সফলভাবে সংরক্ষিত হয়েছে!');
   };
 
   const handleSavePartners = (updatedPartners?: HiringPartnerItem[]) => {
+    hasUserEditedRef.current = false;
     const newConfig = {
       ...partnersConfig,
       partners: updatedPartners || partnersConfig.partners
@@ -210,21 +236,25 @@ export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSucces
   };
 
   const handleSaveFloating = () => {
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({ floatingActionWidget: floatingConfig });
     onSuccessToast('ফ্লোটিং অ্যাকশন ও হোয়াটসঅ্যাপ সেটিংস সংরক্ষিত হয়েছে!');
   };
 
   const handleSaveSocialProof = () => {
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({ socialProofConfig });
     onSuccessToast('সোশ্যাল প্রুফ লাইভ অ্যাক্টিভিটি পপআপ সেটিংস সফলভাবে সংরক্ষিত হয়েছে!');
   };
 
   const handleSaveCampusTour = () => {
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({ campusTourConfig });
     onSuccessToast('ক্যাম্পাস ও ল্যাব ভিজিট বুকিং ফর্ম সেটিংস সফলভাবে সংরক্ষিত হয়েছে!');
   };
 
   const handleSaveSyllabus = () => {
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({ syllabusDownloadConfig: syllabusConfig });
     onSuccessToast('সিলেবাস ডাউনলোড লিড ম্যাগনেট সেটিংস সফলভাবে সংরক্ষিত হয়েছে!');
   };

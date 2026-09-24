@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { PhoneContactItem, EmailContactItem } from '../../../types';
 import {
@@ -24,6 +24,7 @@ interface CmsContactTabProps {
 
 export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings } = useAcademy();
+  const hasUserEditedRef = useRef(false);
 
   const [multiplePhones, setMultiplePhones] = useState<PhoneContactItem[]>(() => {
     if (websiteCmsConfig.multiplePhones && websiteCmsConfig.multiplePhones.length > 0) {
@@ -69,6 +70,22 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
     websiteCmsConfig.googleMapShareUrl || 'https://share.google/9W8K1XZHLbZxFpF8G'
   );
 
+  // Background cloud sync when not actively editing
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+    if (websiteCmsConfig.multiplePhones && websiteCmsConfig.multiplePhones.length > 0) {
+      setMultiplePhones(websiteCmsConfig.multiplePhones);
+    }
+    if (websiteCmsConfig.multipleEmails && websiteCmsConfig.multipleEmails.length > 0) {
+      setMultipleEmails(websiteCmsConfig.multipleEmails);
+    }
+    if (websiteCmsConfig.officeAddress) setAddress(websiteCmsConfig.officeAddress);
+    if (websiteCmsConfig.campusDirections) setDirections(websiteCmsConfig.campusDirections);
+    if (websiteCmsConfig.officeHours) setOfficeHours(websiteCmsConfig.officeHours);
+    if (websiteCmsConfig.googleMapEmbedUrl) setMapsEmbedUrl(websiteCmsConfig.googleMapEmbedUrl);
+    if (websiteCmsConfig.googleMapShareUrl) setMapsShareUrl(websiteCmsConfig.googleMapShareUrl);
+  }, [websiteCmsConfig]);
+
   // New Phone state
   const [newPhone, setNewPhone] = useState({
     label: '',
@@ -85,6 +102,7 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
 
   const handleAddPhone = () => {
     if (!newPhone.number.trim()) return;
+    hasUserEditedRef.current = true;
     const item: PhoneContactItem = {
       id: `ph-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       label: newPhone.label.trim() || 'General Inquiry',
@@ -97,10 +115,12 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
   };
 
   const handleRemovePhone = (indexToRemove: number) => {
+    hasUserEditedRef.current = true;
     setMultiplePhones(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleUpdatePhone = (indexToUpdate: number, field: keyof PhoneContactItem, value: any) => {
+    hasUserEditedRef.current = true;
     setMultiplePhones(prev =>
       prev.map((p, idx) => (idx === indexToUpdate ? { ...p, [field]: value } : p))
     );
@@ -108,6 +128,7 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
 
   const handleAddEmail = () => {
     if (!newEmail.email.trim()) return;
+    hasUserEditedRef.current = true;
     const item: EmailContactItem = {
       id: `em-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       label: newEmail.label.trim() || 'General Support',
@@ -118,10 +139,12 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
   };
 
   const handleRemoveEmail = (indexToRemove: number) => {
+    hasUserEditedRef.current = true;
     setMultipleEmails(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleUpdateEmail = (indexToUpdate: number, field: keyof EmailContactItem, value: any) => {
+    hasUserEditedRef.current = true;
     setMultipleEmails(prev =>
       prev.map((e, idx) => (idx === indexToUpdate ? { ...e, [field]: value } : e))
     );
@@ -129,6 +152,7 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    hasUserEditedRef.current = false;
     const resolved = resolveMapUrls(mapsEmbedUrl, mapsShareUrl, address);
     updateWebsiteCmsConfig({
       officeAddress: address,
@@ -369,7 +393,10 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
               rows={2}
               required
               value={address}
-              onChange={e => setAddress(e.target.value)}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setAddress(e.target.value);
+              }}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
             />
           </div>
@@ -379,7 +406,10 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
             <textarea
               rows={2}
               value={directions}
-              onChange={e => setDirections(e.target.value)}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setDirections(e.target.value);
+              }}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
             />
           </div>
@@ -389,7 +419,10 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
             <input
               type="text"
               value={officeHours}
-              onChange={e => setOfficeHours(e.target.value)}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setOfficeHours(e.target.value);
+              }}
               placeholder="e.g. Saturday - Friday: 9:00 AM - 8:30 PM"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
             />
@@ -415,7 +448,10 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
             <input
               type="text"
               value={mapsShareUrl}
-              onChange={e => setMapsShareUrl(e.target.value)}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setMapsShareUrl(e.target.value);
+              }}
               placeholder="https://share.google/9W8K1XZHLbZxFpF8G"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
             />
@@ -432,6 +468,7 @@ export const CmsContactTab: React.FC<CmsContactTabProps> = ({ onSuccessToast }) 
               type="text"
               value={mapsEmbedUrl}
               onChange={e => {
+                hasUserEditedRef.current = true;
                 const val = e.target.value;
                 setMapsEmbedUrl(val);
                 // If user pasted a share link into embed input, also auto-populate share url

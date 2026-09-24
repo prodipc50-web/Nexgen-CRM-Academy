@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { ShieldCheck, FileCheck2, RefreshCw, Users2, Save } from 'lucide-react';
 
@@ -8,6 +8,7 @@ interface CmsPoliciesTabProps {
 
 export const CmsPoliciesTab: React.FC<CmsPoliciesTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig } = useAcademy();
+  const hasUserEditedRef = useRef(false);
 
   const pol = websiteCmsConfig.policies || {
     termsAndConditions: 'All students enrolled in NexGen Coding Academy must adhere to academic integrity...',
@@ -25,8 +26,27 @@ export const CmsPoliciesTab: React.FC<CmsPoliciesTabProps> = ({ onSuccessToast }
     codeOfConduct: pol.codeOfConduct || ''
   });
 
+  // Background sync from Firestore when user is not actively editing
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+    if (websiteCmsConfig.policies) {
+      setFormData({
+        termsAndConditions: websiteCmsConfig.policies.termsAndConditions || '',
+        privacyPolicy: websiteCmsConfig.policies.privacyPolicy || '',
+        refundPolicy: websiteCmsConfig.policies.refundPolicy || '',
+        codeOfConduct: websiteCmsConfig.policies.codeOfConduct || ''
+      });
+    }
+  }, [websiteCmsConfig.policies]);
+
+  const updateField = (fields: Partial<typeof formData>) => {
+    hasUserEditedRef.current = true;
+    setFormData(prev => ({ ...prev, ...fields }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({
       policies: formData
     });
@@ -103,7 +123,7 @@ export const CmsPoliciesTab: React.FC<CmsPoliciesTabProps> = ({ onSuccessToast }
             <textarea
               rows={12}
               value={formData.termsAndConditions}
-              onChange={e => setFormData({ ...formData, termsAndConditions: e.target.value })}
+              onChange={e => updateField({ termsAndConditions: e.target.value })}
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 leading-relaxed focus:bg-white"
             />
           </div>
@@ -120,7 +140,7 @@ export const CmsPoliciesTab: React.FC<CmsPoliciesTabProps> = ({ onSuccessToast }
             <textarea
               rows={12}
               value={formData.privacyPolicy}
-              onChange={e => setFormData({ ...formData, privacyPolicy: e.target.value })}
+              onChange={e => updateField({ privacyPolicy: e.target.value })}
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 leading-relaxed focus:bg-white"
             />
           </div>
@@ -137,7 +157,7 @@ export const CmsPoliciesTab: React.FC<CmsPoliciesTabProps> = ({ onSuccessToast }
             <textarea
               rows={12}
               value={formData.refundPolicy}
-              onChange={e => setFormData({ ...formData, refundPolicy: e.target.value })}
+              onChange={e => updateField({ refundPolicy: e.target.value })}
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 leading-relaxed focus:bg-white"
             />
           </div>
@@ -154,7 +174,7 @@ export const CmsPoliciesTab: React.FC<CmsPoliciesTabProps> = ({ onSuccessToast }
             <textarea
               rows={12}
               value={formData.codeOfConduct}
-              onChange={e => setFormData({ ...formData, codeOfConduct: e.target.value })}
+              onChange={e => updateField({ codeOfConduct: e.target.value })}
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 leading-relaxed focus:bg-white"
             />
           </div>

@@ -1902,6 +1902,9 @@ export interface WebsiteCmsConfig {
 
   // 16. Alumni Job Placements Showcase Section Config
   placementsSectionConfig?: SectionHeadingConfig;
+
+  // Metadata & Persistence Timestamp
+  updatedAt?: string;
 }
 
 export interface SocialProofTickerItem {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import {
   LearningDeliveryFormatCard,
@@ -27,7 +27,8 @@ import {
   BarChart3,
   Users,
   GraduationCap,
-  Type
+  Type,
+  Sparkles
 } from 'lucide-react';
 
 interface CmsSectionsTabProps {
@@ -35,7 +36,9 @@ interface CmsSectionsTabProps {
 }
 
 export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }) => {
-  const { websiteCmsConfig, updateWebsiteCmsConfig } = useAcademy();
+  const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings } = useAcademy();
+  const [saveFeedback, setSaveFeedback] = useState(false);
+  const hasUserEditedRef = useRef(false);
 
   // 1. Section Visibility
   const [visibility, setVisibility] = useState<WebsiteSectionVisibility>(
@@ -221,7 +224,62 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     websiteCmsConfig.footerConfig?.showLegalLinks ?? true
   );
 
+  // Synchronize state whenever websiteCmsConfig updates (e.g. from cloud or another tab)
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+
+    if (websiteCmsConfig.sectionVisibility) {
+      setVisibility(websiteCmsConfig.sectionVisibility);
+    }
+    if (websiteCmsConfig.deliveryModesConfig) {
+      setDeliveryEnabled(websiteCmsConfig.deliveryModesConfig.enabled ?? true);
+      if (websiteCmsConfig.deliveryModesConfig.cards) {
+        setDeliveryCards(websiteCmsConfig.deliveryModesConfig.cards);
+      }
+    }
+    if (websiteCmsConfig.impactTrustConfig) {
+      setImpactEnabled(websiteCmsConfig.impactTrustConfig.enabled ?? true);
+      setImpactTagText(websiteCmsConfig.impactTrustConfig.tagText || 'CAREER IMPACT & TRUST');
+      setImpactHeading(websiteCmsConfig.impactTrustConfig.heading || 'From Beginner to IT Professionals We Close That Gap.');
+      setImpactSubtitle(websiteCmsConfig.impactTrustConfig.subtitle || '');
+      if (websiteCmsConfig.impactTrustConfig.metrics) {
+        setImpactMetrics(websiteCmsConfig.impactTrustConfig.metrics);
+      }
+    }
+    if (websiteCmsConfig.admissionRoadmap) {
+      setRoadmapEnabled(websiteCmsConfig.admissionRoadmap.enabled ?? true);
+      setRoadmapTag(websiteCmsConfig.admissionRoadmap.tagText || 'ভর্তি ও ক্লাস শুরুর প্রক্রিয়া');
+      setRoadmapTitle(websiteCmsConfig.admissionRoadmap.title || 'সহজ ৪টি ধাপে শুরু করুন আপনার আইটি ক্যারিয়ার');
+      setRoadmapDesc(websiteCmsConfig.admissionRoadmap.description || '');
+      if (websiteCmsConfig.admissionRoadmap.steps) {
+        setRoadmapSteps(websiteCmsConfig.admissionRoadmap.steps);
+      }
+    }
+    if (websiteCmsConfig.coursesSectionConfig) {
+      setCoursesHeading(websiteCmsConfig.coursesSectionConfig);
+    }
+    if (websiteCmsConfig.mentorsSectionConfig) {
+      setMentorsHeading(websiteCmsConfig.mentorsSectionConfig);
+    }
+    if (websiteCmsConfig.blogSectionConfig) {
+      setBlogHeading(websiteCmsConfig.blogSectionConfig);
+    }
+    if (websiteCmsConfig.seminarsSectionConfig) {
+      setSeminarsHeading(websiteCmsConfig.seminarsSectionConfig);
+    }
+    if (websiteCmsConfig.footerConfig) {
+      if (websiteCmsConfig.footerConfig.bio !== undefined) setFooterBio(websiteCmsConfig.footerConfig.bio);
+      if (websiteCmsConfig.footerConfig.copyrightText !== undefined) setCopyrightText(websiteCmsConfig.footerConfig.copyrightText);
+      if (websiteCmsConfig.footerConfig.creditsText !== undefined) setCreditsText(websiteCmsConfig.footerConfig.creditsText);
+      if (websiteCmsConfig.footerConfig.showSocials !== undefined) setShowSocials(websiteCmsConfig.footerConfig.showSocials);
+      if (websiteCmsConfig.footerConfig.showTopCourses !== undefined) setShowTopCourses(websiteCmsConfig.footerConfig.showTopCourses);
+      if (websiteCmsConfig.footerConfig.showQuickNav !== undefined) setShowQuickNav(websiteCmsConfig.footerConfig.showQuickNav);
+      if (websiteCmsConfig.footerConfig.showLegalLinks !== undefined) setShowLegalLinks(websiteCmsConfig.footerConfig.showLegalLinks);
+    }
+  }, [websiteCmsConfig]);
+
   const handleToggleSection = (key: keyof WebsiteSectionVisibility) => {
+    hasUserEditedRef.current = true;
     setVisibility(prev => ({
       ...prev,
       [key]: !prev[key]
@@ -229,6 +287,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
   };
 
   const handleUpdateDeliveryCard = (index: number, field: keyof LearningDeliveryFormatCard, val: any) => {
+    hasUserEditedRef.current = true;
     setDeliveryCards(prev => {
       const copy = [...prev];
       copy[index] = { ...copy[index], [field]: val };
@@ -237,6 +296,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
   };
 
   const handleUpdateRoadmapStep = (index: number, field: keyof AdmissionRoadmapStep, val: any) => {
+    hasUserEditedRef.current = true;
     setRoadmapSteps(prev => {
       const copy = [...prev];
       copy[index] = { ...copy[index], [field]: val };
@@ -245,6 +305,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
   };
 
   const handleUpdateImpactMetric = (index: number, field: keyof ImpactTrustMetricItem, val: string) => {
+    hasUserEditedRef.current = true;
     setImpactMetrics(prev => {
       const copy = [...prev];
       copy[index] = { ...copy[index], [field]: val };
@@ -252,8 +313,9 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     });
   };
 
-  const handleSaveAll = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveAll = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({
       sectionVisibility: visibility,
       deliveryModesConfig: {
@@ -288,11 +350,47 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         showLegalLinks
       }
     });
-    onSuccessToast('সেকশন ভিজিবিলিটি, ইমপ্যাক্ট মেট্রিক্স, ডেলিভারি মোড ও ফুটার সেটিংস সফলভাবে সংরক্ষিত হয়েছে!');
+    setSaveFeedback(true);
+    setTimeout(() => setSaveFeedback(false), 3000);
+    onSuccessToast('সেকশন ভিজিবিলিটি, ইমপ্যাক্ট মেট্রিক্স, ডেলিভারি মোড ও ফুটার সেটিংস সফলভাবে সংরক্ষিত ও লাইভ হয়েছে!');
   };
 
   return (
     <form onSubmit={handleSaveAll} className="space-y-8">
+      {/* Top Sticky Quick Save Action Bar */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 sm:p-5 rounded-3xl border border-indigo-900/50 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center font-black shadow-lg shadow-indigo-600/40 text-white shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-black text-white text-sm sm:text-base flex items-center space-x-2">
+              <span>Website Sections & Footer Settings (সেকশন ও ফুটার হাব)</span>
+              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] uppercase font-bold">
+                Live Auto-Sync
+              </span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              ১৬টি সেকশন, ডেলিভারি মোড, ইমপ্যাক্ট মেট্রিক্স, ভর্তি রোডম্যাপ ও ফুটার কাস্টমাইজেশন সেভ করুন।
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <button
+            type="button"
+            onClick={() => handleSaveAll()}
+            className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-black text-xs shadow-lg flex items-center justify-center space-x-2 transition-all cursor-pointer ${
+              saveFeedback
+                ? 'bg-emerald-600 text-white shadow-emerald-600/40 scale-105'
+                : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/30 active:scale-95'
+            }`}
+          >
+            {saveFeedback ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
+            <span>{saveFeedback ? 'সব সংরক্ষিত হয়েছে (Saved!)' : 'Save All Settings (সব সংরক্ষণ করুন)'}</span>
+          </button>
+        </div>
+      </div>
       {/* SECTION 1: GLOBAL SECTION VISIBILITY TOGGLES */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
@@ -885,7 +983,10 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             <textarea
               rows={2}
               value={footerBio}
-              onChange={e => setFooterBio(e.target.value)}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setFooterBio(e.target.value);
+              }}
               placeholder="e.g. Premier professional IT training organization dedicated to creating industry-grade developers..."
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
             />
@@ -897,8 +998,11 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
               <input
                 type="text"
                 value={copyrightText}
-                onChange={e => setCopyrightText(e.target.value)}
-                placeholder="All Rights Reserved."
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setCopyrightText(e.target.value);
+                }}
+                placeholder={`© ${new Date().getFullYear()} Nexgen Computer Academy. All Rights Reserved.`}
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
               />
             </div>
@@ -908,7 +1012,10 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
               <input
                 type="text"
                 value={creditsText}
-                onChange={e => setCreditsText(e.target.value)}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setCreditsText(e.target.value);
+                }}
                 placeholder="Empowered by NexGen Multi-Campus ERP & Centralized CMS Engine."
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
               />
@@ -920,7 +1027,10 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
               <input
                 type="checkbox"
                 checked={showSocials}
-                onChange={e => setShowSocials(e.target.checked)}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setShowSocials(e.target.checked);
+                }}
                 className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
               />
               <span>Social Icons</span>
@@ -930,7 +1040,10 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
               <input
                 type="checkbox"
                 checked={showTopCourses}
-                onChange={e => setShowTopCourses(e.target.checked)}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setShowTopCourses(e.target.checked);
+                }}
                 className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
               />
               <span>Top Courses Column</span>
@@ -940,7 +1053,10 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
               <input
                 type="checkbox"
                 checked={showQuickNav}
-                onChange={e => setShowQuickNav(e.target.checked)}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setShowQuickNav(e.target.checked);
+                }}
                 className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
               />
               <span>Quick Navigation Column</span>
@@ -950,7 +1066,10 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
               <input
                 type="checkbox"
                 checked={showLegalLinks}
-                onChange={e => setShowLegalLinks(e.target.checked)}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setShowLegalLinks(e.target.checked);
+                }}
                 className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
               />
               <span>Legal Policies Column</span>

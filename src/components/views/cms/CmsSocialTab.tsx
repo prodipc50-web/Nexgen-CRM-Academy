@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import {
   Share2,
@@ -21,6 +21,7 @@ interface CmsSocialTabProps {
 
 export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig } = useAcademy();
+  const hasUserEditedRef = useRef(false);
 
   const socials = websiteCmsConfig.socialLinks || {
     facebookPageUrl: 'https://facebook.com/nexgencodingacademy',
@@ -59,8 +60,43 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
     communityEnabled: websiteCmsConfig.communityHub?.enabled ?? true
   });
 
+  // Background sync from Firestore when not actively editing
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+    const currentSocials = websiteCmsConfig.socialLinks;
+    const currentHub = websiteCmsConfig.communityHub;
+    if (currentSocials || currentHub) {
+      setFormData(prev => ({
+        ...prev,
+        facebookPageUrl: currentSocials?.facebookPageUrl ?? prev.facebookPageUrl,
+        facebookGroupUrl: currentSocials?.facebookGroupUrl ?? prev.facebookGroupUrl,
+        facebookGroupName: currentSocials?.facebookGroupName ?? prev.facebookGroupName,
+        facebookGroupMembersCount: currentSocials?.facebookGroupMembersCount ?? prev.facebookGroupMembersCount,
+        youtubeChannelUrl: currentSocials?.youtubeChannelUrl ?? prev.youtubeChannelUrl,
+        youtubeFeaturedVideoUrl: currentSocials?.youtubeFeaturedVideoUrl ?? prev.youtubeFeaturedVideoUrl,
+        youtubeVideoTitle: currentSocials?.youtubeVideoTitle ?? prev.youtubeVideoTitle,
+        whatsappSupportNumber: currentSocials?.whatsappSupportNumber ?? prev.whatsappSupportNumber,
+        whatsappCommunityUrl: currentSocials?.whatsappCommunityUrl ?? prev.whatsappCommunityUrl,
+        linkedinUrl: currentSocials?.linkedinUrl ?? prev.linkedinUrl,
+        instagramUrl: currentSocials?.instagramUrl ?? prev.instagramUrl,
+        telegramUrl: currentSocials?.telegramUrl ?? prev.telegramUrl,
+        tiktokUrl: currentSocials?.tiktokUrl ?? prev.tiktokUrl,
+        communityBadgeText: currentHub?.badgeText ?? prev.communityBadgeText,
+        communityHeading: currentHub?.heading ?? prev.communityHeading,
+        communityDescription: currentHub?.description ?? prev.communityDescription,
+        communityEnabled: currentHub?.enabled ?? prev.communityEnabled
+      }));
+    }
+  }, [websiteCmsConfig.socialLinks, websiteCmsConfig.communityHub]);
+
+  const updateField = (fields: Partial<typeof formData>) => {
+    hasUserEditedRef.current = true;
+    setFormData(prev => ({ ...prev, ...fields }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    hasUserEditedRef.current = false;
     const {
       communityBadgeText,
       communityHeading,
@@ -98,7 +134,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.facebookPageUrl}
-              onChange={e => setFormData({ ...formData, facebookPageUrl: e.target.value })}
+              onChange={e => updateField({ facebookPageUrl: e.target.value })}
               placeholder="https://facebook.com/your-page"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px] text-blue-800"
             />
@@ -110,7 +146,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.facebookGroupUrl}
-              onChange={e => setFormData({ ...formData, facebookGroupUrl: e.target.value })}
+              onChange={e => updateField({ facebookGroupUrl: e.target.value })}
               placeholder="https://facebook.com/groups/your-group"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px] text-blue-800"
             />
@@ -122,7 +158,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.facebookGroupName}
-              onChange={e => setFormData({ ...formData, facebookGroupName: e.target.value })}
+              onChange={e => updateField({ facebookGroupName: e.target.value })}
               placeholder="e.g. NexGen Coders & Tech Career Network"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
             />
@@ -133,7 +169,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.facebookGroupMembersCount}
-              onChange={e => setFormData({ ...formData, facebookGroupMembersCount: e.target.value })}
+              onChange={e => updateField({ facebookGroupMembersCount: e.target.value })}
               placeholder="e.g. 18,500+ Active Members"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-emerald-600"
             />
@@ -154,7 +190,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.youtubeChannelUrl}
-              onChange={e => setFormData({ ...formData, youtubeChannelUrl: e.target.value })}
+              onChange={e => updateField({ youtubeChannelUrl: e.target.value })}
               placeholder="https://youtube.com/@yourchannel"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px] text-red-800"
             />
@@ -165,7 +201,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.youtubeVideoTitle}
-              onChange={e => setFormData({ ...formData, youtubeVideoTitle: e.target.value })}
+              onChange={e => updateField({ youtubeVideoTitle: e.target.value })}
               placeholder="e.g. Live Campus Tour & Student Success Stories"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
             />
@@ -176,7 +212,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.youtubeFeaturedVideoUrl}
-              onChange={e => setFormData({ ...formData, youtubeFeaturedVideoUrl: e.target.value })}
+              onChange={e => updateField({ youtubeFeaturedVideoUrl: e.target.value })}
               placeholder="https://www.youtube.com/embed/dQw4w9WgXcQ"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
             />
@@ -200,7 +236,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.whatsappSupportNumber}
-              onChange={e => setFormData({ ...formData, whatsappSupportNumber: e.target.value })}
+              onChange={e => updateField({ whatsappSupportNumber: e.target.value })}
               placeholder="01798444444"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-emerald-800"
             />
@@ -211,7 +247,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.whatsappCommunityUrl}
-              onChange={e => setFormData({ ...formData, whatsappCommunityUrl: e.target.value })}
+              onChange={e => updateField({ whatsappCommunityUrl: e.target.value })}
               placeholder="https://chat.whatsapp.com/..."
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
             />
@@ -235,7 +271,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.linkedinUrl}
-              onChange={e => setFormData({ ...formData, linkedinUrl: e.target.value })}
+              onChange={e => updateField({ linkedinUrl: e.target.value })}
               placeholder="https://linkedin.com/company/..."
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
             />
@@ -249,7 +285,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.instagramUrl}
-              onChange={e => setFormData({ ...formData, instagramUrl: e.target.value })}
+              onChange={e => updateField({ instagramUrl: e.target.value })}
               placeholder="https://instagram.com/..."
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
             />
@@ -263,7 +299,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.telegramUrl}
-              onChange={e => setFormData({ ...formData, telegramUrl: e.target.value })}
+              onChange={e => updateField({ telegramUrl: e.target.value })}
               placeholder="https://t.me/..."
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
             />
@@ -277,7 +313,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.tiktokUrl}
-              onChange={e => setFormData({ ...formData, tiktokUrl: e.target.value })}
+              onChange={e => updateField({ tiktokUrl: e.target.value })}
               placeholder="https://tiktok.com/@..."
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
             />
@@ -296,7 +332,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="checkbox"
               checked={formData.communityEnabled}
-              onChange={e => setFormData({ ...formData, communityEnabled: e.target.checked })}
+              onChange={e => updateField({ communityEnabled: e.target.checked })}
               className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
             />
             <span>Show Section on Public Site</span>
@@ -309,7 +345,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.communityBadgeText}
-              onChange={e => setFormData({ ...formData, communityBadgeText: e.target.value })}
+              onChange={e => updateField({ communityBadgeText: e.target.value })}
               placeholder="e.g. Connect with 18,000+ Bangladeshi Coders"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-700"
             />
@@ -320,7 +356,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <input
               type="text"
               value={formData.communityHeading}
-              onChange={e => setFormData({ ...formData, communityHeading: e.target.value })}
+              onChange={e => updateField({ communityHeading: e.target.value })}
               placeholder="e.g. Official Community Groups & YouTube Masterclasses"
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900"
             />
@@ -331,7 +367,7 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
             <textarea
               rows={2}
               value={formData.communityDescription}
-              onChange={e => setFormData({ ...formData, communityDescription: e.target.value })}
+              onChange={e => updateField({ communityDescription: e.target.value })}
               placeholder="e.g. Join our active developer network, ask code queries, collaborate on projects, and watch free full-length crash courses."
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
             />

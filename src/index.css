@@ -50,6 +50,13 @@ body {
 /* Smart typographic text-balance for headings to eliminate single-word orphan wrapping */
 h1, h2, h3, h4, .text-balance {
   text-wrap: balance;
+  line-height: 1.38;
+}
+
+/* Ensure Bengali headings have adequate vertical breath for all vowel diacritics */
+h1:lang(bn), h2:lang(bn), h3:lang(bn), h4:lang(bn),
+.font-bangla h1, .font-bangla h2, .font-bangla h3, .font-bangla h4 {
+  line-height: 1.42;
 }
 
 /* Prevent broken alignments in badges, pills, and action chips */
@@ -150,6 +157,7 @@ h1, h2, h3, h4, .text-balance {
   nav, 
   aside, 
   header, 
+  footer,
   .print\:hidden, 
   [class*="print:hidden"],
   #app-workspace-body,
@@ -157,13 +165,19 @@ h1, h2, h3, h4, .text-balance {
     display: none !important;
   }
 
-  /* When printing portal sheets, completely hide #root so it takes 0 pages and 0 height */
+  /* When printing portal sheets or documents, completely collapse #root so page 1 is never blank */
   body.is-printing-portal-modal > #root,
   body:has(#student-terms-official-sheet) > #root,
   body:has(#admission-form-printable) > #root,
   body:has(#id-card-printable) > #root,
   body:has(#admit-card-printable) > #root,
-  body:has(#bulk-id-card-sheet) > #root {
+  body:has(#money-receipt-printable) > #root,
+  body:has(#pos-receipt-printable) > #root,
+  body:has(#certificate-printable) > #root,
+  body:has(#eod-report-printable) > #root,
+  body:has(#bulk-id-card-sheet) > #root,
+  body:has(.printable-target) > #root,
+  body:has([data-printable="true"]) > #root {
     display: none !important;
     height: 0 !important;
     max-height: 0 !important;
@@ -177,6 +191,8 @@ h1, h2, h3, h4, .text-balance {
   .min-h-screen {
     min-height: 0 !important;
     height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* Reset animations that blur printed text */

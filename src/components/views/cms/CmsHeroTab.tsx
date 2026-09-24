@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { HeroBannerSlide } from '../../../types';
 import {
@@ -21,6 +21,7 @@ interface CmsHeroTabProps {
 
 export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings, updateAcademySettings } = useAcademy();
+  const hasUserEditedRef = useRef(false);
 
   const [formData, setFormData] = useState({
     heroHeadline: websiteCmsConfig.heroHeadline || '',
@@ -65,11 +66,45 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         ]
   );
 
+  // Sync state when websiteCmsConfig updates from cloud/other tab
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+
+    setFormData({
+      heroHeadline: websiteCmsConfig.heroHeadline || '',
+      heroSubtitle: websiteCmsConfig.heroSubtitle || '',
+      heroBadgeText: websiteCmsConfig.heroBadgeText || '',
+      heroCtaText: websiteCmsConfig.heroCtaText || '',
+      topNoticeTicker: websiteCmsConfig.topNoticeTicker || '',
+      totalTrained: websiteCmsConfig.heroStats?.totalTrained || '8,500+',
+      successRate: websiteCmsConfig.heroStats?.successRate || '96.4%',
+      expertTrainers: websiteCmsConfig.heroStats?.expertTrainers || '28+',
+      jobPlacementRatio: websiteCmsConfig.heroStats?.jobPlacementRatio || '89.2%',
+      promoTitle: websiteCmsConfig.promoBanner?.title || '',
+      promoDescription: websiteCmsConfig.promoBanner?.description || '',
+      promoCode: websiteCmsConfig.promoBanner?.discountCode || '',
+      promoExpiresAt: websiteCmsConfig.promoBanner?.expiresAt || '',
+      promoEnabled: websiteCmsConfig.promoBanner?.enabled ?? true,
+      upcomingCardBadge: websiteCmsConfig.upcomingBatchesCard?.badgeText || '40% Offer',
+      upcomingCardTitle: websiteCmsConfig.upcomingBatchesCard?.title || 'Upcoming Batches',
+      upcomingCardHeading: websiteCmsConfig.upcomingBatchesCard?.heading || 'Apply for Direct Admission',
+      upcomingCardDescription: websiteCmsConfig.upcomingBatchesCard?.description || 'Fast-track your IT career with practical project portfolios and certified diplomas.',
+      upcomingCardFeatureNote: websiteCmsConfig.upcomingBatchesCard?.featureNote || 'Free Lifetime Lab Access',
+      upcomingCardCtaText: websiteCmsConfig.upcomingBatchesCard?.ctaText || 'Free Seminars →',
+      upcomingCardCtaLink: websiteCmsConfig.upcomingBatchesCard?.ctaLink || '#seminars'
+    });
+
+    if (websiteCmsConfig.heroSlides && websiteCmsConfig.heroSlides.length > 0) {
+      setSlides(websiteCmsConfig.heroSlides);
+    }
+  }, [websiteCmsConfig]);
+
   const [isLogoCropModalOpen, setIsLogoCropModalOpen] = useState(false);
   const [saveFeedback, setSaveFeedback] = useState(false);
 
   // Two-way sync: When slides update from HeroBannerEditor
   const handleUpdateSlides = (newSlides: HeroBannerSlide[]) => {
+    hasUserEditedRef.current = true;
     setSlides(newSlides);
     if (newSlides.length > 0 && newSlides[0]) {
       const s0 = newSlides[0];
@@ -94,6 +129,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
 
   // Two-way sync: When user types in fallback inputs, reflect to slide[0]
   const handleHeadlineChange = (val: string) => {
+    hasUserEditedRef.current = true;
     setFormData(prev => ({ ...prev, heroHeadline: val }));
     setSlides(prev => {
       if (!prev || prev.length === 0) return prev;
@@ -104,6 +140,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   };
 
   const handleSubtitleChange = (val: string) => {
+    hasUserEditedRef.current = true;
     setFormData(prev => ({ ...prev, heroSubtitle: val }));
     setSlides(prev => {
       if (!prev || prev.length === 0) return prev;
@@ -114,6 +151,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   };
 
   const handleBadgeChange = (val: string) => {
+    hasUserEditedRef.current = true;
     setFormData(prev => ({ ...prev, heroBadgeText: val }));
     setSlides(prev => {
       if (!prev || prev.length === 0) return prev;
@@ -124,6 +162,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   };
 
   const handleCtaChange = (val: string) => {
+    hasUserEditedRef.current = true;
     setFormData(prev => ({ ...prev, heroCtaText: val }));
     setSlides(prev => {
       if (!prev || prev.length === 0) return prev;
@@ -136,6 +175,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   // Unified Save Function (triggered by top sticky button, banner studio save button, or bottom submit)
   const handleSaveAllHero = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    hasUserEditedRef.current = false;
 
     const syncedSlides = slides.length > 0 ? [
       {

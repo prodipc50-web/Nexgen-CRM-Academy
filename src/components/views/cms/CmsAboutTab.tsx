@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { Save, Info, UserCheck, ShieldCheck, Monitor, Award, Plus, Trash2, Crop, Upload, Image as ImageIcon, Sparkles, X } from 'lucide-react';
 import { ImageUploadCropModal } from '../../common/ImageUploadCropModal';
@@ -10,6 +10,7 @@ interface CmsAboutTabProps {
 
 export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig } = useAcademy();
+  const hasUserEditedRef = useRef(false);
 
   const about = websiteCmsConfig.aboutUs || {
     storyTitle: 'Pioneering Industry-Aligned IT Education in Bangladesh',
@@ -44,6 +45,31 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
     facilityHighlights: about.facilityHighlights || []
   });
 
+  // Background cloud sync when not actively editing
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+    if (websiteCmsConfig.aboutUs) {
+      setFormData({
+        storyTitle: websiteCmsConfig.aboutUs.storyTitle || '',
+        storyDescription: websiteCmsConfig.aboutUs.storyDescription || '',
+        mission: websiteCmsConfig.aboutUs.mission || '',
+        vision: websiteCmsConfig.aboutUs.vision || '',
+        directorMessage: websiteCmsConfig.aboutUs.directorMessage || '',
+        directorName: websiteCmsConfig.aboutUs.directorName || '',
+        directorTitle: websiteCmsConfig.aboutUs.directorTitle || '',
+        directorPhotoUrl: websiteCmsConfig.aboutUs.directorPhotoUrl || '',
+        establishedYear: websiteCmsConfig.aboutUs.establishedYear || '2019',
+        affiliations: websiteCmsConfig.aboutUs.affiliations || [],
+        facilityHighlights: websiteCmsConfig.aboutUs.facilityHighlights || []
+      });
+    }
+  }, [websiteCmsConfig.aboutUs]);
+
+  const updateFormField = (fields: Partial<typeof formData>) => {
+    hasUserEditedRef.current = true;
+    setFormData(prev => ({ ...prev, ...fields }));
+  };
+
   const [affiliationInput, setAffiliationInput] = useState('');
   const [facilityTitle, setFacilityTitle] = useState('');
   const [facilityDesc, setFacilityDesc] = useState('');
@@ -53,6 +79,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
   const handleDirectorFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    hasUserEditedRef.current = true;
     try {
       // Compress to max 600px square, 80% quality (~40KB size)
       const compressed = await compressLogoOrAvatar(file, 600);
@@ -71,6 +98,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
 
   const handleAddAffiliation = () => {
     if (!affiliationInput.trim()) return;
+    hasUserEditedRef.current = true;
     setFormData(prev => ({
       ...prev,
       affiliations: [...prev.affiliations, affiliationInput.trim()]
@@ -79,6 +107,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
   };
 
   const handleRemoveAffiliation = (index: number) => {
+    hasUserEditedRef.current = true;
     setFormData(prev => ({
       ...prev,
       affiliations: prev.affiliations.filter((_, i) => i !== index)
@@ -87,6 +116,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
 
   const handleAddFacility = () => {
     if (!facilityTitle.trim()) return;
+    hasUserEditedRef.current = true;
     setFormData(prev => ({
       ...prev,
       facilityHighlights: [
@@ -99,6 +129,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
   };
 
   const handleRemoveFacility = (index: number) => {
+    hasUserEditedRef.current = true;
     setFormData(prev => ({
       ...prev,
       facilityHighlights: prev.facilityHighlights.filter((_, i) => i !== index)
@@ -107,6 +138,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({
       aboutUs: formData
     });
@@ -129,7 +161,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
               type="text"
               required
               value={formData.storyTitle}
-              onChange={e => setFormData({ ...formData, storyTitle: e.target.value })}
+              onChange={e => updateFormField({ storyTitle: e.target.value })}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900"
             />
           </div>
@@ -139,7 +171,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
             <input
               type="text"
               value={formData.establishedYear}
-              onChange={e => setFormData({ ...formData, establishedYear: e.target.value })}
+              onChange={e => updateFormField({ establishedYear: e.target.value })}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-center font-bold"
             />
           </div>
@@ -149,7 +181,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
             <textarea
               rows={3}
               value={formData.storyDescription}
-              onChange={e => setFormData({ ...formData, storyDescription: e.target.value })}
+              onChange={e => updateFormField({ storyDescription: e.target.value })}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl leading-relaxed"
             />
           </div>
@@ -160,7 +192,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
               <textarea
                 rows={3}
                 value={formData.mission}
-                onChange={e => setFormData({ ...formData, mission: e.target.value })}
+                onChange={e => updateFormField({ mission: e.target.value })}
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl leading-relaxed"
               />
             </div>
@@ -169,7 +201,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
               <textarea
                 rows={3}
                 value={formData.vision}
-                onChange={e => setFormData({ ...formData, vision: e.target.value })}
+                onChange={e => updateFormField({ vision: e.target.value })}
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl leading-relaxed"
               />
             </div>
@@ -190,7 +222,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
             <input
               type="text"
               value={formData.directorName}
-              onChange={e => setFormData({ ...formData, directorName: e.target.value })}
+              onChange={e => updateFormField({ directorName: e.target.value })}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
             />
           </div>
@@ -200,7 +232,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
             <input
               type="text"
               value={formData.directorTitle}
-              onChange={e => setFormData({ ...formData, directorTitle: e.target.value })}
+              onChange={e => updateFormField({ directorTitle: e.target.value })}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
             />
           </div>
@@ -227,7 +259,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
                     </span>
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, directorPhotoUrl: '' })}
+                      onClick={() => updateFormField({ directorPhotoUrl: '' })}
                       className="text-red-500 hover:text-red-700 p-1 rounded-md hover:bg-red-50"
                       title="Remove Photo"
                     >
@@ -238,7 +270,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
                   <input
                     type="text"
                     value={formData.directorPhotoUrl}
-                    onChange={e => setFormData({ ...formData, directorPhotoUrl: e.target.value })}
+                    onChange={e => updateFormField({ directorPhotoUrl: e.target.value })}
                     placeholder="https://... (Web Image URL or Upload below)"
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
                   />
@@ -281,7 +313,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
             <textarea
               rows={4}
               value={formData.directorMessage}
-              onChange={e => setFormData({ ...formData, directorMessage: e.target.value })}
+              onChange={e => updateFormField({ directorMessage: e.target.value })}
               className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl leading-relaxed italic"
             />
           </div>

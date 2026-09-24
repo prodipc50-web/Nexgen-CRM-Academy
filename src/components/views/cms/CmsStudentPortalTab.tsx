@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { StudentPortalConfig } from '../../../types';
 import {
@@ -25,6 +25,7 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
   onOpenStudentPortal
 }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig, students } = useAcademy();
+  const hasUserEditedRef = useRef(false);
 
   const currentConfig: StudentPortalConfig = websiteCmsConfig.studentPortal || {
     isPortalEnabled: true,
@@ -39,8 +40,22 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
 
   const [formData, setFormData] = useState<StudentPortalConfig>({ ...currentConfig });
 
+  // Background sync from Firestore when user is not actively editing
+  useEffect(() => {
+    if (hasUserEditedRef.current) return;
+    if (websiteCmsConfig.studentPortal) {
+      setFormData({ ...websiteCmsConfig.studentPortal });
+    }
+  }, [websiteCmsConfig.studentPortal]);
+
+  const updateField = (fields: Partial<StudentPortalConfig>) => {
+    hasUserEditedRef.current = true;
+    setFormData(prev => ({ ...prev, ...fields }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({ studentPortal: formData });
     onSuccessToast('Student portal configuration updated successfully!');
   };
@@ -86,7 +101,7 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
             <input
               type="checkbox"
               checked={formData.isPortalEnabled}
-              onChange={e => setFormData({ ...formData, isPortalEnabled: e.target.checked })}
+              onChange={e => updateField({ isPortalEnabled: e.target.checked })}
               className="w-4 h-4 text-indigo-600 rounded-md mt-0.5"
             />
             <div className="space-y-0.5">
@@ -99,7 +114,7 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
             <input
               type="checkbox"
               checked={formData.allowIdCardDownload}
-              onChange={e => setFormData({ ...formData, allowIdCardDownload: e.target.checked })}
+              onChange={e => updateField({ allowIdCardDownload: e.target.checked })}
               className="w-4 h-4 text-indigo-600 rounded-md mt-0.5"
             />
             <div className="space-y-0.5">
@@ -112,7 +127,7 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
             <input
               type="checkbox"
               checked={formData.allowOnlineFeePayment}
-              onChange={e => setFormData({ ...formData, allowOnlineFeePayment: e.target.checked })}
+              onChange={e => updateField({ allowOnlineFeePayment: e.target.checked })}
               className="w-4 h-4 text-indigo-600 rounded-md mt-0.5"
             />
             <div className="space-y-0.5">
@@ -125,7 +140,7 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
             <input
               type="checkbox"
               checked={formData.allowClassRecordingAccess}
-              onChange={e => setFormData({ ...formData, allowClassRecordingAccess: e.target.checked })}
+              onChange={e => updateField({ allowClassRecordingAccess: e.target.checked })}
               className="w-4 h-4 text-indigo-600 rounded-md mt-0.5"
             />
             <div className="space-y-0.5">
@@ -149,7 +164,7 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
             <textarea
               rows={3}
               value={formData.portalNotice}
-              onChange={e => setFormData({ ...formData, portalNotice: e.target.value })}
+              onChange={e => updateField({ portalNotice: e.target.value })}
               placeholder="e.g. Special lab practice session this Friday from 4:00 PM..."
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl font-medium text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
             />
@@ -159,7 +174,7 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
             <input
               type="checkbox"
               checked={formData.portalNoticeUrgent}
-              onChange={e => setFormData({ ...formData, portalNoticeUrgent: e.target.checked })}
+              onChange={e => updateField({ portalNoticeUrgent: e.target.checked })}
               className="w-4 h-4 text-rose-600 rounded-md"
             />
             <span className="text-rose-600">Mark as Urgent Notice (Highlighted with Red/Amber Alert Box)</span>

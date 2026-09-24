@@ -819,6 +819,16 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           googleMapEmbedUrl: effectiveEmbedUrl,
           marketing: marketingConfig,
           heroStats: { ...INITIAL_WEBSITE_CMS_CONFIG.heroStats, ...(parsed.heroStats || {}) },
+          footerConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.footerConfig, ...(parsed.footerConfig || {}) },
+          deliveryModesConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.deliveryModesConfig, ...(parsed.deliveryModesConfig || {}) },
+          impactTrustConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.impactTrustConfig, ...(parsed.impactTrustConfig || {}) },
+          admissionRoadmap: { ...INITIAL_WEBSITE_CMS_CONFIG.admissionRoadmap, ...(parsed.admissionRoadmap || {}) },
+          coursesSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.coursesSectionConfig || {}), ...(parsed.coursesSectionConfig || {}) },
+          mentorsSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.mentorsSectionConfig || {}), ...(parsed.mentorsSectionConfig || {}) },
+          blogSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.blogSectionConfig || {}), ...(parsed.blogSectionConfig || {}) },
+          seminarsSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.seminarsSectionConfig || {}), ...(parsed.seminarsSectionConfig || {}) },
+          upcomingBatchesCard: { ...(INITIAL_WEBSITE_CMS_CONFIG.upcomingBatchesCard || {}), ...(parsed.upcomingBatchesCard || {}) },
+          heroSlides: Array.isArray(parsed.heroSlides) && parsed.heroSlides.length > 0 ? parsed.heroSlides : INITIAL_WEBSITE_CMS_CONFIG.heroSlides,
           promoBanner: { ...INITIAL_WEBSITE_CMS_CONFIG.promoBanner, ...(parsed.promoBanner || {}) },
           socialLinks: { ...INITIAL_WEBSITE_CMS_CONFIG.socialLinks, ...(parsed.socialLinks || {}) },
           aboutUs: { ...INITIAL_WEBSITE_CMS_CONFIG.aboutUs, ...(parsed.aboutUs || {}) },
@@ -1300,10 +1310,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const lastSavedPayloadString = useRef<string>('');
   const lastLocalMutationTimestamp = useRef<number>(0);
   const latestCoursesRef = useRef<Course[]>(courses);
+  const latestWebsiteCmsConfigRef = useRef<WebsiteCmsConfig>(websiteCmsConfig);
 
   useEffect(() => {
     latestCoursesRef.current = courses;
   }, [courses]);
+
+  useEffect(() => {
+    latestWebsiteCmsConfigRef.current = websiteCmsConfig;
+  }, [websiteCmsConfig]);
 
   // 1. PUBLIC WEBSITE CATALOG REAL-TIME LISTENER
   // Subscribes ONLY to /academy_data/public_catalog (contains NO private students, leads, payments, staff accounts, or audit logs)
@@ -1337,10 +1352,38 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             });
             if (Array.isArray(cat.categories) && cat.categories.length > 0) setCategories(cat.categories);
             if (cat.websiteCmsConfig && typeof cat.websiteCmsConfig === 'object') {
-              setWebsiteCmsConfig(prev => ({ ...prev, ...cat.websiteCmsConfig }));
+              setWebsiteCmsConfig(prev => {
+                const isLocalRecent = (Date.now() - lastLocalMutationTimestamp.current) < 15000;
+                const localT = new Date(prev.updatedAt || 0).getTime();
+                const remoteT = new Date(cat.updatedAt || cat.websiteCmsConfig.updatedAt || 0).getTime();
+                if (isLocalRecent && localT >= remoteT) {
+                  return prev;
+                }
+                const mergedCms: WebsiteCmsConfig = {
+                  ...prev,
+                  ...cat.websiteCmsConfig,
+                  heroStats: { ...(prev.heroStats || {}), ...(cat.websiteCmsConfig.heroStats || {}) },
+                  footerConfig: { ...(prev.footerConfig || {}), ...(cat.websiteCmsConfig.footerConfig || {}) },
+                  sectionVisibility: { ...(prev.sectionVisibility || {}), ...(cat.websiteCmsConfig.sectionVisibility || {}) },
+                  deliveryModesConfig: { ...(prev.deliveryModesConfig || {}), ...(cat.websiteCmsConfig.deliveryModesConfig || {}) },
+                  impactTrustConfig: { ...(prev.impactTrustConfig || {}), ...(cat.websiteCmsConfig.impactTrustConfig || {}) },
+                  admissionRoadmap: { ...(prev.admissionRoadmap || {}), ...(cat.websiteCmsConfig.admissionRoadmap || {}) },
+                  promoBanner: { ...(prev.promoBanner || {}), ...(cat.websiteCmsConfig.promoBanner || {}) },
+                  socialLinks: { ...(prev.socialLinks || {}), ...(cat.websiteCmsConfig.socialLinks || {}) },
+                  aboutUs: { ...(prev.aboutUs || {}), ...(cat.websiteCmsConfig.aboutUs || {}) },
+                  policies: { ...(prev.policies || {}), ...(cat.websiteCmsConfig.policies || {}) },
+                  seo: { ...(prev.seo || {}), ...(cat.websiteCmsConfig.seo || {}) },
+                  heroSlides: Array.isArray(cat.websiteCmsConfig.heroSlides) && cat.websiteCmsConfig.heroSlides.length > 0
+                    ? cat.websiteCmsConfig.heroSlides
+                    : prev.heroSlides
+                };
+                latestWebsiteCmsConfigRef.current = mergedCms;
+                return mergedCms;
+              });
             }
             if (Array.isArray(cat.websiteReviews)) setWebsiteReviews(cat.websiteReviews);
             if (Array.isArray(cat.websiteGallery)) setWebsiteGallery(cat.websiteGallery);
+            if (Array.isArray(cat.websiteNotices)) setWebsiteNotices(cat.websiteNotices);
             if (Array.isArray(cat.websiteFaqs)) setWebsiteFaqs(cat.websiteFaqs);
             if (Array.isArray(cat.websiteBlogs)) setWebsiteBlogs(cat.websiteBlogs);
             if (Array.isArray(cat.seminars)) setSeminars(cat.seminars);
@@ -1414,14 +1457,39 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                   ? DEFAULT_GA4_MEASUREMENT_ID
                   : remoteMarketing.googleAnalyticsId
               };
-              setWebsiteCmsConfig(prev => ({
-                ...prev,
-                ...data.websiteCmsConfig,
-                marketing: { ...(prev.marketing || {}), ...normalizedMarketing }
-              }));
+              setWebsiteCmsConfig(prev => {
+                const isLocalRecent = (Date.now() - lastLocalMutationTimestamp.current) < 15000;
+                const localT = new Date(prev.updatedAt || 0).getTime();
+                const remoteT = new Date(data.updatedAt || data.websiteCmsConfig.updatedAt || 0).getTime();
+                if (isLocalRecent && localT >= remoteT) {
+                  return prev;
+                }
+                const mergedCms: WebsiteCmsConfig = {
+                  ...prev,
+                  ...data.websiteCmsConfig,
+                  heroStats: { ...(prev.heroStats || {}), ...(data.websiteCmsConfig.heroStats || {}) },
+                  footerConfig: { ...(prev.footerConfig || {}), ...(data.websiteCmsConfig.footerConfig || {}) },
+                  sectionVisibility: { ...(prev.sectionVisibility || {}), ...(data.websiteCmsConfig.sectionVisibility || {}) },
+                  deliveryModesConfig: { ...(prev.deliveryModesConfig || {}), ...(data.websiteCmsConfig.deliveryModesConfig || {}) },
+                  impactTrustConfig: { ...(prev.impactTrustConfig || {}), ...(data.websiteCmsConfig.impactTrustConfig || {}) },
+                  admissionRoadmap: { ...(prev.admissionRoadmap || {}), ...(data.websiteCmsConfig.admissionRoadmap || {}) },
+                  promoBanner: { ...(prev.promoBanner || {}), ...(data.websiteCmsConfig.promoBanner || {}) },
+                  socialLinks: { ...(prev.socialLinks || {}), ...(data.websiteCmsConfig.socialLinks || {}) },
+                  aboutUs: { ...(prev.aboutUs || {}), ...(data.websiteCmsConfig.aboutUs || {}) },
+                  policies: { ...(prev.policies || {}), ...(data.websiteCmsConfig.policies || {}) },
+                  seo: { ...(prev.seo || {}), ...(data.websiteCmsConfig.seo || {}) },
+                  marketing: { ...(prev.marketing || {}), ...normalizedMarketing },
+                  heroSlides: Array.isArray(data.websiteCmsConfig.heroSlides) && data.websiteCmsConfig.heroSlides.length > 0
+                    ? data.websiteCmsConfig.heroSlides
+                    : prev.heroSlides
+                };
+                latestWebsiteCmsConfigRef.current = mergedCms;
+                return mergedCms;
+              });
             }
             if (Array.isArray(data.websiteReviews)) setWebsiteReviews(data.websiteReviews);
             if (Array.isArray(data.websiteGallery)) setWebsiteGallery(data.websiteGallery);
+            if (Array.isArray(data.websiteNotices)) setWebsiteNotices(data.websiteNotices);
             if (Array.isArray(data.websiteFaqs)) setWebsiteFaqs(data.websiteFaqs);
             if (Array.isArray(data.websiteBlogs)) setWebsiteBlogs(data.websiteBlogs);
             if (Array.isArray(data.seminars)) setSeminars(data.seminars);
@@ -1808,9 +1876,10 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       courses: latestCoursesRef.current,
       seminars,
       publicCertificates: publicCertificatesPayload,
-      websiteCmsConfig,
+      websiteCmsConfig: latestWebsiteCmsConfigRef.current || websiteCmsConfig,
       websiteReviews,
       websiteGallery,
+      websiteNotices,
       websiteFaqs,
       websiteBlogs,
       updatedAt: new Date().toISOString()
@@ -1958,7 +2027,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
-    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs
+    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteNotices, websiteFaqs, websiteBlogs
   ]);
 
   // Window beforeunload / pagehide immediate sync to prevent data loss on rapid reload
@@ -1995,7 +2064,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
-    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteFaqs, websiteBlogs
+    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteNotices, websiteFaqs, websiteBlogs
   ]);
 
   // 5. SECURE LOCAL STORAGE SYNCHRONIZATION
@@ -4306,11 +4375,77 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // --- WEBSITE CMS & PORTAL ACTIONS ---
   const updateWebsiteCmsConfig = (updates: Partial<WebsiteCmsConfig>) => {
+    lastLocalMutationTimestamp.current = Date.now();
+    let nextConfig: WebsiteCmsConfig;
     setWebsiteCmsConfig(prev => {
-      const next = { ...prev, ...updates };
-      localStorage.setItem(`${STORAGE_KEY}_website_cms_config`, JSON.stringify(next));
-      return next;
+      nextConfig = {
+        ...prev,
+        ...updates,
+        heroStats: updates.heroStats ? { ...(prev.heroStats || {}), ...updates.heroStats } : prev.heroStats,
+        footerConfig: updates.footerConfig ? { ...(prev.footerConfig || {}), ...updates.footerConfig } : prev.footerConfig,
+        sectionVisibility: updates.sectionVisibility ? { ...(prev.sectionVisibility || {}), ...updates.sectionVisibility } : prev.sectionVisibility,
+        deliveryModesConfig: updates.deliveryModesConfig ? { ...(prev.deliveryModesConfig || {}), ...updates.deliveryModesConfig } : prev.deliveryModesConfig,
+        impactTrustConfig: updates.impactTrustConfig ? { ...(prev.impactTrustConfig || {}), ...updates.impactTrustConfig } : prev.impactTrustConfig,
+        admissionRoadmap: updates.admissionRoadmap ? { ...(prev.admissionRoadmap || {}), ...updates.admissionRoadmap } : prev.admissionRoadmap,
+        promoBanner: updates.promoBanner ? { ...(prev.promoBanner || {}), ...updates.promoBanner } : prev.promoBanner,
+        socialLinks: updates.socialLinks ? { ...(prev.socialLinks || {}), ...updates.socialLinks } : prev.socialLinks,
+        aboutUs: updates.aboutUs ? { ...(prev.aboutUs || {}), ...updates.aboutUs } : prev.aboutUs,
+        policies: updates.policies ? { ...(prev.policies || {}), ...updates.policies } : prev.policies,
+        seo: updates.seo ? { ...(prev.seo || {}), ...updates.seo } : prev.seo,
+        marketing: updates.marketing ? { ...(prev.marketing || {}), ...updates.marketing } : prev.marketing,
+        leadFormConfig: updates.leadFormConfig ? { ...(prev.leadFormConfig || {}), ...updates.leadFormConfig } : prev.leadFormConfig,
+        fraudProtection: updates.fraudProtection ? { ...(prev.fraudProtection || {}), ...updates.fraudProtection } : prev.fraudProtection,
+        otpConfig: updates.otpConfig ? { ...(prev.otpConfig || {}), ...updates.otpConfig } : prev.otpConfig,
+        studentPortal: updates.studentPortal ? { ...(prev.studentPortal || {}), ...updates.studentPortal } : prev.studentPortal,
+        topOfferRibbon: updates.topOfferRibbon ? { ...(prev.topOfferRibbon || {}), ...updates.topOfferRibbon } : prev.topOfferRibbon,
+        leadCapturePopup: updates.leadCapturePopup ? { ...(prev.leadCapturePopup || {}), ...updates.leadCapturePopup } : prev.leadCapturePopup,
+        hiringPartnersConfig: updates.hiringPartnersConfig ? { ...(prev.hiringPartnersConfig || {}), ...updates.hiringPartnersConfig } : prev.hiringPartnersConfig,
+        floatingActionWidget: updates.floatingActionWidget ? { ...(prev.floatingActionWidget || {}), ...updates.floatingActionWidget } : prev.floatingActionWidget,
+        coursesSectionConfig: updates.coursesSectionConfig ? { ...(prev.coursesSectionConfig || {}), ...updates.coursesSectionConfig } : prev.coursesSectionConfig,
+        mentorsSectionConfig: updates.mentorsSectionConfig ? { ...(prev.mentorsSectionConfig || {}), ...updates.mentorsSectionConfig } : prev.mentorsSectionConfig,
+        blogSectionConfig: updates.blogSectionConfig ? { ...(prev.blogSectionConfig || {}), ...updates.blogSectionConfig } : prev.blogSectionConfig,
+        seminarsSectionConfig: updates.seminarsSectionConfig ? { ...(prev.seminarsSectionConfig || {}), ...updates.seminarsSectionConfig } : prev.seminarsSectionConfig,
+        upcomingBatchesCard: updates.upcomingBatchesCard ? { ...(prev.upcomingBatchesCard || {}), ...updates.upcomingBatchesCard } : prev.upcomingBatchesCard,
+        heroSlides: Array.isArray(updates.heroSlides) ? updates.heroSlides : prev.heroSlides,
+        updatedAt: new Date().toISOString()
+      };
+      latestWebsiteCmsConfigRef.current = nextConfig;
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_website_cms_config`, JSON.stringify(nextConfig));
+      } catch (err) {
+        console.warn('Failed to save website cms config to localStorage:', err);
+      }
+      return nextConfig;
     });
+
+    // Immediate direct push to server API and Firestore to avoid debounce delay
+    setTimeout(() => {
+      const activeCms = latestWebsiteCmsConfigRef.current;
+      const catalogToPush = {
+        categories,
+        courses: latestCoursesRef.current,
+        seminars,
+        websiteCmsConfig: activeCms,
+        websiteReviews,
+        websiteGallery,
+        websiteFaqs,
+        websiteBlogs,
+        updatedAt: new Date().toISOString()
+      };
+      fetch('/api/catalog', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-staff-auth': 'nexgen-staff-auth-secure'
+        },
+        body: JSON.stringify(catalogToPush)
+      }).catch(e => console.warn('CMS direct server sync notice:', e));
+
+      setDoc(doc(db, 'academy_data', 'public_catalog'), catalogToPush, { merge: true }).catch(err => {
+        console.warn('CMS direct Firestore sync notice:', err);
+      });
+    }, 50);
+
     logAudit('Website CMS Updated', 'Website CMS', 'cms-config', 'Updated public website hero and configuration');
   };
 

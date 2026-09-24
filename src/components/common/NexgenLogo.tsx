@@ -304,11 +304,12 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
         x="200"
         y="298"
         textAnchor="middle"
-        fill="#123B70"
+        fill={isDarkTheme ? "#93C5FD" : "#123B70"}
         fontFamily="system-ui, -apple-system, sans-serif"
         fontWeight="900"
         fontSize="14.5"
         letterSpacing="2.5"
+        style={isDarkTheme ? { textShadow: '0 1px 3px rgba(0,0,0,0.8)' } : undefined}
       >
         COMPUTER ACADEMY
       </text>

@@ -101,9 +101,11 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               alt={currentSlide.title}
               className="w-full h-full object-cover object-center"
             />
-            {/* Multi-layer Gradient Overlays for Readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/40" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/30" />
+            {/* Multi-layer Gradient Overlays for Guaranteed High-Contrast Readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/95 md:via-slate-950/85 to-slate-950/50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40" />
+            {/* Subtle Vignette Edge Mask */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(2,6,23,0.6)_100%)] pointer-events-none" />
           </motion.div>
         </AnimatePresence>
 
@@ -118,21 +120,27 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               transition={{ duration: 0.4 }}
               className="space-y-4 sm:space-y-5"
             >
-              {/* Badge */}
-              {currentSlide.badgeText && (
-                <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-indigo-950/90 border border-indigo-400/40 rounded-full text-indigo-200 text-xs font-black shadow-lg backdrop-blur-md">
-                  <Sparkles className="w-4 h-4 text-amber-300 shrink-0 animate-pulse" />
-                  <span className="truncate">{currentSlide.badgeText}</span>
+              {/* Brand & Category Badges with High Contrast */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 bg-slate-900/95 border border-slate-700/80 rounded-full text-white text-xs font-black shadow-md backdrop-blur-md">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="tracking-wide">Nexgen Computer Academy</span>
                 </div>
-              )}
 
-              {/* Title */}
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight md:leading-[1.15] drop-shadow-md">
+                {currentSlide.badgeText && (
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-950/90 border border-indigo-500/40 rounded-full text-indigo-200 text-xs font-bold shadow-md backdrop-blur-md">
+                    <span className="truncate">{currentSlide.badgeText}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Title - Crisp on PC & Soothing on Mobile */}
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight md:leading-[1.18] drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                 {currentSlide.title}
               </h2>
 
-              {/* Subtitle */}
-              <p className="text-xs sm:text-sm md:text-base text-slate-200 leading-relaxed max-w-2xl drop-shadow-sm">
+              {/* Subtitle - Optimized Bengali leading and eye-comfortable contrast */}
+              <p className="text-xs sm:text-sm md:text-base text-slate-200 leading-relaxed max-w-2xl font-normal drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
                 {currentSlide.subtitle}
               </p>
 
