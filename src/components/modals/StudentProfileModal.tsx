@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { compressLogoOrAvatar } from '../../utils/imageCompressor';
 import { useAcademy } from '../../context/AcademyContext';
 import { Student, StudentStatus, OccupationType, StudentGoal } from '../../types';
 import { NexgenLogo } from '../common/NexgenLogo';
@@ -23,7 +24,9 @@ import {
   Check,
   Trash2,
   AlertTriangle,
-  QrCode
+  QrCode,
+  Camera,
+  Upload
 } from 'lucide-react';
 
 interface StudentProfileModalProps {
@@ -80,6 +83,30 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
   const [editGuardianPhone, setEditGuardianPhone] = useState('');
   const [editGoal, setEditGoal] = useState<StudentGoal>('Freelancing');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleStudentPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !student) return;
+    if (!file.type.startsWith("image/")) {
+      alert("অনুগ্রহ করে সঠিক ইমেজ ফাইল (.jpg, .png, .webp) নির্বাচন করুন।");
+      return;
+    }
+    setIsUploadingPhoto(true);
+    try {
+      const compressedUrl = await compressLogoOrAvatar(file, 300);
+      updateStudent(student.id, { photoUrl: compressedUrl });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err) {
+      console.error("Failed to compress student photo:", err);
+      alert("ছবি প্রসেস করতে সমস্যা হয়েছে।");
+    } finally {
+      setIsUploadingPhoto(false);
+      if (e.target) e.target.value = "";
+    }
+  };
 
   const student = studentId ? students.find(s => s.id === studentId) : null;
 
@@ -147,11 +174,30 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-4 relative z-10">
-            <img
-              src={student.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
-              alt={student.name}
-              className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-400/50 shadow-md"
-            />
+            <div className="relative group shrink-0">
+              <img
+                src={student.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+                alt={student.name}
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-400/50 shadow-md bg-slate-800"
+              />
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={isUploadingPhoto}
+                className="absolute inset-0 bg-slate-950/70 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[9px] font-bold cursor-pointer"
+                title="Upload & Change Student Photo"
+              >
+                <Camera className="w-4 h-4 mb-0.5" />
+                <span>{isUploadingPhoto ? "..." : "Change"}</span>
+              </button>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handleStudentPhotoUpload}
+                className="hidden"
+              />
+            </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-lg font-black">{student.name}</h2>

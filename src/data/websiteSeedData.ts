@@ -1016,7 +1016,42 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     tagText: 'Real Alumni Career Success & Placements',
     heading: 'সফল শিক্ষার্থীদের কর্মসংস্থান ও ফ্রিল্যান্সিং অর্জন',
     subtitle: 'কোর্স সম্পন্নের পর আমাদের ক্যারিয়ার সেলের প্রত্যক্ষ নির্দেশনায় দেশি-বিদেশি শীর্ষ সফটওয়্যার কোম্পানি এবং গ্লোবাল ফ্রিল্যান্স মার্কেটপ্লেসে সফলতার সাথে কাজ করছেন আমাদের শিক্ষার্থীরা।'
-  }
+  },
+  // 15. Gallery Section Config
+  gallerySectionConfig: {
+    tagText: 'Life at Smart Campus',
+    heading: 'Student Lab & Activity Photo Gallery (গ্যালারি)',
+    subtitle: 'Glimpses of our vibrant classroom labs, workshop sessions, and graduation ceremonies.'
+  },
+  // 16. Reviews Section Config
+  reviewsSectionConfig: {
+    tagText: 'Real Student Feedback & Employment Proof',
+    heading: 'Verified Student Reviews & Career Stories (রিভিউ)',
+    subtitle: 'Read how our alumni transitioned into freelance marketplaces and leading tech enterprises.'
+  },
+  // 17. Notices & FAQ Section Config
+  noticesFaqSectionConfig: {
+    noticeTag: 'Official Circulars',
+    noticeHeading: 'Academic Notice Board',
+    noticeSubtitle: 'Official notices regarding exams, batch schedules, and scholarship events.',
+    faqTag: 'Instant Answers',
+    faqHeading: 'Frequently Asked Questions',
+    faqSubtitle: 'Got questions about courses, certifications, or installments? Find instant answers below.'
+  },
+  // 18. Contact Section Config
+  contactSectionConfig: {
+    tagText: 'Direct Helplines & Location',
+    heading: 'Visit Our Campus & Direct Helplines',
+    subtitle: 'We are open everyday from 9:00 AM to 8:30 PM for on-desk counseling and lab visits.'
+  },
+  // 19. Verify Certificate Section Config
+  verifyCertificateSectionConfig: {
+    tagText: 'Govt. Standard Online Verification Portal & Academic Registry',
+    heading: 'Verify Student Certificate & Credentials',
+    subtitle: 'Enter the Certificate Number or Student ID to verify authenticity directly from our official academic registry.'
+  },
+  // 20. Popular Search Tags
+  popularSearchTags: ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing']
 };
 
 export const INITIAL_WEBSITE_BLOGS: WebsiteBlogPost[] = [

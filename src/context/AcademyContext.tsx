@@ -827,6 +827,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           mentorsSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.mentorsSectionConfig || {}), ...(parsed.mentorsSectionConfig || {}) },
           blogSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.blogSectionConfig || {}), ...(parsed.blogSectionConfig || {}) },
           seminarsSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.seminarsSectionConfig || {}), ...(parsed.seminarsSectionConfig || {}) },
+          gallerySectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.gallerySectionConfig || {}), ...(parsed.gallerySectionConfig || {}) },
+          reviewsSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.reviewsSectionConfig || {}), ...(parsed.reviewsSectionConfig || {}) },
+          noticesFaqSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.noticesFaqSectionConfig || {}), ...(parsed.noticesFaqSectionConfig || {}) },
+          contactSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.contactSectionConfig || {}), ...(parsed.contactSectionConfig || {}) },
+          verifyCertificateSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.verifyCertificateSectionConfig || {}), ...(parsed.verifyCertificateSectionConfig || {}) },
+          placementsSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.placementsSectionConfig || {}), ...(parsed.placementsSectionConfig || {}) },
+          popularSearchTags: Array.isArray(parsed.popularSearchTags) ? parsed.popularSearchTags : INITIAL_WEBSITE_CMS_CONFIG.popularSearchTags,
           upcomingBatchesCard: { ...(INITIAL_WEBSITE_CMS_CONFIG.upcomingBatchesCard || {}), ...(parsed.upcomingBatchesCard || {}) },
           heroSlides: Array.isArray(parsed.heroSlides) && parsed.heroSlides.length > 0 ? parsed.heroSlides : INITIAL_WEBSITE_CMS_CONFIG.heroSlides,
           promoBanner: { ...INITIAL_WEBSITE_CMS_CONFIG.promoBanner, ...(parsed.promoBanner || {}) },
@@ -1576,6 +1583,10 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (Array.isArray(data.studentStatusesList)) setStudentStatusesList(data.studentStatusesList);
             if (Array.isArray(data.bloodGroupsList)) setBloodGroupsList(data.bloodGroupsList);
             if (Array.isArray(data.discountTypesList)) setDiscountTypesList(data.discountTypesList);
+            if (data.crmSettings && typeof data.crmSettings === 'object') {
+              setCrmSettings(prev => ({ ...prev, ...data.crmSettings }));
+            }
+            if (Array.isArray(data.archivedItems)) setArchivedItems(data.archivedItems);
           }
           setLastCloudSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
           setCloudSyncStatus('synced');
@@ -1909,6 +1920,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       assignmentSubmissions,
       seminars,
       academySettings,
+      crmSettings,
+      archivedItems,
       leadSources,
       expenseCategoriesList,
       paymentMethodsList,
@@ -2027,7 +2040,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
-    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteNotices, websiteFaqs, websiteBlogs
+    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteNotices, websiteFaqs, websiteBlogs, crmSettings
   ]);
 
   // Window beforeunload / pagehide immediate sync to prevent data loss on rapid reload
@@ -2064,7 +2077,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     staffList, categories, courses, batches, rooms, campaigns, leads, followUps, students,
     admissions, payments, attendance, schedules, exams, examResults, certificates,
     expenses, assets, auditLogs, trashItems, placements, assignments, assignmentSubmissions,
-    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteNotices, websiteFaqs, websiteBlogs
+    seminars, academySettings, websiteCmsConfig, websiteReviews, websiteGallery, websiteNotices, websiteFaqs, websiteBlogs, crmSettings
   ]);
 
   // 5. SECURE LOCAL STORAGE SYNCHRONIZATION
@@ -4405,6 +4418,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         mentorsSectionConfig: updates.mentorsSectionConfig ? { ...(prev.mentorsSectionConfig || {}), ...updates.mentorsSectionConfig } : prev.mentorsSectionConfig,
         blogSectionConfig: updates.blogSectionConfig ? { ...(prev.blogSectionConfig || {}), ...updates.blogSectionConfig } : prev.blogSectionConfig,
         seminarsSectionConfig: updates.seminarsSectionConfig ? { ...(prev.seminarsSectionConfig || {}), ...updates.seminarsSectionConfig } : prev.seminarsSectionConfig,
+        gallerySectionConfig: updates.gallerySectionConfig ? { ...(prev.gallerySectionConfig || {}), ...updates.gallerySectionConfig } : prev.gallerySectionConfig,
+        reviewsSectionConfig: updates.reviewsSectionConfig ? { ...(prev.reviewsSectionConfig || {}), ...updates.reviewsSectionConfig } : prev.reviewsSectionConfig,
+        noticesFaqSectionConfig: updates.noticesFaqSectionConfig ? { ...(prev.noticesFaqSectionConfig || {}), ...updates.noticesFaqSectionConfig } : prev.noticesFaqSectionConfig,
+        contactSectionConfig: updates.contactSectionConfig ? { ...(prev.contactSectionConfig || {}), ...updates.contactSectionConfig } : prev.contactSectionConfig,
+        verifyCertificateSectionConfig: updates.verifyCertificateSectionConfig ? { ...(prev.verifyCertificateSectionConfig || {}), ...updates.verifyCertificateSectionConfig } : prev.verifyCertificateSectionConfig,
+        placementsSectionConfig: updates.placementsSectionConfig ? { ...(prev.placementsSectionConfig || {}), ...updates.placementsSectionConfig } : prev.placementsSectionConfig,
+        popularSearchTags: Array.isArray(updates.popularSearchTags) ? updates.popularSearchTags : prev.popularSearchTags,
         upcomingBatchesCard: updates.upcomingBatchesCard ? { ...(prev.upcomingBatchesCard || {}), ...updates.upcomingBatchesCard } : prev.upcomingBatchesCard,
         heroSlides: Array.isArray(updates.heroSlides) ? updates.heroSlides : prev.heroSlides,
         updatedAt: new Date().toISOString()
@@ -5276,6 +5296,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     websiteGallery,
     websiteFaqs,
     websiteBlogs,
+    websiteNotices,
+    crmSettings,
+    archivedItems,
     leadSources,
     expenseCategoriesList,
     paymentMethodsList,
@@ -5774,6 +5797,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (data.websiteGallery && Array.isArray(data.websiteGallery)) setWebsiteGallery(data.websiteGallery);
       if (data.websiteFaqs && Array.isArray(data.websiteFaqs)) setWebsiteFaqs(data.websiteFaqs);
       if (data.websiteBlogs && Array.isArray(data.websiteBlogs)) setWebsiteBlogs(data.websiteBlogs);
+      if (data.websiteNotices && Array.isArray(data.websiteNotices)) setWebsiteNotices(data.websiteNotices);
+      if (data.crmSettings && typeof data.crmSettings === "object") {
+        setCrmSettings(prev => ({ ...prev, ...data.crmSettings }));
+      }
+      if (data.archivedItems && Array.isArray(data.archivedItems)) setArchivedItems(data.archivedItems);
 
       if (data.leadSources && Array.isArray(data.leadSources)) setLeadSources(data.leadSources);
       if (data.expenseCategoriesList && Array.isArray(data.expenseCategoriesList)) setExpenseCategoriesList(data.expenseCategoriesList);

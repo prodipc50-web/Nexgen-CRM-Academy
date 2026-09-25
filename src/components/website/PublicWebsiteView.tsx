@@ -2222,21 +2222,48 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               </p>
 
               <div className="space-y-3">
-                {websiteNotices.map((not) => (
+                {websiteNotices.filter(n => n.isActive !== false).map((not) => (
                   <div
                     key={not.id}
-                    className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-1.5"
+                    className={`p-4 bg-white rounded-2xl border transition-all ${
+                      not.isUrgent ? 'border-rose-300 shadow-rose-100 shadow-xs' : 'border-slate-200 shadow-2xs'
+                    } space-y-1.5`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
-                        {not.category}
-                      </span>
+                      <div className="flex items-center space-x-1.5">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
+                          {not.category}
+                        </span>
+                        {not.isUrgent && (
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
+                            URGENT
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[11px] text-slate-400 font-mono">{not.publishedDate}</span>
                     </div>
-                    <h4 className="font-bold text-slate-900 text-xs">{not.title}</h4>
-                    <p className="text-[11px] text-slate-600">{not.description}</p>
+                    <h4 className="font-bold text-slate-900 text-xs sm:text-sm">{not.title}</h4>
+                    <p className="text-[11px] text-slate-600 leading-relaxed whitespace-pre-line">{not.description}</p>
+                    {not.fileUrl && (
+                      <div className="pt-2 border-t border-slate-100">
+                        <a
+                          href={not.fileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center space-x-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-xl transition-all"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>View Circular / Attachment</span>
+                        </a>
+                      </div>
+                    )}
                   </div>
                 ))}
+                {websiteNotices.filter(n => n.isActive !== false).length === 0 && (
+                  <div className="p-6 bg-white rounded-2xl border border-slate-200 text-center text-xs text-slate-400">
+                    No active notices at this moment.
+                  </div>
+                )}
               </div>
             </div>
 

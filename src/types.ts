@@ -1874,6 +1874,19 @@ export interface WebsiteCmsConfig {
   blogSectionConfig?: SectionHeadingConfig;
   seminarsSectionConfig?: SectionHeadingConfig;
   mentorsSectionConfig?: SectionHeadingConfig;
+  gallerySectionConfig?: SectionHeadingConfig;
+  reviewsSectionConfig?: SectionHeadingConfig;
+  noticesFaqSectionConfig?: {
+    noticeTag?: string;
+    noticeHeading?: string;
+    noticeSubtitle?: string;
+    faqTag?: string;
+    faqHeading?: string;
+    faqSubtitle?: string;
+  };
+  contactSectionConfig?: SectionHeadingConfig;
+  verifyCertificateSectionConfig?: SectionHeadingConfig;
+  popularSearchTags?: string[];
 
   // 8. Section Visibility Controls (Show/Hide any section on the public site)
   sectionVisibility?: WebsiteSectionVisibility;
