@@ -1051,7 +1051,9 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     subtitle: 'Enter the Certificate Number or Student ID to verify authenticity directly from our official academic registry.'
   },
   // 20. Popular Search Tags
-  popularSearchTags: ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing']
+  popularSearchTags: ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing'],
+  headerSubtitle: 'Farmgate Campus • Govt. Standard IT Training & Career Incubator',
+  headerEstText: 'EST. 2018'
 };
 
 export const INITIAL_WEBSITE_BLOGS: WebsiteBlogPost[] = [

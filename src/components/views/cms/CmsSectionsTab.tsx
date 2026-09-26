@@ -242,6 +242,12 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
   const [popularTagsString, setPopularTagsString] = useState<string>(
     (websiteCmsConfig.popularSearchTags || ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing']).join(', ')
   );
+  const [headerSubtitle, setHeaderSubtitle] = useState<string>(
+    websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training & Career Incubator`
+  );
+  const [headerEstText, setHeaderEstText] = useState<string>(
+    websiteCmsConfig.headerEstText || "EST. 2018"
+  );
 
   // 6. Footer Config
   const [footerBio, setFooterBio] = useState<string>(
@@ -331,6 +337,12 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     if (Array.isArray(websiteCmsConfig.popularSearchTags)) {
       setPopularTagsString(websiteCmsConfig.popularSearchTags.join(', '));
     }
+    if (websiteCmsConfig.headerSubtitle !== undefined) {
+      setHeaderSubtitle(websiteCmsConfig.headerSubtitle);
+    }
+    if (websiteCmsConfig.headerEstText !== undefined) {
+      setHeaderEstText(websiteCmsConfig.headerEstText);
+    }
     if (websiteCmsConfig.footerConfig) {
       if (websiteCmsConfig.footerConfig.bio !== undefined) setFooterBio(websiteCmsConfig.footerConfig.bio);
       if (websiteCmsConfig.footerConfig.copyrightText !== undefined) setCopyrightText(websiteCmsConfig.footerConfig.copyrightText);
@@ -411,6 +423,8 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       verifyCertificateSectionConfig: verifyCertificateHeading,
       placementsSectionConfig: placementsHeading,
       popularSearchTags: popularTagsString.split(',').map(s => s.trim()).filter(Boolean),
+      headerSubtitle,
+      headerEstText,
       footerConfig: {
         bio: footerBio,
         copyrightText,
@@ -894,6 +908,51 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          {/* Website Header Subtitle & Est. Badge */}
+          <div className="p-4.5 rounded-2xl bg-indigo-50/70 border border-indigo-200/90 space-y-3 md:col-span-2">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+              <h4 className="font-bold text-slate-900 text-xs sm:text-sm">
+                Website Header Subtitle & Tagline (লোগো ও নামের নিচের সাবটাইটেল)
+              </h4>
+            </div>
+            <p className="text-[11px] text-slate-600">
+              ওয়েবসাইটের একদম উপরে নেভিগেশন বারে প্রতিষ্ঠানের নামের নিচে প্রদর্শিত ক্যাম্পাস, স্লোগান ও প্রতিষ্ঠার সাল সহজে পরিবর্তন করুন।
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="md:col-span-2">
+                <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                  Header Subtitle / Tagline (ক্যাম্পাস ও স্লোগান টেক্সট)
+                </label>
+                <input
+                  type="text"
+                  value={headerSubtitle}
+                  onChange={e => {
+                    hasUserEditedRef.current = true;
+                    setHeaderSubtitle(e.target.value);
+                  }}
+                  placeholder="e.g. Farmgate Campus • Govt. Standard IT Training & Career Incubator"
+                  className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-900 text-xs focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+                  Established Badge Text (প্রতিষ্ঠার সাল ব্যাজ)
+                </label>
+                <input
+                  type="text"
+                  value={headerEstText}
+                  onChange={e => {
+                    hasUserEditedRef.current = true;
+                    setHeaderEstText(e.target.value);
+                  }}
+                  placeholder="e.g. EST. 2018"
+                  className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-bold text-indigo-700 text-xs focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Courses Heading */}
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
             <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">

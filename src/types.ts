@@ -1887,6 +1887,8 @@ export interface WebsiteCmsConfig {
   contactSectionConfig?: SectionHeadingConfig;
   verifyCertificateSectionConfig?: SectionHeadingConfig;
   popularSearchTags?: string[];
+  headerSubtitle?: string;
+  headerEstText?: string;
 
   // 8. Section Visibility Controls (Show/Hide any section on the public site)
   sectionVisibility?: WebsiteSectionVisibility;

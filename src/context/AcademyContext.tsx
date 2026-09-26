@@ -834,6 +834,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           verifyCertificateSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.verifyCertificateSectionConfig || {}), ...(parsed.verifyCertificateSectionConfig || {}) },
           placementsSectionConfig: { ...(INITIAL_WEBSITE_CMS_CONFIG.placementsSectionConfig || {}), ...(parsed.placementsSectionConfig || {}) },
           popularSearchTags: Array.isArray(parsed.popularSearchTags) ? parsed.popularSearchTags : INITIAL_WEBSITE_CMS_CONFIG.popularSearchTags,
+          headerSubtitle: parsed.headerSubtitle !== undefined ? parsed.headerSubtitle : INITIAL_WEBSITE_CMS_CONFIG.headerSubtitle,
+          headerEstText: parsed.headerEstText !== undefined ? parsed.headerEstText : INITIAL_WEBSITE_CMS_CONFIG.headerEstText,
           upcomingBatchesCard: { ...(INITIAL_WEBSITE_CMS_CONFIG.upcomingBatchesCard || {}), ...(parsed.upcomingBatchesCard || {}) },
           heroSlides: Array.isArray(parsed.heroSlides) && parsed.heroSlides.length > 0 ? parsed.heroSlides : INITIAL_WEBSITE_CMS_CONFIG.heroSlides,
           promoBanner: { ...INITIAL_WEBSITE_CMS_CONFIG.promoBanner, ...(parsed.promoBanner || {}) },
@@ -4425,6 +4427,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         verifyCertificateSectionConfig: updates.verifyCertificateSectionConfig ? { ...(prev.verifyCertificateSectionConfig || {}), ...updates.verifyCertificateSectionConfig } : prev.verifyCertificateSectionConfig,
         placementsSectionConfig: updates.placementsSectionConfig ? { ...(prev.placementsSectionConfig || {}), ...updates.placementsSectionConfig } : prev.placementsSectionConfig,
         popularSearchTags: Array.isArray(updates.popularSearchTags) ? updates.popularSearchTags : prev.popularSearchTags,
+        headerSubtitle: updates.headerSubtitle !== undefined ? updates.headerSubtitle : prev.headerSubtitle,
+        headerEstText: updates.headerEstText !== undefined ? updates.headerEstText : prev.headerEstText,
         upcomingBatchesCard: updates.upcomingBatchesCard ? { ...(prev.upcomingBatchesCard || {}), ...updates.upcomingBatchesCard } : prev.upcomingBatchesCard,
         heroSlides: Array.isArray(updates.heroSlides) ? updates.heroSlides : prev.heroSlides,
         updatedAt: new Date().toISOString()

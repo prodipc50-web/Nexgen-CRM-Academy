@@ -137,7 +137,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                     {academySettings.instituteName || 'Nexgen Computer Academy'}
                   </h3>
                   <p className="text-[11px] text-indigo-200 font-medium truncate">
-                    {academySettings.campusName || 'Farmgate Campus'}
+                    {websiteCmsConfig?.headerSubtitle || academySettings.campusName || 'Farmgate Campus'}
                   </p>
                 </div>
               </div>

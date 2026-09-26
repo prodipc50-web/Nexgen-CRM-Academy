@@ -490,11 +490,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                   {academySettings.instituteName || 'Nexgen Computer Academy'}
                 </h1>
                 <span className="hidden md:inline-flex text-[10px] font-black px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-wider shrink-0">
-                  EST. 2018
+                  {websiteCmsConfig.headerEstText || `EST. ${websiteCmsConfig?.aboutUs?.establishedYear || "2018"}`}
                 </span>
               </div>
               <p className="text-[11px] sm:text-xs text-slate-600 font-semibold truncate mt-1">
-                {academySettings.campusName || 'Farmgate Campus'} • Govt. Standard IT Training & Career Incubator
+                {websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training & Career Incubator`}
               </p>
             </div>
           </div>
