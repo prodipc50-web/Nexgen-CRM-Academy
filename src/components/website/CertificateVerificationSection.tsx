@@ -657,7 +657,7 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
             <div className="w-full flex items-center justify-between pt-3 px-2">
               <span className="text-xs text-slate-300 font-bold flex items-center space-x-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Nexgen Computer Academy Verified Academic Certificate</span>
+                <span>{academySettings.instituteName || 'Nexgen Computer Academy'} Verified Academic Certificate</span>
               </span>
               <div className="flex items-center space-x-2">
                 <a

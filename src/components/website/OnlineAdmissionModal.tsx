@@ -468,7 +468,7 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
                     required
                   />
                   <div className="text-slate-700 leading-snug">
-                    <span>আমি NexGen Computer Academy-এর </span>
+                    <span>আমি {academySettings.instituteName || 'NexGen Computer Academy'}-এর </span>
                     <button
                       type="button"
                       onClick={() => setShowTermsModal(true)}

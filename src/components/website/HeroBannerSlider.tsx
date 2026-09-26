@@ -21,6 +21,7 @@ interface HeroBannerSliderProps {
   onSelectCategory?: (category: string) => void;
   fallbackHeadline?: string;
   fallbackSubtitle?: string;
+  instituteName?: string;
 }
 
 export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
@@ -28,7 +29,8 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
   language,
   onOpenAdmission,
   fallbackHeadline,
-  fallbackSubtitle
+  fallbackSubtitle,
+  instituteName
 }) => {
   const activeSlides = slides.filter(s => s.isActive !== false);
   const baseSlides = activeSlides.length > 0 ? activeSlides : [
@@ -124,7 +126,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               <div className="flex flex-wrap items-center gap-2">
                 <div className="inline-flex items-center space-x-2 px-3 py-1 bg-slate-900/95 border border-slate-700/80 rounded-full text-white text-xs font-black shadow-md backdrop-blur-md">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span className="tracking-wide">Nexgen Computer Academy</span>
+                  <span className="tracking-wide">{instituteName || 'Nexgen Computer Academy'}</span>
                 </div>
 
                 {currentSlide.badgeText && (

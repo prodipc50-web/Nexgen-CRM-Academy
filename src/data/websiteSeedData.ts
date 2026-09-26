@@ -23,7 +23,7 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
     {
       id: 'slide-1',
       title: 'Build Your Tech Career with Hands-on Industry Training',
-      subtitle: 'Master in-demand IT skills from top industry practitioners. 100% practical lab sessions, live freelance mentorship & verified corporate job placement assistance in Dhaka.',
+      subtitle: 'ফার্মগেটে প্র্যাকটিক্যাল এসি ল্যাব ও সারাদেশে লাইভ অনলাইনে শিখুন: Computer Office Application, Advanced Excel, AutoCAD 2D/3D, Video Editing, Digital Marketing, Web Development, UI/UX, AI Automation ও French Language।',
       badgeText: 'Govt. Recognized IT Training Institute • Dhaka, Bangladesh',
       ctaText: 'Explore Courses & Get Free Counseling',
       ctaLink: '#courses',
@@ -219,17 +219,51 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
     metaDescription: 'Govt recognized top IT training institute in Farmgate, Dhaka. Practical Computer Office Application, Advanced Excel, Web Dev, Graphic Design, Digital Marketing & AI courses with 100% lab practice & job placement.',
     keywords: [
       'Computer Course in Farmgate',
-      'Computer Training Center in Farmgate',
+      'Computer Training Center in Farmgate Dhaka',
       'Computer Course in Dhaka',
       'Computer Office Application Course',
       'Advanced Excel Course in Farmgate',
-      'Best IT Training Institute in Farmgate',
-      'Computer Training in Farmgate',
+      'Corporate MS Excel & Financial Modeling',
+      'AutoCAD 2D 3D Course in Dhaka',
+      'AutoCAD Training Center Farmgate',
+      'Civil & Architectural CAD Drafting',
+      'Video Editing Course in Dhaka',
+      'Premiere Pro & After Effects Training Farmgate',
+      'Motion Graphics & YouTube Video Editing',
+      'Digital Marketing Course Dhaka',
+      'Facebook Marketing & Meta Ads Training',
+      'Social Media Marketing Course Farmgate',
+      'SEO Training in Bangladesh',
+      'Search Engine Optimization Course Farmgate',
+      'French Language Course in Dhaka',
+      'French A1 A2 Spoken Course Farmgate',
+      'French for Study Visa Preparation',
+      'AI Automation Course Dhaka',
+      'Prompt Engineering & ChatGPT Productivity',
+      'UI UX Design Course in Dhaka',
+      'Figma UI UX Training Farmgate',
+      'Web Design and Development Course Dhaka',
+      'Full Stack MERN Web Development Farmgate',
       'Graphic Design Course Farmgate',
-      'Web Development Course Farmgate',
-      'AI Computer Course Dhaka',
-      'Practical Computer Training Dhaka',
-      'Govt Certified Computer Course Farmgate'
+      'Freelancing Course in Farmgate Dhaka',
+      'Fiverr & Upwork Marketplace Training',
+      'Best IT Training Institute in Farmgate',
+      'Govt Certified Computer Course Farmgate',
+      'Online Computer Course in Bangladesh',
+      'Best Online IT Training Institute in Bangladesh',
+      'Online Graphic Design Course BD',
+      'Online Video Editing Course in Bangladesh',
+      'Online AutoCAD Course Bangladesh',
+      'Online Digital Marketing Course with Certificate BD',
+      'Online Web Development Live Batch BD',
+      'Online French Language Course in Bangladesh',
+      'Online Freelancing Course Bangladesh',
+      'ঘরে বসে অনলাইন কম্পিউটার কোর্স সার্টিফিকেট সহ',
+      'অনলাইন গ্রাফিক ডিজাইন লাইভ কোর্স বাংলাদেশ',
+      'অনলাইনে ভিডিও এডিটিং শেখার সেরা প্রতিষ্ঠান',
+      'অনলাইন অটোক্যাড কোর্স ফি কত',
+      'অনলাইনে ফ্রিল্যান্সিং ও ডিজিটাল মার্কেটিং ট্রেনিং',
+      'লাইভ জুম ক্লাস ও রেকর্ডেড ক্লাস সুবিধা সহ আইটি কোর্স'
     ],
     canonicalBaseUrl: 'https://nexgenacademy.edu.bd',
     ogTitle: 'Nexgen Computer Academy | #1 Practical IT Training Center in Farmgate, Dhaka',
@@ -250,37 +284,63 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
     targetKeywordThemes: [
       'Computer Course in Farmgate',
       'Computer Training Center in Farmgate',
-      'Computer Course in Dhaka',
       'Computer Office Application Course',
       'Advanced Excel Course in Farmgate',
-      'Computer Training in Farmgate',
-      'AI Computer Course',
-      'Practical Computer Training'
+      'AutoCAD 2D 3D Course in Dhaka',
+      'Video Editing Course in Dhaka',
+      'Digital Marketing Course Dhaka',
+      'Facebook Marketing Training Farmgate',
+      'SEO Course in Dhaka',
+      'French Language Course in Dhaka',
+      'AI Automation Course Dhaka',
+      'UI UX Design Course Dhaka',
+      'Web Design and Development Course',
+      'Graphic Design Course Farmgate',
+      'Freelancing Course in Farmgate Dhaka'
     ],
     serviceAreas: [
+      'All 64 Districts of Bangladesh (Online Live Batches)',
+      'Chittagong Division',
+      'Sylhet Division',
+      'Rajshahi Division',
+      'Khulna Division',
+      'Barisal Division',
+      'Rangpur Division',
+      'Mymensingh Division',
+      'Comilla',
+      'Bogra',
+      'Gazipur',
+      'Narayanganj',
       'Farmgate',
       'Panthapath',
       'Tejgaon',
       'Dhanmondi',
-      'Bijoy Sarani',
-      'Indira Road',
-      'Green Road',
-      'Kawran Bazar',
-      'Dhaka Division',
-      'All Bangladesh (Online)'
+      'Dhaka Division (Lab & Online)'
     ],
     faqItems: [
       {
-        question: 'Why choose Nexgen Computer Academy in Farmgate for IT courses?',
-        answer: 'Nexgen Computer Academy offers 100% lab-centric practical training with dedicated high-spec PC per student, industry-expert mentors, government verifiable certificates, lifetime lab access, and job placement assistance in Dhaka.'
+        question: 'ফার্মগেটে কম্পিউটার ও আইটি কোর্সের কোর্স ফি কত? (Course Fee in Dhaka)',
+        answer: 'আমাদের প্রতিষ্ঠানে প্র্যাকটিক্যাল ল্যাবভিত্তিক কোর্স ফি শুরু হয় মাত্র ৩,৫০০ টাকা থেকে শুরু করে ১৫,০০০ টাকা পর্যন্ত (কোর্স ও মেয়াদ অনুযায়ী)। এছাড়াও রয়েছে বিশেষ স্কলারশিপ ও ২-৩টি সহজ কিস্তিতে ফি পরিশোধের সুবিধা।'
       },
       {
-        question: 'Where is Nexgen Computer Academy located?',
-        answer: 'Nexgen Computer Academy is located at 14/B, Garden Road, Kazipara, Farmgate, Dhaka–1215, Bangladesh (Behind Bashundhara City Market, easily accessible from Farmgate Metro & Panthapath).'
+        question: 'কোর্স শেষে কি সরকারি গ্রহণযোগ্য ও ভেরিফায়েবল সার্টিফিকেট পাওয়া যাবে?',
+        answer: 'হ্যাঁ! প্রতিটি কোর্স সফলভাবে সম্পন্ন করার পর লাইভ কিউআর কোড (QR Code) ও স্টুডেন্ট আইডি সম্বলিত অনলাইন ভেরিফায়েবল ডিজিটাল সার্টিফিকেট প্রদান করা হয়, যা সরকারি-বেসরকারি চাকরি ও আন্তর্জাতিক মার্কেটপ্লেসে গ্রহণযোগ্য।'
       },
       {
-        question: 'Do you offer both Offline Classroom and Online Live courses?',
-        answer: 'Yes! Students from Farmgate, Tejgaon, Dhanmondi, and Dhaka can join our AC practical lab batches, while students from across Bangladesh can join our interactive Live Online batches with class recording access.'
+        question: 'ক্লাসের জন্য কি নিজস্ব ল্যাপটপ থাকা বাধ্যতামূলক নাকি ল্যাব সুবিধা আছে?',
+        answer: 'না, নিজস্ব ল্যাপটপ থাকা বাধ্যতামূলক নয়। আমাদের সেন্টারে সম্পূর্ণ শীতাতপ নিয়ন্ত্রিত আধুনিক ল্যাবে প্রতিটি শিক্ষার্থীর জন্য ব্যক্তিগত আলাদা হাই-কনফিগারেশন কম্পিউটার বরাদ্দ থাকে।'
+      },
+      {
+        question: 'ফার্মগেট ক্যাম্পাস মেট্রো রেল স্টেশন থেকে কত দূরে অবস্থিত?',
+        answer: 'আমাদের ক্যাম্পাস ফার্মগেট মেট্রো রেল স্টেশন (গেট ২) থেকে মাত্র ২ মিনিটের হাঁটা দূরত্বে, গার্ডেন রোডে আনোয়ারা পার্ক ও আনন্দ সিনেমা হলের ঠিক বিপরীতে অবস্থিত।'
+      },
+      {
+        question: 'চাকরিজীবী ও শিক্ষার্থীদের জন্য কি উইকেন্ড (শুক্র-শনি) বা সান্ধ্যকালীন ব্যাচ আছে?',
+        answer: 'হ্যাঁ! চাকরিজীবী ও বিশ্ববিদ্যালয় শিক্ষার্থীদের সুবিধার্থে সকাল, দুপুর ও সান্ধ্যকালীন নিয়মিত শিডিউলের পাশাপাশি স্পেশাল শুক্র ও শনিবারের উইকেন্ড ব্যাচ পরিচালিত হয়।'
+      },
+      {
+        question: 'কোর্স চলাকালীন ও কোর্স শেষে কি ফ্রিল্যান্সিং এবং জব প্লেসমেন্ট সাপোর্ট দেওয়া হয়?',
+        answer: 'হ্যাঁ! কোর্স চলাকালীনই ফাইভার ও আপওয়ার্কে অ্যাকাউন্ট সেটআপ, পোর্টফোলিও তৈরি এবং কাজ পাওয়ার টেকনিক্যাল গাইডলাইন শেখানো হয় এবং কোর্স শেষে আজীবন মেন্টরশিপ সহায়তা দেওয়া হয়।'
       }
     ]
   },
@@ -719,18 +779,18 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     cards: [
       {
         id: 'offline',
-        title: 'Offline Course',
-        badge: 'ল্যাব ব্যাচ',
-        description: 'ইন-পার্সন সরাসরি আধুনিক এসি ল্যাবে প্র্যাকটিক্যাল ক্লাস ও সার্বক্ষণিক শিক্ষক সাপোর্ট।',
-        footerText: 'Courses Available',
+        title: 'Offline Practical Lab',
+        badge: 'ফার্মগেট ক্যাম্পাস ল্যাব',
+        description: 'ফার্মগেট মেট্রো রেল সংলগ্ন আধুনিক এসি ল্যাবে প্রতি শিক্ষার্থীর জন্য আলাদা ১-টু-১ হাই-স্পেক পিসি ও সরাসরি মেন্টর সাপোর্ট।',
+        footerText: 'Lab Batches Active',
         enabled: true
       },
       {
         id: 'online',
-        title: 'Online Live Course',
-        badge: 'লাইভ ক্লাস',
-        description: 'দেশ-বিদেশের যেকোনো স্থান থেকে লাইভ ক্লাসে অংশ নিন, ইনস্ট্যান্ট প্রশ্ন করুন ও ক্লাস রেকর্ডিং পান।',
-        footerText: 'Courses Available',
+        title: 'Online Live Batch',
+        badge: 'সারাদেশে ৬৪ জেলায়',
+        description: 'চট্টগ্রাম, সিলেট, রাজশাহীসহ সারাদেশের শিক্ষার্থীদের জন্য সরাসরি লাইভ জুম ক্লাস, স্ক্রিন শেয়ারিং ও প্রতিটি ক্লাসের এইচডি রেকর্ডিং ব্যাকআপ।',
+        footerText: 'All BD Online Batches',
         enabled: true
       },
       {
@@ -826,7 +886,8 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     placements: true,
     verifyCertificate: true,
     noticesAndFaq: true,
-    contactAndMap: true
+    contactAndMap: true,
+    geoLocalGuide: true
   },
 
   // 7. Top Sticky Offer Ribbon Bar
@@ -1051,7 +1112,17 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     subtitle: 'Enter the Certificate Number or Student ID to verify authenticity directly from our official academic registry.'
   },
   // 20. Popular Search Tags
-  popularSearchTags: ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing'],
+  popularSearchTags: [
+    'AutoCAD 2D/3D',
+    'Video Editing',
+    'Digital Marketing',
+    'Graphic Design',
+    'Web Development',
+    'French Language',
+    'AI Automation',
+    'Advanced Excel',
+    'Freelancing'
+  ],
   headerSubtitle: 'Farmgate Campus • Govt. Standard IT Training & Career Incubator',
   headerEstText: 'EST. 2018'
 };
@@ -1261,32 +1332,44 @@ export const INITIAL_WEBSITE_NOTICES: WebsiteNotice[] = [
 export const INITIAL_WEBSITE_FAQS: WebsiteFaqItem[] = [
   {
     id: 'faq-1',
-    question: 'How do I enroll in a course at Nexgen Computer Academy?',
-    answer: 'You can register online directly through our website by clicking the "Enroll Now" or "Online Admission" button, or visit our Farmgate campus in person for direct on-desk admission with our counselors.',
-    category: 'Admission'
+    question: 'ফার্মগেটে ও অনলাইনে কোর্স ফি কত এবং কিস্তির সুবিধা আছে কি? (Course Fee & Installment)',
+    answer: 'আমাদের প্রতিটি কোর্সের ফি ৩,৫০০ টাকা থেকে শুরু করে ১৫,০০০ টাকা পর্যন্ত (কোর্স ও মেয়াদ অনুযায়ী)। শিক্ষার্থীদের সুবিধার্থে ২-৩টি সহজ কিস্তিতে ফি পরিশোধের সুযোগ এবং বিশেষ স্কলারশিপের সুবিধা রয়েছে।',
+    category: 'Payments'
   },
   {
     id: 'faq-2',
-    question: 'Are the course certificates government recognized and verifiable?',
-    answer: 'Yes! All students who successfully complete their coursework and capstone exams receive an official certificate with a unique QR code and Registration ID that can be instantly verified on our website.',
+    question: 'কোর্স শেষে কি সরকারি গ্রহণযোগ্য ও অনলাইন ভেরিফায়েবল সার্টিফিকেট পাওয়া যাবে?',
+    answer: 'হ্যাঁ! কোর্স সফলভাবে সম্পন্ন করার পর লাইভ কিউআর কোড (QR Code) ও রেজিস্ট্রেশন আইডি সম্বলিত আন্তর্জাতিক মানসম্পন্ন ডিজিটাল সার্টিফিকেট ও প্রিন্টেড হার্ডকপি দেওয়া হয়, যা সরকারি-বেসরকারি চাকরি ও বিদেশের সিভিতে যাচাইযোগ্য।',
     category: 'Certification'
   },
   {
     id: 'faq-3',
-    question: 'Can non-science / non-technical students learn programming or design here?',
-    answer: 'Absolutely! Our courses start from absolute ground zero. We provide step-by-step beginner-friendly guidance, individual mentor reviews, and extra support classes so anyone can master the skills.',
+    question: 'অটোক্যাড (AutoCAD 2D/3D) কোর্সে কী কী প্রজেক্ট ও ড্রাফটিং শেখানো হয়?',
+    answer: 'অটোক্যাড কোর্সে আর্কিটেকচারাল ফ্লোর প্ল্যান, এলিভেশন, সেকশন ড্রয়িং, সিভিল ও মেকানিক্যাল ড্রাফটিং, আইসোমেট্রিক ভিউ, থ্রিডি মডেলিং এবং প্রফেশনাল ব্লু-প্রিন্ট প্রিন্ট ও প্লটিং হ্যান্ডস-অন শেখানো হয়।',
     category: 'Academics'
   },
   {
     id: 'faq-4',
-    question: 'Do you provide installment payment facilities for student course fees?',
-    answer: 'Yes, we offer flexible 2-to-3 installment payment plans for all long-term courses, making professional IT education affordable for everyone.',
-    category: 'Payments'
+    question: 'ফ্রেঞ্চ ভাষা শিক্ষা (French A1/A2) কোর্স করে কি ফ্রান্সে স্টুডেন্ট ভিসার প্রস্তুতি নেওয়া যাবে?',
+    answer: 'হ্যাঁ! আমাদের ফ্রেঞ্চ ভাষা কোর্সে DELF A1 ও A2 লেভেলের আন্তর্জাতিক কারিকুলাম অনুসরণ করা হয়। স্পোকেন প্র্যাকটিস, লিসেনিং, রিডিং ও ফ্রান্স দূতাবাস/ভিসা ইন্টারভিউ প্রস্তুতির পূর্ণাঙ্গ গাইডলাইন প্রদান করা হয়।',
+    category: 'Academics'
   },
   {
     id: 'faq-5',
-    question: 'What kind of freelance and job placement support do you provide?',
-    answer: 'Our dedicated Career Cell conducts weekly client communication workshops, Fiverr/Upwork profile optimization sessions, mock technical interviews, and directly connects top graduates with partnering tech firms.',
+    question: 'ভিডিও এডিটিং ও মোশন গ্রাফিক্স কোর্সে কোন কোন সফটওয়্যার শেখানো হয়?',
+    answer: 'Adobe Premiere Pro, After Effects, CapCut Pro এবং ফটোশপ। এর মধ্যে রয়েছে ইউটিউব ভিডিও এডিটিং, রিলস/শর্টস, কালার গ্রেডিং, গ্রিন স্ক্রিন ও মোশন টাইপোগ্রাফি যা দিয়ে সরাসরি ফ্রিল্যান্সিং করা সম্ভব।',
+    category: 'Academics'
+  },
+  {
+    id: 'faq-6',
+    question: 'সারাদেশের ৬৪ জেলা থেকে ঘরে বসে কীভাবে অনলাইন লাইভ ব্যাচে অংশ নেওয়া যায়?',
+    answer: 'যেকোনো কম্পিউটার বা মোবাইল থেকে আমাদের ইন্টারঅ্যাক্টিভ লাইভ জুম ক্লাসে সরাসরি অংশ নিয়ে শিক্ষকদের প্রশ্ন করা যায়। প্রতিটি ক্লাসের এইচডি ভিডিও রেকর্ডিং আজীবন ব্যবহারের জন্য স্টুডেন্ট পোর্টালে সংরক্ষিত থাকে এবং কুরিয়ারে সার্টিফিকেট পৌঁছানো হয়।',
+    category: 'Admission'
+  },
+  {
+    id: 'faq-7',
+    question: 'কোর্স চলাকালীন ও শেষে কি ফ্রিল্যান্সিং (Fiverr/Upwork) সাপোর্ট পাওয়া যায়?',
+    answer: 'আমাদের ডেডিকেটেড ক্যারিয়ার সেলের মাধ্যমে ফাইভার ও আপওয়ার্ক অ্যাকাউন্ট খোলা, পোর্টফোলিও তৈরি, বিদেশি বায়ারদের মেসেজের রিপ্লাই দেওয়ার কৌশল এবং প্রথম অর্ডার পাওয়ার জন্য সার্বক্ষণিক লাইভ মেন্টর সাপোর্ট দেওয়া হয়।',
     category: 'Career'
   }
 ];

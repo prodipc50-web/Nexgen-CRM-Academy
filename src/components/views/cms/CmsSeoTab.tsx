@@ -49,6 +49,160 @@ import {
 } from 'lucide-react';
 import { trackMetaPixelEvent, DEFAULT_GA4_MEASUREMENT_ID } from '../../../utils/analyticsTracker';
 
+const RECOMMENDED_COURSE_KEYWORDS = [
+  {
+    category: "AutoCAD 2D/3D",
+    icon: "🏗️",
+    keywords: [
+      "AutoCAD 2D 3D Course in Dhaka",
+      "AutoCAD Training Center Farmgate",
+      "Civil & Architectural CAD Drafting",
+      "AutoCAD Freelancing Training"
+    ]
+  },
+  {
+    category: "Video Editing",
+    icon: "🎬",
+    keywords: [
+      "Video Editing Course in Dhaka",
+      "Premiere Pro & After Effects Training Farmgate",
+      "Motion Graphics & YouTube Video Editing",
+      "Reels & CapCut Pro Editing Course"
+    ]
+  },
+  {
+    category: "Digital & Facebook Marketing",
+    icon: "📈",
+    keywords: [
+      "Digital Marketing Course Dhaka",
+      "Facebook Marketing & Meta Ads Training",
+      "Social Media Marketing Course Farmgate",
+      "SEO Training in Bangladesh",
+      "Search Engine Optimization Course Farmgate"
+    ]
+  },
+  {
+    category: "French Language",
+    icon: "🇫🇷",
+    keywords: [
+      "French Language Course in Dhaka",
+      "French A1 A2 Spoken Course Farmgate",
+      "French for Study Visa Preparation",
+      "Learn French in Bangladesh"
+    ]
+  },
+  {
+    category: "AI Automation",
+    icon: "🤖",
+    keywords: [
+      "AI Automation Course Dhaka",
+      "Prompt Engineering & ChatGPT Productivity",
+      "Workflow Automation with n8n & Make",
+      "Future IT AI Skills"
+    ]
+  },
+  {
+    category: "Advanced Excel",
+    icon: "📊",
+    keywords: [
+      "Advanced Excel Course in Farmgate",
+      "Corporate MS Excel & Financial Modeling",
+      "Excel Dashboard & Data Analysis Course",
+      "MIS & Accounts Excel Training"
+    ]
+  },
+  {
+    category: "UI/UX Design",
+    icon: "🎨",
+    keywords: [
+      "UI UX Design Course in Dhaka",
+      "Figma UI UX Training Farmgate",
+      "Mobile App & Web UI UX Design",
+      "Product Design Course Dhaka"
+    ]
+  },
+  {
+    category: "Web Development",
+    icon: "💻",
+    keywords: [
+      "Web Design and Development Course Dhaka",
+      "Full Stack MERN Web Development Farmgate",
+      "React JS & Node JS Training Dhaka",
+      "Front End Web Design Course"
+    ]
+  },
+  {
+    category: "Freelancing & Marketplace",
+    icon: "🚀",
+    keywords: [
+      "Freelancing Course in Farmgate Dhaka",
+      "Fiverr & Upwork Marketplace Training",
+      "Outsourcing & Remote Job Course",
+      "Dollar Earning IT Training Dhaka"
+    ]
+  },
+  {
+    category: "বাংলা সার্চ কুয়েরি (Bangla)",
+    icon: "🇧🇩",
+    keywords: [
+      "কম্পিউটার কোর্স ঢাকা ফার্মগেট",
+      "গ্রাফিক ডিজাইন কোর্স ফি কত",
+      "ভিডিও এডিটিং কোর্স ঢাকা",
+      "অটোক্যাড টুডি থ্রিডি কোর্স ফার্মগেট",
+      "ডিজিটাল মার্কেটিং ও ফেসবুক অ্যাডস কোর্স",
+      "ফ্রেঞ্চ ভাষা শিক্ষা কোর্স ঢাকা",
+      "অ্যাডভান্সড এক্সেল ট্রেনিং ঢাকা",
+      "সরকারি সার্টিফিকেট সহ কম্পিউটার ট্রেনিং",
+      "অনলাইন ফ্রিল্যান্সিং কোর্স ফার্মগেট",
+      "ফার্মগেট মেট্রো রেল সংলগ্ন কম্পিউটার একাডেমি"
+    ]
+  },
+  {
+    category: "কোর্স ফি ও খরচ (Pricing Intent)",
+    icon: "💰",
+    keywords: [
+      "Computer Course Fee in Dhaka",
+      "Graphic Design Course Fee Farmgate",
+      "AutoCAD Course Fee in Dhaka",
+      "Video Editing Course Fee Dhaka",
+      "Digital Marketing Course Fee in Bangladesh",
+      "IT Course Fee and Installment Facility"
+    ]
+  },
+  {
+    category: "মেট্রো ও লোকাল এরিয়া (Location Intent)",
+    icon: "🚇",
+    keywords: [
+      "Farmgate Metro Rail Computer Center",
+      "Computer Training near Panthapath & Green Road",
+      "Best IT Training Institute near Dhanmondi",
+      "Tejgaon Computer Training Center",
+      "Computer Institute near Ananda Cinema Hall Farmgate"
+    ]
+  },
+  {
+    category: "🌐 সারাদেশের অনলাইন কোর্স (All BD Online)",
+    icon: "🌐",
+    keywords: [
+      "Online Computer Course in Bangladesh",
+      "Best Online IT Training Institute in Bangladesh",
+      "Online Graphic Design Course BD",
+      "Online Video Editing Course in Bangladesh",
+      "Online AutoCAD Course Bangladesh",
+      "Online Digital Marketing Course with Certificate BD",
+      "Online Web Development Live Batch BD",
+      "Online French Language Course in Bangladesh",
+      "Online Freelancing Course Bangladesh",
+      "ঘরে বসে অনলাইন কম্পিউটার কোর্স সার্টিফিকেট সহ",
+      "অনলাইন গ্রাফিক ডিজাইন লাইভ কোর্স বাংলাদেশ",
+      "অনলাইনে ভিডিও এডিটিং শেখার সেরা প্রতিষ্ঠান",
+      "অনলাইন অটোক্যাড কোর্স ফি কত",
+      "অনলাইনে ফ্রিল্যান্সিং ও ডিজিটাল মার্কেটিং ট্রেনিং",
+      "লাইভ জুম ক্লাস ও রেকর্ডেড ক্লাস সুবিধা সহ আইটি কোর্স"
+    ]
+  }
+];
+
 interface CmsSeoTabProps {
   onSaveToast?: (msg: string) => void;
   onOpenCourseEditor?: (course: Course) => void;
@@ -1320,6 +1474,55 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
                   >
                     Add Keyword
                   </button>
+                </div>
+
+                {/* 1-Click High-Ranking Keyword Presets Hub */}
+                <div className="pt-3 border-t border-slate-200/80 space-y-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-[11px] font-bold text-slate-700 flex items-center space-x-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <span>১-ক্লিকে শীর্ষ কোর্স কি-ওয়ার্ড যুক্ত করুন (Quick Course Presets):</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allKws = RECOMMENDED_COURSE_KEYWORDS.flatMap(c => c.keywords);
+                        const merged = Array.from(new Set([...formData.keywords, ...allKws]));
+                        setFormData({ ...formData, keywords: merged });
+                      }}
+                      className="px-3 py-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 rounded-lg text-[10px] font-black shadow-xs flex items-center space-x-1 self-start sm:self-auto cursor-pointer"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>সবগুলো কোর্স কি-ওয়ার্ড একসাথে যুক্ত করুন (Add All)</span>
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {RECOMMENDED_COURSE_KEYWORDS.map(cluster => {
+                      const unaddedCount = cluster.keywords.filter(k => !formData.keywords.includes(k)).length;
+                      return (
+                        <button
+                          key={cluster.category}
+                          type="button"
+                          onClick={() => {
+                            const merged = Array.from(new Set([...formData.keywords, ...cluster.keywords]));
+                            setFormData({ ...formData, keywords: merged });
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border flex items-center space-x-1 transition-all cursor-pointer ${
+                            unaddedCount === 0
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200 opacity-80"
+                              : "bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 border-slate-200 hover:border-indigo-300 shadow-2xs active:scale-95"
+                          }`}
+                          title={`${cluster.keywords.join(", ")}`}
+                        >
+                          <span>{cluster.icon}</span>
+                          <span>{cluster.category}</span>
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600 font-mono">
+                            +{unaddedCount}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>

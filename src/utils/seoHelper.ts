@@ -48,16 +48,74 @@ export function getHomepageSeoMetadata(
     `${instituteName} at Farmgate, Dhaka (close to Panthapath, Tejgaon & Dhanmondi). 100% practical lab training in Computer Office Application, Advanced Excel, Web Dev & Freelancing with verifiable certification.`;
 
   const defaultKeywords = [
+    // English & Commercial Intent Keywords
     'Computer Course in Farmgate',
-    'Computer Training Center in Farmgate',
+    'Computer Training Center in Farmgate Dhaka',
     'Computer Training in Tejgaon',
     'Computer Institute near Panthapath',
     'Computer Course in Dhanmondi',
     'Best Computer Training Center in Farmgate Dhaka',
     'Computer Office Application Course',
     'Advanced Excel Course in Farmgate',
-    'Practical IT Training Center Farmgate',
-    'MS Office Training Farmgate Tejgaon Panthapath'
+    'Corporate MS Excel & Financial Modeling',
+    'AutoCAD 2D 3D Course in Dhaka',
+    'AutoCAD Training Center Farmgate',
+    'Civil & Architectural CAD Drafting',
+    'Video Editing Course in Dhaka',
+    'Premiere Pro & After Effects Training Farmgate',
+    'Motion Graphics & YouTube Video Editing',
+    'Digital Marketing Course Dhaka',
+    'Facebook Marketing & Meta Ads Training',
+    'Social Media Marketing Course Farmgate',
+    'SEO Training in Bangladesh',
+    'Search Engine Optimization Course Farmgate',
+    'French Language Course in Dhaka',
+    'French A1 A2 Spoken Course Farmgate',
+    'French for Study Visa Preparation',
+    'AI Automation Course Dhaka',
+    'Prompt Engineering & ChatGPT Productivity',
+    'UI UX Design Course in Dhaka',
+    'Figma UI UX Training Farmgate',
+    'Web Design and Development Course Dhaka',
+    'Full Stack MERN Web Development Farmgate',
+    'Graphic Design Course Farmgate',
+    'Freelancing Course in Farmgate Dhaka',
+    'Fiverr & Upwork Marketplace Training',
+    'Govt Certified Computer Course Farmgate',
+    'Graphic Design Course Fee in Dhaka',
+    'AutoCAD Course Fee in Dhaka',
+    'Computer Course Fee Farmgate Dhaka',
+    
+    // Bangladeshi Native Bangla Queries (বাংলা সার্চ কি-ওয়ার্ড)
+    'কম্পিউটার কোর্স ঢাকা ফার্মগেট',
+    'গ্রাফিক ডিজাইন কোর্স ফি কত',
+    'ভিডিও এডিটিং কোর্স ঢাকা',
+    'অটোক্যাড টুডি থ্রিডি কোর্স ফার্মগেট',
+    'ডিজিটাল মার্কেটিং ও ফেসবুক অ্যাডস কোর্স',
+    'ফ্রেঞ্চ ভাষা শিক্ষা কোর্স ঢাকা',
+    'অ্যাডভান্সড এক্সেল ট্রেনিং ঢাকা',
+    'সরকারি সার্টিফিকেট সহ কম্পিউটার ট্রেনিং',
+    'অনলাইন ফ্রিল্যান্সিং কোর্স ফার্মগেট',
+    'ফার্মগেট মেট্রো রেল সংলগ্ন কম্পিউটার একাডেমি',
+
+    // Nationwide Online Course Searches (সারাদেশের অনলাইন কোর্স কি-ওয়ার্ড)
+    'Online Computer Course in Bangladesh',
+    'Best Online IT Training Institute in Bangladesh',
+    'Online Graphic Design Course BD',
+    'Online Video Editing Course in Bangladesh',
+    'Online AutoCAD Course Bangladesh',
+    'Online Digital Marketing Course with Certificate BD',
+    'Online Web Development Live Batch BD',
+    'Online French Language Course in Bangladesh',
+    'Online Freelancing Course Bangladesh',
+    'Online IT Training with Live Zoom Class',
+    'ঘরে বসে অনলাইন কম্পিউটার কোর্স সার্টিফিকেট সহ',
+    'অনলাইন গ্রাফিক ডিজাইন লাইভ কোর্স বাংলাদেশ',
+    'অনলাইনে ভিডিও এডিটিং শেখার সেরা প্রতিষ্ঠান',
+    'অনলাইন অটোক্যাড কোর্স ফি কত',
+    'অনলাইনে ফ্রিল্যান্সিং ও ডিজিটাল মার্কেটিং ট্রেনিং',
+    'লাইভ জুম ক্লাস ও রেকর্ডেড ক্লাস সুবিধা সহ আইটি কোর্স',
+    'অনলাইন আইটি কোর্স সার্টিফিকেট বাংলাদেশ'
   ];
 
   const keywords = seo?.keywords && seo.keywords.length > 0 ? seo.keywords : defaultKeywords;
@@ -74,8 +132,35 @@ export function getHomepageSeoMetadata(
     schemas.push(getLocalBusinessSchema(academySettings, cmsConfig));
   }
 
-  if (seo?.enableFaqSchema !== false && seo?.faqItems && seo.faqItems.length > 0) {
-    schemas.push(getFaqSchema(seo.faqItems));
+  const defaultFaqItems = [
+    {
+      question: 'ফার্মগেটে কম্পিউটার ও আইটি কোর্সের কোর্স ফি কত? (Course Fee in Dhaka)',
+      answer: 'আমাদের প্রতিষ্ঠানে প্র্যাকটিক্যাল ল্যাবভিত্তিক কোর্স ফি শুরু হয় মাত্র ৩,৫০০ টাকা থেকে শুরু করে ১৫,০০০ টাকা পর্যন্ত (কোর্স ও মেয়াদ অনুযায়ী)। এছাড়াও রয়েছে বিশেষ ছাড় ও সহজ কিস্তিতে ফি প্রদানের সুবিধা।'
+    },
+    {
+      question: 'কোর্স শেষে কি সরকারি গ্রহণযোগ্য ও ভেরিফায়েবল সার্টিফিকেট পাওয়া যাবে?',
+      answer: 'হ্যাঁ! প্রতিটি কোর্স সফলভাবে সম্পন্ন করার পর লাইভ কিউআর কোড ও অনলাইন ভেরিফায়েবল ডিজিটাল সার্টিফিকেট প্রদান করা হয়, যা সরকারি-বেসরকারি চাকরি ও আন্তর্জাতিক মার্কেটপ্লেসে গ্রহণযোগ্য।'
+    },
+    {
+      question: 'ক্লাসের জন্য কি নিজস্ব ল্যাপটপ থাকা বাধ্যতামূলক নাকি ল্যাব সুবিধা আছে?',
+      answer: 'না, নিজস্ব ল্যাপটপ থাকা বাধ্যতামূলক নয়। আমাদের সেন্টারে সম্পূর্ণ শীতাতপ নিয়ন্ত্রিত আধুনিক ল্যাবে প্রতিটি শিক্ষার্থীর জন্য ব্যক্তিগত আলাদা হাই-কনফিগারেশন কম্পিউটার বরাদ্দ থাকে।'
+    },
+    {
+      question: 'ফার্মগেট ক্যাম্পাস মেট্রো রেল স্টেশন থেকে কত দূরে অবস্থিত?',
+      answer: 'আমাদের ক্যাম্পাস ফার্মগেট মেট্রো রেল স্টেশন (গেট ২) থেকে মাত্র ২ মিনিটের হাঁটা দূরত্বে, গার্ডেন রোডে আনোয়ারা পার্ক ও আনন্দ সিনেমা হলের ঠিক বিপরীতে অবস্থিত।'
+    },
+    {
+      question: 'চাকরিজীবী ও শিক্ষার্থীদের জন্য কি উইকেন্ড (শুক্র-শনি) বা সান্ধ্যকালীন ব্যাচ আছে?',
+      answer: 'হ্যাঁ! চাকরিজীবী ও বিশ্ববিদ্যালয় শিক্ষার্থীদের সুবিধার্থে সকাল, দুপুর ও সান্ধ্যকালীন শিডিউলের পাশাপাশি বিশেষ শুক্র ও শনিবারের উইকেন্ড ব্যাচ পরিচালিত হয়।'
+    },
+    {
+      question: 'কোর্স চলাকালীন ও কোর্স শেষে কি ফ্রিল্যান্সিং এবং জব প্লেসমেন্ট সাপোর্ট দেওয়া হয়?',
+      answer: 'হ্যাঁ! কোর্স চলাকালীনই ফাইভার ও আপওয়ার্কে অ্যাকাউন্ট সেটআপ, পোর্টফোলিও তৈরি এবং কাজ পাওয়ার গাইডলাইন শেখানো হয় এবং কোর্স শেষে আজীবন মেন্টরশিপ সহায়তা দেওয়া হয়।'
+    }
+  ];
+  const finalFaqItems = (seo?.faqItems && seo.faqItems.length > 0) ? seo.faqItems : defaultFaqItems;
+  if (seo?.enableFaqSchema !== false && finalFaqItems.length > 0) {
+    schemas.push(getFaqSchema(finalFaqItems));
   }
 
   return {
@@ -236,27 +321,38 @@ export function getLocalBusinessSchema(
       }
     ],
     areaServed: [
+      { '@type': 'Country', name: 'Bangladesh' },
+      { '@type': 'AdministrativeArea', name: 'All 64 Districts of Bangladesh (Interactive Live Online Batches)' },
+      { '@type': 'AdministrativeArea', name: 'Dhaka Division (Onsite Lab & Online)' },
+      { '@type': 'AdministrativeArea', name: 'Chittagong Division' },
+      { '@type': 'AdministrativeArea', name: 'Sylhet Division' },
+      { '@type': 'AdministrativeArea', name: 'Rajshahi Division' },
+      { '@type': 'AdministrativeArea', name: 'Khulna Division' },
+      { '@type': 'AdministrativeArea', name: 'Barisal Division' },
+      { '@type': 'AdministrativeArea', name: 'Rangpur Division' },
+      { '@type': 'AdministrativeArea', name: 'Mymensingh Division' },
+      { '@type': 'AdministrativeArea', name: 'Comilla' },
+      { '@type': 'AdministrativeArea', name: 'Bogra' },
+      { '@type': 'AdministrativeArea', name: 'Gazipur' },
+      { '@type': 'AdministrativeArea', name: 'Narayanganj' },
       { '@type': 'AdministrativeArea', name: 'Farmgate' },
       { '@type': 'AdministrativeArea', name: 'Tejgaon' },
-      { '@type': 'AdministrativeArea', name: 'Tejgaon Industrial Area' },
       { '@type': 'AdministrativeArea', name: 'Panthapath' },
-      { '@type': 'AdministrativeArea', name: 'Dhanmondi' },
-      { '@type': 'AdministrativeArea', name: 'Green Road' },
-      { '@type': 'AdministrativeArea', name: 'Indira Road' },
-      { '@type': 'AdministrativeArea', name: 'Kawran Bazar' },
-      { '@type': 'AdministrativeArea', name: 'Bijoy Sarani' },
-      { '@type': 'AdministrativeArea', name: 'Dhaka' },
-      { '@type': 'Country', name: 'Bangladesh' }
+      { '@type': 'AdministrativeArea', name: 'Dhanmondi' }
     ],
     knowsAbout: [
-      'Computer Office Application',
-      'Advanced MS Excel',
-      'Data Analysis',
-      'Web Design and Development',
-      'Graphic Design and Multimedia',
-      'Digital Marketing and SEO',
-      'AI Prompt Engineering and Productivity',
-      'Freelancing and Remote Job Skills'
+      'Computer Office Application & Digital Literacy',
+      'Advanced MS Excel, Formulas, Dashboards & Financial Modeling',
+      'AutoCAD 2D and 3D Architectural & Engineering Drafting',
+      'Video Editing, Premiere Pro, After Effects & Motion Graphics',
+      'Digital Marketing, Meta Ads & Search Engine Optimization (SEO)',
+      'Facebook Marketing & Social Media Brand Strategy',
+      'French Language Course (A1, A2, Spoken & Visa Preparation)',
+      'AI Automation, Workflow Engineering & Prompt Engineering',
+      'UI/UX Design, Figma & Product Prototype Architecture',
+      'Full Stack Web Design and Development (HTML, CSS, React, Node.js)',
+      'Graphic Design, Photoshop, Illustrator & Branding',
+      'Freelancing, Fiverr, Upwork Marketplace & Global Remote Work'
     ],
     amenityFeature: [
       {
@@ -380,10 +476,19 @@ export function getCourseSchema(
         validFrom: '2026-01-01'
       }
     ],
+    courseMode: ['online', 'onsite', 'blended'],
     hasCourseInstance: [
       {
         '@type': 'CourseInstance',
-        courseMode: course.deliveryMode === 'Online Live' ? 'Online' : 'Offline In-Person Practical Lab',
+        courseMode: 'Online',
+        name: `${course.name} - Live Online Batch (All Bangladesh 64 Districts)`,
+        description: 'Interactive Live Zoom classes, HD screen share, class recordings, and online 1-on-1 mentorship for students across Bangladesh.',
+        startDate: course.landingConfig?.nextBatchStartDate || '2026-09-01'
+      },
+      {
+        '@type': 'CourseInstance',
+        courseMode: 'Offline In-Person Practical Lab',
+        name: `${course.name} - Hands-on AC Lab Batch (Farmgate, Dhaka)`,
         location: {
           '@type': 'Place',
           name: `${instituteName} Farmgate Campus`,

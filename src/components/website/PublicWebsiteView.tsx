@@ -617,6 +617,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             language={language}
             fallbackHeadline={websiteCmsConfig.heroHeadline}
             fallbackSubtitle={websiteCmsConfig.heroSubtitle}
+            instituteName={academySettings.instituteName || 'Nexgen Computer Academy'}
             onOpenAdmission={() => {
               setSelectedCourseForAdmission(null);
               setIsAdmissionOpen(true);
@@ -689,7 +690,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                   <span className="text-slate-400 font-medium shrink-0">জনপ্রিয়:</span>
                   {(websiteCmsConfig.popularSearchTags && websiteCmsConfig.popularSearchTags.length > 0
                     ? websiteCmsConfig.popularSearchTags
-                    : ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing']
+                    : ['AutoCAD 2D/3D', 'Video Editing', 'Digital Marketing', 'Graphic Design', 'Web Development', 'French Language', 'AI Automation', 'Advanced Excel', 'Freelancing']
                   ).map((tag) => (
                     <button
                       key={tag}
@@ -2316,14 +2317,16 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* 13.5 GEO & LOCAL ACCESSIBILITY GUIDE (Farmgate, Tejgaon, Panthapath, Dhanmondi) */}
-      <GeoLocalGuideSection
-        instituteName={academySettings.instituteName || 'নেক্সজেন কম্পিউটার একাডেমি'}
-        address={officeAddress}
-        directions={campusDirections}
-        phone={socials.whatsappSupportNumber || academySettings.primarySupportPhone || '01798444444'}
-        onBookSeatClick={() => setIsAdmissionOpen(true)}
-        onCampusTourClick={() => setIsCampusTourOpen(true)}
-      />
+      {sectionVisibility.geoLocalGuide !== false && (
+        <GeoLocalGuideSection
+          instituteName={academySettings.instituteName || 'নেক্সজেন কম্পিউটার একাডেমি'}
+          address={officeAddress}
+          directions={campusDirections}
+          phone={socials.whatsappSupportNumber || academySettings.primarySupportPhone || '01798444444'}
+          onBookSeatClick={() => setIsAdmissionOpen(true)}
+          onCampusTourClick={() => setIsCampusTourOpen(true)}
+        />
+      )}
 
       {/* 14. CONTACT & MULTI-CHANNEL LOCATION SECTION */}
       {sectionVisibility.contactAndMap !== false && (

@@ -2129,6 +2129,7 @@ export interface WebsiteSectionVisibility {
   verifyCertificate: boolean;
   noticesAndFaq: boolean;
   contactAndMap: boolean;
+  geoLocalGuide?: boolean;
   footer?: boolean;
 }
 

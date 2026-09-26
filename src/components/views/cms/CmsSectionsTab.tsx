@@ -64,6 +64,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       reviews: true,
       verifyCertificate: true,
       noticesAndFaq: true,
+      geoLocalGuide: true,
       contactAndMap: true,
       footer: true
     }
@@ -240,7 +241,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     subtitle: websiteCmsConfig.placementsSectionConfig?.subtitle || 'কোর্স সম্পন্নের পর আমাদের ক্যারিয়ার সেলের প্রত্যক্ষ নির্দেশনায় দেশি-বিদেশি শীর্ষ সফটওয়্যার কোম্পানি এবং গ্লোবাল ফ্রিল্যান্স মার্কেটপ্লেসে সফলতার সাথে কাজ করছেন আমাদের শিক্ষার্থীরা।'
   });
   const [popularTagsString, setPopularTagsString] = useState<string>(
-    (websiteCmsConfig.popularSearchTags || ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing']).join(', ')
+    (websiteCmsConfig.popularSearchTags || ['AutoCAD 2D/3D', 'Video Editing', 'Digital Marketing', 'Graphic Design', 'Web Development', 'French Language', 'AI Automation', 'Advanced Excel', 'Freelancing']).join(', ')
   );
   const [headerSubtitle, setHeaderSubtitle] = useState<string>(
     websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training & Career Incubator`
@@ -508,6 +509,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
                 hiringPartners: true,
                 verifyCertificate: true,
                 noticesAndFaq: true,
+                geoLocalGuide: true,
                 contactAndMap: true,
                 footer: true
               })
@@ -537,8 +539,9 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             { key: 'hiringPartners', label: '14. Hiring Partners & Recruiters', desc: 'শীর্ষ আইটি কোম্পানি ও সরকারি স্বীকৃতি লোগো' },
             { key: 'verifyCertificate', label: '15. Certificate Verification', desc: 'ডিজিটাল কিউআর/আইডি যাচাইকরণ' },
             { key: 'noticesAndFaq', label: '16. Notices & FAQ Accordion', desc: 'নোটিশ বোর্ড ও সাধারণ প্রশ্নোত্তর' },
-            { key: 'contactAndMap', label: '17. Multi-Channel Contact & Map', desc: 'ক্যাম্পাস ঠিকানা ও গুগল ম্যাপ' },
-            { key: 'footer', label: '18. Footer & Legal Policies', desc: 'ওয়েবসাইট ফুটার ও পলিসি লিংকস' }
+            { key: 'geoLocalGuide', label: '17. Local Area & Metro Connectivity Guide', desc: 'ফার্মগেট ও সংলগ্ন এলাকার দূরত্ব ও রুট গাইড' },
+            { key: 'contactAndMap', label: '18. Multi-Channel Contact & Map', desc: 'ক্যাম্পাস ঠিকানা ও গুগল ম্যাপ' },
+            { key: 'footer', label: '19. Footer & Legal Policies', desc: 'ওয়েবসাইট ফুটার ও পলিসি লিংকস' }
           ].map(sec => {
             const isChecked = visibility[sec.key as keyof WebsiteSectionVisibility] ?? true;
             return (
@@ -1327,7 +1330,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
                 hasUserEditedRef.current = true;
                 setPopularTagsString(e.target.value);
               }}
-              placeholder="e.g. Graphic Design, Web Development, Video Editing, Digital Marketing"
+              placeholder="e.g. AutoCAD 2D/3D, Video Editing, Digital Marketing, Graphic Design, Web Development, French Language, AI Automation, Advanced Excel, Freelancing"
               className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-900 text-xs"
             />
           </div>
