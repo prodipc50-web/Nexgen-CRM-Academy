@@ -687,7 +687,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 {/* Mobile Quick Tags */}
                 <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
                   <span className="text-slate-400 font-medium shrink-0">জনপ্রিয়:</span>
-                  {['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing'].map((tag) => (
+                  {(websiteCmsConfig.popularSearchTags && websiteCmsConfig.popularSearchTags.length > 0
+                    ? websiteCmsConfig.popularSearchTags
+                    : ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing']
+                  ).map((tag) => (
                     <button
                       key={tag}
                       type="button"
@@ -1694,10 +1697,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <div className="text-center max-w-2xl mx-auto">
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold mb-2">
                 <Users className="w-3.5 h-3.5" />
-                <span>{communityHubConfig?.badge || 'Connect with 18,000+ Bangladeshi Coders'}</span>
+                <span>{communityHubConfig?.badgeText || communityHubConfig?.badge || 'Connect with 18,000+ Bangladeshi Coders'}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                {communityHubConfig?.title || 'Official Community Groups & YouTube Masterclasses'}
+                {communityHubConfig?.heading || communityHubConfig?.title || 'Official Community Groups & YouTube Masterclasses'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
                 {communityHubConfig?.description || 'Join our active developer network, ask code queries, collaborate on projects, and watch free full-length crash courses.'}
@@ -2006,13 +2009,13 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <div>
               <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-2">
                 <ImageIcon className="w-3.5 h-3.5" />
-                <span>Life at {academySettings.instituteName || 'Our Academy'}</span>
+                <span>{websiteCmsConfig.gallerySectionConfig?.tagText || `Life at ${academySettings.instituteName || "Our Academy"}`}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                Student Lab & Activity Photo Gallery (গ্যালারি)
+                {websiteCmsConfig.gallerySectionConfig?.heading || "Student Lab & Activity Photo Gallery (গ্যালারি)"}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Glimpses of our vibrant classroom labs, workshop sessions, and graduation ceremonies.
+                {websiteCmsConfig.gallerySectionConfig?.subtitle || "Glimpses of our vibrant classroom labs, workshop sessions, and graduation ceremonies."}
               </p>
             </div>
 
@@ -2080,13 +2083,13 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-xs font-bold mb-2">
               <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-              <span>Real Student Feedback & Employment Proof</span>
+              <span>{websiteCmsConfig.reviewsSectionConfig?.tagText || 'Real Student Feedback & Employment Proof'}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Verified Student Reviews & Career Stories (রিভিউ)
+              {websiteCmsConfig.reviewsSectionConfig?.heading || 'Verified Student Reviews & Career Stories (রিভিউ)'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Read how our alumni transitioned into freelance marketplaces and leading tech enterprises.
+              {websiteCmsConfig.reviewsSectionConfig?.subtitle || 'Read how our alumni transitioned into freelance marketplaces and leading tech enterprises.'}
             </p>
           </div>
 
@@ -2215,10 +2218,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <div className="lg:col-span-5 space-y-4">
               <div className="flex items-center space-x-2">
                 <Bell className="w-5 h-5 text-indigo-600" />
-                <h3 className="text-xl font-black text-slate-900">Academic Notice Board</h3>
+                <h3 className="text-xl font-black text-slate-900">
+                  {websiteCmsConfig.noticesFaqSectionConfig?.noticeHeading || 'Academic Notice Board'}
+                </h3>
               </div>
               <p className="text-xs text-slate-500">
-                Official notices regarding exams, batch schedules, and scholarship events.
+                {websiteCmsConfig.noticesFaqSectionConfig?.noticeSubtitle || 'Official notices regarding exams, batch schedules, and scholarship events.'}
               </p>
 
               <div className="space-y-3">
@@ -2271,10 +2276,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center space-x-2">
                 <HelpCircle className="w-5 h-5 text-indigo-600" />
-                <h3 className="text-xl font-black text-slate-900">Frequently Asked Questions</h3>
+                <h3 className="text-xl font-black text-slate-900">
+                  {websiteCmsConfig.noticesFaqSectionConfig?.faqHeading || 'Frequently Asked Questions'}
+                </h3>
               </div>
               <p className="text-xs text-slate-500">
-                Got questions about courses, certifications, or installments? Find instant answers below.
+                {websiteCmsConfig.noticesFaqSectionConfig?.faqSubtitle || 'Got questions about courses, certifications, or installments? Find instant answers below.'}
               </p>
 
               <div className="space-y-3">
@@ -2324,10 +2331,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Visit Our Campus & Direct Helplines
+              {websiteCmsConfig.contactSectionConfig?.heading || 'Visit Our Campus & Direct Helplines'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              {officeHours || 'We are open everyday from 9:00 AM to 8:30 PM for on-desk counseling and lab visits.'}
+              {websiteCmsConfig.contactSectionConfig?.subtitle || officeHours || 'We are open everyday from 9:00 AM to 8:30 PM for on-desk counseling and lab visits.'}
             </p>
           </div>
 

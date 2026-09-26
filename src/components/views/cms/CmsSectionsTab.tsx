@@ -28,7 +28,14 @@ import {
   Users,
   GraduationCap,
   Type,
-  Sparkles
+  Sparkles,
+  Image as ImageIcon,
+  Star,
+  Bell,
+  HelpCircle,
+  Phone,
+  ShieldCheck,
+  Search
 } from 'lucide-react';
 
 interface CmsSectionsTabProps {
@@ -199,6 +206,42 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     heading: websiteCmsConfig.seminarsSectionConfig?.heading || 'Upcoming Free Seminars & Workshops (ফ্রি ক্যারিয়ার সেমিনার)',
     subtitle: websiteCmsConfig.seminarsSectionConfig?.subtitle || 'ক্যাম্পাসে সরাসরি অথবা অনলাইনে যুক্ত হয়ে ইন্ডাস্ট্রি লিডারদের কাছ থেকে ক্যারিয়ার গাইডলাইন নিন।'
   });
+  const [galleryHeading, setGalleryHeading] = useState<SectionHeadingConfig>({
+    tagText: websiteCmsConfig.gallerySectionConfig?.tagText || 'Life at Smart Campus',
+    heading: websiteCmsConfig.gallerySectionConfig?.heading || 'Student Lab & Activity Photo Gallery (গ্যালারি)',
+    subtitle: websiteCmsConfig.gallerySectionConfig?.subtitle || 'Glimpses of our vibrant classroom labs, workshop sessions, and graduation ceremonies.'
+  });
+  const [reviewsHeading, setReviewsHeading] = useState<SectionHeadingConfig>({
+    tagText: websiteCmsConfig.reviewsSectionConfig?.tagText || 'Real Student Feedback & Employment Proof',
+    heading: websiteCmsConfig.reviewsSectionConfig?.heading || 'Verified Student Reviews & Career Stories (রিভিউ)',
+    subtitle: websiteCmsConfig.reviewsSectionConfig?.subtitle || 'Read how our alumni transitioned into freelance marketplaces and leading tech enterprises.'
+  });
+  const [noticesFaqHeading, setNoticesFaqHeading] = useState({
+    noticeTag: websiteCmsConfig.noticesFaqSectionConfig?.noticeTag || 'Official Circulars',
+    noticeHeading: websiteCmsConfig.noticesFaqSectionConfig?.noticeHeading || 'Academic Notice Board',
+    noticeSubtitle: websiteCmsConfig.noticesFaqSectionConfig?.noticeSubtitle || 'Official notices regarding exams, batch schedules, and scholarship events.',
+    faqTag: websiteCmsConfig.noticesFaqSectionConfig?.faqTag || 'Instant Answers',
+    faqHeading: websiteCmsConfig.noticesFaqSectionConfig?.faqHeading || 'Frequently Asked Questions',
+    faqSubtitle: websiteCmsConfig.noticesFaqSectionConfig?.faqSubtitle || 'Got questions about courses, certifications, or installments? Find instant answers below.'
+  });
+  const [contactHeading, setContactHeading] = useState<SectionHeadingConfig>({
+    tagText: websiteCmsConfig.contactSectionConfig?.tagText || 'Direct Helplines & Location',
+    heading: websiteCmsConfig.contactSectionConfig?.heading || 'Visit Our Campus & Direct Helplines',
+    subtitle: websiteCmsConfig.contactSectionConfig?.subtitle || 'We are open everyday from 9:00 AM to 8:30 PM for on-desk counseling and lab visits.'
+  });
+  const [verifyCertificateHeading, setVerifyCertificateHeading] = useState<SectionHeadingConfig>({
+    tagText: websiteCmsConfig.verifyCertificateSectionConfig?.tagText || 'Govt. Standard Online Verification Portal & Academic Registry',
+    heading: websiteCmsConfig.verifyCertificateSectionConfig?.heading || 'Verify Student Certificate & Credentials',
+    subtitle: websiteCmsConfig.verifyCertificateSectionConfig?.subtitle || 'Enter the Certificate Number or Student ID to verify authenticity directly from our official academic registry.'
+  });
+  const [placementsHeading, setPlacementsHeading] = useState<SectionHeadingConfig>({
+    tagText: websiteCmsConfig.placementsSectionConfig?.tagText || 'Real Alumni Career Success & Placements',
+    heading: websiteCmsConfig.placementsSectionConfig?.heading || 'সফল শিক্ষার্থীদের কর্মসংস্থান ও ফ্রিল্যান্সিং অর্জন',
+    subtitle: websiteCmsConfig.placementsSectionConfig?.subtitle || 'কোর্স সম্পন্নের পর আমাদের ক্যারিয়ার সেলের প্রত্যক্ষ নির্দেশনায় দেশি-বিদেশি শীর্ষ সফটওয়্যার কোম্পানি এবং গ্লোবাল ফ্রিল্যান্স মার্কেটপ্লেসে সফলতার সাথে কাজ করছেন আমাদের শিক্ষার্থীরা।'
+  });
+  const [popularTagsString, setPopularTagsString] = useState<string>(
+    (websiteCmsConfig.popularSearchTags || ['Graphic Design', 'Web Development', 'Video Editing', 'Digital Marketing']).join(', ')
+  );
 
   // 6. Footer Config
   const [footerBio, setFooterBio] = useState<string>(
@@ -266,6 +309,27 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     }
     if (websiteCmsConfig.seminarsSectionConfig) {
       setSeminarsHeading(websiteCmsConfig.seminarsSectionConfig);
+    }
+    if (websiteCmsConfig.gallerySectionConfig) {
+      setGalleryHeading(websiteCmsConfig.gallerySectionConfig);
+    }
+    if (websiteCmsConfig.reviewsSectionConfig) {
+      setReviewsHeading(websiteCmsConfig.reviewsSectionConfig);
+    }
+    if (websiteCmsConfig.noticesFaqSectionConfig) {
+      setNoticesFaqHeading(prev => ({ ...prev, ...(websiteCmsConfig.noticesFaqSectionConfig || {}) }));
+    }
+    if (websiteCmsConfig.contactSectionConfig) {
+      setContactHeading(websiteCmsConfig.contactSectionConfig);
+    }
+    if (websiteCmsConfig.verifyCertificateSectionConfig) {
+      setVerifyCertificateHeading(websiteCmsConfig.verifyCertificateSectionConfig);
+    }
+    if (websiteCmsConfig.placementsSectionConfig) {
+      setPlacementsHeading(websiteCmsConfig.placementsSectionConfig);
+    }
+    if (Array.isArray(websiteCmsConfig.popularSearchTags)) {
+      setPopularTagsString(websiteCmsConfig.popularSearchTags.join(', '));
     }
     if (websiteCmsConfig.footerConfig) {
       if (websiteCmsConfig.footerConfig.bio !== undefined) setFooterBio(websiteCmsConfig.footerConfig.bio);
@@ -340,6 +404,13 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       mentorsSectionConfig: mentorsHeading,
       blogSectionConfig: blogHeading,
       seminarsSectionConfig: seminarsHeading,
+      gallerySectionConfig: galleryHeading,
+      reviewsSectionConfig: reviewsHeading,
+      noticesFaqSectionConfig: noticesFaqHeading,
+      contactSectionConfig: contactHeading,
+      verifyCertificateSectionConfig: verifyCertificateHeading,
+      placementsSectionConfig: placementsHeading,
+      popularSearchTags: popularTagsString.split(',').map(s => s.trim()).filter(Boolean),
       footerConfig: {
         bio: footerBio,
         copyrightText,
@@ -961,6 +1032,245 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
                 className="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-600"
               />
             </div>
+          </div>
+
+          {/* Gallery Heading */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">
+              <ImageIcon className="w-4 h-4 text-purple-600" />
+              <span>Gallery Section Header (গ্যালারি সেকশন)</span>
+            </h4>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Top Badge</label>
+              <input
+                type="text"
+                value={galleryHeading.tagText || ''}
+                onChange={e => setGalleryHeading(prev => ({ ...prev, tagText: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-purple-600"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Heading</label>
+              <input
+                type="text"
+                value={galleryHeading.heading || ''}
+                onChange={e => setGalleryHeading(prev => ({ ...prev, heading: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Subtitle</label>
+              <input
+                type="text"
+                value={galleryHeading.subtitle || ''}
+                onChange={e => setGalleryHeading(prev => ({ ...prev, subtitle: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-600"
+              />
+            </div>
+          </div>
+
+          {/* Reviews Heading */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+              <span>Reviews Section Header (শিক্ষার্থী প্রশংসাপত্র)</span>
+            </h4>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Top Badge</label>
+              <input
+                type="text"
+                value={reviewsHeading.tagText || ''}
+                onChange={e => setReviewsHeading(prev => ({ ...prev, tagText: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-amber-600"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Heading</label>
+              <input
+                type="text"
+                value={reviewsHeading.heading || ''}
+                onChange={e => setReviewsHeading(prev => ({ ...prev, heading: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Subtitle</label>
+              <input
+                type="text"
+                value={reviewsHeading.subtitle || ''}
+                onChange={e => setReviewsHeading(prev => ({ ...prev, subtitle: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-600"
+              />
+            </div>
+          </div>
+
+          {/* Placements Heading */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
+              <span>Placements Section Header (ক্যারিয়ার প্লেসমেন্ট)</span>
+            </h4>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Top Badge</label>
+              <input
+                type="text"
+                value={placementsHeading.tagText || ''}
+                onChange={e => setPlacementsHeading(prev => ({ ...prev, tagText: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-emerald-600"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Heading</label>
+              <input
+                type="text"
+                value={placementsHeading.heading || ''}
+                onChange={e => setPlacementsHeading(prev => ({ ...prev, heading: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Subtitle</label>
+              <input
+                type="text"
+                value={placementsHeading.subtitle || ''}
+                onChange={e => setPlacementsHeading(prev => ({ ...prev, subtitle: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-600"
+              />
+            </div>
+          </div>
+
+          {/* Notice Board Heading */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">
+              <Bell className="w-4 h-4 text-indigo-600" />
+              <span>Notice Board Header (একাডেমিক নোটিশ বোর্ড)</span>
+            </h4>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Notice Heading</label>
+              <input
+                type="text"
+                value={noticesFaqHeading.noticeHeading || ''}
+                onChange={e => setNoticesFaqHeading(prev => ({ ...prev, noticeHeading: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Notice Subtitle</label>
+              <input
+                type="text"
+                value={noticesFaqHeading.noticeSubtitle || ''}
+                onChange={e => setNoticesFaqHeading(prev => ({ ...prev, noticeSubtitle: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-600"
+              />
+            </div>
+          </div>
+
+          {/* FAQs Heading */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">
+              <HelpCircle className="w-4 h-4 text-sky-600" />
+              <span>FAQ Section Header (সচরাচর জিজ্ঞাসা)</span>
+            </h4>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">FAQ Heading</label>
+              <input
+                type="text"
+                value={noticesFaqHeading.faqHeading || ''}
+                onChange={e => setNoticesFaqHeading(prev => ({ ...prev, faqHeading: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">FAQ Subtitle</label>
+              <input
+                type="text"
+                value={noticesFaqHeading.faqSubtitle || ''}
+                onChange={e => setNoticesFaqHeading(prev => ({ ...prev, faqSubtitle: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-600"
+              />
+            </div>
+          </div>
+
+          {/* Contact Heading */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">
+              <Phone className="w-4 h-4 text-emerald-600" />
+              <span>Contact & Campus Location Header (যোগাযোগ সেকশন)</span>
+            </h4>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Heading</label>
+              <input
+                type="text"
+                value={contactHeading.heading || ''}
+                onChange={e => setContactHeading(prev => ({ ...prev, heading: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Subtitle / Note</label>
+              <input
+                type="text"
+                value={contactHeading.subtitle || ''}
+                onChange={e => setContactHeading(prev => ({ ...prev, subtitle: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-600"
+              />
+            </div>
+          </div>
+
+          {/* Verify Certificate Heading */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">
+              <ShieldCheck className="w-4 h-4 text-teal-600" />
+              <span>Certificate Verification Header (সার্টিফিকেট ভেরিফিকেশন)</span>
+            </h4>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Top Badge</label>
+              <input
+                type="text"
+                value={verifyCertificateHeading.tagText || ''}
+                onChange={e => setVerifyCertificateHeading(prev => ({ ...prev, tagText: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-teal-600"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Heading</label>
+              <input
+                type="text"
+                value={verifyCertificateHeading.heading || ''}
+                onChange={e => setVerifyCertificateHeading(prev => ({ ...prev, heading: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg font-bold text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Subtitle</label>
+              <input
+                type="text"
+                value={verifyCertificateHeading.subtitle || ''}
+                onChange={e => setVerifyCertificateHeading(prev => ({ ...prev, subtitle: e.target.value }))}
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-slate-600"
+              />
+            </div>
+          </div>
+
+          {/* Popular Search Tags Bar */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 md:col-span-2">
+            <h4 className="font-bold text-slate-900 flex items-center space-x-1.5 text-xs">
+              <Search className="w-4 h-4 text-amber-500" />
+              <span>Hero Search "Popular Tags" (হিরো সার্চের নিচে জনপ্রিয় কি-ওয়ার্ডস)</span>
+            </h4>
+            <p className="text-[11px] text-slate-500">
+              কমা (,) দিয়ে আলাদা করে কি-ওয়ার্ড লিখুন। যেমন: Graphic Design, Web Development, Video Editing, AI & Python
+            </p>
+            <input
+              type="text"
+              value={popularTagsString}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setPopularTagsString(e.target.value);
+              }}
+              placeholder="e.g. Graphic Design, Web Development, Video Editing, Digital Marketing"
+              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-900 text-xs"
+            />
           </div>
         </div>
       </div>

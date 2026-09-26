@@ -41,7 +41,8 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
     batches,
     isAuthenticated,
     currentUser,
-    academySettings
+    academySettings,
+    websiteCmsConfig
   } = useAcademy();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -233,7 +234,7 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-indigo-950/80 border border-indigo-500/30 rounded-full text-indigo-300 text-xs font-bold shadow-inner">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Govt. Standard Online Verification Portal & Academic Registry</span>
+            <span>{websiteCmsConfig?.verifyCertificateSectionConfig?.tagText || 'Govt. Standard Online Verification Portal & Academic Registry'}</span>
           </div>
 
           {/* Admin Manual Certificate Upload & Editor Trigger */}
@@ -254,10 +255,10 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
 
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Verify Student Certificate & Credentials
+            {websiteCmsConfig?.verifyCertificateSectionConfig?.heading || 'Verify Student Certificate & Credentials'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 mt-2">
-            Enter the Certificate Number or Student ID to verify authenticity directly from our official academic registry.
+            {websiteCmsConfig?.verifyCertificateSectionConfig?.subtitle || 'Enter the Certificate Number or Student ID to verify authenticity directly from our official academic registry.'}
           </p>
         </div>
 
