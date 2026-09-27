@@ -23,6 +23,45 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings, updateAcademySettings } = useAcademy();
   const hasUserEditedRef = useRef(false);
 
+  // Top Header Brand Bar States (matching user screenshot)
+  const [headerBrandName, setHeaderBrandName] = useState(academySettings.instituteName || "Nexgen Computer Academy");
+  const [headerSubtitle, setHeaderSubtitle] = useState(
+    websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training & Career Incubator`
+  );
+  const [headerEstText, setHeaderEstText] = useState(websiteCmsConfig.headerEstText || "EST. 2018");
+  const [brandSavedFeedback, setBrandSavedFeedback] = useState(false);
+
+  useEffect(() => {
+    if (!hasUserEditedRef.current && academySettings.instituteName) {
+      setHeaderBrandName(academySettings.instituteName);
+    }
+  }, [academySettings.instituteName]);
+
+  useEffect(() => {
+    if (!hasUserEditedRef.current) {
+      if (websiteCmsConfig.headerSubtitle !== undefined) {
+        setHeaderSubtitle(websiteCmsConfig.headerSubtitle);
+      }
+      if (websiteCmsConfig.headerEstText !== undefined) {
+        setHeaderEstText(websiteCmsConfig.headerEstText);
+      }
+    }
+  }, [websiteCmsConfig.headerSubtitle, websiteCmsConfig.headerEstText]);
+
+  const handleSaveHeaderBrand = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (headerBrandName.trim() && headerBrandName !== academySettings.instituteName) {
+      updateAcademySettings({ instituteName: headerBrandName.trim() });
+    }
+    updateWebsiteCmsConfig({
+      headerSubtitle: headerSubtitle.trim(),
+      headerEstText: headerEstText.trim()
+    });
+    setBrandSavedFeedback(true);
+    setTimeout(() => setBrandSavedFeedback(false), 3000);
+    onSuccessToast("ওয়েবসাইটের হেডার ব্র্যান্ড, লোগো, স্লোগান ও প্রতিষ্ঠার সাল সফলভাবে সংরক্ষিত হয়েছে!");
+  };
+
   const [formData, setFormData] = useState({
     heroHeadline: websiteCmsConfig.heroHeadline || '',
     heroSubtitle: websiteCmsConfig.heroSubtitle || '',
@@ -188,7 +227,12 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       ...slides.slice(1)
     ] : slides;
 
+    if (headerBrandName.trim() && headerBrandName !== academySettings.instituteName) {
+      updateAcademySettings({ instituteName: headerBrandName.trim() });
+    }
     updateWebsiteCmsConfig({
+      headerSubtitle: headerSubtitle.trim(),
+      headerEstText: headerEstText.trim(),
       heroHeadline: formData.heroHeadline || (syncedSlides[0]?.title || ''),
       heroSubtitle: formData.heroSubtitle || (syncedSlides[0]?.subtitle || ''),
       heroBadgeText: formData.heroBadgeText || (syncedSlides[0]?.badgeText || ''),
@@ -267,44 +311,128 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         </div>
       </div>
 
-      {/* 0. Institute Branding & Logo Crop/Resize Management */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div className="flex items-center space-x-2 text-indigo-950 font-black text-sm">
-            <ImageIcon className="w-4 h-4 text-indigo-600" />
-            <span>Institute Public Website Logo & Branding (লোগো ক্রপ ও রিসাইজ)</span>
+      {/* 0. WEBSITE HEADER BRANDING, LOGO & CAMPUS TAGLINE EDITOR (Matches user screenshot) */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <h4 className="text-sm sm:text-base font-black text-slate-900 flex items-center space-x-2">
+              <span className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-black shrink-0">
+                🏷️
+              </span>
+              <span>Website Top Header Branding & Logo (হেডার ব্র্যান্ডিং ও লোগো এডিটর)</span>
+            </h4>
+            <p className="text-xs text-slate-500 mt-1">
+              ওয়েবসাইটের একদম উপরে নেভিগেশন বারে প্রদর্শিত লোগো, প্রতিষ্ঠানের নাম, প্রতিষ্ঠার সাল ব্যাজ ও ক্যাম্পাস স্লোগান এখান থেকে সরাসরি পরিবর্তন করুন।
+            </p>
           </div>
           <button
             type="button"
-            onClick={() => setIsLogoCropModalOpen(true)}
-            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-transform hover:scale-105"
+            onClick={handleSaveHeaderBrand}
+            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-sm flex items-center space-x-1.5 transition-transform active:scale-95 shrink-0 self-start sm:self-auto cursor-pointer"
           >
-            <Crop className="w-3.5 h-3.5" />
-            <span>Manual Crop & Resize Logo</span>
+            {brandSavedFeedback ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-100" /> : <Save className="w-3.5 h-3.5" />}
+            <span>{brandSavedFeedback ? "সংরক্ষিত হয়েছে (Saved)" : "Save Header Brand"}</span>
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200 gap-4">
-          <div className="flex items-center space-x-4">
-            <div className="p-2 bg-white rounded-xl border border-slate-200 shadow-2xs">
-              <NexgenLogo variant="crest" size={48} />
-            </div>
-            <div>
-              <h4 className="font-black text-slate-900 text-sm">{academySettings.instituteName || 'Nexgen Computer Academy'}</h4>
-              <p className="text-xs text-slate-500">Live Website Navigation & Print Header Logo</p>
-              <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">✓ Synchronized with Public Website & ID Cards</p>
-            </div>
+        {/* Visual Mock of Website Header (Exact replica of user screenshot) */}
+        <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-white space-y-2">
+          <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider pb-1">
+            <span>Live Header Navigation Preview (ওয়েবসাইটে যেমন দেখাবে)</span>
+            <span className="text-emerald-400 flex items-center space-x-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Synchronized</span>
+            </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="bg-white text-slate-900 p-3 sm:p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center space-x-3 min-w-0">
+              <div className="p-1.5 bg-slate-50 rounded-2xl border border-slate-200/90 shadow-2xs shrink-0">
+                <NexgenLogo variant="crest" size={44} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm sm:text-base lg:text-lg font-black text-slate-950 tracking-tight leading-none truncate">
+                    {headerBrandName || "Nexgen Computer Academy"}
+                  </span>
+                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-wider shrink-0">
+                    {headerEstText || "EST. 2018"}
+                  </span>
+                </div>
+                <p className="text-[11px] sm:text-xs text-slate-600 font-semibold truncate mt-1">
+                  {headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training & Career Incubator`}
+                </p>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={() => setIsLogoCropModalOpen(true)}
-              className="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs rounded-xl transition-colors flex items-center space-x-1"
+              className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs rounded-xl transition-colors flex items-center space-x-1.5 shrink-0 cursor-pointer"
             >
               <Crop className="w-3.5 h-3.5 text-indigo-600" />
               <span>Change / Crop Logo</span>
             </button>
+          </div>
+        </div>
+
+        {/* Direct Input Fields Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+          {/* 1. Institute Name */}
+          <div className="md:col-span-2 space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>১. প্রতিষ্ঠানের নাম (Institute Brand Name)</span>
+              <span className="text-[10px] text-indigo-600 font-semibold">ওয়েবসাইট ও সার্টিফিকেটে ব্যবহৃত</span>
+            </label>
+            <input
+              type="text"
+              value={headerBrandName}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setHeaderBrandName(e.target.value);
+              }}
+              placeholder="যেমন: Nexgen Computer Academy"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
+
+          {/* 2. Established Badge */}
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>২. প্রতিষ্ঠার সাল ব্যাজ</span>
+              <span className="text-[10px] text-slate-400 font-mono">EST. 2018</span>
+            </label>
+            <input
+              type="text"
+              value={headerEstText}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setHeaderEstText(e.target.value);
+              }}
+              placeholder="e.g. EST. 2018 বা প্রতিষ্ঠিত ২০১৮"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-700 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
+
+          {/* 3. Header Subtitle / Campus Tagline */}
+          <div className="md:col-span-3 space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>৩. ক্যাম্পাস ও স্লোগান সাবটাইটেল (Header Subtitle / Tagline)</span>
+              <span className="text-[10px] text-slate-500">নামের ঠিক নিচে ছোট অক্ষরে প্রদর্শিত হয়</span>
+            </label>
+            <input
+              type="text"
+              value={headerSubtitle}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setHeaderSubtitle(e.target.value);
+              }}
+              placeholder="e.g. Farmgate Campus • Govt. Standard IT Training & Career Incubator"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+            <p className="text-[10px] text-slate-500 pt-0.5">
+              💡 টিপস: আপনি আপনার ব্রাঞ্চের নাম ও স্লোগান (যেমন: <strong className="text-slate-700">ফার্মগেট ক্যাম্পাস • সরকারি মানের প্র্যাকটিক্যাল আইটি ল্যাব</strong>) লিখে দিতে পারেন।
+            </p>
           </div>
         </div>
       </div>
