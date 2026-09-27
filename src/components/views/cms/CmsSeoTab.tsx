@@ -45,7 +45,8 @@ import {
   EyeOff,
   Link as LinkIcon,
   Play,
-  Zap
+  Zap,
+  Save
 } from 'lucide-react';
 import { trackMetaPixelEvent, DEFAULT_GA4_MEASUREMENT_ID } from '../../../utils/analyticsTracker';
 
@@ -316,6 +317,7 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
     }
   }, [websiteCmsConfig.seo]);
 
+  const [saveFeedback, setSaveFeedback] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<
     'gbp_nap' | 'ai_geo_seo' | 'serp_meta' | 'local_seo' | 'courses_seo' | 'analytics_hub' | 'seo_health' | 'schemas' | 'sitemap_robots'
   >('gbp_nap');
@@ -358,6 +360,8 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
     updateWebsiteCmsConfig({
       seo: formData
     });
+    setSaveFeedback(true);
+    setTimeout(() => setSaveFeedback(false), 3000);
     if (onSaveToast) onSaveToast('SEO & Google Business Profile Settings saved to database!');
   };
 
@@ -684,28 +688,31 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Top Sticky Quick Save Action Bar */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-5 sm:p-6 border border-indigo-900/50 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md">
         <div className="space-y-1">
           <div className="inline-flex items-center space-x-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-xs font-bold border border-indigo-500/30">
             <Compass className="w-3.5 h-3.5" />
             <span>Google Search & Local SEO Engine</span>
           </div>
-          <h2 className="text-xl font-black tracking-tight">Google Business Profile, Search Console & Local SEO</h2>
+          <h2 className="text-lg sm:text-xl font-black tracking-tight">Google Business Profile, Search Console & Local SEO</h2>
           <p className="text-xs text-slate-400 max-w-2xl">
-            Single Source of Truth for Local Map ranking, NAP consistency, Search Console verification, Course SERPs,
-            GA4 analytics & structured data.
+            গুগল ম্যাপ র‍্যাংকিং, NAP তথ্য, মেটা ট্যাগ, কি-ওয়ার্ড এবং স্কিমা সেটিংস পরিবর্তন করে যেকোনো সময় সংরক্ষণ করুন।
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full md:w-auto justify-end shrink-0">
           <button
             type="button"
             onClick={handleSave}
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center space-x-1.5"
+            className={`w-full sm:w-auto px-6 py-3 font-black text-xs rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all cursor-pointer ${
+              saveFeedback
+                ? "bg-emerald-600 text-white shadow-emerald-600/40 scale-105"
+                : "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-emerald-500/30 active:scale-95"
+            }`}
           >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Save All SEO Settings</span>
+            {saveFeedback ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
+            <span>{saveFeedback ? "সব সংরক্ষিত হয়েছে (Saved!)" : "Save All SEO Settings (সংরক্ষণ করুন)"}</span>
           </button>
         </div>
       </div>
@@ -1607,6 +1614,17 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
               </div>
             </div>
           </div>
+          {/* Bottom Save Bar for SERP & Meta */}
+          <div className="pt-4 flex justify-end lg:col-span-12">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save Keywords & Meta Tags Settings (সংরক্ষণ করুন)</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -1706,6 +1724,18 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Bottom Save Bar for GBP & NAP */}
+          <div className="pt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save Google Business Profile & NAP Settings (সংরক্ষণ করুন)</span>
+            </button>
           </div>
         </div>
       )}

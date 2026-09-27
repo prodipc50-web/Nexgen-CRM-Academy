@@ -441,6 +441,52 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     onSuccessToast('সেকশন ভিজিবিলিটি, ইমপ্যাক্ট মেট্রিক্স, ডেলিভারি মোড ও ফুটার সেটিংস সফলভাবে সংরক্ষিত ও লাইভ হয়েছে!');
   };
 
+  // Keyboard shortcut Ctrl+S or Cmd+S
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        handleSaveAll();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    visibility,
+    deliveryEnabled,
+    deliveryCards,
+    impactEnabled,
+    impactTagText,
+    impactHeading,
+    impactSubtitle,
+    impactMetrics,
+    roadmapEnabled,
+    roadmapTag,
+    roadmapTitle,
+    roadmapDesc,
+    roadmapSteps,
+    coursesHeading,
+    mentorsHeading,
+    blogHeading,
+    seminarsHeading,
+    galleryHeading,
+    reviewsHeading,
+    noticesFaqHeading,
+    contactHeading,
+    verifyCertificateHeading,
+    placementsHeading,
+    popularTagsString,
+    headerSubtitle,
+    headerEstText,
+    footerBio,
+    copyrightText,
+    creditsText,
+    showSocials,
+    showTopCourses,
+    showQuickNav,
+    showLegalLinks
+  ]);
+
   return (
     <form onSubmit={handleSaveAll} className="space-y-8">
       {/* Top Sticky Quick Save Action Bar */}
@@ -451,13 +497,13 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
           </div>
           <div>
             <h3 className="font-black text-white text-sm sm:text-base flex items-center space-x-2">
-              <span>Website Sections & Footer Settings (সেকশন ও ফুটার হাব)</span>
+              <span>Website Sections & Page Plan Hub (সেকশন ও প্ল্যান হাব)</span>
               <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] uppercase font-bold">
                 Live Auto-Sync
               </span>
             </h3>
             <p className="text-xs text-slate-400">
-              ১৬টি সেকশন, ডেলিভারি মোড, ইমপ্যাক্ট মেট্রিক্স, ভর্তি রোডম্যাপ ও ফুটার কাস্টমাইজেশন সেভ করুন।
+              ১৬টি সেকশন, ডেলিভারি ফরম্যাট, ইমপ্যাক্ট মেট্রিক্স, ভর্তি রোডম্যাপ ও ফুটার কাস্টমাইজেশন সেভ করুন।
             </p>
           </div>
         </div>
@@ -477,8 +523,33 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
           </button>
         </div>
       </div>
+
+      {/* Quick Jump Section Links */}
+      <div className="bg-slate-100/90 p-2.5 rounded-2xl border border-slate-200/90 overflow-x-auto flex items-center space-x-2 text-xs">
+        <span className="text-[11px] font-black text-slate-500 uppercase px-2 shrink-0">দ্রুত সেকশনে যান:</span>
+        <a href="#sec-visibility" className="px-3 py-1.5 bg-white hover:bg-indigo-50 hover:text-indigo-600 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          👁️ সেকশন ভিজিবিলিটি
+        </a>
+        <a href="#sec-delivery" className="px-3 py-1.5 bg-white hover:bg-blue-50 hover:text-blue-600 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          🚀 ডেলিভারি ফরম্যাট
+        </a>
+        <a href="#sec-impact" className="px-3 py-1.5 bg-white hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          📊 ইমপ্যাক্ট মেট্রিক্স
+        </a>
+        <a href="#sec-roadmap" className="px-3 py-1.5 bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 rounded-xl font-black shadow-2xs shrink-0 transition-colors flex items-center space-x-1">
+          <span>🎓</span>
+          <span>ভর্তি রোডম্যাপ ও প্ল্যান (Admission Plan)</span>
+        </a>
+        <a href="#sec-headings" className="px-3 py-1.5 bg-white hover:bg-purple-50 hover:text-purple-600 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          ✏️ পেজ হেডিংস
+        </a>
+        <a href="#sec-footer" className="px-3 py-1.5 bg-white hover:bg-slate-200 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          🦶 ওয়েবসাইট ফুটার
+        </a>
+      </div>
+
       {/* SECTION 1: GLOBAL SECTION VISIBILITY TOGGLES */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+      <div id="sec-visibility" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <h3 className="font-black text-slate-900 text-base flex items-center space-x-2">
@@ -569,10 +640,22 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             );
           })}
         </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-3 border-t border-slate-100 gap-2">
+          <span className="text-xs text-slate-500 font-medium">সেকশন ভিজিবিলিটি অন/অফ পরিবর্তনের পর সংরক্ষণ করতে:</span>
+          <button
+            type="button"
+            onClick={() => handleSaveAll()}
+            className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Save Visibility Settings (ভিজিবিলিটি সেভ করুন)</span>
+          </button>
+        </div>
       </div>
 
       {/* SECTION 2: LEARNING DELIVERY FORMATS (4 CARDS) */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+      <div id="sec-delivery" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <h3 className="font-black text-slate-900 text-base flex items-center space-x-2">
@@ -662,10 +745,22 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             </div>
           ))}
         </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-3 border-t border-slate-100 gap-2">
+          <span className="text-xs text-slate-500 font-medium">ডেলিভারি মোড কার্ডের যেকোনো পরিবর্তন সংরক্ষণ করতে:</span>
+          <button
+            type="button"
+            onClick={() => handleSaveAll()}
+            className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Save Delivery Format Plans (ডেলিভারি প্ল্যান সেভ করুন)</span>
+          </button>
+        </div>
       </div>
 
       {/* SECTION 3: CAREER IMPACT & TRUST METRICS (6 CARDS) */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+      <div id="sec-impact" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <h3 className="font-black text-slate-900 text-base flex items-center space-x-2">
@@ -792,18 +887,33 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             ))}
           </div>
         </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-3 border-t border-slate-100 gap-2">
+          <span className="text-xs text-slate-500 font-medium">ইমপ্যাক্ট মেট্রিক্স বা হেডলাইন পরিবর্তনের পর সংরক্ষণ করতে:</span>
+          <button
+            type="button"
+            onClick={() => handleSaveAll()}
+            className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Save Impact & Trust Metrics (মেট্রিক্স সেভ করুন)</span>
+          </button>
+        </div>
       </div>
 
       {/* SECTION 4: ADMISSION & ONBOARDING ROADMAP (4 STEPS) */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+      <div id="sec-roadmap" className="bg-white p-6 rounded-3xl border-2 border-emerald-300 shadow-md space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
+            <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-black text-[10px] uppercase tracking-wider mb-1">
+              <span>Homepage Admission Plan & Roadmap (ভর্তি প্ল্যান হাব)</span>
+            </div>
             <h3 className="font-black text-slate-900 text-base flex items-center space-x-2">
               <Footprints className="w-5 h-5 text-emerald-600" />
-              <span>Admission & Learning Journey (সহজ ৪টি ধাপের রোডম্যাপ)</span>
+              <span>Admission Roadmap & Career Plan (সহজ ৪টি ধাপে ভর্তি ও ক্যারিয়ার শুরুর প্ল্যান)</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              শিক্ষার্থী ভর্তির চার ধাপের রোডম্যাপ সেকশনের শিরোনাম ও প্রতিটি ধাপের টেক্সট পরিবর্তন করুন।
+            <p className="text-xs text-slate-600 mt-1">
+              হোমপেজের সহজ ৪টি ধাপে ভর্তি ও ক্যারিয়ার শুরুর প্ল্যান/রোডম্যাপ টেক্সট ও ধাপসমূহ এখান থেকে ম্যানুয়ালি এডিট ও সেভ করুন।
             </p>
           </div>
           <label className="flex items-center space-x-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -896,10 +1006,30 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             </div>
           ))}
         </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-slate-100 gap-2 bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200/80">
+          <div>
+            <span className="text-xs text-emerald-950 font-black flex items-center space-x-1.5">
+              <span>🎓</span>
+              <span>ভর্তি ও ক্যারিয়ার রোডম্যাপ প্ল্যান (Admission Roadmap)</span>
+            </span>
+            <p className="text-[11px] text-emerald-700 mt-0.5">
+              ৪টি ধাপের শিরোনাম বা বিবরণ এডিট করার পর তাৎক্ষণিক সেভ করতে বাটনে চাপুন।
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleSaveAll()}
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center space-x-2 transition-all cursor-pointer hover:scale-105 active:scale-95"
+          >
+            <Save className="w-4 h-4" />
+            <span>Save Admission Roadmap & Plan (ভর্তি প্ল্যান সেভ করুন)</span>
+          </button>
+        </div>
       </div>
 
       {/* SECTION 5: CUSTOMIZABLE SECTION HEADINGS */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+      <div id="sec-headings" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
         <div className="pb-3 border-b border-slate-100">
           <h3 className="font-black text-slate-900 text-base flex items-center space-x-2">
             <Type className="w-5 h-5 text-purple-600" />
@@ -1335,10 +1465,22 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             />
           </div>
         </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-3 border-t border-slate-100 gap-2">
+          <span className="text-xs text-slate-500 font-medium">হেডিংস ও সার্চ ট্যাগ পরিবর্তনের পর সংরক্ষণ করতে:</span>
+          <button
+            type="button"
+            onClick={() => handleSaveAll()}
+            className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Save Section Headings & Tags (হেডিংস সেভ করুন)</span>
+          </button>
+        </div>
       </div>
 
       {/* SECTION 6: DYNAMIC FOOTER CONFIGURATION */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+      <div id="sec-footer" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
         <div className="pb-3 border-b border-slate-100">
           <h3 className="font-black text-slate-900 text-base flex items-center space-x-2">
             <FileText className="w-5 h-5 text-purple-600" />
@@ -1448,16 +1590,44 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
             </label>
           </div>
         </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-3 border-t border-slate-100 gap-2">
+          <span className="text-xs text-slate-500 font-medium">ফুটার টেক্সট ও কলাম অপশন সেভ করতে:</span>
+          <button
+            type="button"
+            onClick={() => handleSaveAll()}
+            className="w-full sm:w-auto px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Save Footer Settings (ফুটার সেভ করুন)</span>
+          </button>
+        </div>
       </div>
 
       {/* Global Save Button */}
       <div className="flex justify-end pt-2">
         <button
           type="submit"
-          className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all hover:scale-105"
+          className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all hover:scale-105 cursor-pointer"
         >
           <Save className="w-4 h-4" />
           <span>Save Sections, Roadmaps & Footer Settings</span>
+        </button>
+      </div>
+
+      {/* Floating Persistent Quick Save Button */}
+      <div className="fixed bottom-6 right-6 z-40 flex items-center space-x-2 bg-slate-900/95 backdrop-blur-md text-white p-2.5 rounded-2xl shadow-2xl border border-indigo-500/40 animate-in fade-in slide-in-from-bottom-3 duration-300">
+        <div className="hidden sm:flex flex-col pr-1 text-right">
+          <span className="text-[11px] font-black text-indigo-300">দ্রুত সেভ করুন</span>
+          <span className="text-[9px] text-slate-400">Ctrl + S অথবা বাটনে চাপুন</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => handleSaveAll()}
+          className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
+        >
+          {saveFeedback ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
+          <span>{saveFeedback ? 'সব সংরক্ষিত হয়েছে (Saved!)' : 'Save All Changes (সংরক্ষণ করুন)'}</span>
         </button>
       </div>
     </form>

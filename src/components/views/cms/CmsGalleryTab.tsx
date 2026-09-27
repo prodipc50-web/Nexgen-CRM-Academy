@@ -20,7 +20,11 @@ import {
 } from 'lucide-react';
 import { compressImageFile } from '../../../utils/imageCompressor';
 
-export const CmsGalleryTab: React.FC = () => {
+interface CmsGalleryTabProps {
+  onSuccessToast?: (msg: string) => void;
+}
+
+export const CmsGalleryTab: React.FC<CmsGalleryTabProps> = ({ onSuccessToast }) => {
   const {
     classroomGalleryPhotos,
     addClassroomGalleryPhoto,
@@ -45,10 +49,12 @@ export const CmsGalleryTab: React.FC = () => {
     setIsSaving(true);
     try {
       await syncToCloudNow(true);
+      const msg = 'ক্লাসরুম ও ল্যাব গ্যালারি ক্লাউড ডাটাবেজে সফলভাবে সেভ ও সিঙ্ক হয়েছে!';
       setNotification({
         type: 'success',
-        message: 'ক্লাসরুম ও ল্যাব গ্যালারি ক্লাউড ডাটাবেজে সফলভাবে সেভ ও সিঙ্ক হয়েছে!'
+        message: msg
       });
+      onSuccessToast?.(msg);
       setTimeout(() => setNotification(null), 4000);
     } catch (err) {
       setNotification({
@@ -145,16 +151,20 @@ export const CmsGalleryTab: React.FC = () => {
 
     if (editingId) {
       updateClassroomGalleryPhoto(editingId, formData);
+      const msg = `"${formData.title}" ছবির তথ্য সফলভাবে আপডেট ও সেভ করা হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `"${formData.title}" ছবির তথ্য সফলভাবে আপডেট ও সেভ করা হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
     } else {
       addClassroomGalleryPhoto(formData);
+      const msg = `"${formData.title}" সফলভাবে ক্লাসরুম গ্যালারিতে যোগ ও সেভ হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `"${formData.title}" সফলভাবে ক্লাসরুম গ্যালারিতে যোগ ও সেভ হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
     }
     setTimeout(() => setNotification(null), 4000);
     setIsModalOpen(false);
@@ -163,10 +173,12 @@ export const CmsGalleryTab: React.FC = () => {
   const handleDelete = (id: string, title: string) => {
     if (window.confirm(`Delete photo "${title}"?`)) {
       deleteClassroomGalleryPhoto(id);
+      const msg = `"${title}" সফলভাবে গ্যালারি থেকে মুছে ফেলা হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `"${title}" সফলভাবে গ্যালারি থেকে মুছে ফেলা হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
       setTimeout(() => setNotification(null), 4000);
     }
   };

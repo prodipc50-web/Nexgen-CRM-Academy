@@ -23,7 +23,11 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-export const CmsReviewsTab: React.FC = () => {
+interface CmsReviewsTabProps {
+  onSuccessToast?: (msg: string) => void;
+}
+
+export const CmsReviewsTab: React.FC<CmsReviewsTabProps> = ({ onSuccessToast }) => {
   const {
     studentCourseReviews,
     addStudentCourseReview,
@@ -150,10 +154,12 @@ export const CmsReviewsTab: React.FC = () => {
     setIsSyncing(true);
     try {
       await syncToCloudNow(true);
+      const msg = 'স্টুডেন্ট রিভিউ ক্লাউডে সফলভাবে সেভ ও সিঙ্ক হয়েছে!';
       setNotification({
         type: 'success',
-        message: 'স্টুডেন্ট রিভিউ ক্লাউডে সফলভাবে সেভ ও সিঙ্ক হয়েছে!'
+        message: msg
       });
+      onSuccessToast?.(msg);
       setTimeout(() => setNotification(null), 3500);
     } catch (err) {
       setNotification({
@@ -175,16 +181,20 @@ export const CmsReviewsTab: React.FC = () => {
 
     if (editingId) {
       updateStudentCourseReview(editingId, formData);
+      const msg = `"${formData.studentName}" এর রিভিউ সফলভাবে আপডেট করা হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `"${formData.studentName}" এর রিভিউ সফলভাবে আপডেট করা হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
     } else {
       addStudentCourseReview(formData);
+      const msg = `"${formData.studentName}" এর নতুন রিভিউ সফলভাবে প্রকাশিত হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `"${formData.studentName}" এর নতুন রিভিউ সফলভাবে প্রকাশিত হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
     }
     setIsModalOpen(false);
     setTimeout(() => setNotification(null), 4000);
@@ -193,10 +203,12 @@ export const CmsReviewsTab: React.FC = () => {
   const handleDelete = (id: string, name: string) => {
     if (window.confirm(`Delete review from "${name}"?`)) {
       deleteStudentCourseReview(id);
+      const msg = `"${name}" এর রিভিউ মুছে ফেলা হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `"${name}" এর রিভিউ মুছে ফেলা হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
       setTimeout(() => setNotification(null), 4000);
     }
   };

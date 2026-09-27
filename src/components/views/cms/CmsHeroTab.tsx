@@ -274,6 +274,18 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     handleSaveAllHero(e);
   };
 
+  // Keyboard shortcut Ctrl+S or Cmd+S
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        handleSaveAllHero();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [formData, slides, headerBrandName, headerEstText, headerSubtitle]);
+
   return (
     <div className="space-y-8">
       {/* Top Sticky Quick Save Action Bar */}
@@ -462,6 +474,16 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
           <p className="text-[11px] text-amber-700">
             This scrolling/fixed ticker appears at the very top of the public website above the navigation bar.
           </p>
+          <div className="flex justify-end pt-1">
+            <button
+              type="button"
+              onClick={() => handleSaveAllHero()}
+              className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Save Notice Ticker (নোটিশ সেভ করুন)</span>
+            </button>
+          </div>
         </div>
 
         {/* 3. Main Hero Default Texts */}
@@ -632,6 +654,17 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               />
             </div>
           </div>
+
+          <div className="flex justify-end pt-3 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => handleSaveAllHero()}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Save Hero Headlines & Promos (হেডলাইন সেভ করুন)</span>
+            </button>
+          </div>
         </div>
 
         {/* 4. Upcoming Batches / Offer Card Settings in Hero */}
@@ -724,19 +757,46 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               />
             </div>
           </div>
+
+          <div className="flex justify-end pt-3 border-t border-amber-100">
+            <button
+              type="button"
+              onClick={() => handleSaveAllHero()}
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Save Upcoming Batches Card (অফার কার্ড সেভ করুন)</span>
+            </button>
+          </div>
         </div>
 
         {/* Global Save Button */}
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all hover:scale-105"
+            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all hover:scale-105 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             <span>Save All Hero & Announcements</span>
           </button>
         </div>
       </form>
+
+      {/* Floating Persistent Quick Save Button */}
+      <div className="fixed bottom-6 right-6 z-40 flex items-center space-x-2 bg-slate-900/95 backdrop-blur-md text-white p-2.5 rounded-2xl shadow-2xl border border-indigo-500/40 animate-in fade-in slide-in-from-bottom-3 duration-300">
+        <div className="hidden sm:flex flex-col pr-1 text-right">
+          <span className="text-[11px] font-black text-indigo-300">হিরো ব্যানার সেভ</span>
+          <span className="text-[9px] text-slate-400">Ctrl + S অথবা বাটনে চাপুন</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => handleSaveAllHero()}
+          className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
+        >
+          {saveFeedback ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
+          <span>{saveFeedback ? 'সব সংরক্ষিত হয়েছে (Saved!)' : 'Save All Hero Changes (সংরক্ষণ করুন)'}</span>
+        </button>
+      </div>
 
       {/* Logo Crop & Resize Modal */}
       <LogoCropResizeModal

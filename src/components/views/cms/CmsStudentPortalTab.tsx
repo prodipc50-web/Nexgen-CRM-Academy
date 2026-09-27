@@ -62,6 +62,34 @@ export const CmsStudentPortalTab: React.FC<CmsStudentPortalTabProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Top Sticky Quick Save Action Bar */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 sm:p-5 rounded-3xl border border-indigo-900/50 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center font-black shadow-lg shadow-indigo-600/40 text-white shrink-0">
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-black text-white text-sm sm:text-base flex items-center space-x-2">
+              <span>Student Self-Service Portal Management (শিক্ষার্থী পোর্টাল সেটিংস)</span>
+              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] uppercase font-bold">
+                Live Sync
+              </span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              ডিজিটাল আইডি কার্ড, পেমেন্ট মানি রিসিট ও পোর্টাল নোটিশবোর্ড কনফিগারেশন সংরক্ষণ করুন।
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <button
+            type="submit"
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>Save Portal Settings (সংরক্ষণ করুন)</span>
+          </button>
+        </div>
+      </div>
       {/* Header Info Card */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-3">

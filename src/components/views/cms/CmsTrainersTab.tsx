@@ -30,7 +30,11 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 
-export const CmsTrainersTab: React.FC = () => {
+interface CmsTrainersTabProps {
+  onSuccessToast?: (msg: string) => void;
+}
+
+export const CmsTrainersTab: React.FC<CmsTrainersTabProps> = ({ onSuccessToast }) => {
   const {
     trainersList,
     addTrainer,
@@ -171,10 +175,12 @@ export const CmsTrainersTab: React.FC = () => {
     setIsExplicitSyncing(true);
     try {
       await syncToCloudNow(true);
+      const msg = 'ট্রেনার ও ফ্যাকাল্টি ডাটা ক্লাউডে সফলভাবে সেভ ও সিঙ্ক হয়েছে!';
       setNotification({
         type: 'success',
-        message: 'ট্রেনার ও ফ্যাকাল্টি ডাটা ক্লাউডে সফলভাবে সেভ ও সিঙ্ক হয়েছে!'
+        message: msg
       });
+      onSuccessToast?.(msg);
       setTimeout(() => setNotification(null), 3500);
     } catch (err) {
       setNotification({
@@ -196,16 +202,20 @@ export const CmsTrainersTab: React.FC = () => {
 
     if (editingTrainerId) {
       updateTrainer(editingTrainerId, formData);
+      const msg = `ট্রেনার "${formData.name}" এর প্রোফাইল সফলভাবে আপডেট করা হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `ট্রেনার "${formData.name}" এর প্রোফাইল সফলভাবে আপডেট করা হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
     } else {
       addTrainer(formData);
+      const msg = `নতুন ট্রেনার "${formData.name}" সফলভাবে তৈরি ও সংরক্ষিত হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `নতুন ট্রেনার "${formData.name}" সফলভাবে তৈরি ও সংরক্ষিত হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
     }
     setIsModalOpen(false);
     setTimeout(() => setNotification(null), 4000);
@@ -214,10 +224,12 @@ export const CmsTrainersTab: React.FC = () => {
   const handleDelete = (id: string, name: string) => {
     if (window.confirm(`Are you sure you want to delete trainer profile "${name}"?`)) {
       deleteTrainer(id);
+      const msg = `ট্রেনার "${name}" সফলভাবে মুছে ফেলা হয়েছে!`;
       setNotification({
         type: 'success',
-        message: `ট্রেনার "${name}" সফলভাবে মুছে ফেলা হয়েছে!`
+        message: msg
       });
+      onSuccessToast?.(msg);
       setTimeout(() => setNotification(null), 4000);
     }
   };

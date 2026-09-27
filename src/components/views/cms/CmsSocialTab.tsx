@@ -119,6 +119,34 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Top Sticky Quick Save Action Bar */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 sm:p-5 rounded-3xl border border-indigo-900/50 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center font-black shadow-lg shadow-blue-600/40 text-white shrink-0">
+            <Share2 className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-black text-white text-sm sm:text-base flex items-center space-x-2">
+              <span>Social Media Links & Community Hub (সোশ্যাল মিডিয়া ও গ্রুপ)</span>
+              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] uppercase font-bold">
+                Live Sync
+              </span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              ফেসবুক পেজ, ফেসবুক গ্রুপ, ইউটিউব, লিঙ্কডইন ও হোয়াটসঅ্যাপ লিংক পরিবর্তন করে সংরক্ষণ করুন।
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <button
+            type="submit"
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>Save All Social Links (সংরক্ষণ করুন)</span>
+          </button>
+        </div>
+      </div>
       {/* Facebook Ecosystem */}
       <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-2xs space-y-4">
         <div className="flex items-center space-x-2 text-blue-900 font-black text-sm pb-2 border-b border-blue-50">

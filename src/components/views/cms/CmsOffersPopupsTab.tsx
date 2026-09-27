@@ -310,8 +310,79 @@ export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSucces
     handleSavePartners(updated);
   };
 
+  const handleSaveActiveTab = () => {
+    switch (activeSubTab) {
+      case 'ribbon':
+        handleSaveRibbon();
+        break;
+      case 'popup':
+        handleSavePopup();
+        break;
+      case 'partners':
+        handleSavePartners();
+        break;
+      case 'floating':
+        handleSaveFloating();
+        break;
+      case 'social_proof':
+        handleSaveSocialProof();
+        break;
+      case 'campus_tour':
+        handleSaveCampusTour();
+        break;
+      case 'syllabus_magnet':
+        handleSaveSyllabus();
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Keyboard shortcut Ctrl+S or Cmd+S
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        handleSaveActiveTab();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeSubTab, ribbonConfig, popupConfig, partnersConfig, floatingConfig, socialProofConfig, campusTourConfig, syllabusConfig]);
+
   return (
     <div className="space-y-6">
+      {/* Top Sticky Quick Save Action Bar */}
+      <div className="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white p-4 sm:p-5 rounded-3xl border border-purple-900/50 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-2xl bg-purple-600 flex items-center justify-center font-black shadow-lg shadow-purple-600/40 text-white shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-black text-white text-sm sm:text-base flex items-center space-x-2">
+              <span>Offers, Popups & Lead Magnets Manager</span>
+              <span className="px-2 py-0.5 bg-amber-400 text-slate-950 font-black text-[10px] rounded-md uppercase">
+                {activeSubTab.replace('_', ' ')}
+              </span>
+            </h3>
+            <p className="text-xs text-slate-300">
+              অফার রিবন, লিড পপআপ, সোশ্যাল প্রুফ, ক্যাম্পাস ট্যুর ও সিলেবাস ডাউনলোড লিড সেটিংস লাইভ সেভ করুন।
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <button
+            type="button"
+            onClick={handleSaveActiveTab}
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>Save Active Settings (সেভ করুন)</span>
+          </button>
+        </div>
+      </div>
+
       {/* Sub-Tabs Nav */}
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
         <button
@@ -1551,6 +1622,22 @@ export const CmsOffersPopupsTab: React.FC<CmsOffersPopupsTabProps> = ({ onSucces
           </div>
         </div>
       )}
+
+      {/* Floating Persistent Quick Save Button */}
+      <div className="fixed bottom-6 right-6 z-40 flex items-center space-x-2 bg-slate-900/95 backdrop-blur-md text-white p-2.5 rounded-2xl shadow-2xl border border-purple-500/40 animate-in fade-in slide-in-from-bottom-3 duration-300">
+        <div className="hidden sm:flex flex-col pr-1 text-right">
+          <span className="text-[11px] font-black text-purple-300">অফার ও পপআপ সেভ</span>
+          <span className="text-[9px] text-slate-400">Ctrl + S অথবা বাটনে চাপুন</span>
+        </div>
+        <button
+          type="button"
+          onClick={handleSaveActiveTab}
+          className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
+        >
+          <Save className="w-4 h-4" />
+          <span>Save Changes (সংরক্ষণ করুন)</span>
+        </button>
+      </div>
     </div>
   );
 };

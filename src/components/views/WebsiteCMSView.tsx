@@ -22,8 +22,10 @@ import {
   Layers,
   Users,
   Search,
-  ShieldAlert
+  ShieldAlert,
+  Calendar
 } from 'lucide-react';
+import { SeminarsWorkshopsView } from './SeminarsWorkshopsView';
 import { CmsHeroTab } from './cms/CmsHeroTab';
 import { CmsCoursesTab } from './cms/CmsCoursesTab';
 import { CmsAboutTab } from './cms/CmsAboutTab';
@@ -76,6 +78,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
     | 'notices'
     | 'faqs'
     | 'policies'
+    | 'seminars'
   >('sections');
 
   const [toastMessage, setToastMessage] = useState('');
@@ -88,9 +91,10 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
   const navTabs = [
     { id: 'offers_popups', label: 'Offers, Popups & Partners', icon: Sparkles, count: null, isHot: true, isNew: true },
     { id: 'security_shield', label: 'Cyber Security & Anti-Bot Shield', icon: ShieldAlert, count: null, isHot: true, isNew: true },
-    { id: 'sections', label: 'Page Sections & Layout', icon: Layout, count: null, isHot: true, isNew: true },
+    { id: 'sections', label: 'Page Sections & Roadmap Plan', icon: Layout, count: null, isHot: true, isNew: true },
     { id: 'seo', label: 'SEO & Local Search Hub', icon: Search, count: null, isHot: true, isPhase4: true },
     { id: 'hero', label: 'Hero & Banner Slider', icon: Layers, count: null, isHot: false },
+    { id: 'seminars', label: 'Seminars & Masterclasses', icon: Calendar, count: null },
     { id: 'trainers', label: 'Faculty & Mentors', icon: Users, count: null, isNew: true },
     { id: 'reviews', label: 'Student Reviews', icon: MessageSquare, count: null, isNew: true },
     { id: 'gallery', label: 'Photo Gallery', icon: ImageIcon, count: null },
@@ -204,7 +208,18 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
         {activeTab === 'sections' && <CmsSectionsTab onSuccessToast={triggerToast} />}
         {activeTab === 'seo' && <CmsSeoTab onSaveToast={triggerToast} />}
         {activeTab === 'hero' && <CmsHeroTab onSuccessToast={triggerToast} />}
-        {activeTab === 'trainers' && <CmsTrainersTab />}
+        {activeTab === 'seminars' && (
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 p-4 rounded-2xl flex items-center justify-between text-xs">
+              <div className="flex items-center space-x-2 text-amber-900 font-bold">
+                <Calendar className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>ফ্রি ক্যারিয়ার সেমিনার ও অনলাইন ওয়ার্কশপ শিডিউল তৈরি বা এডিট করুন (সরাসরি হোমপেজের সেমিনার সেকশনে প্রদর্শিত হয়)।</span>
+              </div>
+            </div>
+            <SeminarsWorkshopsView />
+          </div>
+        )}
+        {activeTab === 'trainers' && <CmsTrainersTab onSuccessToast={triggerToast} />}
         {activeTab === 'portal_config' && (
           <CmsStudentPortalTab
             onSuccessToast={triggerToast}
@@ -217,8 +232,8 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
         {activeTab === 'contact' && <CmsContactTab onSuccessToast={triggerToast} />}
         {activeTab === 'social' && <CmsSocialTab onSuccessToast={triggerToast} />}
         {activeTab === 'blog' && <CmsBlogTab onSuccessToast={triggerToast} />}
-        {activeTab === 'reviews' && <CmsReviewsTab />}
-        {activeTab === 'gallery' && <CmsGalleryTab />}
+        {activeTab === 'reviews' && <CmsReviewsTab onSuccessToast={triggerToast} />}
+        {activeTab === 'gallery' && <CmsGalleryTab onSuccessToast={triggerToast} />}
         {activeTab === 'notices' && <CmsNoticesTab onSuccessToast={triggerToast} />}
         {activeTab === 'faqs' && <CmsFaqsTab onSuccessToast={triggerToast} />}
         {activeTab === 'policies' && <CmsPoliciesTab onSuccessToast={triggerToast} />}
