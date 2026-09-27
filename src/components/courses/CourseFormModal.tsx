@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Course, CourseModule, CourseStatus, DurationUnit } from '../../types';
 import { DEFAULT_LEARNING_FEATURES, DEFAULT_TARGET_AUDIENCES } from '../../data/seedData';
+import { generateSlug } from '../../utils/seoHelper';
 import {
   X,
   BookOpen,
@@ -25,7 +26,12 @@ import {
   Eye,
   RefreshCw,
   Download,
-  Star
+  Star,
+  Globe,
+  Smartphone,
+  Monitor,
+  Search,
+  ExternalLink
 } from 'lucide-react';
 
 interface CourseFormModalProps {
@@ -35,7 +41,7 @@ interface CourseFormModalProps {
   onOpenCategoryManager?: () => void;
 }
 
-type TabType = 'basic' | 'duration_fee' | 'curriculum' | 'trainers_audience' | 'prerequisites';
+type TabType = 'basic' | 'duration_fee' | 'curriculum' | 'trainers_audience' | 'prerequisites' | 'seo';
 
 const PRESET_THUMBNAILS = [
   { label: 'Computer Office', url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80' },
@@ -124,6 +130,35 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const [showFilePreview, setShowFilePreview] = useState(false);
 
+  // Course SEO & Google Search Meta State
+  const [seoSlug, setSeoSlug] = useState('');
+  const [seoFocusKeyword, setSeoFocusKeyword] = useState('');
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoMetaDescription, setSeoMetaDescription] = useState('');
+  const [secondaryKeywordsInput, setSecondaryKeywordsInput] = useState('');
+  const [seoNoIndex, setSeoNoIndex] = useState(false);
+  const [serpPreviewMode, setSerpPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
+
+  const handleAutoGenerateSeo = () => {
+    const cleanSlug = generateSlug(name || 'new-course');
+    setSeoSlug(cleanSlug);
+    setSeoFocusKeyword(`${name || "IT"} Course in Dhaka`);
+    setSeoTitle(`${name || "Professional IT"} Course in Farmgate & Online BD | Nexgen Academy`);
+    setSeoMetaDescription(
+      description
+        ? `${name}: ${description.slice(0, 110)}... 100% practical lab, live online & verifiable certificate.`
+        : `Learn ${name || "practical IT skills"} with hands-on lab training at Farmgate, Dhaka & Live Online across Bangladesh. Verifiable certificate & job placement.`
+    );
+    const defaults = [
+      `${name} course Farmgate`,
+      `${name} course fee in Dhaka`,
+      `online ${name} course Bangladesh`,
+      `best ${category} training center`
+    ];
+    setSecondaryKeywordsInput(defaults.join(', '));
+    setSeoNoIndex(false);
+  };
+
   const handleCurriculumFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -194,6 +229,12 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       setCurriculumFileType(initialCourse.curriculumFileType || initialCourse.landingConfig?.syllabusDownload?.fileType || 'pdf');
       setCurriculumFileSize(initialCourse.curriculumFileSize || initialCourse.landingConfig?.syllabusDownload?.fileSize || '');
       setCurriculumUploadedAt(initialCourse.curriculumUploadedAt || initialCourse.landingConfig?.syllabusDownload?.uploadedAt || '');
+      setSeoSlug(initialCourse.seo?.slug || initialCourse.slug || generateSlug(initialCourse.name));
+      setSeoFocusKeyword(initialCourse.seo?.focusKeyword || `${initialCourse.name} Course in Dhaka`);
+      setSeoTitle(initialCourse.seo?.seoTitle || `${initialCourse.name} Course in Farmgate & Online BD | Nexgen Academy`);
+      setSeoMetaDescription(initialCourse.seo?.metaDescription || initialCourse.description || `Join our practical hands-on ${initialCourse.name} course at Farmgate, Dhaka & Live Online across Bangladesh. 100% lab practice, verifiable certificate & career support.`);
+      setSecondaryKeywordsInput((initialCourse.seo?.secondaryKeywords || [`${initialCourse.name} training Farmgate`, `${initialCourse.name} fee in Dhaka`, `best ${initialCourse.category} course`]).join(', '));
+      setSeoNoIndex(initialCourse.seo?.noIndex ?? false);
     } else {
       // Auto generate placeholder code for new course
       const nextCode = `NCA-CRS-${String(courses.length + 1).padStart(2, '0')}`;
@@ -218,6 +259,12 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       setOfferFee(12000);
       setScholarshipAvailable(true);
       setMaxScholarship(3000);
+      setSeoSlug('');
+      setSeoFocusKeyword('');
+      setSeoTitle('');
+      setSeoMetaDescription('');
+      setSecondaryKeywordsInput('');
+      setSeoNoIndex(false);
       setMinInstallmentAmount(4000);
       setModules([
         {
@@ -501,6 +548,16 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       requiredSoftwareHardware,
       previousCourse: previousCourse || undefined,
       targetAudience,
+      slug: seoSlug.trim() || generateSlug(name),
+      seo: {
+        slug: seoSlug.trim() || generateSlug(name),
+        focusKeyword: seoFocusKeyword.trim() || `${name} Course in Dhaka`,
+        seoTitle: seoTitle.trim() || `${name} Course in Farmgate & Online BD | Nexgen Academy`,
+        metaDescription: seoMetaDescription.trim() || description || `Learn ${name} with 100% practical lab & live online training in Dhaka.`,
+        secondaryKeywords: secondaryKeywordsInput.split(',').map(s => s.trim()).filter(Boolean),
+        noIndex: seoNoIndex,
+        canonicalUrl: `https://nexgenacademy.edu.bd/courses/${seoSlug.trim() || generateSlug(name)}`
+      },
       curriculumFileUrl: curriculumFileUrl || undefined,
       curriculumFileName: curriculumFileName || undefined,
       curriculumFileType: curriculumFileType || undefined,
@@ -646,6 +703,22 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
           >
             <Sparkles className="w-4 h-4" />
             <span>5. Prerequisites & Features</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('seo')}
+            className={`flex items-center space-x-2 py-3 px-3 border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === 'seo'
+                ? 'border-indigo-600 text-indigo-700 bg-white'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <Globe className="w-4 h-4 text-emerald-600" />
+            <span>6. SEO & Google Search</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold uppercase">
+              Rank
+            </span>
           </button>
         </div>
 
@@ -886,6 +959,198 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
                     />
                     <p className="text-[10px] text-slate-500 mt-1">e.g. 450+ Enrolled</p>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: SEO & GOOGLE SEARCH LIVE SIMULATOR */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6 animate-in fade-in duration-100">
+              {/* Header Ribbon & Auto-Generate Button */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border border-emerald-200 rounded-2xl">
+                <div>
+                  <h4 className="font-black text-slate-900 text-sm flex items-center space-x-2">
+                    <Globe className="w-4 h-4 text-emerald-600" />
+                    <span>কোর্স সার্চ ইঞ্জিন অপ্টিমাইজেশন (Course SEO & Ranking Hub)</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-600 mt-0.5">
+                    গুগলে এই কোর্সটি লিখে সার্চ দিলে কীভাবে প্রদর্শিত হবে এবং কোন কি-ওয়ার্ডে র‍্যাংক করবে তা এখান থেকে নিয়ন্ত্রণ করুন।
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAutoGenerateSeo}
+                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all active:scale-95 shrink-0 self-start sm:self-auto cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>১-ক্লিকে অটো এসইও তৈরি করুন (Auto-Generate)</span>
+                </button>
+              </div>
+
+              {/* LIVE GOOGLE SERP SIMULATOR */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-slate-800">
+                    <Search className="w-4 h-4 text-indigo-600" />
+                    <span>গুগল সার্চ লাইভ প্রিভিউ (Google Search Preview)</span>
+                  </div>
+                  <div className="flex items-center bg-slate-100 p-0.5 rounded-lg text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setSerpPreviewMode('desktop')}
+                      className={`px-2.5 py-1 rounded-md flex items-center space-x-1 transition-all ${
+                        serpPreviewMode === 'desktop' ? 'bg-white text-indigo-600 shadow-2xs' : 'text-slate-600'
+                      }`}
+                    >
+                      <Monitor className="w-3 h-3" />
+                      <span>Desktop</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSerpPreviewMode('mobile')}
+                      className={`px-2.5 py-1 rounded-md flex items-center space-x-1 transition-all ${
+                        serpPreviewMode === 'mobile' ? 'bg-white text-indigo-600 shadow-2xs' : 'text-slate-600'
+                      }`}
+                    >
+                      <Smartphone className="w-3 h-3" />
+                      <span>Mobile</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Google Snippet Card */}
+                <div className={`p-4 rounded-xl border border-slate-200 bg-white font-sans transition-all ${
+                  serpPreviewMode === 'mobile' ? 'max-w-sm mx-auto shadow-sm' : 'w-full'
+                }`}>
+                  <div className="flex items-center space-x-2 text-[12px] text-slate-700 truncate">
+                    <div className="w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                      N
+                    </div>
+                    <span className="font-semibold text-slate-800">Nexgen Computer Academy</span>
+                    <span className="text-slate-400">› courses › {seoSlug || generateSlug(name) || 'course-name'}</span>
+                  </div>
+                  <h4 className="text-[#1a0dab] hover:underline font-medium text-base sm:text-lg leading-snug cursor-pointer pt-1 line-clamp-2">
+                    {seoTitle || `${name || "Course Name"} Course in Farmgate & Online BD | Nexgen Academy`}
+                  </h4>
+                  <p className="text-[13px] text-[#4d5156] leading-relaxed pt-1 line-clamp-3">
+                    {seoMetaDescription || description || `Join our practical hands-on ${name || "IT"} course at Farmgate, Dhaka & Live Online across Bangladesh. 100% lab practice, verifiable certificate & career support.`}
+                  </p>
+                </div>
+              </div>
+
+              {/* INPUT FIELDS GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. URL Slug */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-700">Course URL Slug (ইউআরএল লিংক)</label>
+                    <span className="text-[10px] text-slate-400 font-mono">/courses/[slug]</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={seoSlug}
+                    onChange={e => setSeoSlug(generateSlug(e.target.value))}
+                    placeholder="e.g. autocad-2d-3d or video-editing"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-indigo-700 font-bold text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                  <span className="text-[10px] text-slate-500 mt-1 block">
+                    ওয়েবসাইটে এই কোর্সের সরাসরি পেজ লিংক হবে: <strong className="font-mono text-slate-800">https://nexgenacademy.edu.bd/courses/{seoSlug || generateSlug(name) || 'url-slug'}</strong>
+                  </span>
+                </div>
+
+                {/* 2. Focus Keyword */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-700">Primary Focus Keyword (প্রধান টার্গেট কি-ওয়ার্ড)</label>
+                    <span className="text-[10px] text-emerald-600 font-semibold">Rank #1 Target</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={seoFocusKeyword}
+                    onChange={e => setSeoFocusKeyword(e.target.value)}
+                    placeholder="e.g. AutoCAD 2D 3D Course in Dhaka"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                  <span className="text-[10px] text-slate-500 mt-1 block">
+                    শিক্ষার্থীরা গুগলে যে নির্দিষ্ট কি-ওয়ার্ড দিয়ে খুঁজলে এই কোর্সটি আগে আসবে।
+                  </span>
+                </div>
+
+                {/* 3. SEO Meta Title */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-700">SEO Meta Title (গুগল সার্চের বড় নীল শিরোনাম)</label>
+                    <span className={`text-[11px] font-bold ${
+                      seoTitle.length >= 40 && seoTitle.length <= 65 ? 'text-emerald-600' : 'text-amber-600'
+                    }`}>
+                      {seoTitle.length} / 60 Chars (Optimal: 40-60)
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={seoTitle}
+                    onChange={e => setSeoTitle(e.target.value)}
+                    placeholder="e.g. AutoCAD 2D 3D Course in Farmgate & Online BD | Nexgen Academy"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+
+                {/* 4. SEO Meta Description */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-700">SEO Meta Description (গুগলের ২ লাইনের সারসংক্ষেপ)</label>
+                    <span className={`text-[11px] font-bold ${
+                      seoMetaDescription.length >= 120 && seoMetaDescription.length <= 165 ? 'text-emerald-600' : 'text-amber-600'
+                    }`}>
+                      {seoMetaDescription.length} / 160 Chars (Optimal: 120-160)
+                    </span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={seoMetaDescription}
+                    onChange={e => setSeoMetaDescription(e.target.value)}
+                    placeholder="e.g. Learn AutoCAD 2D & 3D drafting with 100% practical lab practice in Farmgate, Dhaka or Live Online across Bangladesh. Verifiable certificate & job assistance included."
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+
+                {/* 5. Secondary Keywords */}
+                <div className="md:col-span-2">
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Secondary Search Keywords (কমা দিয়ে অন্যান্য কি-ওয়ার্ড লিখুন)
+                  </label>
+                  <input
+                    type="text"
+                    value={secondaryKeywordsInput}
+                    onChange={e => setSecondaryKeywordsInput(e.target.value)}
+                    placeholder="e.g. AutoCAD course fee in Dhaka, Civil CAD drafting, online AutoCAD course BD"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                  <span className="text-[10px] text-slate-500 mt-1 block">
+                    কমা (,) দিয়ে অতিরিক্ত কি-ওয়ার্ড আলাদা করে দিন যাতে সম্পর্কিত সার্চেও এই কোর্সটি গুগল খুঁজে পায়।
+                  </span>
+                </div>
+
+                {/* 6. Indexing Toggle */}
+                <div className="md:col-span-2 p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-slate-900 block">গুগল ইন্ডেক্সিং স্ট্যাটাস (Google Search Visibility)</span>
+                    <span className="text-[11px] text-slate-500 block">
+                      কোর্সটি গুগলে সক্রিয় থাকবে কি না তা নির্বাচন করুন।
+                    </span>
+                  </div>
+                  <label className="flex items-center space-x-2 cursor-pointer select-none">
+                    <span className={`text-xs font-bold ${seoNoIndex ? 'text-amber-600' : 'text-emerald-700'}`}>
+                      {seoNoIndex ? 'Noindex (গুগলে দেখাবে না)' : 'Indexed (গুগলে দেখাবে - Active)'}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={!seoNoIndex}
+                      onChange={e => setSeoNoIndex(!e.target.checked)}
+                      className="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600"
+                    />
+                  </label>
                 </div>
               </div>
             </div>
