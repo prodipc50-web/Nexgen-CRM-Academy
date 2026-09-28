@@ -62,44 +62,40 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
   }, [activeCourses, selectedCategory]);
 
   return (
-    <section id="career-matrix" className="py-20 bg-slate-900 text-white relative overflow-hidden border-t border-slate-800">
-      {/* Background Subtle Gradient */}
-      <div className="absolute top-1/3 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <section id="career-matrix" className="py-16 bg-white text-slate-900 relative overflow-hidden border-t border-slate-200">
       <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center flex-wrap justify-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/90 border border-slate-700/80 text-xs font-semibold tracking-wide mb-4 shadow-xs">
-            <div className="flex items-center space-x-1.5 text-amber-400">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <div className="inline-flex items-center flex-wrap justify-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-xs font-semibold tracking-wide mb-3 shadow-2xs">
+            <div className="flex items-center space-x-1.5 text-indigo-700">
               <TrendingUp className="w-3.5 h-3.5" />
               <span className="font-bold uppercase tracking-wider text-[11px]">AI Career & Course Decision Engine</span>
             </div>
-            <span className="w-1 h-1 rounded-full bg-slate-600 hidden sm:inline" />
-            <span className="text-slate-300 font-medium text-[11px]">ভবিষ্যতমুখী ক্যারিয়ার গাইড</span>
+            <span className="w-1 h-1 rounded-full bg-slate-300 hidden sm:inline" />
+            <span className="text-slate-600 font-medium text-[11px]">ভবিষ্যতমুখী ক্যারিয়ার গাইড</span>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-100 mb-4 leading-tight">
-            কোন কোর্সটি <span className="text-amber-400">আপনার ক্যারিয়ারের জন্য সেরা?</span>
+          <h2 className="text-2xl sm:text-4xl lg:text-4xl font-extrabold tracking-tight text-slate-950 mb-3 leading-tight">
+            কোন কোর্সটি <span className="text-indigo-600">আপনার ক্যারিয়ারের জন্য সেরা?</span>
           </h2>
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            গুগল ও এআই সার্চ মডেলগুলোর মতো আপনিও সরাসরি যাচাই করুন কোন কোর্সের সিলেবাসে কী কী সফটওয়্যার টুলস শেখানো হয়, 
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            সরাসরি যাচাই করুন কোন কোর্সের সিলেবাসে কী কী সফটওয়্যার টুলস শেখানো হয়, 
             মার্কেটে চাকরির চাহিদা ও আনুমানিক সেলারি রেঞ্জ কেমন।
           </p>
         </div>
 
         {/* Category Pill Filters */}
-        <div className="flex items-center justify-center flex-wrap gap-2 mb-10">
+        <div className="flex items-center justify-center flex-wrap gap-2 mb-8">
           {categories.map((cat, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400/40'
-                  : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-700'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
               }`}
             >
               {cat === 'All' ? 'সকল ক্যারিয়ার ট্র্যাক' : cat}
@@ -108,47 +104,47 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
         </div>
 
         {/* 1-on-1 Direct Course Comparison Matrix */}
-        <div className="bg-slate-800/80 border border-slate-700/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md shadow-2xl mb-12">
+        <div className="bg-slate-50/80 border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs mb-8">
           
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-700">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
             <div>
-              <h3 className="text-lg font-black text-white flex items-center space-x-2">
-                <Sparkles className="w-5 h-5 text-amber-400" />
+              <h3 className="text-base sm:text-lg font-black text-slate-950 flex items-center space-x-2">
+                <Sparkles className="w-4 h-4 text-indigo-600" />
                 <span>পাশাপাশি দুটি কোর্স তুলনা করুন (Side-by-Side Comparison)</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 সফটওয়্যার, প্রজেক্ট, ক্যারিয়ার স্কোপ ও আয়ের সম্ভাবনা সরাসরি দেখুন
               </p>
             </div>
 
             {/* Selectors */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center space-x-1.5 bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl">
-                <span className="text-xs font-bold text-amber-400">কোর্স ১:</span>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="flex items-center space-x-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                <span className="text-xs font-bold text-indigo-700">কোর্স ১:</span>
                 <select
                   value={courseAId}
                   onChange={e => setCourseAId(e.target.value)}
-                  className="bg-transparent text-xs text-white font-semibold outline-none cursor-pointer max-w-[180px] truncate"
+                  className="bg-transparent text-xs text-slate-800 font-semibold outline-none cursor-pointer max-w-[170px] truncate"
                 >
                   {activeCourses.map(c => (
-                    <option key={c.id} value={c.id} className="bg-slate-900 text-white">
+                    <option key={c.id} value={c.id} className="bg-white text-slate-900">
                       {c.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <span className="text-xs font-black text-indigo-400">VS</span>
+              <span className="text-xs font-black text-slate-400">VS</span>
 
-              <div className="flex items-center space-x-1.5 bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl">
-                <span className="text-xs font-bold text-emerald-400">কোর্স ২:</span>
+              <div className="flex items-center space-x-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                <span className="text-xs font-bold text-amber-700">কোর্স ২:</span>
                 <select
                   value={courseBId}
                   onChange={e => setCourseBId(e.target.value)}
-                  className="bg-transparent text-xs text-white font-semibold outline-none cursor-pointer max-w-[180px] truncate"
+                  className="bg-transparent text-xs text-slate-800 font-semibold outline-none cursor-pointer max-w-[170px] truncate"
                 >
                   {activeCourses.map(c => (
-                    <option key={c.id} value={c.id} className="bg-slate-900 text-white">
+                    <option key={c.id} value={c.id} className="bg-white text-slate-900">
                       {c.name}
                     </option>
                   ))}
@@ -162,54 +158,54 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
               
               {/* Course A Card */}
-              <div className="bg-slate-900/90 rounded-2xl p-5 border border-amber-500/30 flex flex-col justify-between space-y-4">
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 uppercase tracking-wider border border-indigo-200">
                       {courseA.category}
                     </span>
-                    <span className="text-xs font-extrabold text-white">
-                      ৳{courseA.offerFee || courseA.regularFee}
+                    <span className="text-xs font-extrabold text-indigo-700 font-mono">
+                      ৳{(courseA.offerFee || courseA.regularFee || 0).toLocaleString()}
                     </span>
                   </div>
 
-                  <h4 className="text-base sm:text-lg font-black text-white leading-snug mb-1">
+                  <h4 className="text-base font-black text-slate-950 leading-snug mb-1">
                     {courseA.name}
                   </h4>
-                  <p className="text-xs text-slate-400 line-clamp-2 mb-4">
+                  <p className="text-xs text-slate-600 line-clamp-2 mb-4">
                     {courseA.description}
                   </p>
 
-                  <div className="space-y-3 text-xs border-t border-slate-800 pt-3">
+                  <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">মেয়াদ ও মোট ক্লাস:</span>
-                      <span className="font-bold text-white text-right">{courseA.duration} ({courseA.totalClasses || 24} Classes)</span>
+                      <span className="text-slate-500">মেয়াদ ও মোট ক্লাস:</span>
+                      <span className="font-bold text-slate-900 text-right">{courseA.duration} ({courseA.totalClasses || 24} Classes)</span>
                     </div>
 
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">শেখানো সফটওয়্যার / টুলস:</span>
-                      <span className="font-bold text-amber-300 text-right max-w-[200px] truncate">
+                      <span className="text-slate-500">শেখানো সফটওয়্যার / টুলস:</span>
+                      <span className="font-bold text-indigo-600 text-right max-w-[200px] truncate">
                         {(courseA as any).toolsCovered?.join(', ') || courseA.curriculumHighlights?.slice(0, 3).join(', ') || 'Practical Lab Tools'}
                       </span>
                     </div>
 
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">যেসব পদে চাকরি / ক্যারিয়ার:</span>
-                      <span className="font-bold text-emerald-400 text-right max-w-[200px] truncate">
+                      <span className="text-slate-500">যেসব পদে চাকরি / ক্যারিয়ার:</span>
+                      <span className="font-bold text-emerald-700 text-right max-w-[200px] truncate">
                         {(courseA as any).careerRoles?.join(', ') || 'Corporate / Freelance Role'}
                       </span>
                     </div>
 
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">মার্কেট স্যালারি রেঞ্জ:</span>
-                      <span className="font-bold text-white text-right">
+                      <span className="text-slate-500">মার্কেট স্যালারি রেঞ্জ:</span>
+                      <span className="font-bold text-slate-900 text-right font-mono">
                         {(courseA as any).estimatedSalaryRange || '৳২৫,০০০ - ৳৬৫,০০০ / মাস'}
                       </span>
                     </div>
 
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">সনদপত্রের মান:</span>
-                      <span className="font-bold text-indigo-300 text-right">
+                      <span className="text-slate-500">সনদপত্রের মান:</span>
+                      <span className="font-bold text-slate-800 text-right">
                         {(courseA as any).certificationType || 'Govt Verifiable QR Certificate'}
                       </span>
                     </div>
@@ -221,7 +217,7 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                     <button
                       type="button"
                       onClick={() => onExploreCourseDetails(courseA)}
-                      className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition"
+                      className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition cursor-pointer"
                     >
                       সিলেবাস দেখুন
                     </button>
@@ -230,63 +226,63 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                     <button
                       type="button"
                       onClick={() => onSelectCourseForAdmission(courseA)}
-                      className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow-md shadow-amber-500/20"
+                      className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-xs cursor-pointer"
                     >
-                      সিট বুকিং করুন
+                      ভর্তি আবেদন
                     </button>
                   )}
                 </div>
               </div>
 
               {/* Course B Card */}
-              <div className="bg-slate-900/90 rounded-2xl p-5 border border-emerald-500/30 flex flex-col justify-between space-y-4">
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 uppercase tracking-wider border border-amber-200">
                       {courseB.category}
                     </span>
-                    <span className="text-xs font-extrabold text-white">
-                      ৳{courseB.offerFee || courseB.regularFee}
+                    <span className="text-xs font-extrabold text-indigo-700 font-mono">
+                      ৳{(courseB.offerFee || courseB.regularFee || 0).toLocaleString()}
                     </span>
                   </div>
 
-                  <h4 className="text-base sm:text-lg font-black text-white leading-snug mb-1">
+                  <h4 className="text-base font-black text-slate-950 leading-snug mb-1">
                     {courseB.name}
                   </h4>
-                  <p className="text-xs text-slate-400 line-clamp-2 mb-4">
+                  <p className="text-xs text-slate-600 line-clamp-2 mb-4">
                     {courseB.description}
                   </p>
 
-                  <div className="space-y-3 text-xs border-t border-slate-800 pt-3">
+                  <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">মেয়াদ ও মোট ক্লাস:</span>
-                      <span className="font-bold text-white text-right">{courseB.duration} ({courseB.totalClasses || 24} Classes)</span>
+                      <span className="text-slate-500">মেয়াদ ও মোট ক্লাস:</span>
+                      <span className="font-bold text-slate-900 text-right">{courseB.duration} ({courseB.totalClasses || 24} Classes)</span>
                     </div>
 
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">শেখানো সফটওয়্যার / টুলস:</span>
-                      <span className="font-bold text-emerald-300 text-right max-w-[200px] truncate">
+                      <span className="text-slate-500">শেখানো সফটওয়্যার / টুলস:</span>
+                      <span className="font-bold text-indigo-600 text-right max-w-[200px] truncate">
                         {(courseB as any).toolsCovered?.join(', ') || courseB.curriculumHighlights?.slice(0, 3).join(', ') || 'Practical Lab Tools'}
                       </span>
                     </div>
 
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">যেসব পদে চাকরি / ক্যারিয়ার:</span>
-                      <span className="font-bold text-amber-400 text-right max-w-[200px] truncate">
+                      <span className="text-slate-500">যেসব পদে চাকরি / ক্যারিয়ার:</span>
+                      <span className="font-bold text-emerald-700 text-right max-w-[200px] truncate">
                         {(courseB as any).careerRoles?.join(', ') || 'Corporate / Freelance Role'}
                       </span>
                     </div>
 
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">মার্কেট স্যালারি রেঞ্জ:</span>
-                      <span className="font-bold text-white text-right">
+                      <span className="text-slate-500">মার্কেট স্যালারি রেঞ্জ:</span>
+                      <span className="font-bold text-slate-900 text-right font-mono">
                         {(courseB as any).estimatedSalaryRange || '৳২৫,০০০ - ৳৬৫,০০০ / মাস'}
                       </span>
                     </div>
 
                     <div className="flex items-start justify-between">
-                      <span className="text-slate-400">সনদপত্রের মান:</span>
-                      <span className="font-bold text-indigo-300 text-right">
+                      <span className="text-slate-500">সনদপত্রের মান:</span>
+                      <span className="font-bold text-slate-800 text-right">
                         {(courseB as any).certificationType || 'Govt Verifiable QR Certificate'}
                       </span>
                     </div>
@@ -298,7 +294,7 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                     <button
                       type="button"
                       onClick={() => onExploreCourseDetails(courseB)}
-                      className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition"
+                      className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition cursor-pointer"
                     >
                       সিলেবাস দেখুন
                     </button>
@@ -307,9 +303,9 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                     <button
                       type="button"
                       onClick={() => onSelectCourseForAdmission(courseB)}
-                      className="flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-md shadow-emerald-500/20"
+                      className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-xs cursor-pointer"
                     >
-                      সিট বুকিং করুন
+                      ভর্তি আবেদন
                     </button>
                   )}
                 </div>

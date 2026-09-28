@@ -63,31 +63,28 @@ export const AccreditationTrustStrip: React.FC<AccreditationTrustStripProps> = (
   ];
 
   return (
-    <div className="bg-slate-900 border-y border-slate-800 py-6 px-4 sm:px-6 lg:px-10 relative overflow-hidden">
-      {/* Subtle Glow */}
-      <div className="absolute top-0 left-1/3 w-64 h-24 bg-indigo-600/10 rounded-full blur-2xl pointer-events-none" />
-      
+    <div className="bg-white border-b border-slate-200 py-6 px-4 sm:px-6 lg:px-10 relative overflow-hidden">
       <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
           {trustItems.map((item) => (
             <div
               key={item.id}
-              className="bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-indigo-500/50 p-3 sm:p-3.5 rounded-2xl transition-all group flex flex-col justify-between space-y-2 shadow-xs"
+              className="bg-slate-50/80 hover:bg-white border border-slate-200/90 hover:border-indigo-300 p-3 sm:p-3.5 rounded-2xl transition-all group flex flex-col justify-between space-y-2 shadow-2xs hover:shadow-xs"
             >
               <div className="flex items-center justify-between gap-1">
-                <div className="p-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 group-hover:scale-105 transition-transform">
+                <div className="p-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs group-hover:scale-105 transition-transform">
                   {item.icon}
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-900 text-slate-300 border border-slate-700">
+                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">
                   {item.badge}
                 </span>
               </div>
 
               <div>
-                <h4 className="font-black text-xs sm:text-[13px] text-white group-hover:text-amber-300 transition-colors leading-snug">
+                <h4 className="font-bold text-xs sm:text-[13px] text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">
                   {item.title}
                 </h4>
-                <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
                   {item.subtitle}
                 </p>
               </div>

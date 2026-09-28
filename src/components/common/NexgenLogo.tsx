@@ -446,7 +446,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
           <div className="flex items-center space-x-2">
             <span
               style={{ fontSize: `${effectiveTitleSize}px` }}
-              className={`font-black tracking-tight leading-none uppercase ${
+              className={`font-black tracking-tight leading-none uppercase whitespace-nowrap truncate ${
                 titleClassName || (isDark ? 'text-white' : 'text-slate-900')
               }`}
             >

@@ -82,12 +82,12 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
 
   return (
     <div
-      className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 group"
+      className="relative w-full rounded-3xl overflow-hidden shadow-lg border border-slate-200/90 bg-slate-900 group"
       onMouseEnter={() => setIsPlaying(false)}
       onMouseLeave={() => setIsPlaying(true)}
     >
       {/* 16:9 Aspect Ratio Container */}
-      <div className="relative min-h-[460px] sm:min-h-[520px] md:min-h-[560px] flex items-center">
+      <div className="relative min-h-[440px] sm:min-h-[500px] md:min-h-[540px] flex items-center">
         {/* Background Image Carousel with Ken-Burns and Cross-Fade */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -104,15 +104,13 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               className="w-full h-full object-cover object-center"
             />
             {/* Multi-layer Gradient Overlays for Guaranteed High-Contrast Readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/95 md:via-slate-950/85 to-slate-950/50" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40" />
-            {/* Subtle Vignette Edge Mask */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(2,6,23,0.6)_100%)] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 md:via-slate-950/80 to-slate-950/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/30" />
           </motion.div>
         </AnimatePresence>
 
         {/* Slide Content Layer */}
-        <div className="relative z-10 w-full max-w-4xl p-6 sm:p-10 md:p-14 space-y-4 sm:space-y-6">
+        <div className="relative z-10 w-full max-w-4xl p-5 sm:p-10 md:p-14 space-y-4 sm:space-y-5">
           <AnimatePresence mode="wait">
             <motion.div
               key={`text-${currentSlide.id}`}
@@ -120,17 +118,17 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4 }}
-              className="space-y-4 sm:space-y-5"
+              className="space-y-3.5 sm:space-y-4"
             >
               {/* Brand & Category Badges with High Contrast */}
               <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center space-x-2 px-3 py-1 bg-slate-900/95 border border-slate-700/80 rounded-full text-white text-xs font-black shadow-md backdrop-blur-md">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span className="tracking-wide">{instituteName || 'Nexgen Computer Academy'}</span>
+                <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-white/15 border border-white/25 rounded-full text-white text-xs font-bold shadow-xs backdrop-blur-md">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span className="tracking-wide whitespace-nowrap">{instituteName || 'Nexgen Computer Academy'}</span>
                 </div>
 
                 {currentSlide.badgeText && (
-                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-950/90 border border-indigo-500/40 rounded-full text-indigo-200 text-xs font-bold shadow-md backdrop-blur-md">
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-500/25 border border-indigo-400/40 rounded-full text-indigo-100 text-xs font-semibold shadow-xs backdrop-blur-md">
                     <span className="truncate">{currentSlide.badgeText}</span>
                   </div>
                 )}
@@ -147,10 +145,10 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               </p>
 
               {/* Call-to-action Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
+              <div className="flex flex-wrap items-center gap-2.5 pt-2">
                 <a
                   href={currentSlide.ctaLink || '#courses'}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-black text-xs sm:text-sm rounded-xl shadow-xl shadow-indigo-600/30 flex items-center space-x-2 transition-all hover:scale-105 active:scale-95"
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all hover:scale-105 active:scale-95 flex items-center space-x-2"
                 >
                   <BookOpen className="w-4 h-4" />
                   <span>{currentSlide.ctaText || getTranslation(language, 'enrollNow')}</span>
@@ -160,10 +158,10 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
                   <button
                     type="button"
                     onClick={onOpenAdmission}
-                    className="px-5 py-3 bg-slate-900/80 hover:bg-slate-800/90 text-slate-200 hover:text-white font-bold text-xs sm:text-sm rounded-xl border border-slate-700 backdrop-blur-md transition-all flex items-center space-x-2"
+                    className="px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm rounded-xl border border-white/30 backdrop-blur-md transition-all flex items-center space-x-1.5"
                   >
                     <span>{currentSlide.secondaryCtaText}</span>
-                    <ArrowRight className="w-4 h-4 text-indigo-400" />
+                    <ArrowRight className="w-4 h-4 text-indigo-300" />
                   </button>
                 )}
               </div>

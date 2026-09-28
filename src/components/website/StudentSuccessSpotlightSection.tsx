@@ -85,37 +85,33 @@ export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSec
   });
 
   return (
-    <section id="success-stories" className="py-16 sm:py-20 bg-slate-950 text-white relative overflow-hidden border-t border-slate-800">
-      {/* Background Lighting */}
-      <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <section id="success-stories" className="py-16 sm:py-20 bg-white text-slate-900 relative overflow-hidden border-t border-slate-200">
       <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10 space-y-10">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full text-xs font-bold border border-amber-500/30">
-              <Award className="w-3.5 h-3.5 text-amber-400" />
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-xs font-bold border border-amber-200">
+              <Award className="w-3.5 h-3.5 text-amber-600" />
               <span>প্রমাণিত সফলতার প্রমাণ ও স্টুডেন্ট ইন্টারভিউ</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
               আমাদের সফল গ্র্যাজুয়েটদের রিয়েল ইনকাম ও ক্যারিয়ার স্টোরি
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
               দেখুন কীভাবে নেক্সজেনের শূন্য থেকে শুরু করা শিক্ষার্থীরা আজ দেশ-বিদেশের মার্কেটপ্লেস ও টপ কোম্পানিতে সফল ক্যারিয়ার গড়েছেন।
             </p>
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center p-1 bg-slate-900 rounded-2xl border border-slate-800">
+          <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200">
             <button
               type="button"
               onClick={() => setActiveFilter('All')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeFilter === 'All'
-                  ? 'bg-amber-400 text-slate-950 shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-950'
               }`}
             >
               সকল গল্প ({defaultStudentStories.length})
@@ -125,8 +121,8 @@ export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSec
               onClick={() => setActiveFilter('Freelance')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeFilter === 'Freelance'
-                  ? 'bg-emerald-500 text-slate-950 shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-950'
               }`}
             >
               গ্লোবাল ফ্রিল্যান্সার
@@ -137,7 +133,7 @@ export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSec
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeFilter === 'Job'
                   ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-950'
               }`}
             >
               কর্পোরেট আইটি জব
@@ -155,67 +151,67 @@ export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSec
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.1 }}
               onClick={() => setSelectedStory(story)}
-              className="bg-slate-900/90 rounded-3xl border border-slate-800 hover:border-amber-400/60 p-5 flex flex-col justify-between space-y-4 shadow-xl hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1 relative"
+              className="bg-slate-50/80 hover:bg-white rounded-3xl border border-slate-200/90 hover:border-indigo-300 p-5 flex flex-col justify-between space-y-4 shadow-2xs hover:shadow-lg transition-all cursor-pointer group hover:-translate-y-1 relative"
             >
               {/* Thumbnail / Video Play Trigger */}
-              <div className="relative h-44 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
+              <div className="relative h-44 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
                 <img
                   src={story.avatarUrl}
                   alt={story.studentName}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-95"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
 
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Play className="w-6 h-6 fill-slate-950 ml-0.5" />
+                  <div className="w-12 h-12 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Play className="w-6 h-6 fill-white ml-0.5" />
                   </div>
                 </div>
 
                 {/* Top Badge */}
-                <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-slate-950/80 backdrop-blur-xs text-amber-300 border border-amber-400/30 text-[10px] font-black uppercase">
+                <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-slate-800 border border-slate-200 text-[10px] font-black uppercase shadow-xs">
                   {story.achievementBadge || 'Verified Story'}
                 </span>
 
                 {/* Income Badge */}
-                <div className="absolute bottom-2.5 left-2.5 right-2.5 px-2.5 py-1 rounded-xl bg-slate-900/90 backdrop-blur-xs border border-slate-700/80 flex items-center justify-between text-xs">
-                  <span className="text-[10px] text-slate-300 font-medium">মাসিক আয়:</span>
-                  <span className="font-black text-emerald-400 font-mono">{story.monthlyIncomeOrPackage}</span>
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-xs border border-slate-200 flex items-center justify-between text-xs shadow-xs">
+                  <span className="text-[10px] text-slate-600 font-medium">মাসিক আয়:</span>
+                  <span className="font-black text-emerald-600 font-mono">{story.monthlyIncomeOrPackage}</span>
                 </div>
               </div>
 
               {/* Story Content */}
               <div className="space-y-2 flex-1">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-black text-sm sm:text-base text-white group-hover:text-amber-300 transition-colors">
+                  <h4 className="font-black text-sm sm:text-base text-slate-950 group-hover:text-indigo-600 transition-colors">
                     {story.studentName}
                   </h4>
-                  <span className="text-[10px] text-slate-500 font-mono">{story.batchNo}</span>
+                  <span className="text-[10px] text-slate-400 font-mono">{story.batchNo}</span>
                 </div>
 
-                <p className="text-xs font-bold text-indigo-400 line-clamp-1">
+                <p className="text-xs font-bold text-indigo-600 line-clamp-1">
                   {story.courseName}
                 </p>
 
-                <p className="text-[11px] text-slate-300 font-medium line-clamp-1 flex items-center space-x-1">
-                  <Briefcase className="w-3 h-3 text-amber-400 shrink-0 inline mr-1" />
+                <p className="text-[11px] text-slate-600 font-medium line-clamp-1 flex items-center space-x-1">
+                  <Briefcase className="w-3 h-3 text-amber-500 shrink-0 inline mr-1" />
                   <span>{story.companyOrPlatform}</span>
                 </p>
 
-                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed pt-1 italic">
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed pt-1 italic">
                   "{story.quote}"
                 </p>
               </div>
 
               {/* Card Footer CTA */}
-              <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                <span className="text-amber-400 font-bold group-hover:underline flex items-center space-x-1">
+              <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+                <span className="text-indigo-600 font-bold group-hover:underline flex items-center space-x-1">
                   <span>ভিডিও ইন্টারভিউ দেখুন</span>
-                  <Play className="w-3 h-3 fill-amber-400" />
+                  <Play className="w-3 h-3 fill-indigo-600" />
                 </span>
-                <span className="text-[11px] text-slate-500">Nexgen Alumni</span>
+                <span className="text-[11px] text-slate-400 font-medium">Nexgen Alumni</span>
               </div>
             </motion.div>
           ))}

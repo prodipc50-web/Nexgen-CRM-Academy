@@ -391,17 +391,17 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* 1. TOP ANNOUNCEMENT BAR & MULTI-HOTLINES */}
-      <div className="bg-slate-950 text-slate-300 text-xs border-b border-slate-800 w-full overflow-hidden">
+      <div className="bg-slate-50 text-slate-700 text-xs border-b border-slate-200 w-full overflow-hidden">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-3 sm:px-6 lg:px-10 py-1.5 sm:py-2 flex flex-col md:flex-row items-center justify-between gap-2">
           {/* Ticker / Notice */}
           <div className="w-full md:w-auto flex-1 min-w-0 flex items-center space-x-2 overflow-hidden text-[11px] sm:text-xs">
-            <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 text-[10px] sm:text-[11px]">
+            <span className="bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 text-[10px] sm:text-[11px] shadow-2xs">
               Notice
             </span>
             <div className="flex-1 min-w-0 overflow-hidden">
               <p
                 onClick={() => setIsTopNoticeModalOpen(true)}
-                className="truncate text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="truncate text-slate-700 hover:text-indigo-600 font-medium transition-colors cursor-pointer"
                 title={websiteCmsConfig.topNoticeTicker || 'Admission open for upcoming weekend & evening batches!'}
               >
                 {websiteCmsConfig.topNoticeTicker || 'Admission open for upcoming weekend & evening batches!'}
@@ -410,7 +410,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <button
               type="button"
               onClick={() => setIsTopNoticeModalOpen(true)}
-              className="p-1 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded transition-colors shrink-0 cursor-pointer"
+              className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-slate-200/60 rounded transition-colors shrink-0 cursor-pointer"
               title="এডিট করুন: টপ নোটিশ ও প্রমো ব্যানার (Edit Notice Ticker & Promo Banner)"
             >
               <Edit className="w-3 h-3" />
@@ -421,20 +421,20 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-1.5 sm:gap-2.5 shrink-0 text-xs overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none">
             <a
               href={`tel:${multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}`}
-              className="flex items-center space-x-1 hover:text-amber-400 font-bold transition-colors whitespace-nowrap shrink-0 text-[11px] sm:text-xs"
+              className="flex items-center space-x-1 text-slate-700 hover:text-indigo-600 font-bold transition-colors whitespace-nowrap shrink-0 text-[11px] sm:text-xs"
             >
-              <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <Phone className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span className="hidden sm:inline">Hotline: {multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}</span>
               <span className="sm:hidden">{multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}</span>
             </a>
 
-            <span className="text-slate-700 hidden sm:inline">|</span>
+            <span className="text-slate-300 hidden sm:inline">|</span>
 
             {/* Language Switcher (EN / BN) */}
             <button
               type="button"
               onClick={() => setLanguage(l => (l === 'bn' ? 'en' : 'bn'))}
-              className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-lg border border-slate-700 transition-colors flex items-center space-x-1 whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs"
+              className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-lg border border-slate-200 shadow-2xs transition-colors flex items-center space-x-1 whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs"
               title="Toggle Language / ভাষা পরিবর্তন"
             >
               <span>{language === 'bn' ? 'English' : 'বাংলা'}</span>
@@ -445,10 +445,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenStudentPortal}
-                className="flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 hover:text-white border border-indigo-700/50 rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs"
+                className="flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs shadow-2xs"
                 title="Student ID, Ledger & Certificate Portal"
               >
-                <GraduationCap className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <GraduationCap className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                 <span>{language === 'bn' ? 'স্টুডেন্ট পোর্টাল' : 'Student'}</span>
               </button>
             )}
@@ -471,10 +471,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenCmsAdmin}
-                className="flex items-center space-x-1 px-2 py-0.5 bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 rounded-lg transition-colors font-bold text-[11px] shrink-0"
+                className="flex items-center space-x-1 px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 rounded-lg transition-colors font-bold text-[11px] shrink-0"
                 title="Edit website texts, courses & gallery in CMS"
               >
-                <Sliders className="w-3 h-3" />
+                <Sliders className="w-3 h-3 text-amber-600" />
                 <span className="hidden sm:inline">CMS</span>
               </button>
             )}
@@ -487,23 +487,23 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 h-20 flex items-center justify-between gap-3 sm:gap-4">
           {/* Logo & Institute Identity */}
           <div
-            className="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer min-w-0 flex-1 sm:flex-initial group"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer min-w-0 flex-1 sm:flex-initial group"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <div className="p-1.5 bg-slate-50 rounded-2xl border border-slate-200/90 shadow-xs group-hover:border-indigo-300 transition-colors shrink-0">
-              <NexgenLogo variant="crest" size={42} />
+            <div className="p-1 sm:p-1.5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs group-hover:border-indigo-300 transition-colors shrink-0">
+              <NexgenLogo variant="crest" size={36} />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center space-x-2">
-                <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-950 tracking-tight leading-none truncate">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center space-x-1.5">
+                <h1 className="text-[13px] xs:text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-950 tracking-tight leading-tight whitespace-nowrap truncate">
                   {academySettings.instituteName || 'Nexgen Computer Academy'}
                 </h1>
                 <span className="hidden md:inline-flex text-[10px] font-black px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-wider shrink-0">
                   {websiteCmsConfig.headerEstText || `EST. ${websiteCmsConfig?.aboutUs?.establishedYear || "2018"}`}
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-600 font-semibold truncate mt-1">
-                {websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training & Career Incubator`}
+              <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate mt-0.5">
+                {websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training`}
               </p>
             </div>
           </div>
@@ -555,14 +555,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </nav>
 
           {/* Right Action Controls: Campus Tour + Online Admission CTA + Mobile Hamburger */}
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
             <button
               type="button"
               onClick={() => {
                 setSelectedCourseForInstallment(null);
                 setIsInstallmentModalOpen(true);
               }}
-              className="hidden md:flex items-center space-x-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-xl border border-amber-200 transition-colors whitespace-nowrap cursor-pointer"
+              className="hidden md:flex items-center space-x-1 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-lg border border-amber-200 transition-colors whitespace-nowrap cursor-pointer"
               title="Calculate 0% Easy Installments"
             >
               <CreditCard className="w-3.5 h-3.5 text-amber-600" />
@@ -572,7 +572,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <button
               type="button"
               onClick={() => setIsCampusTourOpen(true)}
-              className="hidden lg:flex items-center space-x-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl border border-emerald-200 transition-colors whitespace-nowrap cursor-pointer"
+              className="hidden lg:flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-lg border border-emerald-200 transition-colors whitespace-nowrap cursor-pointer"
               title="Book Free 1-on-1 Campus Tour & Lab Visit"
             >
               <Building2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -585,10 +585,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 setSelectedCourseForAdmission(null);
                 setIsAdmissionOpen(true);
               }}
-              className="px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center space-x-1.5 active:scale-95 whitespace-nowrap shrink-0"
+              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-lg shadow-2xs transition-all flex items-center space-x-1 active:scale-95 whitespace-nowrap shrink-0"
               title="Online Admission Application Portal"
             >
-              <Zap className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-amber-300 shrink-0" />
+              <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
               <span className="hidden sm:inline">Online Admission</span>
               <span className="sm:hidden">Admission</span>
               <span className="hidden sm:inline"> (ভর্তি)</span>
@@ -600,10 +600,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open Navigation Menu"
               aria-expanded={isMobileMenuOpen}
-              className="xl:hidden w-11 h-11 rounded-xl text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-all flex items-center justify-center active:scale-95 shrink-0"
+              className="xl:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-all flex items-center justify-center active:scale-95 shrink-0"
               title="Open Navigation Menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
@@ -631,11 +631,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 3. HERO BANNER SECTION WITH DYNAMIC MULTI-SLIDE CAROUSEL */}
       {sectionVisibility.heroBanner !== false && (
-        <section className="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white py-8 sm:py-12 lg:py-14 overflow-hidden">
-        {/* Background Gradients */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 -left-24 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-
+        <section className="relative bg-white text-slate-900 py-6 sm:py-10 lg:py-12 overflow-hidden border-b border-slate-200">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10 space-y-8">
           {/* Dynamic 16:9 Multi-Slide Carousel Banner */}
           <HeroBannerSlider
@@ -653,19 +649,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           {/* Quick Search, Stats & Featured Batches Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch pt-2">
             {/* Left Box: Quick Course Finder & Live Key Stats (7 cols) */}
-            <div className="lg:col-span-7 bg-slate-900/90 rounded-3xl p-5 sm:p-7 border border-slate-800 shadow-xl flex flex-col justify-between space-y-5">
+            <div className="lg:col-span-7 bg-slate-50/80 rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-2xs flex flex-col justify-between space-y-5">
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <h3 className="text-base sm:text-lg font-black text-white">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <h3 className="text-base sm:text-lg font-black text-slate-950">
                     {language === 'bn' ? 'কোর্স খুঁজুন ও ক্যারিয়ার গাইডেন্স' : 'Search Courses & Career Guidance'}
                   </h3>
                 </div>
 
                 {/* Hero Search & Category Quick Filter Bar */}
-                <div className="bg-slate-800/90 border border-slate-700 p-2 sm:p-2.5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-stretch gap-2">
-                  <div className="flex items-center space-x-2 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 shrink-0 min-h-[44px]">
-                    <BookOpen className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div className="bg-white border border-slate-200 p-2 sm:p-2.5 rounded-2xl shadow-xs flex flex-col sm:flex-row items-stretch gap-2">
+                  <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 shrink-0 min-h-[44px]">
+                    <BookOpen className="w-4 h-4 text-indigo-600 shrink-0" />
                     <select
                       value={selectedCategory}
                       onChange={(e) => {
@@ -673,29 +669,29 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                         const el = document.getElementById('courses');
                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                       }}
-                      className="bg-transparent text-xs sm:text-sm font-bold text-slate-200 focus:outline-none cursor-pointer w-full sm:w-auto"
+                      className="bg-transparent text-xs sm:text-sm font-bold text-slate-800 focus:outline-none cursor-pointer w-full sm:w-auto"
                     >
-                      <option value="All" className="bg-slate-900 text-white">All Categories (সব বিভাগ)</option>
+                      <option value="All" className="bg-white text-slate-900">All Categories (সব বিভাগ)</option>
                       {categories.map((cat) => (
-                        <option key={cat} value={cat} className="bg-slate-900 text-white">{cat}</option>
+                        <option key={cat} value={cat} className="bg-white text-slate-900">{cat}</option>
                       ))}
                     </select>
                   </div>
 
-                  <div className="flex-1 flex items-center space-x-2 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 min-h-[44px]">
+                  <div className="flex-1 flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 min-h-[44px]">
                     <Search className="w-4 h-4 text-slate-400 shrink-0" />
                     <input
                       type="text"
                       value={courseSearchQuery}
                       onChange={(e) => setCourseSearchQuery(e.target.value)}
                       placeholder="Search courses (e.g. Video, Web, AI, Graphic...)"
-                      className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-slate-400 focus:outline-none font-medium"
+                      className="w-full bg-transparent text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-medium"
                     />
                     {courseSearchQuery && (
                       <button
                         type="button"
                         onClick={() => setCourseSearchQuery('')}
-                        className="text-slate-400 hover:text-white text-xs p-1 cursor-pointer"
+                        className="text-slate-400 hover:text-slate-700 text-xs p-1 cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -704,7 +700,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
                   <a
                     href="#courses"
-                    className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-1.5 shrink-0 min-h-[44px] active:scale-98"
+                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 shrink-0 min-h-[44px] active:scale-98"
                   >
                     <Search className="w-4 h-4" />
                     <span>Search</span>
@@ -713,7 +709,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
                 {/* Mobile Quick Tags */}
                 <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
-                  <span className="text-slate-400 font-medium shrink-0">জনপ্রিয়:</span>
+                  <span className="text-slate-500 font-medium shrink-0">জনপ্রিয়:</span>
                   {(websiteCmsConfig.popularSearchTags && websiteCmsConfig.popularSearchTags.length > 0
                     ? websiteCmsConfig.popularSearchTags
                     : ['AutoCAD 2D/3D', 'Video Editing', 'Digital Marketing', 'Graphic Design', 'Web Development', 'French Language', 'AI Automation', 'Advanced Excel', 'Freelancing']
@@ -726,7 +722,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                         const el = document.getElementById('courses');
                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600 text-slate-300 hover:text-white border border-slate-700/60 font-medium whitespace-nowrap transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 font-medium whitespace-nowrap transition-colors cursor-pointer"
                     >
                       {tag}
                     </button>
@@ -735,56 +731,56 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               </div>
 
               {/* Stats Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3 border-t border-slate-800">
-                <div className="p-2.5 sm:p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
-                  <span className="block text-xl sm:text-2xl font-black text-amber-400">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3 border-t border-slate-200">
+                <div className="p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200 text-center lg:text-left shadow-2xs">
+                  <span className="block text-xl sm:text-2xl font-black text-indigo-600">
                     {websiteCmsConfig.heroStats?.totalTrained || '8,500+'}
                   </span>
-                  <span className="text-[11px] sm:text-xs text-slate-300 font-medium">Students Trained</span>
+                  <span className="text-[11px] sm:text-xs text-slate-500 font-medium">Students Trained</span>
                 </div>
 
-                <div className="p-2.5 sm:p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
-                  <span className="block text-xl sm:text-2xl font-black text-emerald-400">
+                <div className="p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200 text-center lg:text-left shadow-2xs">
+                  <span className="block text-xl sm:text-2xl font-black text-emerald-600">
                     {websiteCmsConfig.heroStats?.successRate || '96.4%'}
                   </span>
-                  <span className="text-[11px] sm:text-xs text-slate-300 font-medium">Completion Rate</span>
+                  <span className="text-[11px] sm:text-xs text-slate-500 font-medium">Completion Rate</span>
                 </div>
 
-                <div className="p-2.5 sm:p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
-                  <span className="block text-xl sm:text-2xl font-black text-indigo-400">
+                <div className="p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200 text-center lg:text-left shadow-2xs">
+                  <span className="block text-xl sm:text-2xl font-black text-amber-600">
                     {websiteCmsConfig.heroStats?.expertTrainers || '28+'}
                   </span>
-                  <span className="text-[11px] sm:text-xs text-slate-300 font-medium">Industry Mentors</span>
+                  <span className="text-[11px] sm:text-xs text-slate-500 font-medium">Industry Mentors</span>
                 </div>
 
-                <div className="p-2.5 sm:p-3 bg-slate-800/50 rounded-xl border border-slate-700/60 text-center lg:text-left">
-                  <span className="block text-xl sm:text-2xl font-black text-rose-400">
+                <div className="p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200 text-center lg:text-left shadow-2xs">
+                  <span className="block text-xl sm:text-2xl font-black text-indigo-600">
                     {websiteCmsConfig.heroStats?.jobPlacementRatio || '89.2%'}
                   </span>
-                  <span className="text-[11px] sm:text-xs text-slate-300 font-medium">Job Placements</span>
+                  <span className="text-[11px] sm:text-xs text-slate-500 font-medium">Job Placements</span>
                 </div>
               </div>
             </div>
 
             {/* Right Card / Promo Box (5 cols) */}
             <div className="lg:col-span-5">
-              <div className="bg-gradient-to-b from-slate-800 to-slate-850 p-5 sm:p-7 rounded-3xl border-2 border-indigo-500/30 shadow-2xl space-y-4 sm:space-y-5">
+              <div className="bg-slate-50/80 p-5 sm:p-7 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4 sm:space-y-5">
                 {/* Header Row with Inline Non-overlapping Discount Tag */}
                 <div className="flex items-center justify-between gap-2 pb-0.5">
-                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider">
                     {websiteCmsConfig.upcomingBatchesCard?.title || 'Upcoming Batches'}
                   </span>
-                  <span className="bg-gradient-to-r from-rose-500 to-pink-600 text-white font-black text-[11px] px-3 py-1 rounded-full shadow-sm flex items-center space-x-1 shrink-0">
-                    <Sparkles className="w-3 h-3 text-amber-300 shrink-0" />
+                  <span className="bg-amber-100 text-amber-900 border border-amber-300 font-black text-[11px] px-3 py-1 rounded-full shadow-2xs flex items-center space-x-1 shrink-0">
+                    <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
                     <span>{websiteCmsConfig.upcomingBatchesCard?.badgeText || '40% Offer'}</span>
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-base sm:text-xl font-black text-white leading-snug">
+                  <h3 className="text-base sm:text-xl font-black text-slate-950 leading-snug">
                     {websiteCmsConfig.upcomingBatchesCard?.heading || 'Apply for Direct Admission'}
                   </h3>
-                  <p className="text-xs text-slate-300">
+                  <p className="text-xs text-slate-600">
                     {websiteCmsConfig.upcomingBatchesCard?.description || 'Fast-track your IT career with practical project portfolios and certified diplomas.'}
                   </p>
                 </div>
@@ -795,31 +791,31 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     <div
                       key={c.id}
                       onClick={() => handleOpenEnroll(c)}
-                      className="p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 hover:border-indigo-500/60 rounded-2xl flex items-center justify-between cursor-pointer transition-all group gap-2"
+                      className="p-3 bg-white hover:bg-indigo-50/40 border border-slate-200 hover:border-indigo-300 rounded-2xl flex items-center justify-between cursor-pointer transition-all group gap-2 shadow-2xs"
                     >
                       <div className="space-y-0.5 min-w-0">
-                        <h4 className="font-bold text-xs sm:text-sm text-white group-hover:text-amber-400 transition-colors truncate">
+                        <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
                           {c.name}
                         </h4>
-                        <p className="text-[11px] text-slate-400 font-medium">
+                        <p className="text-[11px] text-slate-500 font-medium">
                           {c.duration} • ৳{(c.offerFee || c.regularFee || 0).toLocaleString()}
                         </p>
                       </div>
-                      <span className="px-3 py-1.5 bg-indigo-600 group-hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shrink-0 transition-colors">
+                      <span className="px-3 py-1.5 bg-indigo-600 group-hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shrink-0 transition-colors shadow-2xs">
                         Enroll
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="pt-2 border-t border-slate-700/80 flex items-center justify-between text-xs text-slate-300">
+                <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
                   <div className="flex items-center space-x-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>{websiteCmsConfig.upcomingBatchesCard?.featureNote || 'Free Lifetime Lab Access'}</span>
                   </div>
                   <a
                     href={websiteCmsConfig.upcomingBatchesCard?.ctaLink || '#seminars'}
-                    className="text-amber-400 font-bold hover:underline shrink-0"
+                    className="text-indigo-600 font-bold hover:underline shrink-0"
                   >
                     {websiteCmsConfig.upcomingBatchesCard?.ctaText || 'Free Seminars →'}
                   </a>
@@ -858,19 +854,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     const el = document.getElementById('courses');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="p-5 rounded-3xl bg-emerald-50/70 border border-emerald-200/80 hover:border-emerald-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                  className="p-5 rounded-3xl bg-slate-50/80 hover:bg-white border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-4"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 shrink-0">
-                        <Building className="w-6 h-6" />
+                      <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center justify-center shadow-2xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <Building className="w-5 h-5" />
                       </div>
-                      <span className="px-2.5 py-0.5 bg-emerald-200/80 text-emerald-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                      <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200/60 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0">
                         {offlineCard?.badge || 'ল্যাব ব্যাচ'}
                       </span>
                     </div>
                     <div>
-                      <h3 className="font-black text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
+                      <h3 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">
                         {offlineCard?.title || 'Offline Course'}
                       </h3>
                       <p className="text-xs text-slate-600 mt-1 leading-relaxed">
@@ -878,7 +874,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-xs font-bold text-emerald-800">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs font-bold text-indigo-700">
                     <span>{offlineCoursesCount} {offlineCard?.footerText || 'Courses Available'}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -893,19 +889,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     const el = document.getElementById('courses');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="p-5 rounded-3xl bg-rose-50/70 border border-rose-200/80 hover:border-rose-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                  className="p-5 rounded-3xl bg-slate-50/80 hover:bg-white border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-4"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-200 shrink-0">
-                        <Video className="w-6 h-6" />
+                      <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center justify-center shadow-2xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <Video className="w-5 h-5" />
                       </div>
-                      <span className="px-2.5 py-0.5 bg-rose-200/80 text-rose-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                      <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200/60 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0">
                         {onlineCard?.badge || 'লাইভ ক্লাস'}
                       </span>
                     </div>
                     <div>
-                      <h3 className="font-black text-slate-900 text-base group-hover:text-rose-700 transition-colors">
+                      <h3 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">
                         {onlineCard?.title || 'Online Live Course'}
                       </h3>
                       <p className="text-xs text-slate-600 mt-1 leading-relaxed">
@@ -913,7 +909,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-rose-200/60 text-xs font-bold text-rose-800">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs font-bold text-indigo-700">
                     <span>{onlineCoursesCount} {onlineCard?.footerText || 'Courses Available'}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -928,19 +924,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     const el = document.getElementById('courses');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="p-5 rounded-3xl bg-purple-50/70 border border-purple-200/80 hover:border-purple-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                  className="p-5 rounded-3xl bg-slate-50/80 hover:bg-white border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-4"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-200 shrink-0">
-                        <PlaySquare className="w-6 h-6" />
+                      <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center justify-center shadow-2xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <PlaySquare className="w-5 h-5" />
                       </div>
-                      <span className="px-2.5 py-0.5 bg-purple-200/80 text-purple-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                      <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200/60 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0">
                         {recordedCard?.badge || 'সেলফ-পেসড'}
                       </span>
                     </div>
                     <div>
-                      <h3 className="font-black text-slate-900 text-base group-hover:text-purple-700 transition-colors">
+                      <h3 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">
                         {recordedCard?.title || 'Pre Recorded Course'}
                       </h3>
                       <p className="text-xs text-slate-600 mt-1 leading-relaxed">
@@ -948,7 +944,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-purple-200/60 text-xs font-bold text-purple-800">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs font-bold text-indigo-700">
                     <span>{preRecordedCoursesCount} {recordedCard?.footerText || 'Courses Available'}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -962,19 +958,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     const el = document.getElementById('contact');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="p-5 rounded-3xl bg-cyan-50/70 border border-cyan-200/80 hover:border-cyan-400 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                  className="p-5 rounded-3xl bg-slate-50/80 hover:bg-white border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-4"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="w-12 h-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center shadow-md shadow-cyan-200 shrink-0">
-                        <Briefcase className="w-6 h-6" />
+                      <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center justify-center shadow-2xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <Briefcase className="w-5 h-5" />
                       </div>
-                      <span className="px-2.5 py-0.5 bg-cyan-200/80 text-cyan-900 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap shrink-0">
+                      <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200/60 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0">
                         {corporateCard?.badge || 'কর্পোরেট'}
                       </span>
                     </div>
                     <div>
-                      <h3 className="font-black text-slate-900 text-base group-hover:text-cyan-700 transition-colors">
+                      <h3 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">
                         {corporateCard?.title || 'Corporate Training'}
                       </h3>
                       <p className="text-xs text-slate-600 mt-1 leading-relaxed">
@@ -982,7 +978,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-cyan-200/60 text-xs font-bold text-cyan-800">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-xs font-bold text-indigo-700">
                     <span>{corporateCard?.footerText || 'Custom Team Upskilling'}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -1270,8 +1266,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
                       {/* Top Badges Row */}
                       <div className="flex items-center justify-between gap-2">
-                        {/* Course ID / Badge in pink/rose badge like reference */}
-                        <span className="px-3 py-1 rounded-lg bg-pink-50 border border-pink-200 text-pink-700 font-mono font-bold text-[11px]">
+                        {/* Course ID / Badge with NexGen brand indigo */}
+                        <span className="px-2.5 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200/80 text-indigo-700 font-mono font-bold text-[11px]">
                           {badge}
                         </span>
 
@@ -1361,64 +1357,53 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                         );
                       })()}
 
-                      {/* Action Buttons: Clear 2-Tier Visual Hierarchy */}
-                      <div className="space-y-2 pt-1">
-                        {/* Secondary Row: Syllabus & Details */}
-                        <div className="grid grid-cols-2 gap-2">
+                      {/* Action Buttons: Clean 2-Tier Compact Visual Hierarchy */}
+                      <div className="space-y-1.5 pt-1">
+                        {/* Primary High-Conversion CTA: 1-Click Enroll */}
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEnroll(c)}
+                          className="w-full min-h-[38px] px-3 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-bold text-xs sm:text-sm rounded-xl shadow-2xs transition-all text-center flex items-center justify-center space-x-1.5 cursor-pointer"
+                        >
+                          <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                          <span>অনলাইন ভর্তি আবেদন (Enroll)</span>
+                        </button>
+
+                        {/* Secondary Compact Utility Row: Syllabus, Installment, Details */}
+                        <div className="grid grid-cols-3 gap-1.5">
                           <button
                             type="button"
                             onClick={() => setSelectedCourseForSyllabus(c)}
-                            className="px-2.5 py-2.5 min-h-[42px] bg-slate-50 hover:bg-indigo-50/80 text-indigo-700 font-bold text-xs rounded-xl transition-colors text-center flex items-center justify-center space-x-1.5 cursor-pointer border border-slate-200/80 hover:border-indigo-200 active:scale-98"
+                            className="py-1.5 px-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-[11px] rounded-lg border border-slate-200 transition-colors text-center flex items-center justify-center space-x-1 cursor-pointer active:scale-98"
                             title="Download Syllabus PDF"
                           >
-                            <Download className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                            <Download className="w-3 h-3 text-indigo-600 shrink-0" />
                             <span>সিলেবাস</span>
                           </button>
 
                           <button
                             type="button"
-                            onClick={() => setSelectedCourseForDetails(c)}
-                            className="px-2.5 py-2.5 min-h-[42px] bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-colors text-center flex items-center justify-center space-x-1.5 cursor-pointer active:scale-98"
+                            onClick={() => {
+                              setSelectedCourseForInstallment(c);
+                              setIsInstallmentModalOpen(true);
+                            }}
+                            className="py-1.5 px-1 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-[11px] rounded-lg border border-amber-200 transition-colors text-center flex items-center justify-center space-x-1 cursor-pointer active:scale-98"
+                            title="0% Easy Installment Calculator"
                           >
-                            <BookOpen className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                            <span>কারিকুলাম</span>
+                            <CreditCard className="w-3 h-3 text-amber-600 shrink-0" />
+                            <span>কিস্তি (EMI)</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }))}
+                            className="py-1.5 px-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] rounded-lg border border-indigo-200/60 transition-colors text-center flex items-center justify-center space-x-1 cursor-pointer active:scale-98"
+                            title="View Dedicated Course Page"
+                          >
+                            <Sparkles className="w-3 h-3 text-indigo-600 shrink-0" />
+                            <span>বিস্তারিত পেজ</span>
                           </button>
                         </div>
-
-                        {/* Installment Plan Trigger Button */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedCourseForInstallment(c);
-                            setIsInstallmentModalOpen(true);
-                          }}
-                          className="w-full py-2 px-3 bg-amber-50 hover:bg-amber-100/90 text-amber-900 border border-amber-200/80 rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer active:scale-98"
-                          title="Calculate 0% Easy Installments"
-                        >
-                          <CreditCard className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                          <span>০% সুদে সহজ কিস্তির হিসাব (Easy EMI)</span>
-                        </button>
-
-                        {/* Primary High-Conversion CTA: 1-Click Enroll */}
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEnroll(c)}
-                          className="w-full min-h-[44px] px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-98 text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-indigo-600/25 transition-all text-center flex items-center justify-center space-x-2 cursor-pointer"
-                        >
-                          <Zap className="w-4 h-4 text-amber-300 shrink-0" />
-                          <span>অনলাইন ভর্তি আবেদন (Enroll Now)</span>
-                        </button>
-
-                        {/* Dedicated Landing Page Link */}
-                        <button
-                          type="button"
-                          onClick={() => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }))}
-                          className="w-full min-h-[38px] py-1.5 px-3 bg-slate-50 hover:bg-amber-50/60 text-slate-700 hover:text-indigo-900 border border-slate-200/80 rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1.5 transition-all cursor-pointer active:scale-98"
-                        >
-                          <Sparkles className="w-3 h-3 text-amber-500" />
-                          <span>ডেডিকেটেড কোর্স ল্যান্ডিং পেজ দেখুন</span>
-                          <ChevronRight className="w-3 h-3 text-slate-400" />
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -1574,32 +1559,32 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             </div>
 
             {/* Director's Message Card */}
-            <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-7 rounded-3xl text-white shadow-xl space-y-4 relative overflow-hidden">
+            <div className="lg:col-span-5 bg-white p-6 sm:p-7 rounded-3xl text-slate-900 border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden">
               <div className="flex items-center space-x-4">
                 <img
                   src={about.directorPhotoUrl}
                   alt={about.directorName}
-                  className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-400 shadow-md shrink-0"
+                  className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-100 shadow-sm shrink-0"
                 />
                 <div>
-                  <h4 className="font-black text-white text-sm sm:text-base">{about.directorName}</h4>
-                  <p className="text-xs text-indigo-300 font-medium">{about.directorTitle}</p>
+                  <h4 className="font-black text-slate-950 text-sm sm:text-base">{about.directorName}</h4>
+                  <p className="text-xs text-indigo-600 font-semibold">{about.directorTitle}</p>
                 </div>
               </div>
 
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/10 text-xs leading-relaxed text-slate-200 italic">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 text-xs leading-relaxed text-slate-700 italic">
                 "{about.directorMessage}"
               </div>
 
-              <div className="pt-2 border-t border-white/10 space-y-1.5">
-                <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider">
+              <div className="pt-2 border-t border-slate-200 space-y-1.5">
+                <span className="text-[10px] font-black uppercase text-indigo-700 tracking-wider">
                   Accreditations & Affiliations
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {(about.affiliations || []).map((acc, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 bg-indigo-500/20 text-indigo-200 text-[10px] font-bold rounded-md border border-indigo-400/30"
+                      className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-md border border-indigo-200/60"
                     >
                       ✓ {acc}
                     </span>
@@ -1779,39 +1764,39 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             {/* Facebook Group & Socials Box (5 cols) */}
-            <div className="lg:col-span-5 bg-gradient-to-br from-blue-900 to-indigo-950 p-6 sm:p-7 rounded-3xl text-white shadow-xl flex flex-col justify-between space-y-6">
+            <div className="lg:col-span-5 bg-slate-50 border border-slate-200/90 p-6 sm:p-7 rounded-3xl text-slate-900 shadow-sm flex flex-col justify-between space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2 text-blue-300 text-xs font-black uppercase tracking-wider">
-                  <span className="w-7 h-7 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold">
+                <div className="flex items-center space-x-2 text-blue-700 text-xs font-black uppercase tracking-wider">
+                  <span className="w-7 h-7 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold shadow-2xs">
                     f
                   </span>
                   <span>Facebook Official Network</span>
                 </div>
 
                 <div>
-                  <h3 className="text-lg sm:text-xl font-black text-white leading-tight">
+                  <h3 className="text-lg sm:text-xl font-black text-slate-950 leading-tight">
                     {socials.facebookGroupName || 'NexGen Dev & Tech Career Community'}
                   </h3>
-                  <p className="text-xs text-blue-200 mt-1">
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                     Free daily problem solving, code reviews, hiring job postings, and peer coding sessions.
                   </p>
                 </div>
 
-                <div className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-300 font-black text-xs rounded-xl border border-emerald-400/30">
+                <div className="inline-block px-3 py-1 bg-emerald-50 text-emerald-800 font-bold text-xs rounded-xl border border-emerald-200">
                   ⚡ {socials.facebookGroupMembersCount || '18,500+ Active Members'}
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <a
                   href={socials.facebookGroupUrl || 'https://facebook.com'}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs sm:text-sm rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all hover:scale-[1.02]"
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs flex items-center justify-center space-x-2 transition-all hover:scale-[1.01]"
                 >
                   <Users className="w-4 h-4" />
                   <span>Join Facebook Community Group</span>
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
 
                 {socials.facebookPageUrl && (
@@ -1819,7 +1804,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     href={socials.facebookPageUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-2.5 bg-white/10 hover:bg-white/20 text-blue-100 font-bold text-xs rounded-xl border border-white/20 flex items-center justify-center space-x-2 transition-colors"
+                    className="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 flex items-center justify-center space-x-2 transition-colors"
                   >
                     <span>Like Official Facebook Page</span>
                   </a>
@@ -1830,7 +1815,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     href={socials.whatsappCommunityUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-2.5 bg-emerald-600/90 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2 transition-colors"
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-2xs"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>Join WhatsApp Discussion Group</span>
@@ -1840,8 +1825,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             </div>
 
             {/* YouTube Featured Video Player (7 cols) */}
-            <div className="lg:col-span-7 bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-xl flex flex-col justify-between">
-              <div className="relative w-full aspect-video bg-black">
+            <div className="lg:col-span-7 bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div className="relative w-full aspect-video bg-slate-950">
                 <iframe
                   title="Featured NexGen YouTube Tutorial & Campus Video"
                   src={socials.youtubeFeaturedVideoUrl || 'https://www.youtube.com/embed/dQw4w9WgXcQ'}
@@ -1851,13 +1836,13 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 />
               </div>
 
-              <div className="p-5 bg-slate-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-white border-t border-slate-800">
+              <div className="p-4 sm:p-5 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-slate-900 border-t border-slate-200">
                 <div className="space-y-0.5">
-                  <div className="flex items-center space-x-1.5 text-red-500 font-black text-xs uppercase tracking-wider">
+                  <div className="flex items-center space-x-1.5 text-red-600 font-black text-xs uppercase tracking-wider">
                     <Youtube className="w-4 h-4" />
                     <span>Featured Video Masterclass</span>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-100">
+                  <h4 className="font-bold text-sm text-slate-900">
                     {socials.youtubeVideoTitle || 'NexGen Campus Experience & Live Coding Guide'}
                   </h4>
                 </div>
@@ -1866,7 +1851,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                   href={socials.youtubeChannelUrl || 'https://youtube.com'}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-black text-xs rounded-xl shadow-md flex items-center space-x-1.5 shrink-0"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 shrink-0"
                 >
                   <Youtube className="w-4 h-4" />
                   <span>Subscribe Channel</span>
@@ -1972,18 +1957,18 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 9. UPCOMING FREE SEMINARS & WORKSHOPS */}
       {sectionVisibility.seminars !== false && (
-        <section id="seminars" className="py-16 bg-slate-900 text-white relative overflow-hidden">
+        <section id="seminars" className="py-16 bg-slate-50 border-t border-slate-200 text-slate-900 relative overflow-hidden">
         <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
-              <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-xs font-bold mb-2">
-                <Calendar className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-full text-xs font-bold mb-2">
+                <Calendar className="w-3.5 h-3.5 text-amber-600" />
                 <span>{websiteCmsConfig?.seminarsSectionConfig?.tagText || '100% Free Career Masterclasses'}</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
                 {websiteCmsConfig?.seminarsSectionConfig?.heading || 'Upcoming Free Seminars & Workshops (ফ্রি সেমিনার)'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1">
+              <p className="text-xs sm:text-sm text-slate-600 mt-1">
                 {websiteCmsConfig?.seminarsSectionConfig?.subtitle || 'Participate in live career counseling, ask industry mentors, and book your verified entry pass.'}
               </p>
             </div>
@@ -1993,36 +1978,36 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             {seminars.map((s) => (
               <div
                 key={s.id}
-                className="bg-slate-800/90 rounded-3xl p-6 border border-slate-700 shadow-xl flex flex-col justify-between space-y-5 hover:border-amber-400/60 transition-all"
+                className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm flex flex-col justify-between space-y-5 hover:border-indigo-300 transition-all"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
                       {s.type || 'Free Career Seminar'}
                     </span>
-                    <span className="text-xs font-mono font-bold text-amber-400">
+                    <span className="text-xs font-mono font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
                       Seats Left: {Math.max(1, s.capacity - s.registeredCount)}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-black text-white leading-snug">{s.title}</h3>
+                  <h3 className="text-base font-black text-slate-950 leading-snug">{s.title}</h3>
 
-                  <div className="space-y-2 text-xs text-slate-300 pt-1">
+                  <div className="space-y-2 text-xs text-slate-600 pt-1">
                     <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
+                      <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
                       <span>{s.date}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
+                      <Clock className="w-4 h-4 text-indigo-600 shrink-0" />
                       <span>{s.time}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4 text-indigo-400 shrink-0" />
+                      <MapPin className="w-4 h-4 text-indigo-600 shrink-0" />
                       <span className="truncate">{s.roomOrPlatform || 'Farmgate Seminar Hall 1 & Zoom Live'}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Users className="w-4 h-4 text-indigo-400 shrink-0" />
-                      <span>Speaker: <strong>{s.speakerName}</strong></span>
+                      <Users className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span>Speaker: <strong className="text-slate-900">{s.speakerName}</strong></span>
                     </div>
 
                     {(s.whatsappGroupUrl || s.googleMapsUrl) && (
@@ -2032,7 +2017,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                             href={s.whatsappGroupUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold hover:bg-emerald-900 transition-colors"
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold hover:bg-emerald-100 transition-colors"
                             onClick={e => e.stopPropagation()}
                           >
                             <MessageSquare className="w-3 h-3" />
@@ -2044,7 +2029,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                             href={s.googleMapsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-indigo-950 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold hover:bg-indigo-900 transition-colors"
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold hover:bg-indigo-100 transition-colors"
                             onClick={e => e.stopPropagation()}
                           >
                             <Navigation className="w-3 h-3" />
@@ -2059,9 +2044,9 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveSeminarForReg(s)}
-                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center space-x-1.5"
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-98"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                   <span>Join Free Seminar (সিট বুক করুন)</span>
                 </button>
               </div>
@@ -2421,33 +2406,33 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             {/* Campus Info Card (5 cols) */}
-            <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-indigo-950 p-6 sm:p-8 rounded-3xl text-white space-y-6 flex flex-col justify-between shadow-xl">
+            <div className="lg:col-span-5 bg-slate-50 border border-slate-200/90 p-6 sm:p-8 rounded-3xl text-slate-900 space-y-6 flex flex-col justify-between shadow-sm">
               <div className="space-y-4">
-                <NexgenLogo variant="horizontal" size={44} isDarkTheme={true} />
+                <NexgenLogo variant="horizontal" size={44} isDarkTheme={false} />
 
                 <div className="space-y-4 text-xs pt-2">
                   <div className="flex items-start space-x-3">
-                    <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <MapPin className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="block text-white">Campus Address:</strong>
-                      <span className="text-slate-300">{officeAddress}</span>
+                      <strong className="block text-slate-900">Campus Address:</strong>
+                      <span className="text-slate-600">{officeAddress}</span>
                       {campusDirections && (
-                        <p className="text-[11px] text-amber-300/80 mt-0.5">ℹ️ {campusDirections}</p>
+                        <p className="text-[11px] text-amber-700 font-medium mt-0.5">ℹ️ {campusDirections}</p>
                       )}
                     </div>
                   </div>
 
                   {/* Multiple Phone Helplines */}
                   <div className="flex items-start space-x-3">
-                    <Phone className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <Phone className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                     <div className="space-y-1 w-full">
-                      <strong className="block text-white">Dedicated Telephone Helplines:</strong>
+                      <strong className="block text-slate-900">Dedicated Telephone Helplines:</strong>
                       <div className="space-y-1">
                         {multiplePhones.map((ph, idx) => (
-                          <div key={idx} className="flex items-center justify-between text-slate-300">
-                            <span>{ph.label}: <a href={`tel:${ph.number}`} className="font-bold text-white hover:text-amber-400">{ph.number}</a></span>
+                          <div key={idx} className="flex items-center justify-between text-slate-600">
+                            <span>{ph.label}: <a href={`tel:${ph.number}`} className="font-bold text-slate-900 hover:text-indigo-600">{ph.number}</a></span>
                             {ph.isHotline && (
-                              <span className="text-[9px] bg-rose-500 text-white font-black px-1.5 py-0.2 rounded uppercase">
+                              <span className="text-[9px] bg-rose-100 text-rose-700 border border-rose-200 font-bold px-1.5 py-0.2 rounded uppercase">
                                 Hotline
                               </span>
                             )}
@@ -2459,14 +2444,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
                   {/* Multiple Department Emails */}
                   <div className="flex items-start space-x-3">
-                    <Mail className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <Mail className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                     <div className="space-y-1 w-full">
-                      <strong className="block text-white">Department Email Inboxes:</strong>
-                      <div className="space-y-1 text-[11px] text-slate-300">
+                      <strong className="block text-slate-900">Department Email Inboxes:</strong>
+                      <div className="space-y-1 text-[11px] text-slate-600">
                         {multipleEmails.map((em, idx) => (
                           <div key={idx}>
-                            <span className="text-slate-400">{em.label}:</span>{' '}
-                            <a href={`mailto:${em.email}`} className="text-indigo-300 hover:underline">{em.email}</a>
+                            <span className="text-slate-500">{em.label}:</span>{' '}
+                            <a href={`mailto:${em.email}`} className="text-indigo-600 font-medium hover:underline">{em.email}</a>
                           </div>
                         ))}
                       </div>
@@ -2474,21 +2459,21 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                   </div>
 
                   <div className="flex items-start space-x-3">
-                    <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <Clock className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="block text-white">Visiting Hours:</strong>
-                      <span className="text-slate-300">{officeHours}</span>
+                      <strong className="block text-slate-900">Visiting Hours:</strong>
+                      <span className="text-slate-600">{officeHours}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <a
                   href={websiteCmsConfig.googleMapShareUrl || 'https://share.google/9W8K1XZHLbZxFpF8G'}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-md transition-all hover:scale-105"
+                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-2xs transition-all hover:scale-[1.02]"
                 >
                   <Navigation className="w-3.5 h-3.5" />
                   <span>গুগল ম্যাপে লোকেশন দেখুন</span>
@@ -2502,7 +2487,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                   )}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-md transition-all hover:scale-105"
+                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center space-x-1.5 shadow-2xs transition-all hover:scale-[1.02]"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   <span>Chat on WhatsApp</span>
@@ -2527,29 +2512,29 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 15. FOOTER & POLICIES */}
       {sectionVisibility.footer !== false && (
-        <footer className="bg-slate-950 text-slate-300 text-xs border-t border-slate-800 pt-12 pb-20 sm:pb-8">
+        <footer className="bg-slate-50 text-slate-600 text-xs border-t border-slate-200 pt-12 pb-20 sm:pb-8">
           <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="space-y-3">
-                <NexgenLogo variant="horizontal" size={40} isDarkTheme={true} />
-                <p className="text-slate-300 text-xs leading-relaxed">
+                <NexgenLogo variant="horizontal" size={40} isDarkTheme={false} />
+                <p className="text-slate-600 text-xs leading-relaxed">
                   {footerConfig?.bio || `${academySettings.instituteName || 'Nexgen Computer Academy'} is a premier professional IT training organization based in Dhaka, dedicated to creating industry-grade developers, designers, and freelance leaders.`}
                 </p>
                 {/* Social Icons */}
                 {footerConfig?.showSocials !== false && (
                   <div className="flex items-center space-x-2.5 pt-2">
                     {socials.facebookPageUrl && (
-                      <a href={socials.facebookPageUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-blue-600 text-white flex items-center justify-center transition-colors">
+                      <a href={socials.facebookPageUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-300 flex items-center justify-center transition-colors shadow-2xs font-bold">
                         f
                       </a>
                     )}
                     {socials.youtubeChannelUrl && (
-                      <a href={socials.youtubeChannelUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-red-600 text-white flex items-center justify-center transition-colors">
+                      <a href={socials.youtubeChannelUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-red-600 hover:border-red-300 flex items-center justify-center transition-colors shadow-2xs">
                         <Youtube className="w-4 h-4" />
                       </a>
                     )}
                     {socials.linkedinUrl && (
-                      <a href={socials.linkedinUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-sky-600 text-white flex items-center justify-center transition-colors">
+                      <a href={socials.linkedinUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-sky-600 hover:border-sky-300 flex items-center justify-center transition-colors shadow-2xs font-bold">
                         in
                       </a>
                     )}
@@ -2559,14 +2544,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
               {footerConfig?.showTopCourses !== false && (
                 <div className="space-y-2.5">
-                  <h4 className="font-black text-white text-xs uppercase tracking-wider">Top Courses</h4>
+                  <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Top Courses</h4>
                   <ul className="space-y-2 text-xs">
                     {courses.slice(0, 5).map(c => (
                       <li key={c.id}>
                         <button
                           type="button"
                           onClick={() => handleOpenEnroll(c)}
-                          className="text-slate-300 hover:text-amber-400 transition-colors text-left"
+                          className="text-slate-600 hover:text-indigo-600 transition-colors text-left"
                         >
                           {c.name}
                         </button>
@@ -2578,19 +2563,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
               {footerConfig?.showQuickNav !== false && (
                 <div className="space-y-2.5">
-                  <h4 className="font-black text-white text-xs uppercase tracking-wider">Quick Navigation</h4>
+                  <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Quick Navigation</h4>
                   <ul className="space-y-2 text-xs">
-                    <li><a href="#courses" className="text-slate-300 hover:text-white transition-colors">All Courses & Fees</a></li>
-                    <li><a href="#about" className="text-slate-300 hover:text-white transition-colors">About Us & Campus</a></li>
-                    <li><a href="#community" className="text-slate-300 hover:text-white transition-colors">Facebook Community Group</a></li>
-                    <li><a href="#blog" className="text-slate-300 hover:text-white transition-colors">Tech Blogs & Career Tips</a></li>
-                    <li><a href="#seminars" className="text-slate-300 hover:text-white transition-colors">Free Career Seminars</a></li>
-                    <li><a href="#verify-certificate" className="text-slate-300 hover:text-white transition-colors">Verify Student Certificate</a></li>
+                    <li><a href="#courses" className="text-slate-600 hover:text-indigo-600 transition-colors">All Courses & Fees</a></li>
+                    <li><a href="#about" className="text-slate-600 hover:text-indigo-600 transition-colors">About Us & Campus</a></li>
+                    <li><a href="#community" className="text-slate-600 hover:text-indigo-600 transition-colors">Facebook Community Group</a></li>
+                    <li><a href="#blog" className="text-slate-600 hover:text-indigo-600 transition-colors">Tech Blogs & Career Tips</a></li>
+                    <li><a href="#seminars" className="text-slate-600 hover:text-indigo-600 transition-colors">Free Career Seminars</a></li>
+                    <li><a href="#verify-certificate" className="text-slate-600 hover:text-indigo-600 transition-colors">Verify Student Certificate</a></li>
                     <li>
                       <button
                         type="button"
                         onClick={onOpenStaffLogin}
-                        className="text-slate-400 hover:text-indigo-300 font-medium text-xs transition-colors cursor-pointer"
+                        className="text-slate-500 hover:text-indigo-600 font-medium text-xs transition-colors cursor-pointer"
                       >
                         {isAuthenticated ? 'ERP Dashboard' : 'Staff Access'}
                       </button>
@@ -2601,13 +2586,13 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
               {footerConfig?.showLegalLinks !== false && (
                 <div className="space-y-2.5">
-                  <h4 className="font-black text-white text-xs uppercase tracking-wider">Legal Policies & Standards</h4>
+                  <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Legal Policies & Standards</h4>
                   <ul className="space-y-2 text-xs">
                     <li>
                       <button
                         type="button"
                         onClick={() => setActivePolicyModal('terms')}
-                        className="text-slate-300 hover:text-indigo-400 transition-colors text-left font-bold"
+                        className="text-slate-600 hover:text-indigo-600 transition-colors text-left font-semibold"
                       >
                         Terms & Conditions (শর্তাবলী)
                       </button>
@@ -2616,7 +2601,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       <button
                         type="button"
                         onClick={() => setActivePolicyModal('privacy')}
-                        className="text-slate-300 hover:text-indigo-400 transition-colors text-left font-bold"
+                        className="text-slate-600 hover:text-indigo-600 transition-colors text-left font-semibold"
                       >
                         Privacy Policy (গোপনীয়তা নীতি)
                       </button>
@@ -2625,7 +2610,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       <button
                         type="button"
                         onClick={() => setActivePolicyModal('refund')}
-                        className="text-slate-300 hover:text-indigo-400 transition-colors text-left font-bold"
+                        className="text-slate-600 hover:text-indigo-600 transition-colors text-left font-semibold"
                       >
                         Refund & Batch Transfer Policy
                       </button>
@@ -2634,21 +2619,21 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                       <button
                         type="button"
                         onClick={() => setActivePolicyModal('conduct')}
-                        className="text-slate-300 hover:text-indigo-400 transition-colors text-left font-bold"
+                        className="text-slate-600 hover:text-indigo-600 transition-colors text-left font-semibold"
                       >
                         Student Code of Conduct
                       </button>
                     </li>
                   </ul>
-                  <div className="pt-2 flex items-center space-x-2 text-emerald-400 text-xs font-bold">
-                    <ShieldCheck className="w-4 h-4" />
+                  <div className="pt-2 flex items-center space-x-2 text-emerald-600 text-xs font-bold">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <span>100% Genuine Certified Credentials</span>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+            <div className="pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
               <p>{footerConfig?.copyrightText || `© ${new Date().getFullYear()} ${academySettings.instituteName || 'Nexgen Computer Academy'}. All Rights Reserved.`}</p>
               <p>{footerConfig?.creditsText || 'Empowered by NexGen Multi-Campus ERP & Centralized CMS Engine.'}</p>
             </div>

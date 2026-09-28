@@ -128,27 +128,27 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
             className="relative w-full max-w-[85vw] sm:max-w-[380px] h-full bg-white shadow-2xl flex flex-col z-10 overflow-hidden border-l border-slate-200"
           >
             {/* 1. Drawer Header */}
-            <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between border-b border-indigo-900/50 shrink-0">
+            <div className="p-4 sm:p-5 bg-white text-slate-900 flex items-center justify-between border-b border-slate-200 shrink-0">
               <div className="flex items-center space-x-3 min-w-0">
-                <div className="p-1 bg-white/10 rounded-xl border border-white/20 shadow-xs shrink-0">
+                <div className="p-1.5 bg-slate-50 rounded-xl border border-slate-200 shadow-2xs shrink-0">
                   <NexgenLogo variant="crest" size={36} />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-black text-white leading-tight truncate">
+                  <h3 className="text-xs sm:text-sm font-black text-slate-950 leading-tight whitespace-nowrap truncate">
                     {academySettings.instituteName || 'Nexgen Computer Academy'}
                   </h3>
-                  <p className="text-[11px] text-indigo-200 font-medium truncate">
+                  <p className="text-[11px] text-slate-500 font-medium whitespace-nowrap truncate">
                     {websiteCmsConfig?.headerSubtitle || academySettings.campusName || 'Farmgate Campus'}
                   </p>
                 </div>
               </div>
 
-              {/* Close Button with generous touch target */}
+              {/* Close Button */}
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close navigation menu"
-                className="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors active:scale-95 shrink-0 ml-2"
+                className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors active:scale-95 shrink-0 ml-2 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>

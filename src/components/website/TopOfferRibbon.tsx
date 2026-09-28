@@ -52,7 +52,7 @@ export const TopOfferRibbon: React.FC<TopOfferRibbonProps> = ({
     sessionStorage.setItem('nca_top_ribbon_dismissed', 'true');
   };
 
-  const bgClasses = config.bgColor || 'bg-gradient-to-r from-amber-600 via-rose-600 to-indigo-700';
+  const bgClasses = config.bgColor || 'bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-700';
 
   return (
     <div
