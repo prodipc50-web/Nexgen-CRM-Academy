@@ -20,6 +20,11 @@ import { PlacementsShowcaseSection } from './PlacementsShowcaseSection';
 import { CampusLocationMapBox } from './CampusLocationMapBox';
 import { GeoLocalGuideSection } from './GeoLocalGuideSection';
 import { CourseCareerComparisonSection } from './CourseCareerComparisonSection';
+import { CareerPathFinderWizard } from './CareerPathFinderWizard';
+import { AccreditationTrustStrip } from './AccreditationTrustStrip';
+import { FreeCounselingLeadBanner } from './FreeCounselingLeadBanner';
+import { CourseFeeInstallmentCalculatorModal } from './CourseFeeInstallmentCalculatorModal';
+import { StudentSuccessSpotlightSection } from './StudentSuccessSpotlightSection';
 import {
   Home,
   Phone,
@@ -73,7 +78,9 @@ import {
   ChevronRight,
   Download,
   Flame,
-  Building2
+  Building2,
+  CreditCard,
+  Calculator
 } from 'lucide-react';
 import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage, WebsiteSectionVisibility } from '../../types';
 import { HeroBannerSlider } from './HeroBannerSlider';
@@ -148,6 +155,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [showExitIntent, setShowExitIntent] = useState(false);
   const [isTopNoticeModalOpen, setIsTopNoticeModalOpen] = useState(false);
+  const [isInstallmentModalOpen, setIsInstallmentModalOpen] = useState(false);
+  const [selectedCourseForInstallment, setSelectedCourseForInstallment] = useState<Course | null>(null);
 
   // Auto-apply dynamic Homepage SEO metadata, Canonical URL & JSON-LD Schemas
   React.useEffect(() => {
@@ -512,6 +521,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <Home className="w-4 h-4 text-indigo-600" />
               <span>Home (হোম)</span>
             </a>
+            <a href="#career-wizard" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-amber-600 font-bold whitespace-nowrap">
+              <Compass className="w-3.5 h-3.5 text-amber-500" />
+              <span>Career Path (গাইড)</span>
+            </a>
             <a href="#courses" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Courses (কোর্স)</a>
             <a href="#about" className="hover:text-indigo-600 transition-colors whitespace-nowrap">About Us</a>
             {sectionVisibility.mentors !== false && (
@@ -543,6 +556,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
           {/* Right Action Controls: Campus Tour + Online Admission CTA + Mobile Hamburger */}
           <div className="flex items-center space-x-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCourseForInstallment(null);
+                setIsInstallmentModalOpen(true);
+              }}
+              className="hidden md:flex items-center space-x-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-xl border border-amber-200 transition-colors whitespace-nowrap cursor-pointer"
+              title="Calculate 0% Easy Installments"
+            >
+              <CreditCard className="w-3.5 h-3.5 text-amber-600" />
+              <span>সহজ কিস্তি (EMI)</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setIsCampusTourOpen(true)}
@@ -805,6 +831,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       </section>
       )}
 
+      {/* 3.5 BTEB, ISO 9001 & INSTITUTIONAL TRUST STRIP (BANGLADESHI STANDARD) */}
+      <AccreditationTrustStrip
+        onOpenCounselingModal={() => {
+          setSelectedCourseForAdmission(null);
+          setIsAdmissionOpen(true);
+        }}
+      />
+
       {/* 4. FOUR LEARNING DELIVERY FORMAT CARDS (CMS DRIVEN) */}
       {sectionVisibility.deliveryModes !== false && deliveryConfig?.enabled !== false && (
         <motion.section
@@ -1011,6 +1045,22 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           </div>
         </motion.section>
       )}
+
+      {/* 5.5 INTERACTIVE CAREER PATH FINDER & COURSE MATCHER WIZARD */}
+      <CareerPathFinderWizard
+        courses={courses}
+        onSelectCourseForAdmission={(c) => {
+          setSelectedCourseForAdmission(c);
+          setIsAdmissionOpen(true);
+        }}
+        onDownloadSyllabus={(c) => {
+          setSelectedCourseForSyllabus(c);
+        }}
+        onBookCounseling={(interest) => {
+          setSelectedCourseForAdmission(null);
+          setIsAdmissionOpen(true);
+        }}
+      />
 
       {/* 6. REDESIGNED COURSES SHOWCASE SECTION (MATCHING REFERENCE DESIGN) */}
       {sectionVisibility.courses !== false && (
@@ -1335,6 +1385,20 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                           </button>
                         </div>
 
+                        {/* Installment Plan Trigger Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCourseForInstallment(c);
+                            setIsInstallmentModalOpen(true);
+                          }}
+                          className="w-full py-2 px-3 bg-amber-50 hover:bg-amber-100/90 text-amber-900 border border-amber-200/80 rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer active:scale-98"
+                          title="Calculate 0% Easy Installments"
+                        >
+                          <CreditCard className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                          <span>০% সুদে সহজ কিস্তির হিসাব (Easy EMI)</span>
+                        </button>
+
                         {/* Primary High-Conversion CTA: 1-Click Enroll */}
                         <button
                           type="button"
@@ -1374,6 +1438,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           setIsAdmissionOpen(true);
         }}
         onExploreCourseDetails={(c) => setSelectedCourseForDetails(c)}
+      />
+
+      {/* 4.6 1-CLICK FREE CAREER COUNSELING CALLBACK BANNER */}
+      <FreeCounselingLeadBanner
+        courses={courses}
       />
 
       {/* 5.5. ADMISSION & LEARNING JOURNEY ROADMAP (CMS DRIVEN) */}
@@ -2190,6 +2259,15 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       </section>
       )}
 
+      {/* 11.2 REAL STUDENT SUCCESS VIDEO INTERVIEWS & EARNINGS SPOTLIGHT */}
+      <StudentSuccessSpotlightSection
+        onSelectCourseForAdmission={(courseName) => {
+          const found = courses.find(c => c.name.toLowerCase().includes(courseName.toLowerCase()) || courseName.toLowerCase().includes(c.name.toLowerCase()));
+          setSelectedCourseForAdmission(found || null);
+          setIsAdmissionOpen(true);
+        }}
+      />
+
       {/* 11.5 ALUMNI CAREER PLACEMENTS & FREELANCING MILESTONES */}
       {sectionVisibility.placements !== false && (
         <PlacementsShowcaseSection
@@ -2807,6 +2885,18 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         isOpen={isCampusTourOpen}
         onClose={() => setIsCampusTourOpen(false)}
         courses={courses}
+      />
+
+      {/* 0% EASY INSTALLMENT & FEE BREAKDOWN CALCULATOR MODAL */}
+      <CourseFeeInstallmentCalculatorModal
+        isOpen={isInstallmentModalOpen}
+        onClose={() => setIsInstallmentModalOpen(false)}
+        courses={courses}
+        initialCourse={selectedCourseForInstallment}
+        onProceedAdmission={(course, planText) => {
+          setSelectedCourseForAdmission(course);
+          setIsAdmissionOpen(true);
+        }}
       />
     </div>
   );

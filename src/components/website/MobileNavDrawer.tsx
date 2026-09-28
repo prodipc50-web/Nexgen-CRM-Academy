@@ -24,7 +24,8 @@ import {
   Video,
   Monitor,
   MessageCircle,
-  GraduationCap
+  GraduationCap,
+  Compass
 } from 'lucide-react';
 import { NexgenLogo } from '../common/NexgenLogo';
 import { AcademySettings, WebsiteCmsConfig } from '../../types';
@@ -225,6 +226,23 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                       <Home className="w-4 h-4" />
                     </div>
                     <span className="font-bold text-sm">Home (হোম)</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </a>
+
+                <a
+                  href="#career-wizard"
+                  onClick={() => handleNavClick('#career-wizard')}
+                  className="min-h-[48px] px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-slate-800 hover:bg-amber-50 hover:text-amber-800 transition-colors active:scale-[0.98]"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                      <Compass className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-sm block">Career Path Finder</span>
+                      <span className="text-[10px] text-amber-600 font-medium">১ মিনিটে সঠিক কোর্স খুঁজুন</span>
+                    </div>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </a>
