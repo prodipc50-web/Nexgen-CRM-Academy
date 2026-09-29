@@ -103,9 +103,9 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               alt={currentSlide.title}
               className="w-full h-full object-cover object-center"
             />
-            {/* Multi-layer Gradient Overlays for Guaranteed High-Contrast Readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 md:via-slate-950/80 to-slate-950/40" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/30" />
+            {/* Multi-layer Gradient Overlays for High-Contrast Readability without pitch-black gloom */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/65 md:via-slate-950/60 to-slate-950/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20" />
           </motion.div>
         </AnimatePresence>
 

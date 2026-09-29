@@ -484,85 +484,88 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* 2. MAIN NAVIGATION HEADER */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 h-20 flex items-center justify-between gap-3 sm:gap-4">
+        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-3 sm:px-6 lg:px-10 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo & Institute Identity */}
           <div
-            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer min-w-0 flex-1 sm:flex-initial group"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0 min-w-0 group"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <div className="p-1 sm:p-1.5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs group-hover:border-indigo-300 transition-colors shrink-0">
               <NexgenLogo variant="crest" size={36} />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center space-x-1.5">
-                <h1 className="text-[13px] xs:text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-950 tracking-tight leading-tight whitespace-nowrap truncate">
-                  {academySettings.instituteName || 'Nexgen Computer Academy'}
+            <div className="shrink-0 min-w-0">
+              <div className="flex items-center space-x-1.5 sm:space-x-2">
+                <h1 className="text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-950 tracking-tight leading-tight whitespace-nowrap">
+                  {academySettings.instituteName || 'NexGen Computer Academy'}
                 </h1>
-                <span className="hidden md:inline-flex text-[10px] font-black px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-wider shrink-0">
+                <span className="hidden lg:inline-flex text-[10px] font-black px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-wider shrink-0">
                   {websiteCmsConfig.headerEstText || `EST. ${websiteCmsConfig?.aboutUs?.establishedYear || "2018"}`}
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate mt-0.5">
+              <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate mt-0.5 max-w-[160px] xs:max-w-[220px] sm:max-w-none">
                 {websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training`}
               </p>
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center space-x-3.5 2xl:space-x-4 text-sm font-bold text-slate-700">
+          {/* Desktop Navigation Links (Clean, Balanced & Compact for Laptops & Desktops) */}
+          <nav className="hidden xl:flex items-center space-x-1.5 2xl:space-x-3 text-xs 2xl:text-sm font-bold text-slate-700 shrink min-w-0">
             <a
               href="#"
               onClick={(e) => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-900 bg-slate-100 hover:bg-indigo-50 px-3 py-1.5 rounded-lg whitespace-nowrap"
+              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-900 bg-slate-100 hover:bg-indigo-50 px-2.5 2xl:px-3 py-1.5 rounded-lg whitespace-nowrap shrink-0"
             >
-              <Home className="w-4 h-4 text-indigo-600" />
-              <span>Home (হোম)</span>
+              <Home className="w-3.5 h-3.5 text-indigo-600" />
+              <span>হোম</span>
             </a>
-            <a href="#career-wizard" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-amber-600 font-bold whitespace-nowrap">
+            <a href="#courses" className="hover:text-indigo-600 transition-colors px-2 py-1 whitespace-nowrap shrink-0">
+              কোর্সসমূহ
+            </a>
+            <a href="#career-wizard" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-amber-700 font-bold px-2 py-1 whitespace-nowrap shrink-0">
               <Compass className="w-3.5 h-3.5 text-amber-500" />
-              <span>Career Path (গাইড)</span>
+              <span>ক্যারিয়ার গাইড</span>
             </a>
-            <a href="#courses" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Courses (কোর্স)</a>
-            <a href="#about" className="hover:text-indigo-600 transition-colors whitespace-nowrap">About Us</a>
-            {sectionVisibility.mentors !== false && (
-              <a href="#mentors" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Mentors</a>
-            )}
-            <a href="#community" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-blue-700 whitespace-nowrap">
-              <Users className="w-4 h-4" />
-              <span>Community</span>
+            <a href="#seminars" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2 py-1 whitespace-nowrap shrink-0">
+              <span>ফ্রি সেমিনার</span>
+              <span className="bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase">Free</span>
             </a>
-            <a href="#seminars" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 whitespace-nowrap">
-              <span>Free Seminars</span>
-              <span className="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full text-[10px] font-black">Free</span>
-            </a>
-            <a href="#blog" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Blog</a>
-            <a href="#gallery" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Gallery</a>
-            <a href="#reviews" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Reviews</a>
             {sectionVisibility.placements !== false && (
-              <a href="#placements" className="hover:text-emerald-600 transition-colors flex items-center space-x-1 text-emerald-700 whitespace-nowrap">
+              <a href="#placements" className="hover:text-emerald-700 transition-colors flex items-center space-x-1 text-emerald-700 px-2 py-1 whitespace-nowrap shrink-0">
                 <Briefcase className="w-3.5 h-3.5" />
-                <span>Placements</span>
+                <span>প্লেসমেন্ট</span>
               </a>
             )}
-            <a href="#verify-certificate" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-emerald-700 whitespace-nowrap">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Verify</span>
+            <a href="#verify-certificate" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-700 px-2 py-1 whitespace-nowrap shrink-0">
+              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+              <span>সার্টিফিকেট যাচাই</span>
             </a>
-            <a href="#contact" className="hover:text-indigo-600 transition-colors whitespace-nowrap">Contact</a>
+            
+            {/* Extended Links visible on extra wide 2xl screens */}
+            <a href="#about" className="hidden 2xl:inline-block hover:text-indigo-600 transition-colors px-2 py-1 whitespace-nowrap shrink-0">
+              আমাদের সম্পর্কে
+            </a>
+            <a href="#community" className="hidden 2xl:inline-flex items-center space-x-1 hover:text-indigo-600 transition-colors px-2 py-1 whitespace-nowrap shrink-0">
+              <Users className="w-3.5 h-3.5 text-blue-600" />
+              <span>কমিউনিটি</span>
+            </a>
+            <a href="#contact" className="hover:text-indigo-600 transition-colors px-2 py-1 whitespace-nowrap shrink-0">
+              যোগাযোগ
+            </a>
           </nav>
 
-          {/* Right Action Controls: Campus Tour + Online Admission CTA + Mobile Hamburger */}
+          {/* Right Action Controls: Admission CTA + Secondary Actions + Mobile Hamburger */}
           <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            {/* Secondary actions visible on extra wide 2xl screens to avoid laptop crowding */}
             <button
               type="button"
               onClick={() => {
                 setSelectedCourseForInstallment(null);
                 setIsInstallmentModalOpen(true);
               }}
-              className="hidden md:flex items-center space-x-1 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-lg border border-amber-200 transition-colors whitespace-nowrap cursor-pointer"
+              className="hidden 2xl:flex items-center space-x-1 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-lg border border-amber-200 transition-colors whitespace-nowrap cursor-pointer"
               title="Calculate 0% Easy Installments"
             >
               <CreditCard className="w-3.5 h-3.5 text-amber-600" />
@@ -572,26 +575,26 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <button
               type="button"
               onClick={() => setIsCampusTourOpen(true)}
-              className="hidden lg:flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-lg border border-emerald-200 transition-colors whitespace-nowrap cursor-pointer"
+              className="hidden 2xl:flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-lg border border-emerald-200 transition-colors whitespace-nowrap cursor-pointer"
               title="Book Free 1-on-1 Campus Tour & Lab Visit"
             >
               <Building2 className="w-3.5 h-3.5 text-emerald-600" />
               <span>ক্যাম্পাস ভিজিট</span>
             </button>
 
+            {/* Primary High-Converting Admission CTA */}
             <button
               type="button"
               onClick={() => {
                 setSelectedCourseForAdmission(null);
                 setIsAdmissionOpen(true);
               }}
-              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-lg shadow-2xs transition-all flex items-center space-x-1 active:scale-95 whitespace-nowrap shrink-0"
+              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all flex items-center space-x-1 active:scale-95 whitespace-nowrap shrink-0 cursor-pointer"
               title="Online Admission Application Portal"
             >
               <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-              <span className="hidden sm:inline">Online Admission</span>
-              <span className="sm:hidden">Admission</span>
-              <span className="hidden sm:inline"> (ভর্তি)</span>
+              <span className="hidden sm:inline">Online Admission (ভর্তি)</span>
+              <span className="sm:hidden text-xs">ভর্তি আবেদন</span>
             </button>
 
             {/* Mobile Menu Toggle Button */}
@@ -600,7 +603,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open Navigation Menu"
               aria-expanded={isMobileMenuOpen}
-              className="xl:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-all flex items-center justify-center active:scale-95 shrink-0"
+              className="xl:hidden w-8 h-8 sm:w-10 sm:h-10 rounded-xl text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-all flex items-center justify-center active:scale-95 shrink-0 cursor-pointer"
               title="Open Navigation Menu"
             >
               <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -828,12 +831,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* 3.5 BTEB, ISO 9001 & INSTITUTIONAL TRUST STRIP (BANGLADESHI STANDARD) */}
-      <AccreditationTrustStrip
-        onOpenCounselingModal={() => {
-          setSelectedCourseForAdmission(null);
-          setIsAdmissionOpen(true);
-        }}
-      />
+      {sectionVisibility.trustStrip !== false && (
+        <AccreditationTrustStrip
+          onOpenCounselingModal={() => {
+            setSelectedCourseForAdmission(null);
+            setIsAdmissionOpen(true);
+          }}
+        />
+      )}
 
       {/* 4. FOUR LEARNING DELIVERY FORMAT CARDS (CMS DRIVEN) */}
       {sectionVisibility.deliveryModes !== false && deliveryConfig?.enabled !== false && (
@@ -1043,20 +1048,22 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* 5.5 INTERACTIVE CAREER PATH FINDER & COURSE MATCHER WIZARD */}
-      <CareerPathFinderWizard
-        courses={courses}
-        onSelectCourseForAdmission={(c) => {
-          setSelectedCourseForAdmission(c);
-          setIsAdmissionOpen(true);
-        }}
-        onDownloadSyllabus={(c) => {
-          setSelectedCourseForSyllabus(c);
-        }}
-        onBookCounseling={(interest) => {
-          setSelectedCourseForAdmission(null);
-          setIsAdmissionOpen(true);
-        }}
-      />
+      {sectionVisibility.careerWizard !== false && (
+        <CareerPathFinderWizard
+          courses={courses}
+          onSelectCourseForAdmission={(c) => {
+            setSelectedCourseForAdmission(c);
+            setIsAdmissionOpen(true);
+          }}
+          onDownloadSyllabus={(c) => {
+            setSelectedCourseForSyllabus(c);
+          }}
+          onBookCounseling={(interest) => {
+            setSelectedCourseForAdmission(null);
+            setIsAdmissionOpen(true);
+          }}
+        />
+      )}
 
       {/* 6. REDESIGNED COURSES SHOWCASE SECTION (MATCHING REFERENCE DESIGN) */}
       {sectionVisibility.courses !== false && (
@@ -1416,19 +1423,23 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* 4.5 AI COURSE CAREER & DECISION COMPARISON ENGINE */}
-      <CourseCareerComparisonSection
-        courses={courses}
-        onSelectCourseForAdmission={(c) => {
-          setSelectedCourseForAdmission(c);
-          setIsAdmissionOpen(true);
-        }}
-        onExploreCourseDetails={(c) => setSelectedCourseForDetails(c)}
-      />
+      {sectionVisibility.courseComparison !== false && (
+        <CourseCareerComparisonSection
+          courses={courses}
+          onSelectCourseForAdmission={(c) => {
+            setSelectedCourseForAdmission(c);
+            setIsAdmissionOpen(true);
+          }}
+          onExploreCourseDetails={(c) => setSelectedCourseForDetails(c)}
+        />
+      )}
 
       {/* 4.6 1-CLICK FREE CAREER COUNSELING CALLBACK BANNER */}
-      <FreeCounselingLeadBanner
-        courses={courses}
-      />
+      {sectionVisibility.counselingBanner !== false && (
+        <FreeCounselingLeadBanner
+          courses={courses}
+        />
+      )}
 
       {/* 5.5. ADMISSION & LEARNING JOURNEY ROADMAP (CMS DRIVEN) */}
       {sectionVisibility.admissionRoadmap !== false && roadmapConfig?.enabled !== false && (
@@ -2514,15 +2525,15 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       {sectionVisibility.footer !== false && (
         <footer className="bg-slate-50 text-slate-600 text-xs border-t border-slate-200 pt-12 pb-20 sm:pb-8">
           <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="space-y-3">
-                <NexgenLogo variant="horizontal" size={40} isDarkTheme={false} />
-                <p className="text-slate-600 text-xs leading-relaxed">
-                  {footerConfig?.bio || `${academySettings.instituteName || 'Nexgen Computer Academy'} is a premier professional IT training organization based in Dhaka, dedicated to creating industry-grade developers, designers, and freelance leaders.`}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
+              <div className="space-y-3.5 md:col-span-2 lg:col-span-4">
+                <NexgenLogo variant="horizontal" size={42} isDarkTheme={false} />
+                <p className="text-slate-600 text-xs leading-relaxed max-w-sm">
+                  {footerConfig?.bio || `${academySettings.instituteName || 'NexGen Computer Academy'} is a premier professional IT training organization based in Dhaka, dedicated to creating industry-grade developers, designers, and freelance leaders.`}
                 </p>
                 {/* Social Icons */}
                 {footerConfig?.showSocials !== false && (
-                  <div className="flex items-center space-x-2.5 pt-2">
+                  <div className="flex items-center space-x-2.5 pt-1">
                     {socials.facebookPageUrl && (
                       <a href={socials.facebookPageUrl} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-300 flex items-center justify-center transition-colors shadow-2xs font-bold">
                         f
@@ -2543,7 +2554,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               </div>
 
               {footerConfig?.showTopCourses !== false && (
-                <div className="space-y-2.5">
+                <div className="space-y-2.5 lg:col-span-2">
                   <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Top Courses</h4>
                   <ul className="space-y-2 text-xs">
                     {courses.slice(0, 5).map(c => (
@@ -2562,7 +2573,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               )}
 
               {footerConfig?.showQuickNav !== false && (
-                <div className="space-y-2.5">
+                <div className="space-y-2.5 lg:col-span-3">
                   <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Quick Navigation</h4>
                   <ul className="space-y-2 text-xs">
                     <li><a href="#courses" className="text-slate-600 hover:text-indigo-600 transition-colors">All Courses & Fees</a></li>
@@ -2585,7 +2596,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               )}
 
               {footerConfig?.showLegalLinks !== false && (
-                <div className="space-y-2.5">
+                <div className="space-y-2.5 lg:col-span-3">
                   <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Legal Policies & Standards</h4>
                   <ul className="space-y-2 text-xs">
                     <li>

@@ -116,7 +116,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
             transition={{ duration: 0.24, ease: 'easeInOut' }}
             onClick={onClose}
             aria-hidden="true"
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs cursor-pointer"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs cursor-pointer"
           />
 
           {/* Slide-out Drawer Panel */}
@@ -125,19 +125,19 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 280, mass: 0.9 }}
-            className="relative w-full max-w-[85vw] sm:max-w-[380px] h-full bg-white shadow-2xl flex flex-col z-10 overflow-hidden border-l border-slate-200"
+            className="relative w-full max-w-[88vw] sm:max-w-[400px] h-full bg-white shadow-2xl flex flex-col z-10 overflow-hidden border-l border-slate-200"
           >
             {/* 1. Drawer Header */}
             <div className="p-4 sm:p-5 bg-white text-slate-900 flex items-center justify-between border-b border-slate-200 shrink-0">
-              <div className="flex items-center space-x-3 min-w-0">
+              <div className="flex items-center space-x-3 min-w-0 flex-1">
                 <div className="p-1.5 bg-slate-50 rounded-xl border border-slate-200 shadow-2xs shrink-0">
                   <NexgenLogo variant="crest" size={36} />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-xs sm:text-sm font-black text-slate-950 leading-tight whitespace-nowrap truncate">
-                    {academySettings.instituteName || 'Nexgen Computer Academy'}
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-black text-slate-950 leading-tight">
+                    {academySettings.instituteName || 'NexGen Computer Academy'}
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-medium whitespace-nowrap truncate">
+                  <p className="text-[11px] text-slate-500 font-semibold truncate mt-0.5">
                     {websiteCmsConfig?.headerSubtitle || academySettings.campusName || 'Farmgate Campus'}
                   </p>
                 </div>

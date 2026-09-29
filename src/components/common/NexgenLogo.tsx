@@ -436,24 +436,24 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     const isDark = isDarkTheme || className.includes('text-white') || className.includes('dark');
 
     return (
-      <div className={`inline-flex items-center space-x-3 ${className}`}>
+      <div className={`inline-flex items-center space-x-2.5 sm:space-x-3 max-w-full ${className}`}>
         {hasCustomImg ? (
           <CustomImageLogo width={dimension} height={dimension} />
         ) : (
           <CrestOnly width={dimension} height={dimension} />
         )}
-        <div>
-          <div className="flex items-center space-x-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span
               style={{ fontSize: `${effectiveTitleSize}px` }}
-              className={`font-black tracking-tight leading-none uppercase whitespace-nowrap truncate ${
+              className={`font-black tracking-tight leading-tight uppercase ${
                 titleClassName || (isDark ? 'text-white' : 'text-slate-900')
               }`}
             >
               {effectiveTitle}
             </span>
             <span
-              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 border ${
+              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 border whitespace-nowrap ${
                 isDark
                   ? 'bg-slate-800 text-indigo-300 border-slate-700'
                   : 'bg-indigo-50 text-indigo-700 border-indigo-200/60'
@@ -465,7 +465,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
           {showTagline && (
             <p
               style={{ fontSize: `${effectiveTaglineSize}px` }}
-              className={`font-medium leading-tight mt-1 ${
+              className={`font-medium leading-snug mt-1 ${
                 taglineClassName || (isDark ? 'text-slate-400' : 'text-slate-500')
               }`}
             >

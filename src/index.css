@@ -21,11 +21,13 @@ html {
   text-rendering: optimizeLegibility;
   max-width: 100%;
   overflow-x: hidden;
+  background-color: #ffffff;
 }
 
 body {
   font-family: var(--font-bangla);
   color: #0f172a;
+  background-color: #ffffff;
   line-height: 1.65;
   max-width: 100%;
   overflow-x: hidden;

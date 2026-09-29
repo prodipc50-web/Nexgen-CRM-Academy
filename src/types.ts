@@ -2131,6 +2131,10 @@ export interface WebsiteSectionVisibility {
   contactAndMap: boolean;
   geoLocalGuide?: boolean;
   footer?: boolean;
+  trustStrip?: boolean;
+  careerWizard?: boolean;
+  courseComparison?: boolean;
+  counselingBanner?: boolean;
 }
 
 export interface VideoTestimonial {
