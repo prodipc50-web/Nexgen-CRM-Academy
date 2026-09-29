@@ -156,7 +156,7 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Ribbon */}
-        <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 text-white p-5 sm:p-6 relative">
+        <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-700 text-white p-5 sm:p-6 relative">
           <button
             type="button"
             onClick={onClose}

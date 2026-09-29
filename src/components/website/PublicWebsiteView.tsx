@@ -1225,14 +1225,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                     className="bg-white rounded-3xl border border-slate-200 shadow-2xs hover:shadow-xl hover:border-indigo-300 transition-all flex flex-col overflow-hidden group"
                   >
                     {/* Visual Cover Thumbnail Image with Zoom on Hover */}
-                    <div className="relative aspect-video overflow-hidden bg-slate-900">
+                    <div className="relative aspect-video overflow-hidden bg-slate-100">
                       <img
                         src={thumbnail}
                         alt={c.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
 
                       {/* Floating Badge Tag (Top Right) */}
                       <div className="absolute top-3 right-3 flex items-center space-x-1.5">
@@ -1254,10 +1254,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                           e.stopPropagation();
                           window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }));
                         }}
-                        className="absolute top-3 left-3 flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-slate-900/85 hover:bg-indigo-600 text-white backdrop-blur-xs border border-white/20 shadow-md transition-all cursor-pointer z-10"
+                        className="absolute top-3 left-3 flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-white/95 hover:bg-white text-slate-900 hover:text-indigo-600 backdrop-blur-xs border border-slate-200 shadow-md transition-all cursor-pointer z-10"
                         title="সম্পূর্ণ ডেডিকেটেড ল্যান্ডিং পেজ দেখুন"
                       >
-                        <ExternalLink className="w-3 h-3 text-amber-300" />
+                        <ExternalLink className="w-3 h-3 text-indigo-600" />
                         <span>Course Page</span>
                       </button>
                     </div>
@@ -1719,7 +1719,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                             href={trainer.socialLinks.github}
                             target="_blank"
                             rel="noreferrer"
-                            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-900 text-slate-600 hover:text-white flex items-center justify-center transition-colors text-xs font-bold"
+                            className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-600 text-slate-600 hover:text-white flex items-center justify-center transition-colors text-xs font-bold"
                             title="GitHub Profile"
                           >
                             gh
@@ -1908,7 +1908,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 onClick={() => setSelectedBlogForReading(blog)}
                 className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xs hover:shadow-xl hover:border-indigo-300 transition-all flex flex-col cursor-pointer group"
               >
-                <div className="h-48 w-full overflow-hidden bg-slate-900 relative">
+                <div className="h-48 w-full overflow-hidden bg-slate-100 relative">
                   <img
                     src={blog.coverImage || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80'}
                     alt={blog.title}
@@ -2105,15 +2105,15 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 onClick={() => setSelectedGalleryImage(item)}
                 className="group relative bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-2xs hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
               >
-                <div className="h-56 w-full overflow-hidden bg-slate-900 relative">
+                <div className="h-56 w-full overflow-hidden bg-slate-100 relative">
                   <img
                     src={item.imageUrl}
                     alt={item.title}
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
-                  <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold rounded-full border border-white/20">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
+                  <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-white/95 backdrop-blur-xs text-slate-800 text-[10px] font-bold rounded-full border border-slate-200 shadow-xs">
                     {item.category}
                   </span>
                 </div>
@@ -2681,35 +2681,35 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       {/* Lightbox for Gallery Photo */}
       {selectedGalleryImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in"
           onClick={() => setSelectedGalleryImage(null)}
         >
           <div
-            className="max-w-4xl w-full bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-700"
+            className="max-w-4xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-200"
             onClick={e => e.stopPropagation()}
           >
-            <div className="relative max-h-[70vh] bg-black flex items-center justify-center">
+            <div className="relative max-h-[70vh] bg-slate-50 flex items-center justify-center p-3">
               <img
                 src={selectedGalleryImage.imageUrl}
                 alt={selectedGalleryImage.title}
                 referrerPolicy="no-referrer"
-                className="max-h-[70vh] w-auto object-contain"
+                className="max-h-[70vh] w-auto object-contain rounded-2xl shadow-md border border-slate-200"
               />
             </div>
-            <div className="p-5 flex items-center justify-between text-white bg-slate-900 border-t border-slate-800">
+            <div className="p-5 flex items-center justify-between text-slate-900 bg-white border-t border-slate-200">
               <div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-600/50 text-indigo-200">
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                   {selectedGalleryImage.category}
                 </span>
-                <h4 className="font-bold text-base mt-1">{selectedGalleryImage.title}</h4>
+                <h4 className="font-bold text-base text-slate-900 mt-1">{selectedGalleryImage.title}</h4>
                 {selectedGalleryImage.caption && (
-                  <p className="text-xs text-slate-400 mt-0.5">{selectedGalleryImage.caption}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{selectedGalleryImage.caption}</p>
                 )}
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedGalleryImage(null)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer transition-colors"
               >
                 Close
               </button>

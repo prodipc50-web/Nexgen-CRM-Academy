@@ -447,25 +447,25 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] text-slate-100">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-white border border-slate-200 w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] text-slate-800">
         
         {/* Header */}
-        <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-slate-700/80 flex items-center justify-between">
+        <div className="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600">
               <Award className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="text-lg font-black text-white tracking-tight">
+                <h3 className="text-lg font-black text-slate-900 tracking-tight">
                   ম্যানুয়াল সার্টিফিকেট আপলোড, ক্রপ ও এডিটর
                 </h3>
-                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[10px] font-black uppercase">
+                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200/80 rounded-full text-[10px] font-black uppercase">
                   Admin Tool
                 </span>
               </div>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-slate-500 font-medium">
                 সার্টিফিকেট স্ক্যান কপি আপলোড করুন, রিসাইজ ও ক্রপ করুন এবং ভেরিফিকেশন পোর্টালে যুক্ত করুন।
               </p>
             </div>
@@ -474,14 +474,14 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center justify-between px-6 py-2.5 bg-slate-850 border-b border-slate-800 text-xs font-bold">
+        <div className="flex items-center justify-between px-6 py-2.5 bg-slate-50 border-b border-slate-200 text-xs font-bold">
           <div className="flex items-center space-x-2">
             <button
               type="button"
@@ -489,10 +489,10 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                 setActiveTab('editor');
                 if (!editingCertId) resetForm();
               }}
-              className={`px-4 py-2 rounded-xl transition-all flex items-center space-x-2 ${
+              className={`px-4 py-2 rounded-xl transition-all flex items-center space-x-2 cursor-pointer ${
                 activeTab === 'editor'
-                  ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-indigo-600 text-white font-black shadow-md'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
               }`}
             >
               <Edit3 className="w-4 h-4" />
@@ -502,10 +502,10 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
             <button
               type="button"
               onClick={() => setActiveTab('registry')}
-              className={`px-4 py-2 rounded-xl transition-all flex items-center space-x-2 ${
+              className={`px-4 py-2 rounded-xl transition-all flex items-center space-x-2 cursor-pointer ${
                 activeTab === 'registry'
                   ? 'bg-indigo-600 text-white font-black shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
               }`}
             >
               <FileCheck className="w-4 h-4" />
@@ -517,7 +517,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
             <button
               type="button"
               onClick={resetForm}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium"
+              className="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium cursor-pointer"
             >
               + নতুন এন্ট্রি শুরু করুন
             </button>
@@ -543,14 +543,14 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
             <form onSubmit={handleSaveCertificate} className="space-y-6">
               
               {/* Image Upload & Interactive Cropper Section */}
-              <div className="bg-slate-850 p-5 rounded-2xl border border-slate-700/80 space-y-4">
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <h4 className="text-sm font-black text-white flex items-center space-x-2">
-                      <ImageIcon className="w-4 h-4 text-amber-400" />
+                    <h4 className="text-sm font-black text-slate-900 flex items-center space-x-2">
+                      <ImageIcon className="w-4 h-4 text-indigo-600" />
                       <span>সার্টিফিকেট ইমেজ স্ক্যান কপি (Upload & Crop)</span>
                     </h4>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-500 font-medium">
                       সার্টিফিকেটের ফটো বা স্ক্যান কপি আপলোড করুন। ক্রপ টুলের সাহায্যে সঠিক সাইজ ও ফ্রেমিং সেট করতে পারবেন।
                     </p>
                   </div>
@@ -566,7 +566,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer shadow-sm"
+                      className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer shadow-sm"
                     >
                       <Upload className="w-3.5 h-3.5" />
                       <span>ফাইল ব্রাউজ করুন</span>
@@ -576,7 +576,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       <button
                         type="button"
                         onClick={() => setIsCropping(true)}
-                        className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/40 text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer"
+                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer"
                       >
                         <Crop className="w-3.5 h-3.5" />
                         <span>রিসাইজ ও ক্রপ করুন</span>
@@ -587,7 +587,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       <button
                         type="button"
                         onClick={() => setUploadedImageSrc(null)}
-                        className="p-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white rounded-xl transition-colors"
+                        className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl transition-colors cursor-pointer"
                         title="রিমুভ করুন"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -598,11 +598,11 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
 
                 {/* Cropping Mode Interface */}
                 {isCropping && uploadedImageSrc ? (
-                  <div className="bg-slate-900 p-4 rounded-2xl border-2 border-amber-500/50 space-y-4 animate-in fade-in duration-150">
-                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-800 pb-3">
+                  <div className="bg-white p-4 rounded-2xl border-2 border-indigo-500/50 space-y-4 animate-in fade-in duration-150 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-200 pb-3">
                       {/* Aspect ratio presets */}
                       <div className="flex items-center space-x-1">
-                        <span className="text-slate-400 font-bold mr-1">অনুপাত:</span>
+                        <span className="text-slate-600 font-bold mr-1">অনুপাত:</span>
                         {[
                           { id: '1.414', label: 'A4 ল্যান্ডস্কেপ' },
                           { id: '16:9', label: '16:9 HD' },
@@ -613,10 +613,10 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                             key={aspect.id}
                             type="button"
                             onClick={() => setCropAspect(aspect.id as AspectRatio)}
-                            className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${
+                            className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer ${
                               cropAspect === aspect.id
-                                ? 'bg-amber-500 text-slate-950'
-                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                ? 'bg-indigo-600 text-white'
+                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             {aspect.label}
@@ -629,7 +629,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                         <button
                           type="button"
                           onClick={() => setCropRotation(r => (r - 90 + 360) % 360)}
-                          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300"
+                          className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
                           title="Rotate -90°"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
@@ -637,16 +637,16 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                         <button
                           type="button"
                           onClick={() => setCropRotation(r => (r + 90) % 360)}
-                          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300"
+                          className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
                           title="Rotate +90°"
                         >
                           <RotateCw className="w-3.5 h-3.5" />
                         </button>
 
-                        <div className="h-4 w-px bg-slate-700 mx-1" />
+                        <div className="h-4 w-px bg-slate-200 mx-1" />
 
-                        <div className="flex items-center space-x-1.5 bg-slate-800 px-2 py-1 rounded-lg">
-                          <ZoomOut className="w-3.5 h-3.5 text-slate-400" />
+                        <div className="flex items-center space-x-1.5 bg-slate-100 px-2 py-1 rounded-lg">
+                          <ZoomOut className="w-3.5 h-3.5 text-slate-500" />
                           <input
                             type="range"
                             min="0.5"
@@ -654,10 +654,10 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                             step="0.05"
                             value={cropZoom}
                             onChange={e => setCropZoom(parseFloat(e.target.value))}
-                            className="w-20 accent-amber-500 cursor-pointer"
+                            className="w-20 accent-indigo-600 cursor-pointer"
                           />
-                          <ZoomIn className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="font-mono text-[10px] text-amber-400 font-bold ml-1">
+                          <ZoomIn className="w-3.5 h-3.5 text-slate-500" />
+                          <span className="font-mono text-[10px] text-indigo-700 font-bold ml-1">
                             {Math.round(cropZoom * 100)}%
                           </span>
                         </div>
@@ -669,7 +669,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                             setCropRotation(0);
                             setCropPan({ x: 0, y: 0 });
                           }}
-                          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 text-[10px] font-bold"
+                          className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-[10px] font-bold cursor-pointer"
                           title="রিসেট পজিশন"
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
@@ -683,14 +683,14 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       onMouseMove={handleMouseMove}
                       onMouseUp={handleMouseUp}
                       onMouseLeave={handleMouseUp}
-                      className="relative w-full max-h-[360px] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                      className="relative w-full max-h-[360px] bg-slate-100 rounded-xl overflow-hidden border border-slate-200 flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
                     >
                       <canvas
                         ref={cropCanvasRef}
-                        className="max-h-[340px] max-w-full object-contain shadow-2xl rounded"
+                        className="max-h-[340px] max-w-full object-contain shadow-md rounded"
                       />
-                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-slate-950/80 backdrop-blur-sm border border-slate-800 rounded-md text-[10px] text-slate-400 flex items-center space-x-1 pointer-events-none">
-                        <Move className="w-3 h-3 text-amber-400" />
+                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-md text-[10px] text-slate-600 flex items-center space-x-1 pointer-events-none shadow-xs">
+                        <Move className="w-3 h-3 text-indigo-600" />
                         <span>ড্র্যাগ করে সঠিক পজিশনে আনুন</span>
                       </div>
                     </div>
@@ -700,14 +700,14 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       <button
                         type="button"
                         onClick={() => setIsCropping(false)}
-                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl"
+                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer"
                       >
                         বাতিল
                       </button>
                       <button
                         type="button"
                         onClick={handleApplyCrop}
-                        className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl shadow-lg flex items-center space-x-1.5"
+                        className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-xl shadow-md flex items-center space-x-1.5 cursor-pointer"
                       >
                         <Check className="w-4 h-4" />
                         <span>ক্রপ ও সেভ করুন (Apply Crop)</span>
@@ -716,18 +716,18 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                   </div>
                 ) : uploadedImageSrc ? (
                   /* Uploaded Image Preview Box */
-                  <div className="relative rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-950 p-2 group flex flex-col items-center">
-                    <div className="relative max-h-64 w-full flex items-center justify-center overflow-hidden rounded-xl bg-slate-900">
+                  <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 bg-white p-2 group flex flex-col items-center">
+                    <div className="relative max-h-64 w-full flex items-center justify-center overflow-hidden rounded-xl bg-slate-50 border border-slate-100">
                       <img
                         src={uploadedImageSrc}
                         alt="Uploaded Certificate Scanned Copy"
-                        className="max-h-60 object-contain rounded-lg shadow-lg"
+                        className="max-h-60 object-contain rounded-lg shadow-sm"
                       />
-                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-3">
+                      <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-3">
                         <button
                           type="button"
                           onClick={() => setLightboxImageUrl(uploadedImageSrc)}
-                          className="p-2.5 bg-slate-900/90 text-white rounded-xl hover:bg-indigo-600 transition-colors shadow-lg"
+                          className="p-2.5 bg-white text-slate-900 rounded-xl hover:bg-indigo-600 hover:text-white transition-colors shadow-lg cursor-pointer"
                           title="ফুল ভিউ"
                         >
                           <Maximize2 className="w-4 h-4" />
@@ -735,19 +735,19 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                         <button
                           type="button"
                           onClick={() => setIsCropping(true)}
-                          className="p-2.5 bg-slate-900/90 text-white rounded-xl hover:bg-amber-600 transition-colors shadow-lg"
+                          className="p-2.5 bg-white text-slate-900 rounded-xl hover:bg-indigo-600 hover:text-white transition-colors shadow-lg cursor-pointer"
                           title="রি-ক্রপ করুন"
                         >
                           <Crop className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <div className="w-full flex items-center justify-between text-[11px] text-slate-400 mt-2 px-1">
-                      <span className="text-emerald-400 font-bold flex items-center space-x-1">
+                    <div className="w-full flex items-center justify-between text-[11px] text-slate-600 mt-2 px-1">
+                      <span className="text-emerald-700 font-bold flex items-center space-x-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>সার্টিফিকেট ইমেজ রেডি</span>
                       </span>
-                      <span className="font-mono">High Quality Scaled</span>
+                      <span className="font-mono text-slate-500">High Quality Scaled</span>
                     </div>
                   </div>
                 ) : (
@@ -756,23 +756,23 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                     onDragOver={e => e.preventDefault()}
                     onDrop={handleDropFile}
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-700 hover:border-amber-500/70 bg-slate-900/50 hover:bg-slate-900 rounded-2xl p-8 text-center cursor-pointer transition-all space-y-3"
+                    className="border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-white hover:bg-indigo-50/20 rounded-2xl p-8 text-center cursor-pointer transition-all space-y-3"
                   >
-                    <div className="w-14 h-14 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-2xl mx-auto flex items-center justify-center">
+                    <div className="w-14 h-14 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center">
                       <Upload className="w-7 h-7" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">
-                        সার্টিফিকেট ছবি বা স্ক্যান কপি এখানে ড্রপ করুন অথবা <span className="text-amber-400 underline">ব্রাউজ করুন</span>
+                      <p className="text-sm font-bold text-slate-800">
+                        সার্টিফিকেট ছবি বা স্ক্যান কপি এখানে ড্রপ করুন অথবা <span className="text-indigo-600 underline">ব্রাউজ করুন</span>
                       </p>
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-slate-500 mt-1">
                         PNG, JPG, JPEG বা WebP সাপোর্ট করে (A4 Landscape অনুপাত রিকমেন্ডেড)
                       </p>
                     </div>
 
                     {/* Presets Gallery */}
                     <div className="pt-2">
-                      <p className="text-[11px] text-slate-400 mb-2 font-medium">অথবা ডেমো টেমপ্লেট থেকে সিলেক্ট করুন:</p>
+                      <p className="text-[11px] text-slate-500 mb-2 font-medium">অথবা ডেমো টেমপ্লেট থেকে সিলেক্ট করুন:</p>
                       <div className="flex flex-wrap justify-center gap-2">
                         {PRESET_CERTIFICATES.map(preset => (
                           <button
@@ -783,7 +783,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                               setUploadedImageSrc(preset.url);
                               setCourseName(preset.course);
                             }}
-                            className="px-2.5 py-1 bg-slate-800 hover:bg-indigo-900/60 border border-slate-700 hover:border-indigo-500 text-[11px] rounded-lg text-slate-300 font-medium transition-colors"
+                            className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-[11px] rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
                           >
                             {preset.name}
                           </button>
@@ -795,35 +795,35 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
               </div>
 
               {/* Certificate Information Fields */}
-              <div className="bg-slate-850 p-5 rounded-2xl border border-slate-700/80 space-y-4">
-                <h4 className="text-sm font-black text-white flex items-center space-x-2">
-                  <FileCheck className="w-4 h-4 text-emerald-400" />
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                <h4 className="text-sm font-black text-slate-900 flex items-center space-x-2">
+                  <FileCheck className="w-4 h-4 text-emerald-600" />
                   <span>সার্টিফিকেট ও শিক্ষার্থীর তথ্য (Certificate Registry Data)</span>
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                   {/* Student Name */}
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">
-                      শিক্ষার্থীর নাম <span className="text-rose-400">*</span>
+                    <label className="block text-slate-700 font-bold mb-1">
+                      শিক্ষার্থীর নাম <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
-                      <User className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         required
                         value={studentName}
                         onChange={e => setStudentName(e.target.value)}
                         placeholder="e.g. মোঃ তানভীর আহমেদ"
-                        className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-medium"
+                        className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-medium"
                       />
                     </div>
                   </div>
 
                   {/* Student ID */}
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">
-                      স্টুডেন্ট রোল / আইডি <span className="text-rose-400">*</span>
+                    <label className="block text-slate-700 font-bold mb-1">
+                      স্টুডেন্ট রোল / আইডি <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -831,20 +831,20 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       value={studentId}
                       onChange={e => setStudentId(e.target.value)}
                       placeholder="e.g. STU-2026-089"
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-mono font-medium"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-mono font-medium"
                     />
                   </div>
 
                   {/* Certificate Serial Number */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-slate-300 font-bold">
-                        সার্টিফিকেট নম্বর <span className="text-rose-400">*</span>
+                      <label className="text-slate-700 font-bold">
+                        সার্টিফিকেট নম্বর <span className="text-rose-500">*</span>
                       </label>
                       <button
                         type="button"
                         onClick={() => setCertificateNumber(generateSerial())}
-                        className="text-[10px] text-amber-400 hover:underline flex items-center space-x-0.5"
+                        className="text-[10px] text-indigo-600 hover:underline flex items-center space-x-0.5 cursor-pointer font-bold"
                       >
                         <RefreshCw className="w-2.5 h-2.5" />
                         <span>জেনারেট</span>
@@ -856,14 +856,14 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       value={certificateNumber}
                       onChange={e => setCertificateNumber(e.target.value)}
                       placeholder="e.g. NCA-CERT-2026-8941"
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-amber-300 font-mono font-bold outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-indigo-700 font-mono font-bold outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
 
                   {/* Course Title */}
                   <div className="sm:col-span-2">
-                    <label className="block text-slate-300 font-bold mb-1">
-                      কোর্সের নাম (Course Title) <span className="text-rose-400">*</span>
+                    <label className="block text-slate-700 font-bold mb-1">
+                      কোর্সের নাম (Course Title) <span className="text-rose-500">*</span>
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -872,7 +872,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                         value={courseName}
                         onChange={e => setCourseName(e.target.value)}
                         placeholder="e.g. Professional Full-Stack Web Development with AI"
-                        className="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-medium"
+                        className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-medium"
                       />
                       <select
                         onChange={e => {
@@ -882,7 +882,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                             setCourseName(crs.name);
                           }
                         }}
-                        className="bg-slate-800 border border-slate-700 text-slate-300 rounded-xl px-2.5 text-xs outline-none cursor-pointer max-w-[140px]"
+                        className="bg-white border border-slate-200 text-slate-700 rounded-xl px-2.5 text-xs outline-none cursor-pointer max-w-[140px]"
                       >
                         <option value="">কোর্স লিস্ট ▾</option>
                         {courses.map(c => (
@@ -896,7 +896,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
 
                   {/* Batch Number */}
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 font-bold mb-1">
                       ব্যাচ নম্বর / সেশন
                     </label>
                     <input
@@ -904,19 +904,19 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       value={batchName}
                       onChange={e => setBatchName(e.target.value)}
                       placeholder="e.g. Batch-2026-B1"
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-medium"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-medium"
                     />
                   </div>
 
                   {/* Performance / Grade */}
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 font-bold mb-1">
                       গ্রেড / ফলাফল (Grade)
                     </label>
                     <select
                       value={grade}
                       onChange={e => setGrade(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-medium cursor-pointer"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-medium cursor-pointer"
                     >
                       <option value="A+ (Distinction)">A+ (Distinction)</option>
                       <option value="A+">A+</option>
@@ -930,33 +930,33 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
 
                   {/* Issue Date */}
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 font-bold mb-1">
                       ইস্যুর তারিখ (Issue Date)
                     </label>
                     <input
                       type="date"
                       value={issueDate}
                       onChange={e => setIssueDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
 
                   {/* Completion Date */}
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 font-bold mb-1">
                       কোর্স সমাপ্তির তারিখ
                     </label>
                     <input
                       type="date"
                       value={completionDate}
                       onChange={e => setCompletionDate(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
 
                   {/* Signatory / Authority */}
                   <div className="sm:col-span-2">
-                    <label className="block text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 font-bold mb-1">
                       অনুমোদনকারী স্বাক্ষরকারী (Signatory Name & Title)
                     </label>
                     <input
@@ -964,19 +964,19 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       value={instructorSignatureName}
                       onChange={e => setInstructorSignatureName(e.target.value)}
                       placeholder="e.g. Engr. Md. Shariful Islam (Academic Director)"
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-medium"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-medium"
                     />
                   </div>
 
                   {/* Status */}
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 font-bold mb-1">
                       ভেরিফিকেশন স্ট্যাটাস
                     </label>
                     <select
                       value={status}
                       onChange={e => setStatus(e.target.value as any)}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-medium cursor-pointer"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-medium cursor-pointer"
                     >
                       <option value="Issued">Issued (সক্রিয় ও ভেরিফাইড)</option>
                       <option value="Draft">Draft (খসড়া)</option>
@@ -986,7 +986,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
 
                   {/* Special Remarks */}
                   <div className="sm:col-span-3">
-                    <label className="block text-slate-300 font-bold mb-1">
+                    <label className="block text-slate-700 font-bold mb-1">
                       বিশেষ নোট / মন্তব্য (Special Remarks)
                     </label>
                     <input
@@ -994,18 +994,18 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       value={remarks}
                       onChange={e => setRemarks(e.target.value)}
                       placeholder={`e.g. Authenticated by ${academySettings?.instituteName || 'Academy'} Academic Board & Managing Director.`}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 font-medium"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-medium"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
                   ফরম রিসেট
                 </button>
@@ -1014,14 +1014,14 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors"
+                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                   >
                     বন্ধ করুন
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all disabled:opacity-50"
+                    className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md flex items-center space-x-2 transition-all disabled:opacity-50 cursor-pointer"
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>
@@ -1034,7 +1034,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
           ) : (
             /* Registry & Management Tab */
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-850 p-4 rounded-2xl border border-slate-800">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <div className="relative w-full sm:w-80">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
@@ -1042,7 +1042,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                     value={searchFilter}
                     onChange={e => setSearchFilter(e.target.value)}
                     placeholder="নাম, রোল, বা সার্টিফিকেট নং দিয়ে খুঁজুন..."
-                    className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs outline-none focus:border-amber-500"
+                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 font-medium"
                   />
                 </div>
 
@@ -1053,7 +1053,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       resetForm();
                       setActiveTab('editor');
                     }}
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black rounded-xl shadow transition-colors flex items-center space-x-1.5"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-xl shadow-md transition-colors flex items-center space-x-1.5 cursor-pointer"
                   >
                     <Award className="w-3.5 h-3.5" />
                     <span>+ নতুন সার্টিফিকেট যোগ করুন</span>
@@ -1074,36 +1074,36 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                   return (
                     <div
                       key={cert.id}
-                      className="bg-slate-850 border border-slate-750 hover:border-indigo-500/50 rounded-2xl p-4 transition-all shadow-md flex flex-col justify-between space-y-3"
+                      className="bg-white border border-slate-200 hover:border-indigo-400 rounded-2xl p-4 transition-all shadow-sm flex flex-col justify-between space-y-3"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start space-x-3">
                           {cert.certificateImageUrl ? (
                             <div
                               onClick={() => setLightboxImageUrl(cert.certificateImageUrl!)}
-                              className="w-16 h-12 rounded-lg overflow-hidden border border-slate-700 bg-slate-950 shrink-0 cursor-pointer group relative"
+                              className="w-16 h-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 shrink-0 cursor-pointer group relative"
                             >
                               <img
                                 src={cert.certificateImageUrl}
                                 alt={dispName}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                               />
-                              <div className="absolute inset-0 bg-slate-950/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute inset-0 bg-slate-900/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Eye className="w-3.5 h-3.5 text-white" />
                               </div>
                             </div>
                           ) : (
-                            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                            <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200/80 text-indigo-600 flex items-center justify-center shrink-0">
                               <Award className="w-6 h-6" />
                             </div>
                           )}
 
                           <div>
-                            <h5 className="text-sm font-black text-white">{dispName}</h5>
-                            <p className="text-[11px] text-slate-400">
-                              ID: <span className="font-mono text-slate-300 font-bold">{dispRoll}</span>
+                            <h5 className="text-sm font-black text-slate-900">{dispName}</h5>
+                            <p className="text-[11px] text-slate-500">
+                              ID: <span className="font-mono text-slate-700 font-bold">{dispRoll}</span>
                             </p>
-                            <p className="text-xs text-amber-300 font-bold mt-0.5 line-clamp-1">
+                            <p className="text-xs text-indigo-700 font-bold mt-0.5 line-clamp-1">
                               {dispCourse}
                             </p>
                           </div>
@@ -1112,27 +1112,27 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase shrink-0 ${
                             cert.status === 'Issued'
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-rose-50 text-rose-700 border border-rose-200'
                           }`}
                         >
                           {cert.status || 'Issued'}
                         </span>
                       </div>
 
-                      <div className="bg-slate-900/80 p-2 rounded-xl text-[11px] flex items-center justify-between text-slate-300 font-mono">
+                      <div className="bg-slate-50 p-2 rounded-xl text-[11px] flex items-center justify-between text-slate-700 font-mono border border-slate-200/70">
                         <span>Cert #{dispNum}</span>
-                        <span className="text-amber-400 font-bold">{cert.grade}</span>
+                        <span className="text-indigo-700 font-bold">{cert.grade}</span>
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-xs">
+                      <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
                         <div className="flex items-center space-x-1.5">
                           {cert.certificateImageUrl && (
                             <button
                               type="button"
                               onClick={() => setLightboxImageUrl(cert.certificateImageUrl!)}
-                              className="p-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-lg transition-colors"
+                              className="p-1.5 bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-lg transition-colors cursor-pointer border border-slate-200"
                               title="সার্টিফিকেট দেখুন"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -1144,7 +1144,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                               navigator.clipboard.writeText(dispNum);
                               showToast(`সার্টিফিকেট নং কপি হয়েছে: ${dispNum}`);
                             }}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors"
+                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition-colors cursor-pointer border border-slate-200"
                             title="সার্টিফিকেট নম্বর কপি করুন"
                           >
                             <Copy className="w-3.5 h-3.5" />
@@ -1156,7 +1156,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                                 onSelectForVerification(dispNum);
                                 onClose();
                               }}
-                              className="px-2 py-1 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 hover:text-white border border-indigo-700/40 rounded-lg text-[11px] font-bold"
+                              className="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[11px] font-bold cursor-pointer"
                               title="ওয়েবসাইটে ভেরিফাই রেজাল্ট ওপেন করুন"
                             >
                               Verify View
@@ -1168,7 +1168,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                           <button
                             type="button"
                             onClick={() => loadCertificateForEdit(cert)}
-                            className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 rounded-lg text-xs font-bold transition-colors flex items-center space-x-1"
+                            className="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors flex items-center space-x-1 border border-indigo-200 cursor-pointer"
                           >
                             <Edit3 className="w-3 h-3" />
                             <span>এডিট / ক্রপ</span>
@@ -1181,7 +1181,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                                 showToast('সার্টিফিকেট মুছে ফেলা হয়েছে।');
                               }
                             }}
-                            className="p-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white rounded-lg transition-colors"
+                            className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-colors border border-rose-200 cursor-pointer"
                             title="মুছে ফেলুন"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1193,9 +1193,9 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                 })}
 
                 {filteredCertificates.length === 0 && (
-                  <div className="col-span-full py-12 text-center text-slate-400 space-y-2">
-                    <Award className="w-10 h-10 mx-auto text-slate-600" />
-                    <p className="text-sm font-bold text-slate-300">কোনো সার্টিফিকেট পাওয়া যায়নি</p>
+                  <div className="col-span-full py-12 text-center text-slate-500 space-y-2">
+                    <Award className="w-10 h-10 mx-auto text-slate-300" />
+                    <p className="text-sm font-bold text-slate-700">কোনো সার্টিফিকেট পাওয়া যায়নি</p>
                     <p className="text-xs">নতুন সার্টিফিকেট আপলোড করতে উপরের বাটনে ক্লিক করুন।</p>
                   </div>
                 )}
@@ -1209,16 +1209,16 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
       {lightboxImageUrl && (
         <div
           onClick={() => setLightboxImageUrl(null)}
-          className="fixed inset-0 z-60 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-60 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="relative max-w-4xl max-h-[90vh] bg-slate-900 border border-slate-700 rounded-3xl p-3 shadow-2xl flex flex-col items-center"
+            className="relative max-w-4xl max-h-[90vh] bg-white border border-slate-200 rounded-3xl p-4 shadow-2xl flex flex-col items-center"
           >
             <button
               type="button"
               onClick={() => setLightboxImageUrl(null)}
-              className="absolute top-4 right-4 p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-full transition-colors z-10"
+              className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors z-10 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1226,19 +1226,19 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
             <img
               src={lightboxImageUrl}
               alt="High Definition Certificate"
-              className="max-h-[80vh] w-auto object-contain rounded-2xl shadow-xl"
+              className="max-h-[80vh] w-auto object-contain rounded-2xl shadow-md border border-slate-200"
             />
 
             <div className="w-full flex items-center justify-between pt-3 px-3">
-              <span className="text-xs text-slate-400 font-bold flex items-center space-x-1">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs text-slate-600 font-bold flex items-center space-x-1">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
                 <span>{academySettings?.instituteName || 'Academy'} Verified Certificate Registry Image</span>
               </span>
               <div className="flex items-center space-x-2">
                 <a
                   href={lightboxImageUrl}
                   download={`${(academySettings?.instituteName || 'academy').toLowerCase().replace(/\s+/g, '-')}-certificate.jpg`}
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors"
+                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer shadow-sm"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>ডাউনলোড</span>
@@ -1261,7 +1261,7 @@ export const ManualCertificateManagerModal: React.FC<ManualCertificateManagerMod
                       setTimeout(() => printWin.print(), 250);
                     }
                   }}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors"
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors border border-slate-200 cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>প্রিন্ট</span>

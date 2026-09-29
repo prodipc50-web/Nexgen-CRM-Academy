@@ -174,7 +174,7 @@ export const CampusTourModal: React.FC<CampusTourModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Ribbon */}
-        <div className="bg-gradient-to-r from-emerald-900 via-teal-800 to-slate-900 text-white p-5 sm:p-6 relative">
+        <div className="bg-gradient-to-r from-emerald-700 via-teal-600 to-indigo-700 text-white p-5 sm:p-6 relative">
           <button
             type="button"
             onClick={onClose}

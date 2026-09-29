@@ -180,7 +180,7 @@ export const LeadCapturePopupModal: React.FC<LeadCapturePopupModalProps> = ({
             <button
               type="button"
               onClick={handleClose}
-              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl transition-all cursor-pointer"
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition-all cursor-pointer shadow-md"
             >
               ওয়েবসাইটে ফিরে যান
             </button>
@@ -189,7 +189,7 @@ export const LeadCapturePopupModal: React.FC<LeadCapturePopupModalProps> = ({
           /* FORM SUBMISSION VIEW */
           <div>
             {/* Top Gradient Header */}
-            <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 p-6 sm:p-7 text-white relative">
+            <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-700 p-6 sm:p-7 text-white relative">
               {config?.badgeText && (
                 <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-wider mb-2.5 shadow-xs">
                   <Sparkles className="w-3 h-3 text-slate-950" />

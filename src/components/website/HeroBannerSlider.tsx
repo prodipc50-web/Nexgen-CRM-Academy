@@ -82,7 +82,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
 
   return (
     <div
-      className="relative w-full rounded-3xl overflow-hidden shadow-lg border border-slate-200/90 bg-slate-900 group"
+      className="relative w-full rounded-3xl overflow-hidden shadow-lg border border-slate-200/90 bg-slate-100 group"
       onMouseEnter={() => setIsPlaying(false)}
       onMouseLeave={() => setIsPlaying(true)}
     >
@@ -176,7 +176,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               type="button"
               onClick={handlePrev}
               aria-label="Previous Slide"
-              className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-950/60 hover:bg-indigo-600 text-white border border-slate-700/80 flex items-center justify-center backdrop-blur-md transition-all opacity-80 group-hover:opacity-100 hover:scale-110 active:scale-95"
+              className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-800 hover:text-indigo-600 border border-slate-200 flex items-center justify-center backdrop-blur-md transition-all shadow-md hover:scale-110 active:scale-95 cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -185,7 +185,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
               type="button"
               onClick={handleNext}
               aria-label="Next Slide"
-              className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-950/60 hover:bg-indigo-600 text-white border border-slate-700/80 flex items-center justify-center backdrop-blur-md transition-all opacity-80 group-hover:opacity-100 hover:scale-110 active:scale-95"
+              className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-800 hover:text-indigo-600 border border-slate-200 flex items-center justify-center backdrop-blur-md transition-all shadow-md hover:scale-110 active:scale-95 cursor-pointer"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -202,10 +202,10 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
                 type="button"
                 onClick={() => setCurrentIndex(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`transition-all duration-300 rounded-full ${
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
                   idx === currentIndex
-                    ? 'w-8 h-2 bg-indigo-500 shadow-md shadow-indigo-500/50'
-                    : 'w-2 h-2 bg-white/40 hover:bg-white/70'
+                    ? 'w-8 h-2 bg-indigo-600 shadow-md shadow-indigo-600/50'
+                    : 'w-2 h-2 bg-white/60 hover:bg-white'
                 }`}
               />
             ))}
@@ -216,11 +216,11 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
             <button
               type="button"
               onClick={() => setIsPlaying(p => !p)}
-              className="p-1.5 rounded-lg bg-slate-950/60 hover:bg-slate-900 border border-slate-800 text-slate-300 text-xs flex items-center space-x-1 backdrop-blur-md"
+              className="p-1.5 rounded-lg bg-white/90 hover:bg-white border border-slate-200 text-slate-700 text-xs flex items-center space-x-1 backdrop-blur-md shadow-xs cursor-pointer"
               title={isPlaying ? 'Pause Auto-slide' : 'Play Auto-slide'}
             >
-              {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
-              <span className="text-[10px] font-mono pr-1">
+              {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-600" />}
+              <span className="text-[10px] font-mono pr-1 text-slate-700 font-bold">
                 0{currentIndex + 1}/0{effectiveSlides.length}
               </span>
             </button>

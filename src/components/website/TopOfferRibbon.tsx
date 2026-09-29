@@ -80,16 +80,16 @@ export const TopOfferRibbon: React.FC<TopOfferRibbonProps> = ({
             <button
               type="button"
               onClick={() => handleCopyCoupon(config.couponCode!)}
-              className="inline-flex items-center space-x-1.5 bg-black/30 hover:bg-black/40 border border-white/40 px-2.5 py-0.5 rounded-md font-mono text-[11px] font-black cursor-pointer transition-all active:scale-95 shadow-inner"
+              className="inline-flex items-center space-x-1.5 bg-white/20 hover:bg-white/30 border border-white/40 px-2.5 py-0.5 rounded-md font-mono text-[11px] font-black cursor-pointer transition-all active:scale-95 shadow-xs"
               title="ক্লিক করে কোড কপি করুন"
             >
-              <span className="text-amber-300">{config.couponCode}</span>
+              <span className="text-white font-bold">{config.couponCode}</span>
               {copied ? (
                 <Check className="w-3 h-3 text-emerald-300" />
               ) : (
-                <Copy className="w-3 h-3 text-white/70" />
+                <Copy className="w-3 h-3 text-white/90" />
               )}
-              <span className="text-[10px] text-white/80 font-sans hidden sm:inline">
+              <span className="text-[10px] text-white/90 font-sans hidden sm:inline">
                 {copied ? 'কপি হয়েছে!' : 'কপি করুন'}
               </span>
             </button>
@@ -97,8 +97,8 @@ export const TopOfferRibbon: React.FC<TopOfferRibbonProps> = ({
 
           {/* Expiry Countdown / Date Tag */}
           {config.expiresAt && (
-            <span className="hidden md:inline-flex items-center space-x-1 text-[11px] text-amber-200 font-medium bg-black/20 px-2 py-0.5 rounded-full border border-amber-300/30">
-              <Clock className="w-3 h-3 text-amber-300" />
+            <span className="hidden md:inline-flex items-center space-x-1 text-[11px] text-white font-medium bg-white/20 px-2 py-0.5 rounded-full border border-white/30">
+              <Clock className="w-3 h-3 text-white" />
               <span>{config.expiresAt}</span>
             </span>
           )}

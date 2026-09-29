@@ -13,7 +13,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({ isOpen, onClose, b
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in"
+      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in"
       onClick={onClose}
     >
       <div
@@ -21,20 +21,20 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({ isOpen, onClose, b
         onClick={e => e.stopPropagation()}
       >
         {/* Cover Image Header */}
-        <div className="relative h-64 sm:h-80 bg-slate-900 overflow-hidden">
+        <div className="relative h-64 sm:h-80 bg-slate-100 overflow-hidden">
           <img
             src={blog.coverImage || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80'}
             alt={blog.title}
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
 
           {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors"
+            className="absolute top-4 right-4 p-2 bg-white/90 hover:bg-white text-slate-700 hover:text-slate-900 rounded-full transition-colors shadow-md cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

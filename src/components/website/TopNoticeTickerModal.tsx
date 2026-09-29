@@ -70,16 +70,16 @@ export const TopNoticeTickerModal: React.FC<TopNoticeTickerModalProps> = ({
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div className="px-6 py-4 bg-white text-slate-900 flex items-center justify-between border-b border-slate-200">
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30">
+            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200/80">
               <Megaphone className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-black text-base text-white">
+              <h3 className="font-black text-base text-slate-900">
                 টপ নোটিশ ও জরুরি ব্যানার এডিটর
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 font-medium">
                 Manage Top Notice Ticker & Promotional Header Banner
               </p>
             </div>
@@ -88,7 +88,7 @@ export const TopNoticeTickerModal: React.FC<TopNoticeTickerModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-500 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

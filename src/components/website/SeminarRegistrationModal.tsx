@@ -206,7 +206,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
             <button
               type="button"
               onClick={onClose}
-              className="mt-2 px-6 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800"
+              className="mt-2 px-6 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700 shadow-md cursor-pointer"
             >
               সম্পন্ন (Done)
             </button>

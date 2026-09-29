@@ -1414,7 +1414,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               </div>
 
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent flex items-end justify-between p-4 pointer-events-none">
-                <span className="text-xs font-bold text-white bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-700">
+                <span className="text-xs font-bold text-slate-800 bg-white/95 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-200 shadow-sm">
                   🏢 আধুনিক কম্পিউটার ল্যাব ও এসি ক্লাসরুম
                 </span>
                 {canEdit && (
@@ -2841,7 +2841,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   <div>
                     <h4 className="text-sm sm:text-base font-black text-white leading-snug drop-shadow-sm">{photo.title}</h4>
                     {photo.category && (
-                      <span className="inline-block mt-1 text-xs font-bold text-emerald-300 bg-slate-900/80 border border-emerald-500/40 px-2 py-0.5 rounded-md">
+                      <span className="inline-block mt-1 text-xs font-bold text-slate-800 bg-white/95 backdrop-blur-md border border-slate-200 px-2 py-0.5 rounded-md shadow-xs">
                         {photo.category}
                       </span>
                     )}
@@ -3031,16 +3031,16 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
       {/* OTP Verification Modal */}
       {isOtpModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-sm w-full space-y-4 text-center shadow-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-200/80 flex items-center justify-center mx-auto">
               <Lock className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-black text-white text-base">OTP সিকিউরিটি ভেরিফিকেশন</h3>
-              <p className="text-xs sm:text-sm text-slate-200 mt-1 font-medium">{otpNotice || `${leadPhone} নাম্বারে ৬ ডিজিটের কোড পাঠানো হয়েছে`}</p>
+              <h3 className="font-black text-slate-950 text-base">OTP সিকিউরিটি ভেরিফিকেশন</h3>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">{otpNotice || `${leadPhone} নাম্বারে ৬ ডিজিটের কোড পাঠানো হয়েছে`}</p>
               {otpSimulatedCode && (
-                <div className="mt-2 p-2 bg-indigo-500/20 border border-indigo-500/40 rounded-xl text-xs font-mono text-indigo-200 font-bold">
+                <div className="mt-2 p-2 bg-indigo-50 border border-indigo-200 rounded-xl text-xs font-mono text-indigo-700 font-bold">
                   Simulated Code: {otpSimulatedCode}
                 </div>
               )}
@@ -3048,7 +3048,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
             <form onSubmit={handleVerifyOtpSubmit} className="space-y-3">
               {otpError && (
-                <div className="p-2 bg-rose-500/20 text-rose-200 text-xs font-bold rounded-xl">{otpError}</div>
+                <div className="p-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-xl">{otpError}</div>
               )}
               <input
                 type="text"
@@ -3057,20 +3057,20 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 value={otpCode}
                 onChange={e => setOtpCode(e.target.value)}
                 placeholder="XXXXXX"
-                className="w-full text-center tracking-widest text-lg font-bold font-mono py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500"
+                className="w-full text-center tracking-widest text-lg font-bold font-mono py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-600"
               />
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setIsOtpModalOpen(false)}
-                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold cursor-pointer"
+                  className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isVerifyingOtp}
-                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black cursor-pointer"
+                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold cursor-pointer"
                 >
                   {isVerifyingOtp ? 'Verifying...' : 'Verify OTP'}
                 </button>
@@ -3084,31 +3084,31 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       {selectedLightboxImage && (
         <div
           onClick={() => setSelectedLightboxImage(null)}
-          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="relative max-w-4xl w-full bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-3 p-3 sm:p-4"
+            className="relative max-w-4xl w-full bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl space-y-3 p-3 sm:p-4"
           >
             {/* Top Bar */}
             <div className="flex items-center justify-between px-2 pt-1">
               <div>
-                <h4 className="text-base font-black text-white">{selectedLightboxImage.title || 'ক্যাম্পাস ও ল্যাব ফটো'}</h4>
+                <h4 className="text-base font-black text-slate-950">{selectedLightboxImage.title || 'ক্যাম্পাস ও ল্যাব ফটো'}</h4>
                 {selectedLightboxImage.category && (
-                  <span className="text-xs text-emerald-400 font-semibold">{selectedLightboxImage.category}</span>
+                  <span className="text-xs text-indigo-600 font-semibold">{selectedLightboxImage.category}</span>
                 )}
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedLightboxImage(null)}
-                className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* High-res Image */}
-            <div className="relative rounded-2xl overflow-hidden bg-black max-h-[70vh] flex items-center justify-center">
+            <div className="relative rounded-2xl overflow-hidden bg-slate-100 max-h-[70vh] flex items-center justify-center">
               <img
                 src={selectedLightboxImage.url}
                 alt={selectedLightboxImage.title || 'Lab Photo Zoom'}
@@ -3123,27 +3123,27 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       {isVideoModalOpen && (
         <div
           onClick={() => setIsVideoModalOpen(false)}
-          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="relative max-w-3xl w-full bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-3 p-4"
+            className="relative max-w-3xl w-full bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl space-y-3 p-4"
           >
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center space-x-2">
-                <Video className="w-5 h-5 text-indigo-400" />
-                <h4 className="text-base font-black text-white">{course.name} - ল্যাব ও ক্লাস ওভারভিউ</h4>
+                <Video className="w-5 h-5 text-indigo-600" />
+                <h4 className="text-base font-black text-slate-950">{course.name} - ল্যাব ও ক্লাস ওভারভিউ</h4>
               </div>
               <button
                 type="button"
                 onClick={() => setIsVideoModalOpen(false)}
-                className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center relative">
+            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center relative">
               {landingConfig.videoPromoUrl ? (
                 <iframe
                   src={
@@ -3158,11 +3158,11 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 />
               ) : (
                 <div className="p-6 text-center space-y-3">
-                  <div className="w-16 h-16 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto">
+                  <div className="w-16 h-16 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
                     <Play className="w-8 h-8 ml-1" />
                   </div>
                   <h5 className="font-bold text-white text-base">ক্লাস ট্রেলার ও ল্যাব ভিডিও</h5>
-                  <p className="text-xs sm:text-sm text-slate-200 max-w-md mx-auto font-medium">
+                  <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto font-medium">
                     {canEdit
                       ? 'অ্যাডমিন প্যানেলের এডিটর থেকে সরাসরি আপনার ইউটিউব বা ভিডিও লিংক যুক্ত করতে পারেন।'
                       : 'খুব শীঘ্রই ভিডিওটি আপডেট করা হবে। আমাদের ক্যাম্পাসে এসে সরাসরি ফ্রি ডেমো ক্লাস দেখতে পারেন।'}
@@ -3190,32 +3190,32 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
       {isScheduleManagerOpen && canEdit && (
         <div
           onClick={() => setIsScheduleManagerOpen(false)}
-          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="relative max-w-lg w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-5 sm:p-6 text-left"
+            className="relative max-w-lg w-full bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-5 sm:p-6 text-left"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center space-x-2 text-emerald-400">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2 text-indigo-600">
                 <Calendar className="w-5 h-5 shrink-0" />
-                <h3 className="text-base sm:text-lg font-black text-white">
+                <h3 className="text-base sm:text-lg font-black text-slate-950">
                   {editingScheduleId ? 'শিডিউল তথ্য এডিট করুন' : 'ম্যানুয়ালি নতুন শিডিউল যোগ করুন'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsScheduleManagerOpen(false)}
-                className="p-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {schFeedbackMessage && (
-              <div className="p-3 bg-emerald-500/20 border border-emerald-500/50 rounded-xl text-xs sm:text-sm text-emerald-200 font-bold flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs sm:text-sm text-emerald-800 font-bold flex items-center space-x-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>{schFeedbackMessage}</span>
               </div>
             )}
@@ -3228,7 +3228,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               className="space-y-3.5"
             >
               <div>
-                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                   ক্লাসের বারসমূহ (Days) *
                 </label>
                 <input
@@ -3237,7 +3237,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   value={schMgrDays}
                   onChange={e => setSchMgrDays(e.target.value)}
                   placeholder="যেমন: শুক্র ও শনি, অথবা রবি, মঙ্গল ও বৃহস্পতি"
-                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:bg-white focus:ring-2 focus:ring-indigo-600 font-medium"
                 />
                 {/* Quick day suggestion buttons */}
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -3246,7 +3246,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       key={preset}
                       type="button"
                       onClick={() => setSchMgrDays(preset)}
-                      className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-200 hover:text-white border border-slate-700 cursor-pointer"
+                      className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 border border-slate-200 cursor-pointer"
                     >
                       {preset}
                     </button>
@@ -3255,7 +3255,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                   ক্লাসের সময় (Time Slot) *
                 </label>
                 <input
@@ -3264,7 +3264,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   value={schMgrTimeSlot}
                   onChange={e => setSchMgrTimeSlot(e.target.value)}
                   placeholder="যেমন: সকাল ১০:০০ - দুপুর ১২:০০, অথবা সন্ধ্যা ৭:০০ - রাত ৮:৩০"
-                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:bg-white focus:ring-2 focus:ring-indigo-600 font-medium"
                 />
                 {/* Quick time suggestions */}
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -3273,7 +3273,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                       key={timePreset}
                       type="button"
                       onClick={() => setSchMgrTimeSlot(timePreset)}
-                      className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-200 hover:text-white border border-slate-700 cursor-pointer"
+                      className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 border border-slate-200 cursor-pointer"
                     >
                       {timePreset}
                     </button>
@@ -3283,7 +3283,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     ক্লাস শুরুর তারিখ (Date)
                   </label>
                   <input
@@ -3291,12 +3291,12 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     value={schMgrStartDate}
                     onChange={e => setSchMgrStartDate(e.target.value)}
                     placeholder="যেমন: ১৫ এপ্রিল ২০২৬"
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:bg-white focus:ring-2 focus:ring-indigo-600 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     বাকি সিট সংখ্যা (Seats)
                   </label>
                   <input
@@ -3305,20 +3305,20 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     max={50}
                     value={schMgrSeats}
                     onChange={e => setSchMgrSeats(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-bold"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-hidden focus:bg-white focus:ring-2 focus:ring-indigo-600 font-bold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     ক্লাসের মোড (Mode)
                   </label>
                   <select
                     value={schMgrMode}
                     onChange={e => setSchMgrMode(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-hidden focus:bg-white focus:ring-2 focus:ring-indigo-600 font-medium cursor-pointer"
                   >
                     <option value="Offline">অফলাইন ল্যাব (ফার্মগেট ক্যাম্পাস)</option>
                     <option value="Online Live">অনলাইন লাইভ ক্লাস</option>
@@ -3328,7 +3328,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                     শিডিউল নাম (ঐচ্ছিক)
                   </label>
                   <input
@@ -3336,22 +3336,22 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                     value={schMgrLabel}
                     onChange={e => setSchMgrLabel(e.target.value)}
                     placeholder="ফাঁকা রাখলে স্বয়ংক্রিয় তৈরি হবে"
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:bg-white focus:ring-2 focus:ring-indigo-600 font-medium"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2.5 pt-2 border-t border-slate-800">
+              <div className="flex gap-2.5 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsScheduleManagerOpen(false)}
-                  className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs sm:text-sm font-bold transition-colors cursor-pointer"
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-bold transition-colors cursor-pointer"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-emerald-600/30 transition-all cursor-pointer flex items-center justify-center space-x-1"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-2xs transition-all cursor-pointer flex items-center justify-center space-x-1"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>{editingScheduleId ? 'আপডেট সম্পন্ন করুন' : 'শিডিউল যুক্ত করুন'}</span>
