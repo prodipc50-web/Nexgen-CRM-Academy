@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light only;
+  supported-color-schemes: light;
   --erp-primary: #4f46e5;
   --erp-primary-hover: #4338ca;
   --erp-primary-light: #eef2ff;
