@@ -25,7 +25,10 @@ import {
   Monitor,
   MessageCircle,
   GraduationCap,
-  Compass
+  Compass,
+  ChevronDown,
+  ChevronUp,
+  ArrowRight
 } from 'lucide-react';
 import { NexgenLogo } from '../common/NexgenLogo';
 import { AcademySettings, WebsiteCmsConfig } from '../../types';
@@ -42,6 +45,7 @@ interface MobileNavDrawerProps {
   onOpenCmsAdmin?: () => void;
   isAuthenticated: boolean;
   onSelectDeliveryMode?: (mode: 'All' | 'Offline' | 'Online' | 'Pre Recorded') => void;
+  onSelectCategory?: (category: string) => void;
 }
 
 export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
@@ -55,8 +59,10 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   onOpenStaffLogin,
   onOpenCmsAdmin,
   isAuthenticated,
-  onSelectDeliveryMode
+  onSelectDeliveryMode,
+  onSelectCategory
 }) => {
+  const [isCoursesExpanded, setIsCoursesExpanded] = React.useState(false);
   // Prevent body scrolling when drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -247,27 +253,77 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 </a>
 
-                <a
-                  href="#courses"
-                  onClick={() => handleNavClick('#courses')}
-                  className="min-h-[48px] px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-slate-800 hover:bg-indigo-50 hover:text-indigo-700 transition-colors active:scale-[0.98]"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                      <BookOpen className="w-4 h-4" />
+                {/* Courses Accordion / Dropdown */}
+                <div className="rounded-2xl border border-slate-100 overflow-hidden bg-slate-50/50">
+                  <div
+                    onClick={() => setIsCoursesExpanded(prev => !prev)}
+                    className="min-h-[48px] px-3.5 py-2.5 flex items-center justify-between text-slate-800 hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-pointer select-none"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                        <BookOpen className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-sm block">Courses (কোর্সসমূহ)</span>
+                        <span className="text-[10px] text-slate-400 font-medium">All Career Programs</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="font-bold text-sm block">Courses (কোর্সসমূহ)</span>
-                      <span className="text-[10px] text-slate-400 font-medium">All Career Programs</span>
+                    <div className="flex items-center space-x-1.5">
+                      <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded-full">
+                        {coursesCount || 10}
+                      </span>
+                      {isCoursesExpanded ? (
+                        <ChevronUp className="w-4 h-4 text-indigo-600 transition-transform" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-slate-400 transition-transform" />
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-1.5">
-                    <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded-full">
-                      {coursesCount || 10}
-                    </span>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                  </div>
-                </a>
+
+                  {/* Expanded Popular Categories List */}
+                  {isCoursesExpanded && (
+                    <div className="p-2 pt-0 space-y-1 bg-white border-t border-slate-100">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block px-2.5 py-1">
+                        POPULAR CATEGORIES
+                      </span>
+                      {[
+                        { name: 'Graphic Design', query: 'Graphic Design' },
+                        { name: 'UI/UX Design', query: 'UI/UX Design' },
+                        { name: 'Web Development', query: 'Web Development' },
+                        { name: 'Full Stack Development', query: 'Full Stack Development' },
+                        { name: 'Python & AI', query: 'Python' },
+                        { name: 'Digital Marketing', query: 'Digital Marketing' },
+                        { name: 'Video Editing & Motion', query: 'Video' }
+                      ].map(cat => (
+                        <button
+                          key={cat.name}
+                          type="button"
+                          onClick={() => {
+                            if (onSelectCategory) onSelectCategory(cat.query);
+                            handleNavClick('#courses');
+                          }}
+                          className="w-full flex items-center justify-between px-2.5 py-2 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/70 rounded-xl transition-all text-left"
+                        >
+                          <span>{cat.name}</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
+                        </button>
+                      ))}
+                      <div className="border-t border-slate-100 pt-1 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (onSelectCategory) onSelectCategory('All');
+                            handleNavClick('#courses');
+                          }}
+                          className="w-full flex items-center justify-between px-2.5 py-2 text-xs font-black text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all text-left"
+                        >
+                          <span>Explore All Courses</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-indigo-600" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {websiteCmsConfig?.sectionVisibility?.mentors !== false && (
                   <a

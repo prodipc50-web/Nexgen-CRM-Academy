@@ -1773,7 +1773,22 @@ export interface WebsiteCmsConfig {
     jobPlacementRatio: string; // e.g. "88%"
   };
   topNoticeTicker: string;
+  heroVideoUrl?: string;
+  heroStyle?: 'split-video' | 'slider';
+  heroPrimaryCtaText?: string;
+  heroSecondaryCtaText?: string;
   heroSlides?: HeroBannerSlide[];
+  benefitsGridConfig?: {
+    enabled?: boolean;
+    title?: string;
+    subtitle?: string;
+    benefits?: {
+      id: string;
+      title: string;
+      bengaliSubtitle: string;
+      iconName?: string;
+    }[];
+  };
   promoBanner: {
     enabled: boolean;
     title: string;
@@ -1917,6 +1932,26 @@ export interface WebsiteCmsConfig {
 
   // 16. Alumni Job Placements Showcase Section Config
   placementsSectionConfig?: SectionHeadingConfig;
+
+  // 17. Accreditation Trust Strip (BTEB, ISO 9001, Single PC Lab, etc.)
+  trustStripConfig?: AccreditationTrustStripConfig;
+
+  // 18. Student Success & Video Income Stories Spotlight
+  studentSuccessConfig?: StudentSuccessConfig;
+  studentSuccessStories?: StudentSuccessStory[];
+
+  // 19. Career Path Finder Wizard
+  careerWizardConfig?: CareerWizardConfig;
+
+  // 20. Course Career Comparison
+  courseComparisonConfig?: CourseComparisonConfig;
+
+  // 21. Free Counseling Lead Banner
+  counselingBannerConfig?: FreeCounselingBannerConfig;
+
+  // 22. Modern Split Video Hero Options
+  heroVideoBadgeText?: string;
+  heroVideoThumbnailUrl?: string;
 
   // Metadata & Persistence Timestamp
   updatedAt?: string;
@@ -2132,6 +2167,7 @@ export interface WebsiteSectionVisibility {
   geoLocalGuide?: boolean;
   footer?: boolean;
   trustStrip?: boolean;
+  studentSuccess?: boolean;
   careerWizard?: boolean;
   courseComparison?: boolean;
   counselingBanner?: boolean;
@@ -2147,6 +2183,69 @@ export interface VideoTestimonial {
   batchNumber?: string;
   storyDescription?: string;
   isActive: boolean;
+}
+
+export interface StudentSuccessStory {
+  id: string;
+  studentName: string;
+  courseName: string;
+  companyOrPlatform: string; // e.g. "Brain Station 23", "Fiverr Level 2", "Upwork Top Rated"
+  monthlyIncomeOrPackage: string; // e.g. "৳৫৫,০০০/মাস", "$১,৪০০+/মাস"
+  avatarUrl: string;
+  videoEmbedUrl?: string; // YouTube video embed or watch URL
+  storySummary: string;
+  quote: string;
+  batchNo?: string;
+  achievementBadge?: string;
+  isActive?: boolean;
+}
+
+export interface StudentSuccessConfig {
+  enabled?: boolean;
+  tagText?: string;
+  heading?: string;
+  subtitle?: string;
+  stories?: StudentSuccessStory[];
+}
+
+export interface AccreditationTrustItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  badge: string;
+  iconName?: 'Award' | 'ShieldCheck' | 'Monitor' | 'Briefcase' | 'HeartHandshake' | 'CreditCard' | 'Sparkles' | 'GraduationCap' | string;
+  enabled?: boolean;
+}
+
+export interface AccreditationTrustStripConfig {
+  enabled?: boolean;
+  tagText?: string;
+  items?: AccreditationTrustItem[];
+}
+
+export interface CareerWizardConfig {
+  enabled?: boolean;
+  tagText?: string;
+  heading?: string;
+  subtitle?: string;
+  counselingHotline?: string;
+}
+
+export interface CourseComparisonConfig {
+  enabled?: boolean;
+  tagText?: string;
+  heading?: string;
+  subtitle?: string;
+  comparisonNote?: string;
+}
+
+export interface FreeCounselingBannerConfig {
+  enabled?: boolean;
+  tagText?: string;
+  title?: string;
+  subtitle?: string;
+  hotlineOverride?: string;
+  whatsappOverride?: string;
 }
 
 export interface SystemSnapshotMetadata {

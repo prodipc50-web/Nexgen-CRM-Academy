@@ -8,10 +8,16 @@ import {
 } from '../types';
 
 export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
-  heroHeadline: 'Build Your Tech Career with Hands-on Industry Training',
-  heroSubtitle: 'Master in-demand IT skills from top industry practitioners. 100% practical lab sessions, live freelance mentorship & verified corporate job placement assistance in Dhaka.',
+  heroStyle: 'split-video',
+  heroHeadline: 'NexGen Computer Academy: Computer & Freelancing Training Center in Farmgate',
+  heroSubtitle: 'At NexGen Computer Academy, the top freelancing & professional IT training center in Farmgate, Dhaka, we teach you how to succeed in career and freelance marketplaces. Our expert mentors guide you step-by-step to build a portfolio you are proud of. Additionally, we will help you set up your profiles and apply for top tech jobs. Thousands of students have already started earning with us. Now, it is your turn. Start freelancing today.',
   heroBadgeText: 'Govt. Recognized IT Training Institute • Dhaka, Bangladesh',
-  heroCtaText: 'Explore Courses & Get Free Counseling',
+  heroCtaText: 'Get Admission',
+  heroPrimaryCtaText: 'Get Admission',
+  heroSecondaryCtaText: 'Learn more',
+  heroVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+  heroVideoBadgeText: 'কম্পিউটার বা ফ্রিল্যান্সিং শিখে ক্যারিয়ার গড়ার উপায়',
+  heroVideoThumbnailUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80',
   heroStats: {
     totalTrained: '8,500+',
     successRate: '96.4%',
@@ -872,9 +878,13 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
   // 6. Section Visibility Controls
   sectionVisibility: {
     heroBanner: true,
+    trustStrip: true,
     deliveryModes: true,
     impactTrust: true,
+    careerWizard: true,
     courses: true,
+    courseComparison: true,
+    counselingBanner: true,
     admissionRoadmap: true,
     aboutUs: true,
     communityHub: true,
@@ -882,12 +892,160 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     seminars: true,
     gallery: true,
     reviews: true,
+    studentSuccess: true,
     hiringPartners: true,
     placements: true,
     verifyCertificate: true,
     noticesAndFaq: true,
     contactAndMap: true,
-    geoLocalGuide: true
+    geoLocalGuide: true,
+    footer: true
+  },
+
+  // 6.1 Accreditation & Institutional Trust Strip
+  trustStripConfig: {
+    enabled: true,
+    tagText: 'Govt. Standard & ISO 9001:2015',
+    items: [
+      {
+        id: 'bteb',
+        iconName: 'Award',
+        title: 'BTEB স্ট্যান্ডার্ড কারিকুলাম',
+        subtitle: 'বাংলাদেশ কারিগরি শিক্ষা বোর্ড অনুমোদিত মান',
+        badge: 'Govt. Standard',
+        enabled: true
+      },
+      {
+        id: 'iso',
+        iconName: 'ShieldCheck',
+        title: 'ISO 9001:2015 সার্টিফাইড',
+        subtitle: 'আন্তর্জাতিক মানসম্পন্ন আইটি ট্রেনিং ও ম্যানেজমেন্ট',
+        badge: 'ISO Quality',
+        enabled: true
+      },
+      {
+        id: 'pc_lab',
+        iconName: 'Monitor',
+        title: '১০০% সিঙ্গেল পিসি ল্যাব',
+        subtitle: 'প্রতিটি শিক্ষার্থীর জন্য ক্লাসে ব্যক্তিগত হাই-স্পিড কম্পিউটার',
+        badge: 'Smart Lab',
+        enabled: true
+      },
+      {
+        id: 'placement',
+        iconName: 'Briefcase',
+        title: '১০০+ হায়ার পার্টনার প্লেসমেন্ট',
+        subtitle: 'সিভি বিল্ডিং, মক ইন্টারভিউ ও সরাসরি ইন্টার্নশিপ রেফারেল',
+        badge: 'Career Cell',
+        enabled: true
+      },
+      {
+        id: 'support',
+        iconName: 'HeartHandshake',
+        title: 'লাইফটাইম মেন্টরশিপ সাপোর্ট',
+        subtitle: 'কোর্স শেষ হলেও আনলিমিটেড ক্যাম্পাস ল্যাব ও সলিউশন এক্সেস',
+        badge: 'Lifetime 24/7',
+        enabled: true
+      },
+      {
+        id: 'installment',
+        iconName: 'CreditCard',
+        title: '০% সুদে সহজ কিস্তি সুবিধা',
+        subtitle: 'বিকাশ, নগদ ও ব্যাংকে সহজ ২-৩ কিস্তিতে ভর্তির সুযোগ',
+        badge: 'Easy EMI',
+        enabled: true
+      }
+    ]
+  },
+
+  // 6.2 Real Student Success Video Interviews & Earnings Spotlight
+  studentSuccessConfig: {
+    enabled: true,
+    tagText: 'প্রমাণিত সফলতার প্রমাণ ও স্টুডেন্ট ইন্টারভিউ',
+    heading: 'আমাদের সফল গ্র্যাজুয়েটদের রিয়েল ইনকাম ও ক্যারিয়ার স্টোরি',
+    subtitle: 'নেক্সজেন কম্পিউটার একাডেমির প্রজেক্ট-ভিত্তিক মেন্টরশিপের মাধ্যমে কীভাবে শত শত শিক্ষার্থী নন-আইটি ব্যাকগ্রাউন্ড থেকে সফল ফ্রিল্যান্সার ও ফুল-টাইম সফটওয়্যার ইঞ্জিনিয়ার হয়েছেন তাদের বাস্তব অভিজ্ঞতা শুনুন।',
+    stories: [
+      {
+        id: 'story-1',
+        studentName: 'তানভীর হাসান',
+        courseName: 'MERN Stack Web Development',
+        companyOrPlatform: 'Brain Station 23 • Junior Software Engineer',
+        monthlyIncomeOrPackage: '৳৫৫,০০০/মাস',
+        avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80',
+        videoEmbedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        storySummary: 'নন-সিএসই ব্যাকগ্রাউন্ড থেকে এসে নেক্সজেন কম্পিউটার একাডেমির প্রজেক্ট-ভিত্তিক মেন্টরশিপের মাধ্যমে ৬ মাসে ৫টি ফুল-স্ট্যাক প্রজেক্ট তৈরি করে সরাসরি ব্রেইন স্টেশন ২৩-এ চাকরি পান।',
+        quote: 'নেক্সজেনের সরাসরি ল্যাব সাপোর্ট ও শিক্ষকদের আন্তরিক গাইডলাইন ছাড়া এত দ্রুত ইন্ডাস্ট্রিতে ক্যারিয়ার শুরু করা সম্ভব ছিল না।',
+        batchNo: 'Batch WEB-2402',
+        achievementBadge: '🏆 Full-Time Placement',
+        isActive: true
+      },
+      {
+        id: 'story-2',
+        studentName: 'ফারজানা আক্তার তিশা',
+        courseName: 'Graphic Design & Freelancing',
+        companyOrPlatform: 'Fiverr Level 2 Seller • Top Rated',
+        monthlyIncomeOrPackage: '$১,৪০০+ (৳১,৬৫,০০০+/মাস)',
+        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+        videoEmbedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        storySummary: 'গৃহিণী হিসেবে ঘরে বসেই গ্রাফিক ডিজাইন ও লোগো ব্র্যান্ডিং কোর্স সম্পন্ন করে ফাইভার মার্কেটপ্লেসে এখন পর্যন্ত ৩০০+ আন্তর্জাতিক ক্লায়েন্টের কাজ সম্পন্ন করেছেন।',
+        quote: 'মহিলাদের জন্য ঘরে বসে সম্মানের সাথে স্বাবলম্বী হওয়ার সবচেয়ে বিশ্বস্ত প্রতিষ্ঠান নেক্সজেন।',
+        batchNo: 'Batch GDF-2311',
+        achievementBadge: '⭐ Freelance Rockstar',
+        isActive: true
+      },
+      {
+        id: 'story-3',
+        studentName: 'মেহেদী হাসান সাকিব',
+        courseName: 'Professional Video Editing & Motion Graphics',
+        companyOrPlatform: 'YouTube Content Agency (USA) • Remote Editor',
+        monthlyIncomeOrPackage: '$৮৫০+/মাস (৳১,০০,০০০+)',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+        videoEmbedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        storySummary: 'প্রিমিয়ার প্রো ও আফটার ইফেক্টসের অ্যাডভান্সড টেকনিক শিখে আমেরিকান ক্রিয়েটর চ্যানেলের ফুল-টাইম রিমোট ভিডিও এডিটর হিসেবে নিযুক্ত হন।',
+        quote: 'ফার্মগেটের হাই-কনফিগ পিসি ল্যাব থাকায় প্র্যাকটিস করাটা অনেক সহজ হয়েছিল।',
+        batchNo: 'Batch VDM-2401',
+        achievementBadge: '🎬 Remote Global Work',
+        isActive: true
+      },
+      {
+        id: 'story-4',
+        studentName: 'আরিফুল ইসলাম',
+        courseName: 'Digital Marketing & AI Growth Hacking',
+        companyOrPlatform: 'Pathao • Associate Marketing Specialist',
+        monthlyIncomeOrPackage: '৳৪৮,০০০/মাস',
+        avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
+        videoEmbedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        storySummary: 'মেটা অ্যাডস, গুগল ক্যাম্পেইন ও কনভার্সন অপটিমাইজেশন শিখে দেশের শীর্ষ রাইড-শেয়ারিং ও লজিস্টিক প্রতিষ্ঠান পাঠাও-এ ক্যারিয়ার গড়ে তোলেন।',
+        quote: 'এখানে শুধু থিওরি না, লাইভ ক্যাম্পেইনে প্র্যাক্টিক্যাল বাজেট দিয়ে কাজ শেখানো হয়।',
+        batchNo: 'Batch DM-2403',
+        achievementBadge: '💼 Corporate Hire',
+        isActive: true
+      }
+    ]
+  },
+
+  // 6.3 Career Path Finder Wizard
+  careerWizardConfig: {
+    enabled: true,
+    tagText: 'AI ক্যারিয়ার ম্যাচিং ও দিকনির্দেশনা',
+    heading: 'কোন কোর্সটি আপনার ব্যাকগ্রাউন্ড ও ক্যারিয়ারের জন্য পারফেক্ট?',
+    subtitle: 'মাত্র ৪টি সাধারণ প্রশ্নের উত্তর দিন। আপনার আগ্রহ, শিক্ষাগত যোগ্যতা ও আয়ের লক্ষ্যের ভিত্তিতে সিস্টেম উপযুক্ত কোর্স ও রোডম্যাপ সাজেস্ট করবে।'
+  },
+
+  // 6.4 Course Career Comparison
+  courseComparisonConfig: {
+    enabled: true,
+    tagText: 'ক্যারিয়ার তুলনা ও সঠিক সিদ্ধান্ত',
+    heading: 'কোন কোর্সটি কেমন? এক নজরে কোর্স ও ক্যারিয়ার তুলনা করুন',
+    subtitle: 'কোর্স নির্বাচন নিয়ে দ্বিধায় আছেন? পাশাপাশি দুইটি কোর্স রেখে সিলেবাস, মার্কেট চাহিদা ও গড় মাসিক উপার্জনের সম্ভাবনা যাচাই করুন।'
+  },
+
+  // 6.5 Free Counseling Lead Callback Banner
+  counselingBannerConfig: {
+    enabled: true,
+    tagText: '১-ক্লিক ফ্রি ক্যারিয়ার কাউন্সেলিং',
+    title: 'আইটি ক্যারিয়ার নিয়ে দ্বিধাগ্রস্ত? আমাদের সিনিয়র ক্যারিয়ার এক্সপার্টের সাথে কথা বলুন',
+    subtitle: 'আপনার নাম ও মোবাইল নম্বর দিয়ে রিকোয়েস্ট পাঠান। আমাদের মেন্টর আপনাকে ফোন করে ফ্রি ক্যারিয়ার গাইডলাইন প্রদান করবেন।'
   },
 
   // 7. Top Sticky Offer Ribbon Bar

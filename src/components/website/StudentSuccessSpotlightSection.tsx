@@ -10,9 +10,11 @@ import {
   ExternalLink,
   Briefcase
 } from 'lucide-react';
+import { useAcademy } from '../../context/AcademyContext';
 import { StudentSuccessStory, StudentSuccessVideoModal } from './StudentSuccessVideoModal';
 
 interface StudentSuccessSpotlightSectionProps {
+  stories?: StudentSuccessStory[];
   onSelectCourseForAdmission?: (courseName: string) => void;
 }
 
@@ -72,17 +74,45 @@ export const defaultStudentStories: StudentSuccessStory[] = [
 ];
 
 export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSectionProps> = ({
+  stories: propsStories,
   onSelectCourseForAdmission
 }) => {
+  const { websiteCmsConfig } = useAcademy();
   const [selectedStory, setSelectedStory] = useState<StudentSuccessStory | null>(null);
   const [activeFilter, setActiveFilter] = useState<'All' | 'Freelance' | 'Job'>('All');
 
-  const filteredStories = defaultStudentStories.filter((s) => {
+  const configuredStories =
+    propsStories ||
+    websiteCmsConfig?.studentSuccessConfig?.stories ||
+    websiteCmsConfig?.studentSuccessStories ||
+    defaultStudentStories;
+
+  const activeStoriesList = configuredStories.filter((s) => s.isActive !== false);
+
+  const filteredStories = activeStoriesList.filter((s) => {
     if (activeFilter === 'All') return true;
-    if (activeFilter === 'Freelance') return s.companyOrPlatform.includes('Fiverr') || s.companyOrPlatform.includes('Upwork') || s.companyOrPlatform.includes('USA');
-    if (activeFilter === 'Job') return !s.companyOrPlatform.includes('Fiverr') && !s.companyOrPlatform.includes('Upwork');
+    if (activeFilter === 'Freelance')
+      return (
+        s.companyOrPlatform.includes('Fiverr') ||
+        s.companyOrPlatform.includes('Upwork') ||
+        s.companyOrPlatform.includes('USA') ||
+        s.companyOrPlatform.toLowerCase().includes('freelance') ||
+        s.achievementBadge?.toLowerCase().includes('freelance')
+      );
+    if (activeFilter === 'Job')
+      return (
+        !s.companyOrPlatform.includes('Fiverr') &&
+        !s.companyOrPlatform.includes('Upwork') &&
+        !s.companyOrPlatform.toLowerCase().includes('freelance')
+      );
     return true;
   });
+
+  const sectionTag = websiteCmsConfig?.studentSuccessConfig?.tagText || 'প্রমাণিত সফলতার প্রমাণ ও স্টুডেন্ট ইন্টারভিউ';
+  const sectionHeading = websiteCmsConfig?.studentSuccessConfig?.heading || 'আমাদের সফল গ্র্যাজুয়েটদের রিয়েল ইনকাম ও ক্যারিয়ার স্টোরি';
+  const sectionSubtitle = websiteCmsConfig?.studentSuccessConfig?.subtitle || 'দেখুন কীভাবে নেক্সজেনের শূন্য থেকে শুরু করা শিক্ষার্থীরা আজ দেশ-বিদেশের মার্কেটপ্লেস ও টপ কোম্পানিতে সফল ক্যারিয়ার গড়েছেন।';
+
+  if (activeStoriesList.length === 0) return null;
 
   return (
     <section id="success-stories" className="py-16 sm:py-20 bg-white text-slate-900 relative overflow-hidden border-t border-slate-200">
@@ -93,13 +123,13 @@ export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSec
           <div className="space-y-2">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-xs font-bold border border-amber-200">
               <Award className="w-3.5 h-3.5 text-amber-600" />
-              <span>প্রমাণিত সফলতার প্রমাণ ও স্টুডেন্ট ইন্টারভিউ</span>
+              <span>{sectionTag}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
-              আমাদের সফল গ্র্যাজুয়েটদের রিয়েল ইনকাম ও ক্যারিয়ার স্টোরি
+              {sectionHeading}
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
-              দেখুন কীভাবে নেক্সজেনের শূন্য থেকে শুরু করা শিক্ষার্থীরা আজ দেশ-বিদেশের মার্কেটপ্লেস ও টপ কোম্পানিতে সফল ক্যারিয়ার গড়েছেন।
+              {sectionSubtitle}
             </p>
           </div>
 
@@ -114,7 +144,7 @@ export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSec
                   : 'text-slate-600 hover:text-slate-950'
               }`}
             >
-              সকল গল্প ({defaultStudentStories.length})
+              সকল গল্প ({activeStoriesList.length})
             </button>
             <button
               type="button"

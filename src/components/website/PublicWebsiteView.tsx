@@ -25,6 +25,8 @@ import { AccreditationTrustStrip } from './AccreditationTrustStrip';
 import { FreeCounselingLeadBanner } from './FreeCounselingLeadBanner';
 import { CourseFeeInstallmentCalculatorModal } from './CourseFeeInstallmentCalculatorModal';
 import { StudentSuccessSpotlightSection } from './StudentSuccessSpotlightSection';
+import { ModernSplitVideoHero } from './ModernSplitVideoHero';
+import { InstituteBenefitsGrid } from './InstituteBenefitsGrid';
 import {
   Home,
   Phone,
@@ -133,6 +135,53 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const [selectedDeliveryMode, setSelectedDeliveryMode] = useState<'All' | 'Offline' | 'Online' | 'Pre Recorded'>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [courseSearchQuery, setCourseSearchQuery] = useState<string>('');
+  const [isCoursesDropdownOpen, setIsCoursesDropdownOpen] = useState(false);
+  const coursesDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Close Courses dropdown on click outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (coursesDropdownRef.current && !coursesDropdownRef.current.contains(event.target as Node)) {
+        setIsCoursesDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const popularNavCategories = [
+    { name: 'Graphic Design', query: 'Graphic Design' },
+    { name: 'UI/UX Design', query: 'UI/UX Design' },
+    { name: 'Web Development', query: 'Web Development' },
+    { name: 'Full Stack Development', query: 'Full Stack Development' },
+    { name: 'Python & AI', query: 'Python' },
+    { name: 'Digital Marketing', query: 'Digital Marketing' },
+    { name: 'Video Editing & Motion', query: 'Video' }
+  ];
+
+  const handleNavCategoryClick = (query: string) => {
+    const matchedCategory = categories.find(
+      c => c.toLowerCase().includes(query.toLowerCase()) || query.toLowerCase().includes(c.toLowerCase())
+    ) || query;
+
+    setSelectedCategory(matchedCategory);
+    setIsCoursesDropdownOpen(false);
+
+    const el = document.getElementById('courses');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleExploreAllCourses = () => {
+    setSelectedCategory('All');
+    setIsCoursesDropdownOpen(false);
+
+    const el = document.getElementById('courses');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   const [activeGalleryCategory, setActiveGalleryCategory] = useState<string>('All');
   const [selectedBlogCategory, setSelectedBlogCategory] = useState<string>('All');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -502,98 +551,127 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                   {websiteCmsConfig.headerEstText || `EST. ${websiteCmsConfig?.aboutUs?.establishedYear || "2018"}`}
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate mt-0.5 max-w-[160px] xs:max-w-[220px] sm:max-w-none">
-                {websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training`}
+              <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate mt-0.5 max-w-[180px] xs:max-w-[240px] sm:max-w-none">
+                {(websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • IT Training & Freelancing`).replace(/[•\s]+$/, '')}
               </p>
             </div>
           </div>
 
-          {/* Desktop Navigation Links (Clean, Balanced & Compact for Laptops & Desktops) */}
-          <nav className="hidden xl:flex items-center space-x-1.5 2xl:space-x-3 text-xs 2xl:text-sm font-bold text-slate-700 shrink min-w-0">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-900 bg-slate-100 hover:bg-indigo-50 px-2.5 2xl:px-3 py-1.5 rounded-lg whitespace-nowrap shrink-0"
+          {/* Desktop Navigation Links (Clean, Perfectly Spaced, Youthins Style) */}
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2.5 text-xs font-bold text-slate-700 shrink min-w-0">
+            {/* Courses Dropdown Link & Floating Menu Card */}
+            <div
+              ref={coursesDropdownRef}
+              className="relative shrink-0"
+              onMouseEnter={() => setIsCoursesDropdownOpen(true)}
+              onMouseLeave={() => setIsCoursesDropdownOpen(false)}
             >
-              <Home className="w-3.5 h-3.5 text-indigo-600" />
-              <span>হোম</span>
-            </a>
-            <a href="#courses" className="hover:text-indigo-600 transition-colors px-2 py-1 whitespace-nowrap shrink-0">
-              কোর্সসমূহ
-            </a>
-            <a href="#career-wizard" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-amber-700 font-bold px-2 py-1 whitespace-nowrap shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsCoursesDropdownOpen(prev => !prev)}
+                className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer select-none text-xs ${
+                  isCoursesDropdownOpen
+                    ? 'text-indigo-600 bg-indigo-50/80 font-black'
+                    : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <span>Courses</span>
+                {isCoursesDropdownOpen ? (
+                  <ChevronUp className="w-3.5 h-3.5 text-indigo-600 ml-0.5 transition-transform" />
+                ) : (
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5 transition-transform" />
+                )}
+              </button>
+
+              {/* Floating Dropdown Card (Matches the reference design exactly) */}
+              {isCoursesDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 w-64 bg-slate-50/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl z-50 p-3.5 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-2.5 py-1 mb-1">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">
+                      POPULAR CATEGORIES
+                    </span>
+                  </div>
+
+                  <div className="space-y-0.5">
+                    {popularNavCategories.map((item) => (
+                      <button
+                        key={item.name}
+                        type="button"
+                        onClick={() => handleNavCategoryClick(item.query)}
+                        className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-white rounded-xl transition-all text-left cursor-pointer group shadow-2xs hover:shadow-xs border border-transparent hover:border-slate-200/70"
+                      >
+                        <span className="group-hover:translate-x-0.5 transition-transform">{item.name}</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all" />
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-slate-200/80 mt-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleExploreAllCourses}
+                      className="w-full flex items-center justify-between px-3 py-2 text-xs font-black text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/80 rounded-xl transition-all text-left cursor-pointer group"
+                    >
+                      <span className="group-hover:translate-x-0.5 transition-transform">Explore All Courses</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-indigo-600 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* My Courses / Student Portal Link (Matching Youthins Navigation) */}
+            <button
+              type="button"
+              onClick={onOpenStudentPortal}
+              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-700 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold"
+              title="Student Portal & Enrolled Courses"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+              <span>My Courses</span>
+            </button>
+
+            {/* CV / Career Guide */}
+            <a
+              href="#career-wizard"
+              className="hover:text-amber-700 transition-colors flex items-center space-x-1 text-slate-700 hover:bg-amber-50/70 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-xs font-bold"
+            >
               <Compass className="w-3.5 h-3.5 text-amber-500" />
-              <span>ক্যারিয়ার গাইড</span>
+              <span>CV / ক্যারিয়ার গাইড</span>
             </a>
-            <a href="#seminars" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2 py-1 whitespace-nowrap shrink-0">
+
+            {/* Free Seminars */}
+            <a
+              href="#seminars"
+              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-700 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-xs font-bold"
+            >
               <span>ফ্রি সেমিনার</span>
               <span className="bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase">Free</span>
             </a>
-            {sectionVisibility.placements !== false && (
-              <a href="#placements" className="hover:text-emerald-700 transition-colors flex items-center space-x-1 text-emerald-700 px-2 py-1 whitespace-nowrap shrink-0">
-                <Briefcase className="w-3.5 h-3.5" />
-                <span>প্লেসমেন্ট</span>
-              </a>
-            )}
-            <a href="#verify-certificate" className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-700 px-2 py-1 whitespace-nowrap shrink-0">
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-              <span>সার্টিফিকেট যাচাই</span>
-            </a>
-            
-            {/* Extended Links visible on extra wide 2xl screens */}
-            <a href="#about" className="hidden 2xl:inline-block hover:text-indigo-600 transition-colors px-2 py-1 whitespace-nowrap shrink-0">
-              আমাদের সম্পর্কে
-            </a>
-            <a href="#community" className="hidden 2xl:inline-flex items-center space-x-1 hover:text-indigo-600 transition-colors px-2 py-1 whitespace-nowrap shrink-0">
-              <Users className="w-3.5 h-3.5 text-blue-600" />
-              <span>কমিউনিটি</span>
-            </a>
-            <a href="#contact" className="hover:text-indigo-600 transition-colors px-2 py-1 whitespace-nowrap shrink-0">
+
+            {/* Contact */}
+            <a
+              href="#contact"
+              className="hover:text-indigo-600 transition-colors text-slate-700 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-xs font-bold"
+            >
               যোগাযোগ
             </a>
           </nav>
 
-          {/* Right Action Controls: Admission CTA + Secondary Actions + Mobile Hamburger */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-            {/* Secondary actions visible on extra wide 2xl screens to avoid laptop crowding */}
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCourseForInstallment(null);
-                setIsInstallmentModalOpen(true);
-              }}
-              className="hidden 2xl:flex items-center space-x-1 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-lg border border-amber-200 transition-colors whitespace-nowrap cursor-pointer"
-              title="Calculate 0% Easy Installments"
-            >
-              <CreditCard className="w-3.5 h-3.5 text-amber-600" />
-              <span>সহজ কিস্তি (EMI)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsCampusTourOpen(true)}
-              className="hidden 2xl:flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-lg border border-emerald-200 transition-colors whitespace-nowrap cursor-pointer"
-              title="Book Free 1-on-1 Campus Tour & Lab Visit"
-            >
-              <Building2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>ক্যাম্পাস ভিজিট</span>
-            </button>
-
-            {/* Primary High-Converting Admission CTA */}
+          {/* Right Action Controls: Clean Admission CTA + Mobile Hamburger */}
+          <div className="flex items-center space-x-2 shrink-0">
+            {/* Primary Sleek Admission CTA with Compact Font Size */}
             <button
               type="button"
               onClick={() => {
                 setSelectedCourseForAdmission(null);
                 setIsAdmissionOpen(true);
               }}
-              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all flex items-center space-x-1 active:scale-95 whitespace-nowrap shrink-0 cursor-pointer"
-              title="Online Admission Application Portal"
+              className="px-3.5 py-2 sm:px-4 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-full shadow-2xs transition-all flex items-center space-x-1.5 active:scale-95 whitespace-nowrap shrink-0 cursor-pointer"
+              title="Online Admission Application"
             >
               <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-              <span className="hidden sm:inline">Online Admission (ভর্তি)</span>
+              <span className="hidden sm:inline">ভর্তি আবেদন (Admission)</span>
               <span className="sm:hidden text-xs">ভর্তি আবেদন</span>
             </button>
 
@@ -603,10 +681,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label="Open Navigation Menu"
               aria-expanded={isMobileMenuOpen}
-              className="xl:hidden w-8 h-8 sm:w-10 sm:h-10 rounded-xl text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-all flex items-center justify-center active:scale-95 shrink-0 cursor-pointer"
+              className="lg:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full text-slate-700 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 border border-slate-200 transition-all flex items-center justify-center active:scale-95 shrink-0 cursor-pointer"
               title="Open Navigation Menu"
             >
-              <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Menu className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -630,213 +708,37 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         onSelectDeliveryMode={(mode) => {
           setSelectedDeliveryMode(mode);
         }}
+        onSelectCategory={(category) => {
+          const matchedCategory = categories.find(
+            c => c.toLowerCase().includes(category.toLowerCase()) || category.toLowerCase().includes(c.toLowerCase())
+          ) || category;
+          setSelectedCategory(matchedCategory);
+        }}
       />
 
-      {/* 3. HERO BANNER SECTION WITH DYNAMIC MULTI-SLIDE CAROUSEL */}
+      {/* 3. HERO SECTION (MATCHING SCREENSHOT 1: MODERN SPLIT VIDEO HERO) */}
       {sectionVisibility.heroBanner !== false && (
-        <section className="relative bg-white text-slate-900 py-6 sm:py-10 lg:py-12 overflow-hidden border-b border-slate-200">
-        <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10 space-y-8">
-          {/* Dynamic 16:9 Multi-Slide Carousel Banner */}
-          <HeroBannerSlider
-            slides={websiteCmsConfig.heroSlides || []}
-            language={language}
-            fallbackHeadline={websiteCmsConfig.heroHeadline}
-            fallbackSubtitle={websiteCmsConfig.heroSubtitle}
-            instituteName={academySettings.instituteName || 'Nexgen Computer Academy'}
-            onOpenAdmission={() => {
-              setSelectedCourseForAdmission(null);
-              setIsAdmissionOpen(true);
-            }}
-          />
-
-          {/* Quick Search, Stats & Featured Batches Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch pt-2">
-            {/* Left Box: Quick Course Finder & Live Key Stats (7 cols) */}
-            <div className="lg:col-span-7 bg-slate-50/80 rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-2xs flex flex-col justify-between space-y-5">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <h3 className="text-base sm:text-lg font-black text-slate-950">
-                    {language === 'bn' ? 'কোর্স খুঁজুন ও ক্যারিয়ার গাইডেন্স' : 'Search Courses & Career Guidance'}
-                  </h3>
-                </div>
-
-                {/* Hero Search & Category Quick Filter Bar */}
-                <div className="bg-white border border-slate-200 p-2 sm:p-2.5 rounded-2xl shadow-xs flex flex-col sm:flex-row items-stretch gap-2">
-                  <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 shrink-0 min-h-[44px]">
-                    <BookOpen className="w-4 h-4 text-indigo-600 shrink-0" />
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => {
-                        setSelectedCategory(e.target.value);
-                        const el = document.getElementById('courses');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="bg-transparent text-xs sm:text-sm font-bold text-slate-800 focus:outline-none cursor-pointer w-full sm:w-auto"
-                    >
-                      <option value="All" className="bg-white text-slate-900">All Categories (সব বিভাগ)</option>
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat} className="bg-white text-slate-900">{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex-1 flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 sm:px-3.5 sm:py-2.5 min-h-[44px]">
-                    <Search className="w-4 h-4 text-slate-400 shrink-0" />
-                    <input
-                      type="text"
-                      value={courseSearchQuery}
-                      onChange={(e) => setCourseSearchQuery(e.target.value)}
-                      placeholder="Search courses (e.g. Video, Web, AI, Graphic...)"
-                      className="w-full bg-transparent text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-medium"
-                    />
-                    {courseSearchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setCourseSearchQuery('')}
-                        className="text-slate-400 hover:text-slate-700 text-xs p-1 cursor-pointer"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  <a
-                    href="#courses"
-                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 shrink-0 min-h-[44px] active:scale-98"
-                  >
-                    <Search className="w-4 h-4" />
-                    <span>Search</span>
-                  </a>
-                </div>
-
-                {/* Mobile Quick Tags */}
-                <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px]">
-                  <span className="text-slate-500 font-medium shrink-0">জনপ্রিয়:</span>
-                  {(websiteCmsConfig.popularSearchTags && websiteCmsConfig.popularSearchTags.length > 0
-                    ? websiteCmsConfig.popularSearchTags
-                    : ['AutoCAD 2D/3D', 'Video Editing', 'Digital Marketing', 'Graphic Design', 'Web Development', 'French Language', 'AI Automation', 'Advanced Excel', 'Freelancing']
-                  ).map((tag) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => {
-                        setCourseSearchQuery(tag);
-                        const el = document.getElementById('courses');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 font-medium whitespace-nowrap transition-colors cursor-pointer"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Stats Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-3 border-t border-slate-200">
-                <div className="p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200 text-center lg:text-left shadow-2xs">
-                  <span className="block text-xl sm:text-2xl font-black text-indigo-600">
-                    {websiteCmsConfig.heroStats?.totalTrained || '8,500+'}
-                  </span>
-                  <span className="text-[11px] sm:text-xs text-slate-500 font-medium">Students Trained</span>
-                </div>
-
-                <div className="p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200 text-center lg:text-left shadow-2xs">
-                  <span className="block text-xl sm:text-2xl font-black text-emerald-600">
-                    {websiteCmsConfig.heroStats?.successRate || '96.4%'}
-                  </span>
-                  <span className="text-[11px] sm:text-xs text-slate-500 font-medium">Completion Rate</span>
-                </div>
-
-                <div className="p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200 text-center lg:text-left shadow-2xs">
-                  <span className="block text-xl sm:text-2xl font-black text-amber-600">
-                    {websiteCmsConfig.heroStats?.expertTrainers || '28+'}
-                  </span>
-                  <span className="text-[11px] sm:text-xs text-slate-500 font-medium">Industry Mentors</span>
-                </div>
-
-                <div className="p-2.5 sm:p-3 bg-white rounded-xl border border-slate-200 text-center lg:text-left shadow-2xs">
-                  <span className="block text-xl sm:text-2xl font-black text-indigo-600">
-                    {websiteCmsConfig.heroStats?.jobPlacementRatio || '89.2%'}
-                  </span>
-                  <span className="text-[11px] sm:text-xs text-slate-500 font-medium">Job Placements</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Card / Promo Box (5 cols) */}
-            <div className="lg:col-span-5">
-              <div className="bg-slate-50/80 p-5 sm:p-7 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4 sm:space-y-5">
-                {/* Header Row with Inline Non-overlapping Discount Tag */}
-                <div className="flex items-center justify-between gap-2 pb-0.5">
-                  <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider">
-                    {websiteCmsConfig.upcomingBatchesCard?.title || 'Upcoming Batches'}
-                  </span>
-                  <span className="bg-amber-100 text-amber-900 border border-amber-300 font-black text-[11px] px-3 py-1 rounded-full shadow-2xs flex items-center space-x-1 shrink-0">
-                    <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
-                    <span>{websiteCmsConfig.upcomingBatchesCard?.badgeText || '40% Offer'}</span>
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="text-base sm:text-xl font-black text-slate-950 leading-snug">
-                    {websiteCmsConfig.upcomingBatchesCard?.heading || 'Apply for Direct Admission'}
-                  </h3>
-                  <p className="text-xs text-slate-600">
-                    {websiteCmsConfig.upcomingBatchesCard?.description || 'Fast-track your IT career with practical project portfolios and certified diplomas.'}
-                  </p>
-                </div>
-
-                {/* Top 3 Featured Courses Quick List */}
-                <div className="space-y-2.5">
-                  {courses.slice(0, 3).map((c) => (
-                    <div
-                      key={c.id}
-                      onClick={() => handleOpenEnroll(c)}
-                      className="p-3 bg-white hover:bg-indigo-50/40 border border-slate-200 hover:border-indigo-300 rounded-2xl flex items-center justify-between cursor-pointer transition-all group gap-2 shadow-2xs"
-                    >
-                      <div className="space-y-0.5 min-w-0">
-                        <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
-                          {c.name}
-                        </h4>
-                        <p className="text-[11px] text-slate-500 font-medium">
-                          {c.duration} • ৳{(c.offerFee || c.regularFee || 0).toLocaleString()}
-                        </p>
-                      </div>
-                      <span className="px-3 py-1.5 bg-indigo-600 group-hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shrink-0 transition-colors shadow-2xs">
-                        Enroll
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
-                  <div className="flex items-center space-x-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>{websiteCmsConfig.upcomingBatchesCard?.featureNote || 'Free Lifetime Lab Access'}</span>
-                  </div>
-                  <a
-                    href={websiteCmsConfig.upcomingBatchesCard?.ctaLink || '#seminars'}
-                    className="text-indigo-600 font-bold hover:underline shrink-0"
-                  >
-                    {websiteCmsConfig.upcomingBatchesCard?.ctaText || 'Free Seminars →'}
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      )}
-
-      {/* 3.5 BTEB, ISO 9001 & INSTITUTIONAL TRUST STRIP (BANGLADESHI STANDARD) */}
-      {sectionVisibility.trustStrip !== false && (
-        <AccreditationTrustStrip
-          onOpenCounselingModal={() => {
+        <ModernSplitVideoHero
+          instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
+          campusName={academySettings.campusName || 'Farmgate'}
+          headline={websiteCmsConfig.heroHeadline}
+          subtitle={websiteCmsConfig.heroSubtitle}
+          videoUrl={websiteCmsConfig.heroVideoUrl}
+          onOpenAdmission={() => {
             setSelectedCourseForAdmission(null);
             setIsAdmissionOpen(true);
           }}
+          onLearnMore={() => {
+            const el = document.getElementById('benefits') || document.getElementById('courses');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
+      )}
+
+      {/* 3.5 THE BENEFITS OF TAKING A COURSE (MATCHING SCREENSHOT 2: 8 CARDS) */}
+      {sectionVisibility.trustStrip !== false && (
+        <InstituteBenefitsGrid
+          instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
         />
       )}
 
@@ -2256,13 +2158,15 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* 11.2 REAL STUDENT SUCCESS VIDEO INTERVIEWS & EARNINGS SPOTLIGHT */}
-      <StudentSuccessSpotlightSection
-        onSelectCourseForAdmission={(courseName) => {
-          const found = courses.find(c => c.name.toLowerCase().includes(courseName.toLowerCase()) || courseName.toLowerCase().includes(c.name.toLowerCase()));
-          setSelectedCourseForAdmission(found || null);
-          setIsAdmissionOpen(true);
-        }}
-      />
+      {sectionVisibility.studentSuccess !== false && (
+        <StudentSuccessSpotlightSection
+          onSelectCourseForAdmission={(courseName) => {
+            const found = courses.find(c => c.name.toLowerCase().includes(courseName.toLowerCase()) || courseName.toLowerCase().includes(c.name.toLowerCase()));
+            setSelectedCourseForAdmission(found || null);
+            setIsAdmissionOpen(true);
+          }}
+        />
+      )}
 
       {/* 11.5 ALUMNI CAREER PLACEMENTS & FREELANCING MILESTONES */}
       {sectionVisibility.placements !== false && (

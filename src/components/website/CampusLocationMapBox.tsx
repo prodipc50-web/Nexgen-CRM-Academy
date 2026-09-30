@@ -48,16 +48,16 @@ export const CampusLocationMapBox: React.FC<CampusLocationMapBoxProps> = ({
           <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-200/80 shrink-0">
             <MapPin className="w-4 h-4 animate-bounce" />
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center space-x-2 min-w-0">
-              <span className="font-extrabold text-xs sm:text-sm text-slate-950 tracking-tight whitespace-nowrap truncate">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+              <span className="font-black text-xs sm:text-sm text-slate-950 tracking-tight whitespace-nowrap">
                 {instituteName}
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold border border-indigo-200/60 whitespace-nowrap shrink-0">
+              <span className="px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-bold border border-indigo-200/60 whitespace-nowrap shrink-0">
                 Farmgate Campus
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 truncate max-w-[220px] xs:max-w-[280px] sm:max-w-[360px]">
+            <p className="text-[11px] text-slate-500 truncate max-w-[240px] xs:max-w-[320px] sm:max-w-[420px] mt-0.5">
               {address}
             </p>
           </div>

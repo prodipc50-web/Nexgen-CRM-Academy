@@ -63,10 +63,16 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   };
 
   const [formData, setFormData] = useState({
+    heroStyle: websiteCmsConfig.heroStyle || 'split-video',
     heroHeadline: websiteCmsConfig.heroHeadline || '',
     heroSubtitle: websiteCmsConfig.heroSubtitle || '',
+    heroVideoUrl: websiteCmsConfig.heroVideoUrl || '',
+    heroVideoBadgeText: websiteCmsConfig.heroVideoBadgeText || 'কম্পিউটার বা ফ্রিল্যান্সিং শিখে ক্যারিয়ার গড়ার উপায়',
+    heroVideoThumbnailUrl: websiteCmsConfig.heroVideoThumbnailUrl || '',
     heroBadgeText: websiteCmsConfig.heroBadgeText || '',
     heroCtaText: websiteCmsConfig.heroCtaText || '',
+    heroPrimaryCtaText: websiteCmsConfig.heroPrimaryCtaText || websiteCmsConfig.heroCtaText || 'Get Admission',
+    heroSecondaryCtaText: websiteCmsConfig.heroSecondaryCtaText || 'Learn more',
     topNoticeTicker: websiteCmsConfig.topNoticeTicker || '',
     totalTrained: websiteCmsConfig.heroStats?.totalTrained || '8,500+',
     successRate: websiteCmsConfig.heroStats?.successRate || '96.4%',
@@ -110,10 +116,16 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     if (hasUserEditedRef.current) return;
 
     setFormData({
+      heroStyle: websiteCmsConfig.heroStyle || 'split-video',
       heroHeadline: websiteCmsConfig.heroHeadline || '',
       heroSubtitle: websiteCmsConfig.heroSubtitle || '',
+      heroVideoUrl: websiteCmsConfig.heroVideoUrl || '',
+      heroVideoBadgeText: websiteCmsConfig.heroVideoBadgeText || 'কম্পিউটার বা ফ্রিল্যান্সিং শিখে ক্যারিয়ার গড়ার উপায়',
+      heroVideoThumbnailUrl: websiteCmsConfig.heroVideoThumbnailUrl || '',
       heroBadgeText: websiteCmsConfig.heroBadgeText || '',
       heroCtaText: websiteCmsConfig.heroCtaText || '',
+      heroPrimaryCtaText: websiteCmsConfig.heroPrimaryCtaText || websiteCmsConfig.heroCtaText || 'Get Admission',
+      heroSecondaryCtaText: websiteCmsConfig.heroSecondaryCtaText || 'Learn more',
       topNoticeTicker: websiteCmsConfig.topNoticeTicker || '',
       totalTrained: websiteCmsConfig.heroStats?.totalTrained || '8,500+',
       successRate: websiteCmsConfig.heroStats?.successRate || '96.4%',
@@ -233,10 +245,16 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     updateWebsiteCmsConfig({
       headerSubtitle: headerSubtitle.trim(),
       headerEstText: headerEstText.trim(),
+      heroStyle: formData.heroStyle as 'split-video' | 'slider',
       heroHeadline: formData.heroHeadline || (syncedSlides[0]?.title || ''),
       heroSubtitle: formData.heroSubtitle || (syncedSlides[0]?.subtitle || ''),
+      heroVideoUrl: formData.heroVideoUrl,
+      heroVideoBadgeText: formData.heroVideoBadgeText,
+      heroVideoThumbnailUrl: formData.heroVideoThumbnailUrl,
       heroBadgeText: formData.heroBadgeText || (syncedSlides[0]?.badgeText || ''),
       heroCtaText: formData.heroCtaText || (syncedSlides[0]?.ctaText || ''),
+      heroPrimaryCtaText: formData.heroPrimaryCtaText || formData.heroCtaText || 'Get Admission',
+      heroSecondaryCtaText: formData.heroSecondaryCtaText || 'Learn more',
       topNoticeTicker: formData.topNoticeTicker,
       heroSlides: syncedSlides,
       heroStats: {
@@ -486,11 +504,67 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
           </div>
         </div>
 
-        {/* 3. Main Hero Default Texts */}
+        {/* 3. Main Hero Default Texts & Video Split Hero */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center space-x-2 text-indigo-950 font-black text-sm pb-2 border-b border-slate-100">
-            <Sparkles className="w-4 h-4 text-indigo-600" />
-            <span>Hero Fallback Headline & Subtitles (স্লাইডারের সাথে সিঙ্ক)</span>
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center space-x-2 text-indigo-950 font-black text-sm">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+              <span>Hero Style & Content Customization (হিরো লেআউট ও ভিডিও কনফিগ)</span>
+            </div>
+          </div>
+
+          {/* Hero Style Selection: Modern Split Video vs Slider */}
+          <div className="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-2">
+            <label className="font-bold text-xs text-indigo-950 block">Hero Section Presentation Style (হোমপেজ হিরো স্টাইল):</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <label
+                className={`p-3 rounded-xl border flex items-center space-x-3 cursor-pointer transition-all ${
+                  formData.heroStyle === 'split-video'
+                    ? 'bg-white border-indigo-600 shadow-xs text-indigo-950 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="heroStyle"
+                  value="split-video"
+                  checked={formData.heroStyle === 'split-video'}
+                  onChange={() => {
+                    hasUserEditedRef.current = true;
+                    setFormData({ ...formData, heroStyle: 'split-video' });
+                  }}
+                  className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                />
+                <div>
+                  <div className="font-bold">Modern Split Video Hero (Youthins Style)</div>
+                  <div className="text-[10px] text-slate-500 font-normal">বামে টাইটেল, ডেসক্রিপশন ও অ্যাকশন বাটন এবং ডানে 16:9 হাইলাইট ভিডিও প্লেয়ার</div>
+                </div>
+              </label>
+
+              <label
+                className={`p-3 rounded-xl border flex items-center space-x-3 cursor-pointer transition-all ${
+                  formData.heroStyle === 'slider'
+                    ? 'bg-white border-indigo-600 shadow-xs text-indigo-950 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="heroStyle"
+                  value="slider"
+                  checked={formData.heroStyle === 'slider'}
+                  onChange={() => {
+                    hasUserEditedRef.current = true;
+                    setFormData({ ...formData, heroStyle: 'slider' });
+                  }}
+                  className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                />
+                <div>
+                  <div className="font-bold">Multi-Slide Banner Studio</div>
+                  <div className="text-[10px] text-slate-500 font-normal">পূর্ণাঙ্গ ব্যাকগ্রাউন্ড ইমেজ, অটো-রোটেটিং স্লাইডার ও ব্যানার স্টুডিও</div>
+                </div>
+              </label>
+            </div>
           </div>
 
           <div className="space-y-3 text-xs">
@@ -512,7 +586,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                 required
                 value={formData.heroHeadline}
                 onChange={e => handleHeadlineChange(e.target.value)}
-                placeholder="e.g. Build Your Tech Career with Hands-on Industry Training"
+                placeholder="e.g. NexGen Computer Academy: Computer & Freelancing Training Center in Farmgate"
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -529,15 +603,87 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               />
             </div>
 
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Primary CTA Button Label</label>
-              <input
-                type="text"
-                value={formData.heroCtaText}
-                onChange={e => handleCtaChange(e.target.value)}
-                placeholder="e.g. Explore Courses & Get Free Counseling"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-              />
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+              <div className="font-bold text-slate-900">হিরো ভিডিও ও থাম্বনেইল সেটিংস (Modern Split Video):</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">
+                    YouTube Video URL (ইউটিউব ভিডিও লিংক)
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.heroVideoUrl}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroVideoUrl: e.target.value });
+                    }}
+                    placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    className="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">
+                    Video Badge Text (ভিডিওর ওপর ছোট ব্যাজ)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.heroVideoBadgeText}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroVideoBadgeText: e.target.value });
+                    }}
+                    placeholder="e.g. কম্পিউটার বা ফ্রিল্যান্সিং শিখে ক্যারিয়ার গড়ার উপায়"
+                    className="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-xs text-rose-600 font-bold"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="font-bold text-slate-700 block mb-1">
+                    Video Poster / Thumbnail Image URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.heroVideoThumbnailUrl}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroVideoThumbnailUrl: e.target.value });
+                    }}
+                    placeholder="e.g. https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80"
+                    className="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-xs text-slate-600"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Primary CTA Button Label (১ম বাটন)</label>
+                <input
+                  type="text"
+                  value={formData.heroPrimaryCtaText}
+                  onChange={e => {
+                    hasUserEditedRef.current = true;
+                    setFormData({ ...formData, heroPrimaryCtaText: e.target.value, heroCtaText: e.target.value });
+                  }}
+                  placeholder="e.g. Get Admission / ভর্তি আবেদন"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-rose-600 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Secondary CTA Button Label (২য় বাটন)</label>
+                <input
+                  type="text"
+                  value={formData.heroSecondaryCtaText}
+                  onChange={e => {
+                    hasUserEditedRef.current = true;
+                    setFormData({ ...formData, heroSecondaryCtaText: e.target.value });
+                  }}
+                  placeholder="e.g. Learn more / বিস্তারিত দেখুন"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
             </div>
           </div>
         </div>
