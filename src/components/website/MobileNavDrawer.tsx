@@ -46,6 +46,7 @@ interface MobileNavDrawerProps {
   isAuthenticated: boolean;
   onSelectDeliveryMode?: (mode: 'All' | 'Offline' | 'Online' | 'Pre Recorded') => void;
   onSelectCategory?: (category: string) => void;
+  onNavigateSubPage?: (page: 'home' | 'courses' | 'seminars' | 'success-stories' | 'mentors' | 'gallery' | 'about' | 'verify-certificate' | 'contact' | 'blog') => void;
 }
 
 export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
@@ -60,7 +61,8 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   onOpenCmsAdmin,
   isAuthenticated,
   onSelectDeliveryMode,
-  onSelectCategory
+  onSelectCategory,
+  onNavigateSubPage
 }) => {
   const [isCoursesExpanded, setIsCoursesExpanded] = React.useState(false);
   // Prevent body scrolling when drawer is open
@@ -89,6 +91,48 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   const handleNavClick = (href: string, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     onClose();
+    if (onNavigateSubPage) {
+      if (href === '#' || href === '') {
+        onNavigateSubPage('home');
+        return;
+      }
+      if (href === '#courses') {
+        onNavigateSubPage('courses');
+        return;
+      }
+      if (href === '#seminars') {
+        onNavigateSubPage('seminars');
+        return;
+      }
+      if (href === '#success-stories') {
+        onNavigateSubPage('success-stories');
+        return;
+      }
+      if (href === '#mentors') {
+        onNavigateSubPage('mentors');
+        return;
+      }
+      if (href === '#gallery') {
+        onNavigateSubPage('gallery');
+        return;
+      }
+      if (href === '#about') {
+        onNavigateSubPage('about');
+        return;
+      }
+      if (href === '#verify' || href === '#verify-certificate') {
+        onNavigateSubPage('verify-certificate');
+        return;
+      }
+      if (href === '#contact') {
+        onNavigateSubPage('contact');
+        return;
+      }
+      if (href === '#blog') {
+        onNavigateSubPage('blog');
+        return;
+      }
+    }
     if (href === '#' || href === '') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -136,15 +180,17 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
             {/* 1. Drawer Header */}
             <div className="p-4 sm:p-5 bg-white text-slate-900 flex items-center justify-between border-b border-slate-200 shrink-0">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
-                <div className="p-1.5 bg-slate-50 rounded-xl border border-slate-200 shadow-2xs shrink-0">
-                  <NexgenLogo variant="crest" size={36} />
+                <div className="flex items-center">
+                  <span className="text-xl font-black text-[#1e1b4b]">Unique</span>
+                  <span className="text-xl font-black text-[#0284c7] ml-1">IT</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#f43f5e] ml-1 mb-2"></div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-black text-slate-950 leading-tight">
-                    {academySettings.instituteName || 'NexGen Computer Academy'}
+                <div className="min-w-0 flex-1 border-l border-slate-200 pl-2">
+                  <h3 className="text-xs font-black text-slate-950 leading-tight">
+                    {academySettings.instituteName || 'Unique IT Institute'}
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-semibold truncate mt-0.5">
-                    {websiteCmsConfig?.headerSubtitle || academySettings.campusName || 'Farmgate Campus'}
+                  <p className="text-[10px] text-slate-500 font-semibold truncate mt-0.5">
+                    {academySettings.campusName || 'Banasree Campus, Dhaka'}
                   </p>
                 </div>
               </div>
@@ -343,6 +389,23 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                     <ChevronRight className="w-4 h-4 text-slate-400" />
                   </a>
                 )}
+
+                <a
+                  href="#success-stories"
+                  onClick={() => handleNavClick('#success-stories')}
+                  className="min-h-[48px] px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 transition-colors active:scale-[0.98]"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                      <Award className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-sm block">Success Story (সাকসেস স্টোরি)</span>
+                      <span className="text-[10px] text-emerald-600 font-medium">Student Earnings & Videos</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </a>
 
                 <a
                   href="#seminars"

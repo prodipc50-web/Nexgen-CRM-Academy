@@ -1119,15 +1119,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     }
     return {
-      instituteName: 'Nexgen Computer Academy',
-      tagline: 'Institute of Information Technology & Professional Skills',
-      campusName: 'Farmgate Campus',
+      instituteName: 'Unique IT Institute',
+      tagline: 'Empowering Careers Through Practical IT Training & Freelancing',
+      campusName: 'Banasree Campus',
       primarySupportPhone: '01798444444',
-      officialAddress: '14/B Garden Road, Farmgate, Dhaka-1215',
-      officialEmail: 'info@nexgenacademy.edu.bd',
+      officialAddress: 'Block-C, Main Road, Banasree, Rampura, Dhaka-1219',
+      officialEmail: 'info@uniqueitinstitute.com',
       helplines: ['01798444444', '+880 1711-223344', '+880 1811-556677'],
-      websiteUrl: 'https://nexgenacademy.edu.bd',
-      certificateVerificationBaseUrl: 'https://nexgenacademy.edu.bd/verify/',
+      websiteUrl: 'https://uniqueitinstitute.com',
+      certificateVerificationBaseUrl: 'https://uniqueitinstitute.com/verify/',
       idCardSignatoryName: 'Prodip Chowdhury',
       idCardSignatoryTitle: 'Authorized Signatory',
       admitCardControllerName: 'Controller of Examinations',

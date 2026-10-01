@@ -13,6 +13,7 @@ export interface StudentSuccessStory {
   quote: string;
   batchNo?: string;
   achievementBadge?: string;
+  isActive?: boolean;
 }
 
 interface StudentSuccessVideoModalProps {

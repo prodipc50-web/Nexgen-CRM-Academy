@@ -27,6 +27,34 @@ import { CourseFeeInstallmentCalculatorModal } from './CourseFeeInstallmentCalcu
 import { StudentSuccessSpotlightSection } from './StudentSuccessSpotlightSection';
 import { ModernSplitVideoHero } from './ModernSplitVideoHero';
 import { InstituteBenefitsGrid } from './InstituteBenefitsGrid';
+import { CoursesSubPage } from './subpages/CoursesSubPage';
+import { SeminarsSubPage } from './subpages/SeminarsSubPage';
+import { SuccessStorySubPage } from './subpages/SuccessStorySubPage';
+import { MentorsSubPage } from './subpages/MentorsSubPage';
+import { GallerySubPage } from './subpages/GallerySubPage';
+import { AboutUsSubPage } from './subpages/AboutUsSubPage';
+import { ContactUsSubPage } from './subpages/ContactUsSubPage';
+import { VerifyCertificateSubPage } from './subpages/VerifyCertificateSubPage';
+import { BlogSubPage } from './subpages/BlogSubPage';
+import { UniqueItTopBar } from './uniqueit/UniqueItTopBar';
+import { UniqueItNavbar } from './uniqueit/UniqueItNavbar';
+import { UniqueItHero } from './uniqueit/UniqueItHero';
+import { UniqueItCategorySlider } from './uniqueit/UniqueItCategorySlider';
+import { UniqueItPopularCourses } from './uniqueit/UniqueItPopularCourses';
+import { UniqueItExploreCategories } from './uniqueit/UniqueItExploreCategories';
+import { UniqueItAboutHero } from './uniqueit/UniqueItAboutHero';
+import { UniqueItOnlineCourses } from './uniqueit/UniqueItOnlineCourses';
+import { UniqueItSuccessStories } from './uniqueit/UniqueItSuccessStories';
+import { UniqueItStudentReviews } from './uniqueit/UniqueItStudentReviews';
+import { UniqueItWhyChoose } from './uniqueit/UniqueItWhyChoose';
+import { UniqueItNewsletter } from './uniqueit/UniqueItNewsletter';
+import { UniqueItPhotoStrip } from './uniqueit/UniqueItPhotoStrip';
+import { UniqueItFaq } from './uniqueit/UniqueItFaq';
+import { UniqueItExclusiveSolutions } from './uniqueit/UniqueItExclusiveSolutions';
+import { UniqueItSnakeCta } from './uniqueit/UniqueItSnakeCta';
+import { UniqueItAdmissionBanner } from './uniqueit/UniqueItAdmissionBanner';
+import { UniqueItFooter } from './uniqueit/UniqueItFooter';
+import { UniqueItFloatingDiscount } from './uniqueit/UniqueItFloatingDiscount';
 import {
   Home,
   Phone,
@@ -82,9 +110,10 @@ import {
   Flame,
   Building2,
   CreditCard,
-  Calculator
+  Calculator,
+  Play
 } from 'lucide-react';
-import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage, WebsiteSectionVisibility } from '../../types';
+import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage, WebsiteSectionVisibility, WebsiteSubPage } from '../../types';
 import { HeroBannerSlider } from './HeroBannerSlider';
 import { TopNoticeTickerModal } from './TopNoticeTickerModal';
 import { getTranslation } from '../../utils/translations';
@@ -131,6 +160,60 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   // Bilingual Language State
   const [language, setLanguage] = useState<AppLanguage>('bn');
 
+  // Active SubPage View (defaults to 'home', or initialized from query param / hash)
+  const [activeSubPage, setActiveSubPage] = useState<WebsiteSubPage>(() => {
+    if (typeof window === 'undefined') return 'home';
+    const params = new URLSearchParams(window.location.search);
+    const pageParam = params.get('page') || params.get('subpage');
+    if (pageParam && ['courses', 'seminars', 'success-stories', 'mentors', 'gallery', 'about', 'contact', 'verify-certificate', 'blog'].includes(pageParam)) {
+      return pageParam as WebsiteSubPage;
+    }
+    const hash = window.location.hash.toLowerCase();
+    if (hash === '#courses' || hash === '#courses-page') return 'courses';
+    if (hash === '#seminars' || hash === '#seminar') return 'seminars';
+    if (hash === '#success-stories' || hash === '#success') return 'success-stories';
+    if (hash === '#mentors' || hash === '#trainers') return 'mentors';
+    if (hash === '#gallery') return 'gallery';
+    if (hash === '#about' || hash === '#about-us') return 'about';
+    if (hash === '#contact' || hash === '#contact-us') return 'contact';
+    if (hash === '#verify' || hash === '#verify-certificate') return 'verify-certificate';
+    if (hash === '#blog') return 'blog';
+    return 'home';
+  });
+
+  const navigateSubPage = (page: WebsiteSubPage) => {
+    setActiveSubPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      const url = new URL(window.location.href);
+      if (page === 'home') {
+        url.searchParams.delete('page');
+        url.searchParams.delete('subpage');
+        if (url.hash) url.hash = '';
+      } else {
+        url.searchParams.set('page', page);
+      }
+      window.history.pushState({ subpage: page }, '', url.toString());
+    } catch {
+      // safe fallback
+    }
+  };
+
+  // Sync subpage on browser Back / Forward navigation
+  React.useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const pageParam = (params.get('page') || params.get('subpage')) as WebsiteSubPage;
+      if (pageParam && ['courses', 'seminars', 'success-stories', 'mentors', 'gallery', 'about', 'contact', 'verify-certificate', 'blog'].includes(pageParam)) {
+        setActiveSubPage(pageParam);
+      } else {
+        setActiveSubPage('home');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Active Filters for Course Section
   const [selectedDeliveryMode, setSelectedDeliveryMode] = useState<'All' | 'Offline' | 'Online' | 'Pre Recorded'>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -166,21 +249,13 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
     setSelectedCategory(matchedCategory);
     setIsCoursesDropdownOpen(false);
-
-    const el = document.getElementById('courses');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    navigateSubPage('courses');
   };
 
   const handleExploreAllCourses = () => {
     setSelectedCategory('All');
     setIsCoursesDropdownOpen(false);
-
-    const el = document.getElementById('courses');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    navigateSubPage('courses');
   };
   const [activeGalleryCategory, setActiveGalleryCategory] = useState<string>('All');
   const [selectedBlogCategory, setSelectedBlogCategory] = useState<string>('All');
@@ -206,6 +281,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const [isTopNoticeModalOpen, setIsTopNoticeModalOpen] = useState(false);
   const [isInstallmentModalOpen, setIsInstallmentModalOpen] = useState(false);
   const [selectedCourseForInstallment, setSelectedCourseForInstallment] = useState<Course | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   // Auto-apply dynamic Homepage SEO metadata, Canonical URL & JSON-LD Schemas
   React.useEffect(() => {
@@ -291,6 +367,49 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
     if (selectedBlogCategory === 'All') return true;
     return b.category === selectedBlogCategory;
   });
+
+  const handleSubmitInquiry = async (payload: {
+    fullName: string;
+    phone: string;
+    email?: string;
+    courseId?: string;
+    courseName?: string;
+    message?: string;
+  }) => {
+    const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+      staffList.find(s => s.role === 'COUNSELOR') ||
+      staffList[0];
+    const counselorId = activeCounselor?.id || 'st-desk';
+    const counselorName = activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Counseling Desk'})` : 'Counseling Desk';
+    const todayDate = new Date().toISOString().split('T')[0];
+
+    const newLeadData = {
+      fullName: payload.fullName,
+      studentName: payload.fullName,
+      name: payload.fullName,
+      phone: payload.phone,
+      email: payload.email || '',
+      courseId: payload.courseId || (courses[0]?.id || ''),
+      courseName: payload.courseName || '',
+      interestedCourseId: payload.courseId || (courses[0]?.id || ''),
+      source: 'Website Contact Page',
+      leadSource: 'Website Contact Page',
+      notes: payload.message ? `[Website Inquiry] ${payload.message}` : '[Website Contact] Information requested',
+      status: 'New' as const,
+      counselorId,
+      counselorName,
+      occupation: 'Student / Professional',
+      educationLevel: 'HSC / Graduate',
+      visitDate: todayDate,
+      firstContactDate: todayDate,
+      comments: payload.message || ''
+    };
+    addLead(newLeadData);
+    if (submitPublicLead) {
+      submitPublicLead(newLeadData).catch(err => console.warn('Lead sync notice:', err));
+    }
+    return true;
+  };
 
   const handleOpenEnroll = (course: Course) => {
     setSelectedCourseForAdmission(course);
@@ -479,6 +598,17 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
             <span className="text-slate-300 hidden sm:inline">|</span>
 
+            {/* Quick Certificate Verification button */}
+            <button
+              type="button"
+              onClick={() => navigateSubPage('verify-certificate')}
+              className="flex items-center space-x-1 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg transition-colors font-bold whitespace-nowrap shrink-0 cursor-pointer text-[11px] sm:text-xs shadow-2xs"
+              title="Verify Student Certificate Online"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Verify Certificate</span>
+            </button>
+
             {/* Language Switcher (EN / BN) */}
             <button
               type="button"
@@ -537,7 +667,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           {/* Logo & Institute Identity */}
           <div
             className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0 min-w-0 group"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onClick={() => navigateSubPage('home')}
           >
             <div className="p-1 sm:p-1.5 bg-slate-50 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs group-hover:border-indigo-300 transition-colors shrink-0">
               <NexgenLogo variant="crest" size={36} />
@@ -545,21 +675,35 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <div className="shrink-0 min-w-0">
               <div className="flex items-center space-x-1.5 sm:space-x-2">
                 <h1 className="text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-950 tracking-tight leading-tight whitespace-nowrap">
-                  {academySettings.instituteName || 'NexGen Computer Academy'}
+                  {academySettings.instituteName || 'Unique IT Institute'}
                 </h1>
                 <span className="hidden lg:inline-flex text-[10px] font-black px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-wider shrink-0">
-                  {websiteCmsConfig.headerEstText || `EST. ${websiteCmsConfig?.aboutUs?.establishedYear || "2018"}`}
+                  {websiteCmsConfig.headerEstText || `EST. ${websiteCmsConfig?.aboutUs?.establishedYear || "2014"}`}
                 </span>
               </div>
               <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate mt-0.5 max-w-[180px] xs:max-w-[240px] sm:max-w-none">
-                {(websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • IT Training & Freelancing`).replace(/[•\s]+$/, '')}
+                {(websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Banasree Head Office"} • IT Training & Freelancing`).replace(/[•\s]+$/, '')}
               </p>
             </div>
           </div>
 
-          {/* Desktop Navigation Links (Clean, Perfectly Spaced, Youthins Style) */}
-          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2.5 text-xs font-bold text-slate-700 shrink min-w-0">
-            {/* Courses Dropdown Link & Floating Menu Card */}
+          {/* Desktop Navigation Links (Clean, Unique IT Institute Style with Subpages) */}
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 text-xs font-bold text-slate-700 shrink min-w-0">
+            {/* 1. Home */}
+            <button
+              type="button"
+              onClick={() => navigateSubPage('home')}
+              className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold ${
+                activeSubPage === 'home'
+                  ? 'text-indigo-600 bg-indigo-50/90 font-black shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>হোম (Home)</span>
+            </button>
+
+            {/* 2. Courses Dropdown Link & Subpage Trigger */}
             <div
               ref={coursesDropdownRef}
               className="relative shrink-0"
@@ -568,14 +712,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             >
               <button
                 type="button"
-                onClick={() => setIsCoursesDropdownOpen(prev => !prev)}
-                className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer select-none text-xs ${
-                  isCoursesDropdownOpen
-                    ? 'text-indigo-600 bg-indigo-50/80 font-black'
+                onClick={() => navigateSubPage('courses')}
+                className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer select-none text-xs font-bold ${
+                  activeSubPage === 'courses' || isCoursesDropdownOpen
+                    ? 'text-indigo-600 bg-indigo-50/90 font-black shadow-2xs'
                     : 'text-slate-700 hover:bg-slate-100'
                 }`}
               >
-                <span>Courses</span>
+                <span>কোর্সসমূহ (Courses)</span>
                 {isCoursesDropdownOpen ? (
                   <ChevronUp className="w-3.5 h-3.5 text-indigo-600 ml-0.5 transition-transform" />
                 ) : (
@@ -583,7 +727,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 )}
               </button>
 
-              {/* Floating Dropdown Card (Matches the reference design exactly) */}
+              {/* Floating Dropdown Card */}
               {isCoursesDropdownOpen && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-slate-50/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl z-50 p-3.5 animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-2.5 py-1 mb-1">
@@ -620,42 +764,84 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               )}
             </div>
 
-            {/* My Courses / Student Portal Link (Matching Youthins Navigation) */}
+            {/* 3. Free Seminars */}
             <button
               type="button"
-              onClick={onOpenStudentPortal}
-              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-700 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold"
-              title="Student Portal & Enrolled Courses"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
-              <span>My Courses</span>
-            </button>
-
-            {/* CV / Career Guide */}
-            <a
-              href="#career-wizard"
-              className="hover:text-amber-700 transition-colors flex items-center space-x-1 text-slate-700 hover:bg-amber-50/70 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-xs font-bold"
-            >
-              <Compass className="w-3.5 h-3.5 text-amber-500" />
-              <span>CV / ক্যারিয়ার গাইড</span>
-            </a>
-
-            {/* Free Seminars */}
-            <a
-              href="#seminars"
-              className="hover:text-indigo-600 transition-colors flex items-center space-x-1 text-slate-700 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-xs font-bold"
+              onClick={() => navigateSubPage('seminars')}
+              className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold ${
+                activeSubPage === 'seminars'
+                  ? 'text-indigo-600 bg-indigo-50/90 font-black shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
             >
               <span>ফ্রি সেমিনার</span>
               <span className="bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase">Free</span>
-            </a>
+            </button>
 
-            {/* Contact */}
-            <a
-              href="#contact"
-              className="hover:text-indigo-600 transition-colors text-slate-700 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-xs font-bold"
+            {/* 4. Success Story */}
+            <button
+              type="button"
+              onClick={() => navigateSubPage('success-stories')}
+              className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold ${
+                activeSubPage === 'success-stories'
+                  ? 'text-indigo-600 bg-indigo-50/90 font-black shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
             >
-              যোগাযোগ
-            </a>
+              <span>সাকসেস স্টোরি</span>
+            </button>
+
+            {/* 5. Mentors */}
+            <button
+              type="button"
+              onClick={() => navigateSubPage('mentors')}
+              className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold ${
+                activeSubPage === 'mentors'
+                  ? 'text-indigo-600 bg-indigo-50/90 font-black shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <span>আমাদের মেন্টরস</span>
+            </button>
+
+            {/* 6. Gallery */}
+            <button
+              type="button"
+              onClick={() => navigateSubPage('gallery')}
+              className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold ${
+                activeSubPage === 'gallery'
+                  ? 'text-indigo-600 bg-indigo-50/90 font-black shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <span>গ্যালারি</span>
+            </button>
+
+            {/* 7. About Us */}
+            <button
+              type="button"
+              onClick={() => navigateSubPage('about')}
+              className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold ${
+                activeSubPage === 'about'
+                  ? 'text-indigo-600 bg-indigo-50/90 font-black shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <span>আমাদের সম্পর্কে</span>
+            </button>
+
+            {/* 8. Contact */}
+            <button
+              type="button"
+              onClick={() => navigateSubPage('contact')}
+              className={`hover:text-indigo-600 transition-colors flex items-center space-x-1 px-2.5 py-1.5 rounded-lg whitespace-nowrap cursor-pointer text-xs font-bold ${
+                activeSubPage === 'contact'
+                  ? 'text-indigo-600 bg-indigo-50/90 font-black shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <span>যোগাযোগ</span>
+            </button>
           </nav>
 
           {/* Right Action Controls: Clean Admission CTA + Mobile Hamburger */}
@@ -714,32 +900,137 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           ) || category;
           setSelectedCategory(matchedCategory);
         }}
+        onNavigateSubPage={navigateSubPage}
       />
 
-      {/* 3. HERO SECTION (MATCHING SCREENSHOT 1: MODERN SPLIT VIDEO HERO) */}
-      {sectionVisibility.heroBanner !== false && (
-        <ModernSplitVideoHero
-          instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
-          campusName={academySettings.campusName || 'Farmgate'}
-          headline={websiteCmsConfig.heroHeadline}
-          subtitle={websiteCmsConfig.heroSubtitle}
-          videoUrl={websiteCmsConfig.heroVideoUrl}
+      {/* RENDER DEDICATED SUBPAGES OR FULL HOMEPAGE */}
+      {activeSubPage === 'courses' ? (
+        <CoursesSubPage
+          courses={courses}
+          categories={categories}
+          batches={batches}
+          onOpenEnroll={handleOpenEnroll}
+          onOpenSyllabus={(c) => setSelectedCourseForSyllabus(c)}
+          onOpenInstallment={(c) => {
+            setSelectedCourseForInstallment(c);
+            setIsInstallmentModalOpen(true);
+          }}
+          onOpenCourseLanding={(c) => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }))}
+          onBackToHome={() => navigateSubPage('home')}
+        />
+      ) : activeSubPage === 'seminars' ? (
+        <SeminarsSubPage
+          seminars={seminars}
+          onOpenSeminarReg={handleOpenSeminar}
+          onBackToHome={() => navigateSubPage('home')}
+        />
+      ) : activeSubPage === 'success-stories' ? (
+        <SuccessStorySubPage
+          stories={websiteCmsConfig.studentSuccessConfig?.stories}
+          reviews={websiteReviews}
           onOpenAdmission={() => {
             setSelectedCourseForAdmission(null);
             setIsAdmissionOpen(true);
           }}
-          onLearnMore={() => {
-            const el = document.getElementById('benefits') || document.getElementById('courses');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
+          onBackToHome={() => navigateSubPage('home')}
         />
+      ) : activeSubPage === 'mentors' ? (
+        <MentorsSubPage
+          trainers={trainersList}
+          onOpenCounseling={() => {
+            setSelectedCourseForAdmission(null);
+            setIsAdmissionOpen(true);
+          }}
+          onBackToHome={() => navigateSubPage('home')}
+        />
+      ) : activeSubPage === 'gallery' ? (
+        <GallerySubPage
+          galleryItems={websiteGallery}
+          instituteName={academySettings.instituteName}
+          onBackToHome={() => navigateSubPage('home')}
+        />
+      ) : activeSubPage === 'about' ? (
+        <AboutUsSubPage
+          aboutUs={websiteCmsConfig.aboutUs}
+          academySettings={academySettings}
+          websiteCmsConfig={websiteCmsConfig}
+          onOpenAdmission={() => {
+            setSelectedCourseForAdmission(null);
+            setIsAdmissionOpen(true);
+          }}
+          onBackToHome={() => navigateSubPage('home')}
+        />
+      ) : activeSubPage === 'contact' ? (
+        <ContactUsSubPage
+          academySettings={academySettings}
+          websiteCmsConfig={websiteCmsConfig}
+          courses={courses}
+          onSubmitInquiry={handleSubmitInquiry}
+          onBackToHome={() => navigateSubPage('home')}
+        />
+      ) : activeSubPage === 'verify-certificate' ? (
+        <VerifyCertificateSubPage
+          onOpenStaffLogin={onOpenStaffLogin}
+          onBackToHome={() => navigateSubPage('home')}
+        />
+      ) : activeSubPage === 'blog' ? (
+        <BlogSubPage
+          blogs={websiteBlogs || []}
+          onSelectBlog={(b) => setSelectedBlogForReading(b)}
+          onBackToHome={() => navigateSubPage('home')}
+        />
+      ) : (
+        <>
+          {/* 3. HERO SECTION (DYNAMIC: MODERN SPLIT VIDEO HERO OR MULTI-SLIDE BANNER) */}
+      {sectionVisibility.heroBanner !== false && (
+        websiteCmsConfig.heroStyle === 'slider' ? (
+          <HeroBannerSlider
+            slides={websiteCmsConfig.heroSlides || []}
+            language={language}
+            onOpenAdmission={() => {
+              setSelectedCourseForAdmission(null);
+              setIsAdmissionOpen(true);
+            }}
+          />
+        ) : (
+          <ModernSplitVideoHero
+            instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
+            campusName={academySettings.campusName || 'Farmgate'}
+            headline={websiteCmsConfig.heroHeadline}
+            subtitle={websiteCmsConfig.heroSubtitle}
+            videoUrl={websiteCmsConfig.heroVideoUrl}
+            videoBadgeText={websiteCmsConfig.heroVideoBadgeText}
+            videoThumbnailUrl={websiteCmsConfig.heroVideoThumbnailUrl}
+            primaryCtaText={websiteCmsConfig.heroPrimaryCtaText || websiteCmsConfig.heroCtaText}
+            secondaryCtaText={websiteCmsConfig.heroSecondaryCtaText}
+            onOpenAdmission={() => {
+              setSelectedCourseForAdmission(null);
+              setIsAdmissionOpen(true);
+            }}
+            onLearnMore={() => {
+              const el = document.getElementById('benefits') || document.getElementById('courses');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+          />
+        )
       )}
 
-      {/* 3.5 THE BENEFITS OF TAKING A COURSE (MATCHING SCREENSHOT 2: 8 CARDS) */}
+      {/* 3.5 THE BENEFITS OF TAKING A COURSE & BTEB/ISO TRUST STRIP */}
       {sectionVisibility.trustStrip !== false && (
-        <InstituteBenefitsGrid
-          instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
-        />
+        <div id="benefits" className="space-y-0">
+          <InstituteBenefitsGrid
+            instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
+          />
+          {websiteCmsConfig.trustStripConfig?.enabled !== false && (
+            <AccreditationTrustStrip
+              items={websiteCmsConfig.trustStripConfig?.items}
+              onOpenCounselingModal={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
+            />
+          )}
+        </div>
       )}
 
       {/* 4. FOUR LEARNING DELIVERY FORMAT CARDS (CMS DRIVEN) */}
@@ -1654,6 +1945,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                   </div>
                 ))}
             </div>
+
+            {/* View All Mentors Button */}
+            <div className="text-center pt-4">
+              <button
+                type="button"
+                onClick={() => navigateSubPage('mentors')}
+                className="inline-flex items-center space-x-2 px-6 py-3 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-400 text-slate-800 hover:text-indigo-600 font-bold text-xs rounded-2xl shadow-2xs transition-all cursor-pointer active:scale-98"
+              >
+                <GraduationCap className="w-4 h-4 text-indigo-600" />
+                <span>সকল সম্মানিত মেন্টরসদের প্রোফাইল দেখুন (View All Mentors)</span>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
           </div>
         </section>
       )}
@@ -1885,6 +2189,15 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 {websiteCmsConfig?.seminarsSectionConfig?.subtitle || 'Participate in live career counseling, ask industry mentors, and book your verified entry pass.'}
               </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => navigateSubPage('seminars')}
+              className="inline-flex items-center space-x-1.5 px-4 py-2.5 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-400 text-indigo-700 font-bold text-xs rounded-xl shadow-2xs transition-all shrink-0 self-start md:self-auto cursor-pointer"
+            >
+              <span>সব সেমিনার দেখুন (View All)</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -2040,6 +2353,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               </motion.div>
             ))}
           </div>
+
+          {/* View Full Gallery Button */}
+          <div className="text-center pt-8">
+            <button
+              type="button"
+              onClick={() => navigateSubPage('gallery')}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-white hover:bg-indigo-50 border border-slate-300 hover:border-indigo-400 text-slate-800 hover:text-indigo-600 font-bold text-xs rounded-2xl shadow-2xs transition-all cursor-pointer active:scale-98"
+            >
+              <ImageIcon className="w-4 h-4 text-indigo-600" />
+              <span>সম্পূর্ণ ফটো গ্যালারি ঘুরে দেখুন (View Full Gallery)</span>
+              <ChevronRight className="w-4 h-4 text-slate-400" />
+            </button>
+          </div>
         </div>
       </section>
       )}
@@ -2107,6 +2433,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 </div>
               </motion.div>
             ))}
+          </div>
+
+          {/* View All Success Stories Button */}
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              onClick={() => navigateSubPage('success-stories')}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-98"
+            >
+              <Play className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+              <span>সকল সফলতার গল্প ও ভিডিও ইন্টারভিউ দেখুন (View All Success Stories)</span>
+              <ChevronRight className="w-4 h-4 text-white/80" />
+            </button>
           </div>
 
           {/* Google Reviews CTA Badge & Link */}
@@ -2425,6 +2764,9 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       </section>
       )}
 
+        </>
+      )}
+
       {/* 15. FOOTER & POLICIES */}
       {sectionVisibility.footer !== false && (
         <footer className="bg-slate-50 text-slate-600 text-xs border-t border-slate-200 pt-12 pb-20 sm:pb-8">
@@ -2433,7 +2775,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <div className="space-y-3.5 md:col-span-2 lg:col-span-4">
                 <NexgenLogo variant="horizontal" size={42} isDarkTheme={false} />
                 <p className="text-slate-600 text-xs leading-relaxed max-w-sm">
-                  {footerConfig?.bio || `${academySettings.instituteName || 'NexGen Computer Academy'} is a premier professional IT training organization based in Dhaka, dedicated to creating industry-grade developers, designers, and freelance leaders.`}
+                  {footerConfig?.bio || `${academySettings.instituteName || 'Unique IT Institute'} is a premier professional IT training organization based in Dhaka, dedicated to creating industry-grade developers, designers, and freelance leaders.`}
                 </p>
                 {/* Social Icons */}
                 {footerConfig?.showSocials !== false && (
@@ -2466,7 +2808,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenEnroll(c)}
-                          className="text-slate-600 hover:text-indigo-600 transition-colors text-left"
+                          className="text-slate-600 hover:text-indigo-600 transition-colors text-left cursor-pointer"
                         >
                           {c.name}
                         </button>
@@ -2480,12 +2822,15 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
                 <div className="space-y-2.5 lg:col-span-3">
                   <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">Quick Navigation</h4>
                   <ul className="space-y-2 text-xs">
-                    <li><a href="#courses" className="text-slate-600 hover:text-indigo-600 transition-colors">All Courses & Fees</a></li>
-                    <li><a href="#about" className="text-slate-600 hover:text-indigo-600 transition-colors">About Us & Campus</a></li>
-                    <li><a href="#community" className="text-slate-600 hover:text-indigo-600 transition-colors">Facebook Community Group</a></li>
-                    <li><a href="#blog" className="text-slate-600 hover:text-indigo-600 transition-colors">Tech Blogs & Career Tips</a></li>
-                    <li><a href="#seminars" className="text-slate-600 hover:text-indigo-600 transition-colors">Free Career Seminars</a></li>
-                    <li><a href="#verify-certificate" className="text-slate-600 hover:text-indigo-600 transition-colors">Verify Student Certificate</a></li>
+                    <li><button type="button" onClick={() => navigateSubPage('courses')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">All Courses & Fees (কোর্সসমূহ)</button></li>
+                    <li><button type="button" onClick={() => navigateSubPage('seminars')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">Free Career Seminars (ফ্রি সেমিনার)</button></li>
+                    <li><button type="button" onClick={() => navigateSubPage('success-stories')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">Success Stories (সাকসেস স্টোরি)</button></li>
+                    <li><button type="button" onClick={() => navigateSubPage('mentors')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">Our Mentors (শিক্ষক ও মেন্টর)</button></li>
+                    <li><button type="button" onClick={() => navigateSubPage('gallery')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">Photo Gallery (ক্যাম্পাস গ্যালারি)</button></li>
+                    <li><button type="button" onClick={() => navigateSubPage('about')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">About Us (আমাদের সম্পর্কে)</button></li>
+                    <li><button type="button" onClick={() => navigateSubPage('contact')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">Contact Us (যোগাযোগ ও ঠিকানা)</button></li>
+                    <li><button type="button" onClick={() => navigateSubPage('verify-certificate')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">Verify Certificate (সার্টিফিকেট যাচাই)</button></li>
+                    <li><button type="button" onClick={() => navigateSubPage('blog')} className="text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer text-left">Tech Blog & Articles (ব্লগ)</button></li>
                     <li>
                       <button
                         type="button"

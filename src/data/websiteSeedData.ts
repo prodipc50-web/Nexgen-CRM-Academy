@@ -9,22 +9,22 @@ import {
 
 export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
   heroStyle: 'split-video',
-  heroHeadline: 'NexGen Computer Academy: Computer & Freelancing Training Center in Farmgate',
-  heroSubtitle: 'At NexGen Computer Academy, the top freelancing & professional IT training center in Farmgate, Dhaka, we teach you how to succeed in career and freelance marketplaces. Our expert mentors guide you step-by-step to build a portfolio you are proud of. Additionally, we will help you set up your profiles and apply for top tech jobs. Thousands of students have already started earning with us. Now, it is your turn. Start freelancing today.',
+  heroHeadline: 'Unique IT Institute: Career-Ready IT & Freelancing Training Center in Bangladesh',
+  heroSubtitle: 'At Unique IT Institute, the top freelancing & professional IT training center in Bangladesh, we teach you how to succeed in career and freelance marketplaces. Our expert mentors guide you step-by-step to build a portfolio you are proud of. Additionally, we will help you set up your profiles and apply for top tech jobs. Thousands of students have already started earning with us. Now, it is your turn. Start freelancing today.',
   heroBadgeText: 'Govt. Recognized IT Training Institute • Dhaka, Bangladesh',
   heroCtaText: 'Get Admission',
   heroPrimaryCtaText: 'Get Admission',
-  heroSecondaryCtaText: 'Learn more',
+  heroSecondaryCtaText: 'Free Career Seminar',
   heroVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
   heroVideoBadgeText: 'কম্পিউটার বা ফ্রিল্যান্সিং শিখে ক্যারিয়ার গড়ার উপায়',
   heroVideoThumbnailUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80',
   heroStats: {
-    totalTrained: '8,500+',
-    successRate: '96.4%',
-    expertTrainers: '28+',
-    jobPlacementRatio: '89.2%'
+    totalTrained: '12,500+',
+    successRate: '98.4%',
+    expertTrainers: '35+',
+    jobPlacementRatio: '91.2%'
   },
-  topNoticeTicker: '⚡ New Admission Open: Special 40% Scholarship Discount on Web Development, Graphics Design, Python AI & Cyber Security batches! Limited Seats!',
+  topNoticeTicker: '⚡ New Admission Open: Special 40% Scholarship Discount on Web Development, Graphics Design, Digital Marketing & Video Editing batches! Limited Seats!',
   heroSlides: [
     {
       id: 'slide-1',
@@ -197,13 +197,13 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
   // About Us Page Details
   aboutUs: {
     storyTitle: 'Empowering Next-Generation IT Professionals Since 2018',
-    storyDescription: 'Nexgen Computer Academy was founded with a single mission: to eliminate the gap between conventional textbook education and modern corporate tech requirements. Over the last 8+ years, we have nurtured more than 8,500+ young individuals across Bangladesh, turning non-coders into industry-ready software engineers, creative brand designers, data analysts, and top-tier freelancers on global marketplaces.',
+    storyDescription: 'Unique IT Institute was founded with a single mission: to eliminate the gap between conventional textbook education and modern corporate tech requirements. Over the years, we have nurtured more than 12,500+ young individuals across Bangladesh, turning non-coders into industry-ready software engineers, creative brand designers, digital marketers, and top-tier freelancers on global marketplaces.',
     mission: 'To provide world-class, affordable, and practical technology education that enables every student to achieve financial independence through freelancing, remote jobs, and corporate IT careers.',
-    vision: 'To be the leading IT center of excellence in South Asia by developing skilled manpower, fostering innovation, and bridging global tech talent demands.',
-    directorName: 'Prodip Chowdhury',
-    directorTitle: 'Managing Director & Lead Technology Specialist',
+    vision: 'To be the leading IT center of excellence in Bangladesh by developing skilled manpower, fostering innovation, and bridging global tech talent demands.',
+    directorName: 'CEO & Founder',
+    directorTitle: 'Managing Director & Lead Technology Mentor',
     directorPhotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-    directorMessage: 'Technology is the great equalizer of our era. When you have genuine, practical problem-solving skills, geographic boundaries disappear. At Nexgen, our promise is not just teaching software, but providing an end-to-end mentorship ecosystem until you secure your first client or corporate job. Welcome to your future.',
+    directorMessage: 'Technology is the great equalizer of our era. When you have genuine, practical problem-solving skills, geographic boundaries disappear. At Unique IT Institute, our promise is not just teaching software, but providing an end-to-end mentorship ecosystem until you secure your first client or corporate job. Welcome to your future.',
     establishedYear: '2018',
     affiliations: [
       'Bangladesh Technical Education Board (BTEB) Registered Partner',

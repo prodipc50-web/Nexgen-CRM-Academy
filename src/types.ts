@@ -2146,6 +2146,18 @@ export interface SectionHeadingConfig {
   subtitle?: string;
 }
 
+export type WebsiteSubPage =
+  | 'home'
+  | 'courses'
+  | 'seminars'
+  | 'success-stories'
+  | 'mentors'
+  | 'gallery'
+  | 'about'
+  | 'contact'
+  | 'verify-certificate'
+  | 'blog';
+
 export interface WebsiteSectionVisibility {
   heroBanner: boolean;
   deliveryModes: boolean;
@@ -2193,6 +2205,8 @@ export interface StudentSuccessStory {
   monthlyIncomeOrPackage: string; // e.g. "৳৫৫,০০০/মাস", "$১,৪০০+/মাস"
   avatarUrl: string;
   videoEmbedUrl?: string; // YouTube video embed or watch URL
+  videoThumbnailUrl?: string;
+  clientCountry?: string;
   storySummary: string;
   quote: string;
   batchNo?: string;
