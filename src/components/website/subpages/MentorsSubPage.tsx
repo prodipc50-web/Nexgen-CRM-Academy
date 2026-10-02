@@ -173,7 +173,7 @@ export const MentorsSubPage: React.FC<MentorsSubPageProps> = ({
               {/* Organization & Socials */}
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-500 truncate max-w-[140px]">
-                  {trainer.companyOrOrg || 'Unique IT Institute'}
+                  {trainer.companyOrOrg || 'NexGen Computer Academy'}
                 </span>
                 <div className="flex items-center space-x-1.5">
                   {trainer.socialLinks?.linkedin && (

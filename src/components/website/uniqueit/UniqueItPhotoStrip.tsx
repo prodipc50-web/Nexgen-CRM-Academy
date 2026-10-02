@@ -1,7 +1,12 @@
 import React from 'react';
+import { WebsiteGalleryItem } from '../../../types';
 
-export const UniqueItPhotoStrip: React.FC = () => {
-  const photos = [
+interface UniqueItPhotoStripProps {
+  galleryItems?: WebsiteGalleryItem[];
+}
+
+export const UniqueItPhotoStrip: React.FC<UniqueItPhotoStripProps> = ({ galleryItems }) => {
+  const defaultPhotos = [
     {
       id: '1',
       title: 'Lab Session',
@@ -18,6 +23,15 @@ export const UniqueItPhotoStrip: React.FC = () => {
       url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80'
     }
   ];
+
+  const photos =
+    galleryItems && galleryItems.length > 0
+      ? galleryItems.slice(0, 3).map((g) => ({
+          id: g.id,
+          title: g.title,
+          url: g.imageUrl
+        }))
+      : defaultPhotos;
 
   return (
     <section className="py-6 bg-white">

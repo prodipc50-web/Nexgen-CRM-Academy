@@ -9,8 +9,8 @@ import {
 
 export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
   heroStyle: 'split-video',
-  heroHeadline: 'Unique IT Institute: Career-Ready IT & Freelancing Training Center in Bangladesh',
-  heroSubtitle: 'At Unique IT Institute, the top freelancing & professional IT training center in Bangladesh, we teach you how to succeed in career and freelance marketplaces. Our expert mentors guide you step-by-step to build a portfolio you are proud of. Additionally, we will help you set up your profiles and apply for top tech jobs. Thousands of students have already started earning with us. Now, it is your turn. Start freelancing today.',
+  heroHeadline: 'NexGen Computer Academy: Career-Ready IT & Freelancing Training Center in Bangladesh',
+  heroSubtitle: 'At NexGen Computer Academy, the top freelancing & professional IT training center in Bangladesh, we teach you how to succeed in career and freelance marketplaces. Our expert mentors guide you step-by-step to build a portfolio you are proud of. Additionally, we will help you set up your profiles and apply for top tech jobs. Thousands of students have already started earning with us. Now, it is your turn. Start freelancing today.',
   heroBadgeText: 'Govt. Recognized IT Training Institute • Dhaka, Bangladesh',
   heroCtaText: 'Get Admission',
   heroPrimaryCtaText: 'Get Admission',
@@ -197,13 +197,13 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
   // About Us Page Details
   aboutUs: {
     storyTitle: 'Empowering Next-Generation IT Professionals Since 2018',
-    storyDescription: 'Unique IT Institute was founded with a single mission: to eliminate the gap between conventional textbook education and modern corporate tech requirements. Over the years, we have nurtured more than 12,500+ young individuals across Bangladesh, turning non-coders into industry-ready software engineers, creative brand designers, digital marketers, and top-tier freelancers on global marketplaces.',
+    storyDescription: 'NexGen Computer Academy was founded with a single mission: to eliminate the gap between conventional textbook education and modern corporate tech requirements. Over the years, we have nurtured more than 12,500+ young individuals across Bangladesh, turning non-coders into industry-ready software engineers, creative brand designers, digital marketers, and top-tier freelancers on global marketplaces.',
     mission: 'To provide world-class, affordable, and practical technology education that enables every student to achieve financial independence through freelancing, remote jobs, and corporate IT careers.',
     vision: 'To be the leading IT center of excellence in Bangladesh by developing skilled manpower, fostering innovation, and bridging global tech talent demands.',
     directorName: 'CEO & Founder',
     directorTitle: 'Managing Director & Lead Technology Mentor',
     directorPhotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-    directorMessage: 'Technology is the great equalizer of our era. When you have genuine, practical problem-solving skills, geographic boundaries disappear. At Unique IT Institute, our promise is not just teaching software, but providing an end-to-end mentorship ecosystem until you secure your first client or corporate job. Welcome to your future.',
+    directorMessage: 'Technology is the great equalizer of our era. When you have genuine, practical problem-solving skills, geographic boundaries disappear. At NexGen Computer Academy, our promise is not just teaching software, but providing an end-to-end mentorship ecosystem until you secure your first client or corporate job. Welcome to your future.',
     establishedYear: '2018',
     affiliations: [
       'Bangladesh Technical Education Board (BTEB) Registered Partner',
@@ -1282,7 +1282,116 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     'Freelancing'
   ],
   headerSubtitle: 'Farmgate Campus • Govt. Standard IT Training & Career Incubator',
-  headerEstText: 'EST. 2018'
+  headerEstText: 'EST. 2018',
+
+  // New Design Homepage Configurations & Section Controls
+  newSectionVisibility: {
+    topBar: true,
+    hero: true,
+    categorySlider: true,
+    popularCourses: true,
+    exploreCategories: true,
+    aboutHero: true,
+    onlineCourses: true,
+    successStories: true,
+    studentReviews: true,
+    whyChoose: true,
+    newsletterCta: true,
+    photoStrip: true,
+    faqs: true,
+    exclusiveSolutions: true,
+    snakeCta: true,
+    admissionBanner: true,
+    footer: true
+  },
+
+  aboutHeroConfig: {
+    tagline: 'Trusted for 12 Years',
+    headline: 'From Beginner to IT Professionals We Close That Gap.',
+    description: 'For 12 years, NexGen Computer Academy has had one goal — turn ordinary people into extraordinary IT professionals. Technology is no longer just for engineers and computer scientists. Today every business, every industry, and every career path runs on digital skills. That is why we have spent over a decade making sure that anyone regardless of background or experience can learn the skills that truly matter.',
+    labBadgeText: 'Modern AC Lab • Farmgate Campus',
+    imageUrl: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
+    stats: [
+      { id: 'st-1', value: '20000 +', label: 'Successful Students', color: 'purple' },
+      { id: 'st-2', value: '9000 +', label: 'Expert Freelancers', color: 'red' },
+      { id: 'st-3', value: '2000 +', label: 'Skilled Job Holders', color: 'purple' },
+      { id: 'st-4', value: '5000 +', label: 'Industry Expert', color: 'red' },
+      { id: 'st-5', value: '95 %', label: 'Success Ratio', color: 'purple' },
+      { id: 'st-6', value: '100 +', label: 'Companies', color: 'red' }
+    ]
+  },
+
+  whyChooseConfig: {
+    heading: 'Why Choose NexGen Academy?',
+    description: 'NexGen Computer Academy is not your typical training centre and we have never tried to be. We are a complete career-building platform — one that takes you from your very first skill all the way to your first job, your first client, and your first real breakthrough in the IT industry.',
+    points: [
+      { id: 'pt-1', title: '১ শিক্ষার্থী ১টি কম্পিউটার', desc: 'ক্লাসের প্রতিটি সেশনে ব্যক্তিগত হাই-কনফিগ পিসি বরাদ্দ' },
+      { id: 'pt-2', title: 'লাইফটাইম কোর্স সাপোর্ট', desc: 'কোর্স শেষ হলেও যেকোনো টেকনিক্যাল সমস্যায় আজীবন সাপোর্ট' },
+      { id: 'pt-3', title: 'প্র্যাক্টিক্যাল প্রজেক্ট পোর্টফোলিও', desc: 'থিওরি নয়, ১০০% রিয়েল ক্লায়েন্ট ও ইন্ডাস্ট্রি প্রজেক্ট' },
+      { id: 'pt-4', title: 'ইন্টার্নশিপ ও জব প্লেসমেন্ট সেল', desc: '৫০+ পার্টনার কোম্পানিতে সিভি ফরোয়ার্ডিং ও ইন্টার্নশিপ' },
+      { id: 'pt-5', title: 'অভিজ্ঞ প্রফেশনাল মেন্টর', desc: 'শীর্ষস্থানীয় সফটওয়্যার কোম্পানি ও ফ্রিল্যান্সিং এক্সপার্ট' },
+      { id: 'pt-6', title: 'প্রতিটি ক্লাসের এইচডি ভিডিও ব্যাকআপ', desc: 'ক্লাস মিস হলেও বাসায় বসে রিভিশন দেওয়ার সুযোগ' },
+      { id: 'pt-7', title: 'মার্কেটপ্লেস আর্নিং গাইডলাইন', desc: 'Fiverr ও Upwork প্রোফাইল সেটআপ ও লাইভ বিডিং ট্রেইনিং' },
+      { id: 'pt-8', title: 'ভেরিফায়েবল সার্টিফিকেট', desc: 'অনলাইনে কিউআর কোড স্ক্যান করে ভেরিফিকেশন সুবিধা' },
+      { id: 'pt-9', title: 'সহজ কিস্তিতে কোর্স ফি সুবিধা', desc: 'শিক্ষার্থীদের জন্য ২-৩টি সহজ কিস্তিতে ফি দেওয়ার সুযোগ' }
+    ]
+  },
+
+  exclusiveSolutionsConfig: {
+    heading: 'Exclusive Solutions That Set Us Apart',
+    description: 'We go beyond ordinary software tutorials. Our ecosystem guarantees that every student graduates with tangible, market-ready capabilities.',
+    items: [
+      {
+        id: 'ex-1',
+        title: 'Career Transformation Ecosystem',
+        desc: 'From day one, our mentors diagnose your career aspirations and tailor individual project milestones matching market job descriptions.'
+      },
+      {
+        id: 'ex-2',
+        title: 'Guaranteed Hands-on Practice',
+        desc: 'Our modern air-conditioned computer labs in Farmgate are open 7 days a week with dedicated lab instructors assisting every student.'
+      },
+      {
+        id: 'ex-3',
+        title: 'Global Marketplace Readiness',
+        desc: 'Learn Upwork, Fiverr, and Behance algorithm strategies, client proposal writing, and international payment withdrawal.'
+      },
+      {
+        id: 'ex-4',
+        title: 'Corporate Placement Alliance',
+        desc: 'Direct hiring partnerships with 35+ software agencies, digital media houses, and IT firms across Bangladesh.'
+      }
+    ]
+  },
+
+  newsletterCtaConfig: {
+    eyebrow: 'Career Counseling & Masterclass',
+    title: 'Upgrade your learning experience & unlock high-demand IT careers.',
+    description: 'Join our free career counseling session this Friday. Discover which technology path matches your natural talent and start earning with confidence.',
+    buttonText: 'Join Free Masterclass',
+    note: '⚡ 100% Free Entry • No Prior Experience Required'
+  },
+
+  snakeCtaConfig: {
+    title: 'So why delay? The best time to start is today.',
+    subtitle: 'Take the first step towards a financially independent IT career with NexGen Computer Academy.',
+    ctaText: 'Get Started Now'
+  },
+
+  admissionBannerConfig: {
+    title: 'New Admission is Going On! Special 40% Scholarship Available.',
+    subtitle: 'Limited seats per lab batch. Enroll now to secure your workstation and personal mentorship slot.',
+    ctaText: 'Apply For Admission',
+    discountBadge: 'Special 40% Scholarship'
+  },
+
+  paymentMerchantsConfig: {
+    bkashNumber: '01795077536',
+    nagadNumber: '01795077536',
+    rocketNumber: '01795077536',
+    upayNumber: '01795077536',
+    sslcommerzNote: 'Cards & Internet Banking'
+  }
 };
 
 export const INITIAL_WEBSITE_BLOGS: WebsiteBlogPost[] = [

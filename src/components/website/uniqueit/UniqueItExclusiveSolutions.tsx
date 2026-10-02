@@ -1,8 +1,13 @@
 import React from 'react';
-import { Users, Code, Compass, Video, ShieldCheck } from 'lucide-react';
+import { Users, Code, Compass, Video, ShieldCheck, Sparkles } from 'lucide-react';
+import { ExclusiveSolutionsCmsConfig } from '../../../types';
 
-export const UniqueItExclusiveSolutions: React.FC = () => {
-  const cards = [
+interface UniqueItExclusiveSolutionsProps {
+  config?: ExclusiveSolutionsCmsConfig;
+}
+
+export const UniqueItExclusiveSolutions: React.FC<UniqueItExclusiveSolutionsProps> = ({ config }) => {
+  const defaultCards = [
     {
       id: '1',
       title: 'Community Support',
@@ -40,21 +45,45 @@ export const UniqueItExclusiveSolutions: React.FC = () => {
     }
   ];
 
+  const heading = config?.heading || 'Exclusive Solutions that Set Us Apart';
+  const description =
+    config?.description ||
+    'Our aim is to make your learning experience the best possible by providing you with additional facilities that will help you to grow without bounds.';
+
+  const colorStyles = [
+    'text-amber-500 bg-amber-50',
+    'text-rose-500 bg-rose-50',
+    'text-orange-500 bg-orange-50',
+    'text-purple-600 bg-purple-50',
+    'text-emerald-500 bg-emerald-50'
+  ];
+
+  const cards =
+    config?.items && config.items.length > 0
+      ? config.items.map((it, idx) => ({
+          id: it.id || `ex-${idx}`,
+          title: it.title,
+          desc: it.desc,
+          icon: [Users, Code, Compass, Video, ShieldCheck][idx % 5] || Sparkles,
+          color: colorStyles[idx % colorStyles.length]
+        }))
+      : defaultCards;
+
   return (
     <section className="py-16 sm:py-20 bg-[#0c0d1e] text-white">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-12">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
-            Exclusive Solutions that Set Us Apart
+            {heading}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-            Our aim is to make your learning experience the best possible by providing you with additional facilities that will help you to grow without bounds.
+            {description}
           </p>
         </div>
 
-        {/* 5 Cards Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Cards Row */}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${Math.min(cards.length, 5)} gap-4`}>
           {cards.map((c) => {
             const IconComp = c.icon;
             return (

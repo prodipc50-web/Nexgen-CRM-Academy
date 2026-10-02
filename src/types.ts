@@ -1953,8 +1953,111 @@ export interface WebsiteCmsConfig {
   heroVideoBadgeText?: string;
   heroVideoThumbnailUrl?: string;
 
+  // 23. New Modular Homepage Design Configurations & Section Controls
+  newSectionVisibility?: NewHomepageSectionVisibility;
+  aboutHeroConfig?: AboutHeroCmsConfig;
+  whyChooseConfig?: WhyChooseCmsConfig;
+  exclusiveSolutionsConfig?: ExclusiveSolutionsCmsConfig;
+  newsletterCtaConfig?: NewsletterCtaCmsConfig;
+  snakeCtaConfig?: SnakeCtaCmsConfig;
+  admissionBannerConfig?: AdmissionBannerCmsConfig;
+  paymentMerchantsConfig?: PaymentMerchantsCmsConfig;
+
   // Metadata & Persistence Timestamp
   updatedAt?: string;
+}
+
+// New Design Homepage CMS Configs
+export interface NewHomepageSectionVisibility {
+  topBar?: boolean;
+  hero?: boolean;
+  categorySlider?: boolean;
+  popularCourses?: boolean;
+  exploreCategories?: boolean;
+  aboutHero?: boolean;
+  onlineCourses?: boolean;
+  successStories?: boolean;
+  studentReviews?: boolean;
+  whyChoose?: boolean;
+  newsletterCta?: boolean;
+  photoStrip?: boolean;
+  faqs?: boolean;
+  exclusiveSolutions?: boolean;
+  snakeCta?: boolean;
+  admissionBanner?: boolean;
+  footer?: boolean;
+}
+
+export interface AboutHeroCmsStat {
+  id: string;
+  value: string;
+  label: string;
+  color: 'purple' | 'red';
+}
+
+export interface AboutHeroCmsConfig {
+  tagline?: string;
+  headline?: string;
+  description?: string;
+  labBadgeText?: string;
+  imageUrl?: string;
+  stats?: AboutHeroCmsStat[];
+}
+
+export interface WhyChooseCmsPoint {
+  id: string;
+  title: string;
+  desc?: string;
+  iconName?: string;
+  color?: string;
+}
+
+export interface WhyChooseCmsConfig {
+  heading?: string;
+  description?: string;
+  points?: WhyChooseCmsPoint[];
+}
+
+export interface ExclusiveSolutionsCmsItem {
+  id: string;
+  title: string;
+  desc: string;
+  iconName?: string;
+}
+
+export interface ExclusiveSolutionsCmsConfig {
+  heading?: string;
+  description?: string;
+  items?: ExclusiveSolutionsCmsItem[];
+}
+
+export interface NewsletterCtaCmsConfig {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  buttonText?: string;
+  note?: string;
+}
+
+export interface SnakeCtaCmsConfig {
+  title?: string;
+  subtitle?: string;
+  ctaText?: string;
+}
+
+export interface AdmissionBannerCmsConfig {
+  title?: string;
+  subtitle?: string;
+  ctaText?: string;
+  discountBadge?: string;
+}
+
+export interface PaymentMerchantsCmsConfig {
+  bkashNumber?: string;
+  nagadNumber?: string;
+  rocketNumber?: string;
+  upayNumber?: string;
+  sslcommerzNote?: string;
 }
 
 export interface SocialProofTickerItem {

@@ -33,7 +33,7 @@ export const AboutUsSubPage: React.FC<AboutUsSubPageProps> = ({
   const defaultAbout = {
     establishedYear: '2014',
     storyTitle: 'Bridging the Gap Between Beginners and IT Professionals for over 12+ Years',
-    storyDescription: 'Unique IT Institute was established with a singular vision: to empower young minds and non-tech individuals with high-income digital skills and practical industry mentorship. Over the last decade, we have transformed more than 25,000+ students into skilled professionals, top-rated global freelancers, and corporate IT executives across 35+ partner enterprises.',
+    storyDescription: 'NexGen Computer Academy was established with a singular vision: to empower young minds and non-tech individuals with high-income digital skills and practical industry mentorship. Over the last decade, we have transformed more than 25,000+ students into skilled professionals, top-rated global freelancers, and corporate IT executives across 35+ partner enterprises.',
     mission: 'To deliver affordable, project-centered, high-standard IT and freelancing education that builds sustainable careers and creates self-reliant digital entrepreneurs.',
     vision: 'To become Bangladesh’s premier technology academy and skill empowerment hub, recognized globally for excellence in creative design, software engineering, and digital marketing.',
     directorName: 'Engr. Mohammad Jahangir Alam',
@@ -59,7 +59,7 @@ export const AboutUsSubPage: React.FC<AboutUsSubPageProps> = ({
     ...(aboutUs || {})
   };
 
-  const instituteName = academySettings.instituteName || 'Unique IT Institute';
+  const instituteName = academySettings.instituteName || 'NexGen Computer Academy';
 
   return (
     <div className="bg-slate-50 min-h-screen pb-20">

@@ -1,6 +1,7 @@
 import React from 'react';
-import { MapPin, Phone, Mail, Facebook, Youtube, Instagram, Twitter } from 'lucide-react';
-import { WebsiteSubPage, Course } from '../../../types';
+import { MapPin, Phone, Mail, Facebook, Youtube, Instagram, Twitter, ShieldCheck } from 'lucide-react';
+import { WebsiteSubPage, Course, PaymentMerchantsCmsConfig } from '../../../types';
+import { NexgenLogo } from '../../common/NexgenLogo';
 
 interface UniqueItFooterProps {
   onNavigateSubPage: (page: WebsiteSubPage) => void;
@@ -8,6 +9,13 @@ interface UniqueItFooterProps {
   onOpenStudentRegister: () => void;
   onOpenPolicyModal?: (policy: 'terms' | 'privacy') => void;
   courses?: Course[];
+  instituteName?: string;
+  officialAddress?: string;
+  officialEmail?: string;
+  primaryPhone?: string;
+  helplines?: string[];
+  onOpenStaffLogin?: () => void;
+  paymentMerchantsConfig?: PaymentMerchantsCmsConfig;
 }
 
 export const UniqueItFooter: React.FC<UniqueItFooterProps> = ({
@@ -15,8 +23,19 @@ export const UniqueItFooter: React.FC<UniqueItFooterProps> = ({
   onOpenStudentLogin,
   onOpenStudentRegister,
   onOpenPolicyModal,
-  courses
+  courses,
+  instituteName = 'NexGen Computer Academy',
+  officialAddress = 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215',
+  officialEmail = 'info@nexgenacademy.edu.bd',
+  primaryPhone = '01798444444',
+  helplines = ['01798444444', '+880 1711-223344', '+880 1811-556677'],
+  onOpenStaffLogin,
+  paymentMerchantsConfig
 }) => {
+  const bkashNumber = paymentMerchantsConfig?.bkashNumber || '01795077536';
+  const nagadNumber = paymentMerchantsConfig?.nagadNumber || '01795077536';
+  const rocketNumber = paymentMerchantsConfig?.rocketNumber || '01795077536';
+  const sslcommerzNote = paymentMerchantsConfig?.sslcommerzNote || 'Cards & Net Banking';
   const popularCourses = [
     'Graphic Design with AI Online Course',
     'Digital Marketing Online Course',
@@ -39,37 +58,29 @@ export const UniqueItFooter: React.FC<UniqueItFooterProps> = ({
             <div className="space-y-3 pt-1 text-slate-300">
               <div className="flex items-start space-x-2.5">
                 <MapPin className="w-4 h-4 text-[#e11d48] shrink-0 mt-0.5" />
-                <span>House # 37(Road # 5, Block # C) Rampura Banasree, Dhaka-1219</span>
+                <span>{officialAddress}</span>
               </div>
 
               <div className="space-y-1.5 pt-1">
                 <div className="flex items-center space-x-2.5">
                   <Phone className="w-4 h-4 text-[#e11d48] shrink-0" />
-                  <a href="tel:+8801722007005" className="hover:text-white transition-colors font-medium">
-                    +8801722-007005
+                  <a href={`tel:${primaryPhone.replace(/\s+/g, '')}`} className="hover:text-white transition-colors font-medium">
+                    {primaryPhone}
                   </a>
                 </div>
-                <div className="flex items-center space-x-2.5 pl-6">
-                  <a href="tel:+8801795077536" className="hover:text-white transition-colors font-medium">
-                    +8801795-077536
-                  </a>
-                </div>
-                <div className="flex items-center space-x-2.5 pl-6">
-                  <a href="tel:+8801795077692" className="hover:text-white transition-colors font-medium">
-                    +8801795-077692
-                  </a>
-                </div>
-                <div className="flex items-center space-x-2.5 pl-6">
-                  <a href="tel:+8801741998731" className="hover:text-white transition-colors font-medium">
-                    +8801741-998731
-                  </a>
-                </div>
+                {helplines.slice(1).map((hl, idx) => (
+                  <div key={idx} className="flex items-center space-x-2.5 pl-6">
+                    <a href={`tel:${hl.replace(/\s+/g, '')}`} className="hover:text-white transition-colors font-medium">
+                      {hl}
+                    </a>
+                  </div>
+                ))}
               </div>
 
               <div className="flex items-center space-x-2.5 pt-1">
                 <Mail className="w-4 h-4 text-[#e11d48] shrink-0" />
-                <a href="mailto:info@uniqueitinstitute.com" className="hover:text-white transition-colors">
-                  info@uniqueitinstitute.com
+                <a href={`mailto:${officialEmail}`} className="hover:text-white transition-colors">
+                  {officialEmail}
                 </a>
               </div>
             </div>
@@ -99,6 +110,17 @@ export const UniqueItFooter: React.FC<UniqueItFooterProps> = ({
                   Student Register
                 </button>
               </li>
+              {onOpenStaffLogin && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={onOpenStaffLogin}
+                    className="hover:text-amber-300 transition-colors cursor-pointer text-left font-bold text-amber-400"
+                  >
+                    Staff / Admin Portal
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   type="button"
@@ -233,25 +255,25 @@ export const UniqueItFooter: React.FC<UniqueItFooterProps> = ({
             {/* bKash */}
             <div className="bg-white rounded-xl p-3 text-center border border-slate-700 flex flex-col items-center justify-center space-y-1">
               <span className="text-pink-600 font-black text-sm tracking-wide">bKash</span>
-              <span className="text-[10px] text-slate-800 font-mono font-bold">01795077536</span>
+              <span className="text-[10px] text-slate-800 font-mono font-bold">{bkashNumber}</span>
             </div>
 
             {/* Nagad */}
             <div className="bg-white rounded-xl p-3 text-center border border-slate-700 flex flex-col items-center justify-center space-y-1">
               <span className="text-orange-600 font-black text-sm tracking-wide">নগদ</span>
-              <span className="text-[10px] text-slate-800 font-mono font-bold">01795077536</span>
+              <span className="text-[10px] text-slate-800 font-mono font-bold">{nagadNumber}</span>
             </div>
 
             {/* Rocket */}
             <div className="bg-white rounded-xl p-3 text-center border border-slate-700 flex flex-col items-center justify-center space-y-1">
               <span className="text-purple-700 font-black text-sm tracking-wide">Rocket</span>
-              <span className="text-[10px] text-slate-800 font-mono font-bold">01795077536</span>
+              <span className="text-[10px] text-slate-800 font-mono font-bold">{rocketNumber}</span>
             </div>
 
             {/* SSLCommerz */}
             <div className="bg-white rounded-xl p-3 text-center border border-slate-700 flex flex-col items-center justify-center space-y-1">
               <span className="text-blue-700 font-black text-sm tracking-wide">sslcommerz</span>
-              <span className="text-[10px] text-slate-500 font-bold">Cards & Net Banking</span>
+              <span className="text-[10px] text-slate-500 font-bold">{sslcommerzNote}</span>
             </div>
           </div>
         </div>
@@ -261,14 +283,22 @@ export const UniqueItFooter: React.FC<UniqueItFooterProps> = ({
       <div className="bg-[#030d1c] py-6">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo */}
-          <div className="flex items-center">
-            <span className="text-xl font-black text-white tracking-tight">Unique</span>
-            <span className="text-xl font-black text-[#0284c7] ml-1">IT</span>
+          <div className="flex items-center space-x-2.5">
+            <NexgenLogo variant="crest" size={32} className="shrink-0" isDarkTheme />
+            <div className="flex flex-col">
+              <div className="flex items-center">
+                <span className="text-lg font-black text-white tracking-tight leading-none">NexGen</span>
+                <span className="text-lg font-black text-[#dc143c] ml-1 leading-none">Academy</span>
+              </div>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">
+                Computer Training Institute
+              </span>
+            </div>
           </div>
 
           {/* Copyright */}
           <p className="text-slate-400 text-[11px] text-center">
-            Copyright © 2026 Unique IT Institute. All right reserved
+            Copyright © 2026 {instituteName}. All rights reserved
           </p>
 
           {/* Social Icons */}

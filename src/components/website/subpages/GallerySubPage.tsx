@@ -17,7 +17,7 @@ interface GallerySubPageProps {
 
 export const GallerySubPage: React.FC<GallerySubPageProps> = ({
   galleryItems = [],
-  instituteName = 'Unique IT Institute',
+  instituteName = 'NexGen Computer Academy',
   onBackToHome
 }) => {
   const [activeCategory, setActiveCategory] = useState<string>('All');

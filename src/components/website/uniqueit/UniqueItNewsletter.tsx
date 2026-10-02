@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
+import { NewsletterCtaCmsConfig } from '../../../types';
 
-export const UniqueItNewsletter: React.FC = () => {
+interface UniqueItNewsletterProps {
+  config?: NewsletterCtaCmsConfig;
+}
+
+export const UniqueItNewsletter: React.FC<UniqueItNewsletterProps> = ({ config }) => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const title = config?.title || 'Upgrade Your Learning Experience';
+  const description =
+    config?.description ||
+    'Sign up for our free newsletter and get latest updates on IT scholarships, freelancing trends, and weekly free masterclasses from NexGen Computer Academy.';
+  const buttonText = config?.buttonText || 'Subscribe';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +33,19 @@ export const UniqueItNewsletter: React.FC = () => {
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-5 z-10">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-snug">
-                Upgrade Your <span className="text-[#dc143c]">Learning Experience</span>
+                {title.includes('Learning Experience') ? (
+                  <>
+                    {title.split('Learning Experience')[0]}
+                    <span className="text-[#dc143c]">Learning Experience</span>
+                    {title.split('Learning Experience')[1]}
+                  </>
+                ) : (
+                  title
+                )}
               </h2>
 
               <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-lg">
-                Sign up for our newsletter and get all the updates on Interactive Cares and the latest trends of the industry.
+                {description}
               </p>
 
               {isSubscribed ? (
@@ -48,7 +67,7 @@ export const UniqueItNewsletter: React.FC = () => {
                     type="submit"
                     className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white text-xs font-black transition-colors cursor-pointer shrink-0 active:scale-95"
                   >
-                    Subscribe
+                    {buttonText}
                   </button>
                 </form>
               )}

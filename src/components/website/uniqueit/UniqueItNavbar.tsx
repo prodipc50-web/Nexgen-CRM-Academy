@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Menu, User, BookOpen, Sparkles, ShieldCheck, Award, Phone } from 'lucide-react';
 import { WebsiteSubPage } from '../../../types';
+import { NexgenLogo } from '../../common/NexgenLogo';
 
 interface UniqueItNavbarProps {
   instituteName?: string;
@@ -9,15 +10,21 @@ interface UniqueItNavbarProps {
   onOpenAdmission: () => void;
   onOpenStudentLogin: () => void;
   onOpenMobileMenu: () => void;
+  onOpenStaffLogin?: () => void;
+  isAuthenticated?: boolean;
+  onOpenCmsAdmin?: () => void;
 }
 
 export const UniqueItNavbar: React.FC<UniqueItNavbarProps> = ({
-  instituteName = 'Unique IT Institute',
+  instituteName = 'NexGen Computer Academy',
   activeSubPage,
   onNavigateSubPage,
   onOpenAdmission,
   onOpenStudentLogin,
-  onOpenMobileMenu
+  onOpenMobileMenu,
+  onOpenStaffLogin,
+  isAuthenticated,
+  onOpenCmsAdmin
 }) => {
   const [coursesOpen, setCoursesOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
@@ -46,16 +53,22 @@ export const UniqueItNavbar: React.FC<UniqueItNavbarProps> = ({
         {/* Brand Logo */}
         <div
           onClick={() => onNavigateSubPage('home')}
-          className="flex items-center space-x-2 cursor-pointer select-none"
+          className="flex items-center space-x-2.5 cursor-pointer select-none group"
         >
-          <div className="flex items-center">
-            <span className="text-2xl font-black text-[#1e1b4b] tracking-tight">Unique</span>
-            <span className="text-2xl font-black text-[#0284c7] ml-1">IT</span>
-            <div className="w-2 h-2 rounded-full bg-[#f43f5e] ml-1 mb-3"></div>
+          <NexgenLogo variant="crest" size={38} className="shrink-0 transition-transform group-hover:scale-105" />
+          <div className="flex flex-col">
+            <div className="flex items-center">
+              <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+                NexGen
+              </span>
+              <span className="text-xl sm:text-2xl font-black text-[#dc143c] ml-1 leading-none">
+                Academy
+              </span>
+            </div>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+              Computer Training Institute
+            </span>
           </div>
-          <span className="hidden xl:inline text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1 border-l border-slate-200">
-            Institute
-          </span>
         </div>
 
         {/* Desktop Nav Links */}
@@ -317,6 +330,18 @@ export const UniqueItNavbar: React.FC<UniqueItNavbarProps> = ({
             <User className="w-3.5 h-3.5" />
             <span>Student Login</span>
           </button>
+
+          {onOpenStaffLogin && (
+            <button
+              type="button"
+              onClick={onOpenStaffLogin}
+              className="px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer whitespace-nowrap hidden md:inline-flex items-center space-x-1.5"
+              title="Admin & Staff CRM Portal"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isAuthenticated ? 'ERP Dashboard' : 'Staff Portal'}</span>
+            </button>
+          )}
 
           {/* Mobile Menu Button */}
           <button

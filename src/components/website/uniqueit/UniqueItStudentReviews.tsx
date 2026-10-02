@@ -11,15 +11,15 @@ export const UniqueItStudentReviews: React.FC<UniqueItStudentReviewsProps> = ({ 
     {
       id: '1',
       rating: 5,
-      text: 'It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old.',
-      author: 'Japanese Language Course',
-      role: 'Student - JLPT',
+      text: 'It has roots in practical training and industry standard tools, giving me immediate freelance confidence.',
+      author: 'Japanese Language & Freelancing',
+      role: 'Student - Batch 2025',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
     },
     {
       id: '2',
       rating: 5,
-      text: 'Unique IT Institute is the best freelancing training center. Their training method is very modern and helpful. Thank you Unique IT authorities.',
+      text: 'NexGen Computer Academy is the best freelancing training center. Their training method is very modern and helpful. Thank you NexGen Computer Academy authorities.',
       author: 'Mahmudul Hasan',
       role: 'Graphic Designer - Fiverr, Upwork',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80'
@@ -27,12 +27,26 @@ export const UniqueItStudentReviews: React.FC<UniqueItStudentReviewsProps> = ({ 
     {
       id: '3',
       rating: 5,
-      text: 'Unique IT Institute is one of the best computer training centers I have ever visited. I have completed computer office course from this institute. The teachers here were very friendly. Thanks Unique IT Institute. ❤️',
+      text: 'NexGen Computer Academy is one of the best computer training centers I have ever visited. I have completed computer office course from this institute. The teachers here were very friendly. Thanks NexGen Computer Academy. ❤️',
       author: 'MD Tonmoy',
       role: 'Computer Office Application - Real Estate Company',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80'
     }
   ];
+
+  const items =
+    reviews && reviews.length > 0
+      ? reviews.slice(0, 6).map((r) => ({
+          id: r.id,
+          rating: r.rating || 5,
+          text: r.comment,
+          author: r.studentName,
+          role: r.courseName || 'NexGen Graduate',
+          avatar:
+            r.avatarUrl ||
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
+        }))
+      : defaultReviews;
 
   return (
     <section className="py-16 sm:py-20 bg-[#faf8ff] border-b border-slate-100">
@@ -50,9 +64,9 @@ export const UniqueItStudentReviews: React.FC<UniqueItStudentReviewsProps> = ({ 
           </p>
         </div>
 
-        {/* 3 Review Cards */}
+        {/* Review Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {defaultReviews.map((rev) => (
+          {items.map((rev) => (
             <div
               key={rev.id}
               className="bg-white rounded-2xl p-6 border border-slate-200 shadow-2xs hover:shadow-lg transition-all flex flex-col justify-between space-y-5"

@@ -8,14 +8,20 @@ import {
   Sparkles,
   Award,
   Briefcase,
-  Building2
+  Building2,
+  CheckCircle2
 } from 'lucide-react';
+import { WhyChooseCmsConfig } from '../../../types';
 
-export const UniqueItWhyChoose: React.FC = () => {
-  const points = [
+interface UniqueItWhyChooseProps {
+  config?: WhyChooseCmsConfig;
+}
+
+export const UniqueItWhyChoose: React.FC<UniqueItWhyChooseProps> = ({ config }) => {
+  const defaultPoints = [
     {
       id: '1',
-      title: 'অ্যাফোর্ডেবল প্রাইসে বেস্ট লার্নিং',
+      title: '১ শিক্ষার্থী ১টি কম্পিউটার (ব্যক্তিগত পিসি বরাদ্দ)',
       icon: GraduationCap,
       color: 'bg-amber-50 text-amber-600 border-amber-200'
     },
@@ -39,35 +45,62 @@ export const UniqueItWhyChoose: React.FC = () => {
     },
     {
       id: '5',
-      title: 'প্রতিটি কোর্সের সাথে পাবেন এক্সক্লুসিভ সাপোর্ট সেশন',
+      title: 'প্রতিটি কোর্সের সাথে পাবেন লাইফটাইম এক্সক্লুসিভ সাপোর্ট সেশন',
       icon: Headphones,
       color: 'bg-purple-50 text-purple-600 border-purple-200'
     },
     {
       id: '6',
-      title: 'প্রজেক্ট করার মাধ্যমে স্পেশাল প্রজেক্ট ডে',
+      title: 'প্রজেক্ট করার মাধ্যমে স্পেশাল প্রজেক্ট ডে ও পোর্টফোলিও রিভিউ',
       icon: Sparkles,
       color: 'bg-cyan-50 text-cyan-600 border-cyan-200'
     },
     {
       id: '7',
-      title: 'কোর্স শেষে থাকছে ভেরিফায়েবল সার্টিফিকেট',
+      title: 'কোর্স শেষে থাকছে অনলাইন ভেরিফায়েবল সার্টিফিকেট',
       icon: Award,
       color: 'bg-pink-50 text-pink-600 border-pink-200'
     },
     {
       id: '8',
-      title: 'ক্যারিয়ারে দ্রুত গ্রোথ করার জন্য রয়েছে জব প্রিপারেশন সাপোর্ট',
+      title: 'মার্কেটপ্লেস আর্নিং গাইডলাইন ও জব প্রিপারেশন সাপোর্ট',
       icon: Briefcase,
       color: 'bg-blue-50 text-blue-600 border-blue-200'
     },
     {
       id: '9',
-      title: '৫০+ পার্টনার কোম্পানিতে জব প্লেসমেন্ট সুযোগ',
+      title: '৫০+ পার্টনার কোম্পানিতে সিভি ফরোয়ার্ডিং ও ইন্টার্নশিপ সুযোগ',
       icon: Building2,
       color: 'bg-teal-50 text-teal-600 border-teal-200'
     }
   ];
+
+  const colorCycle = [
+    'bg-amber-50 text-amber-600 border-amber-200',
+    'bg-rose-50 text-rose-600 border-rose-200',
+    'bg-indigo-50 text-indigo-600 border-indigo-200',
+    'bg-emerald-50 text-emerald-600 border-emerald-200',
+    'bg-purple-50 text-purple-600 border-purple-200',
+    'bg-cyan-50 text-cyan-600 border-cyan-200',
+    'bg-pink-50 text-pink-600 border-pink-200',
+    'bg-blue-50 text-blue-600 border-blue-200',
+    'bg-teal-50 text-teal-600 border-teal-200'
+  ];
+
+  const heading = config?.heading || 'Why Choose NexGen Academy?';
+  const description =
+    config?.description ||
+    'NexGen Computer Academy is not your typical training centre and we have never tried to be. We are a complete career-building platform — one that takes you from your very first skill all the way to your first job, your first client, and your first real breakthrough in the IT industry.';
+
+  const points =
+    config?.points && config.points.length > 0
+      ? config.points.map((pt, i) => ({
+          id: pt.id || `pt-${i}`,
+          title: pt.title,
+          icon: CheckCircle2,
+          color: pt.color || colorCycle[i % colorCycle.length]
+        }))
+      : defaultPoints;
 
   return (
     <section className="py-16 sm:py-20 bg-white border-b border-slate-100">
@@ -75,10 +108,18 @@ export const UniqueItWhyChoose: React.FC = () => {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
-            Why Choose <span className="text-[#6b1cb0]">Unique IT?</span>
+            {heading.includes('NexGen') ? (
+              <>
+                {heading.split('NexGen')[0]}
+                <span className="text-[#6b1cb0]">NexGen</span>
+                {heading.split('NexGen')[1]}
+              </>
+            ) : (
+              heading
+            )}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-            Unique IT Institute is not your typical training centre and we have never tried to be. We are a complete career-building platform — one that takes you from your very first skill all the way to your first job, your first client, and your first real breakthrough in the IT industry.
+            {description}
           </p>
         </div>
 

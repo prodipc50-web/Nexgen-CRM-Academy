@@ -61,8 +61,8 @@ export const UniqueItPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
           {displayCourses.map((c, idx) => {
             const courseCode = c.code || `UITB-${c.category?.slice(0, 2).toUpperCase() || 'IT'}-${c.id.slice(-3)}`;
             const isOnline = c.courseType === 'Online';
-            const price = c.fee || 15750;
-            const regularPrice = Math.round(price * 1.4);
+            const price = c.offerFee || c.regularFee || 15750;
+            const regularPrice = c.regularFee || Math.round(price * 1.4);
             const rating = c.rating || 5.0;
             const reviewsCount = c.reviewsCount || 1221;
             const duration = c.durationMonths ? `${c.durationMonths} Months` : '3 Months';
@@ -87,7 +87,7 @@ export const UniqueItPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                   />
                   <div className="absolute top-2.5 left-2.5">
                     <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold">
-                      Unique IT
+                      NexGen Academy
                     </span>
                   </div>
                 </div>

@@ -71,7 +71,7 @@ export const UniqueItHero: React.FC<UniqueItHeroProps> = ({
             {/* Subtitle */}
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl font-normal">
               {subtitle ||
-                "Thousands of people in Bangladesh are stuck - not because they lack talent, but because they never got the right training. At Unique IT Institute, we teach you exactly what today's job market needs. Real tools. Real projects. Real mentors. And real results that follow you for life."}
+                "Thousands of people in Bangladesh are stuck - not because they lack talent, but because they never got the right training. At NexGen Computer Academy, we teach you exactly what today's job market needs. Real tools. Real projects. Real mentors. And real results that follow you for life."}
             </p>
 
             {/* Action Buttons Row */}
@@ -165,15 +165,15 @@ export const UniqueItHero: React.FC<UniqueItHeroProps> = ({
             <div className="relative rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-slate-900 group">
               <img
                 src={videoThumbnailUrl}
-                alt="Unique IT Institute Classroom and Studio"
+                alt="NexGen Computer Academy Classroom and Studio"
                 className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/20 to-transparent"></div>
 
-              {/* Unique IT Watermark in Corner */}
+              {/* NexGen Watermark in Corner */}
               <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-black text-slate-900 flex items-center space-x-1 shadow-md">
-                <span className="text-[#1e1b4b]">Unique</span>
-                <span className="text-[#0284c7]">IT</span>
+                <span className="text-[#1e1b4b]">NexGen</span>
+                <span className="text-[#dc143c]">Academy</span>
                 <span className="text-slate-500 font-medium">Campus</span>
               </div>
 

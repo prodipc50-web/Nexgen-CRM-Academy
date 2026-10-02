@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { NexgenLogo } from '../common/NexgenLogo';
 import {
   X,
   Home,
@@ -30,7 +31,6 @@ import {
   ChevronUp,
   ArrowRight
 } from 'lucide-react';
-import { NexgenLogo } from '../common/NexgenLogo';
 import { AcademySettings, WebsiteCmsConfig } from '../../types';
 
 interface MobileNavDrawerProps {
@@ -180,17 +180,13 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
             {/* 1. Drawer Header */}
             <div className="p-4 sm:p-5 bg-white text-slate-900 flex items-center justify-between border-b border-slate-200 shrink-0">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
-                <div className="flex items-center">
-                  <span className="text-xl font-black text-[#1e1b4b]">Unique</span>
-                  <span className="text-xl font-black text-[#0284c7] ml-1">IT</span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#f43f5e] ml-1 mb-2"></div>
-                </div>
+                <NexgenLogo variant="crest" size={36} className="shrink-0" />
                 <div className="min-w-0 flex-1 border-l border-slate-200 pl-2">
                   <h3 className="text-xs font-black text-slate-950 leading-tight">
-                    {academySettings.instituteName || 'Unique IT Institute'}
+                    {academySettings.instituteName || 'NexGen Computer Academy'}
                   </h3>
                   <p className="text-[10px] text-slate-500 font-semibold truncate mt-0.5">
-                    {academySettings.campusName || 'Banasree Campus, Dhaka'}
+                    {academySettings.campusName || 'Farmgate Campus, Dhaka'}
                   </p>
                 </div>
               </div>

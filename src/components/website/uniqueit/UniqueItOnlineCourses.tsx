@@ -36,8 +36,8 @@ export const UniqueItOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayCourses.map((c, idx) => {
             const courseCode = c.code || `UITB-ON-${c.id.slice(-3)}`;
-            const price = c.fee || 7499;
-            const regularPrice = Math.round(price * 1.5);
+            const price = c.offerFee || c.regularFee || 7499;
+            const regularPrice = c.regularFee || Math.round(price * 1.5);
             const rating = c.rating || 5.0;
             const reviewsCount = c.reviewsCount || 430;
             const duration = c.durationMonths ? `${c.durationMonths} Months` : '2.5 Months';
@@ -62,7 +62,7 @@ export const UniqueItOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
                   />
                   <div className="absolute top-2.5 left-2.5">
                     <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold">
-                      Unique IT
+                      NexGen Academy
                     </span>
                   </div>
                 </div>

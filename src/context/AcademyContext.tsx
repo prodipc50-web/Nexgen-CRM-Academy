@@ -1110,6 +1110,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           exportSecurityPassword: parsed.exportSecurityPassword || '',
           branches: Array.isArray(parsed.branches) && parsed.branches.length > 0 ? parsed.branches : DEFAULT_CAMPUS_BRANCHES,
           ...parsed,
+          instituteName: (parsed.instituteName && parsed.instituteName !== 'Unique IT Institute') ? parsed.instituteName : 'NexGen Computer Academy',
+          officialEmail: (parsed.officialEmail && parsed.officialEmail !== 'info@uniqueitinstitute.com') ? parsed.officialEmail : 'info@nexgenacademy.edu.bd',
           campusName: parsed.campusName || 'Farmgate Campus',
           primarySupportPhone: parsed.primarySupportPhone || '01798444444',
           theme: parsed.theme ? { ...DEFAULT_THEME_CONFIG, ...parsed.theme } : DEFAULT_THEME_CONFIG
@@ -1119,15 +1121,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     }
     return {
-      instituteName: 'Unique IT Institute',
-      tagline: 'Empowering Careers Through Practical IT Training & Freelancing',
-      campusName: 'Banasree Campus',
+      instituteName: 'NexGen Computer Academy',
+      tagline: 'Professional IT Training & Career Development Academy in Bangladesh',
+      campusName: 'Farmgate Campus',
       primarySupportPhone: '01798444444',
-      officialAddress: 'Block-C, Main Road, Banasree, Rampura, Dhaka-1219',
-      officialEmail: 'info@uniqueitinstitute.com',
+      officialAddress: 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215',
+      officialEmail: 'info@nexgenacademy.edu.bd',
       helplines: ['01798444444', '+880 1711-223344', '+880 1811-556677'],
-      websiteUrl: 'https://uniqueitinstitute.com',
-      certificateVerificationBaseUrl: 'https://uniqueitinstitute.com/verify/',
+      websiteUrl: 'https://nexgenacademy.edu.bd',
+      certificateVerificationBaseUrl: 'https://nexgenacademy.edu.bd/verify/',
       idCardSignatoryName: 'Prodip Chowdhury',
       idCardSignatoryTitle: 'Authorized Signatory',
       admitCardControllerName: 'Controller of Examinations',
