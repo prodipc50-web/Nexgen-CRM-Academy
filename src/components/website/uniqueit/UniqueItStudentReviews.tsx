@@ -39,11 +39,12 @@ export const UniqueItStudentReviews: React.FC<UniqueItStudentReviewsProps> = ({ 
       ? reviews.slice(0, 6).map((r) => ({
           id: r.id,
           rating: r.rating || 5,
-          text: r.comment,
+          text: r.reviewText || (r as any).comment || '',
           author: r.studentName,
-          role: r.courseName || 'NexGen Graduate',
+          role: r.workplaceOrRole || r.earningsOrSuccess || r.courseName || 'NexGen Graduate',
           avatar:
-            r.avatarUrl ||
+            r.studentPhoto ||
+            (r as any).avatarUrl ||
             'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
         }))
       : defaultReviews;

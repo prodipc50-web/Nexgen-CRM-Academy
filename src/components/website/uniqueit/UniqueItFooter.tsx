@@ -304,7 +304,7 @@ export const UniqueItFooter: React.FC<UniqueItFooterProps> = ({
           {/* Social Icons */}
           <div className="flex items-center space-x-2">
             <a
-              href="https://facebook.com/uniqueitinstitute"
+              href="https://facebook.com/nexgencomputeracademy"
               target="_blank"
               rel="noreferrer"
               className="w-7 h-7 rounded-full bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"

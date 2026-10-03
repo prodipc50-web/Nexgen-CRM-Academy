@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import {
+  NewHomepageSectionVisibility,
+  AboutHeroCmsConfig,
+  AboutHeroCmsStat,
+  WhyChooseCmsConfig,
+  WhyChooseCmsPoint,
+  ExclusiveSolutionsCmsConfig,
+  ExclusiveSolutionsCmsItem,
+  NewsletterCtaCmsConfig,
+  SnakeCtaCmsConfig,
+  AdmissionBannerCmsConfig,
+  PaymentMerchantsCmsConfig,
   LearningDeliveryFormatCard,
   AdmissionRoadmapStep,
   WebsiteSectionVisibility,
@@ -10,6 +21,7 @@ import {
   AccreditationTrustItem,
   StudentSuccessStory
 } from '../../../types';
+import { INITIAL_WEBSITE_CMS_CONFIG } from '../../../data/websiteSeedData';
 import {
   Sliders,
   Eye,
@@ -53,12 +65,109 @@ interface CmsSectionsTabProps {
   onSuccessToast: (msg: string) => void;
 }
 
+import { CmsNewHomepageSectionsEditor } from './CmsNewHomepageSectionsEditor';
+
 export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings } = useAcademy();
   const [saveFeedback, setSaveFeedback] = useState(false);
   const hasUserEditedRef = useRef(false);
 
-  // 1. Section Visibility
+  // 0. Modern Homepage 16-Section Switchboard (New Unique IT / NexGen Layout)
+  const [newVisibility, setNewVisibility] = useState<NewHomepageSectionVisibility>(
+    websiteCmsConfig.newSectionVisibility || INITIAL_WEBSITE_CMS_CONFIG.newSectionVisibility || {
+      topBar: true,
+      hero: true,
+      categorySlider: true,
+      popularCourses: true,
+      exploreCategories: true,
+      aboutHero: true,
+      onlineCourses: true,
+      successStories: true,
+      studentReviews: true,
+      whyChoose: true,
+      newsletterCta: true,
+      photoStrip: true,
+      faqs: true,
+      exclusiveSolutions: true,
+      snakeCta: true,
+      admissionBanner: true,
+      footer: true
+    }
+  );
+
+  // Modern Homepage Module Configurations
+  const [aboutHero, setAboutHero] = useState<AboutHeroCmsConfig>(
+    websiteCmsConfig.aboutHeroConfig || INITIAL_WEBSITE_CMS_CONFIG.aboutHeroConfig || {
+      tagline: 'Trusted for 12 Years',
+      headline: 'From Beginner to IT Professionals We Close That Gap.',
+      description: 'For 12 years, NexGen Computer Academy has had one goal — turn ordinary people into extraordinary IT professionals.',
+      labBadgeText: 'Modern AC Lab • Farmgate Campus',
+      imageUrl: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
+      stats: [
+        { id: 'st-1', value: '20000 +', label: 'Successful Students', color: 'purple' },
+        { id: 'st-2', value: '9000 +', label: 'Expert Freelancers', color: 'red' },
+        { id: 'st-3', value: '2000 +', label: 'Skilled Job Holders', color: 'purple' },
+        { id: 'st-4', value: '5000 +', label: 'Industry Expert', color: 'red' },
+        { id: 'st-5', value: '95 %', label: 'Success Ratio', color: 'purple' },
+        { id: 'st-6', value: '100 +', label: 'Companies', color: 'red' }
+      ]
+    }
+  );
+
+  const [whyChoose, setWhyChoose] = useState<WhyChooseCmsConfig>(
+    websiteCmsConfig.whyChooseConfig || INITIAL_WEBSITE_CMS_CONFIG.whyChooseConfig || {
+      heading: 'Why Choose NexGen Academy?',
+      description: 'NexGen Computer Academy is not your typical training centre and we have never tried to be.',
+      points: []
+    }
+  );
+
+  const [exclusiveSolutions, setExclusiveSolutions] = useState<ExclusiveSolutionsCmsConfig>(
+    websiteCmsConfig.exclusiveSolutionsConfig || INITIAL_WEBSITE_CMS_CONFIG.exclusiveSolutionsConfig || {
+      heading: 'Exclusive Solutions That Set Us Apart',
+      description: 'We go beyond ordinary software tutorials.',
+      items: []
+    }
+  );
+
+  const [newsletterCta, setNewsletterCta] = useState<NewsletterCtaCmsConfig>(
+    websiteCmsConfig.newsletterCtaConfig || INITIAL_WEBSITE_CMS_CONFIG.newsletterCtaConfig || {
+      eyebrow: 'Career Counseling & Masterclass',
+      title: 'Upgrade your learning experience & unlock high-demand IT careers.',
+      description: 'Join our free career counseling session this Friday.',
+      buttonText: 'Join Free Masterclass',
+      note: '⚡ 100% Free Entry • No Prior Experience Required'
+    }
+  );
+
+  const [snakeCta, setSnakeCta] = useState<SnakeCtaCmsConfig>(
+    websiteCmsConfig.snakeCtaConfig || INITIAL_WEBSITE_CMS_CONFIG.snakeCtaConfig || {
+      title: 'So why delay? The best time to start is today.',
+      subtitle: 'Take the first step towards a financially independent IT career with NexGen Computer Academy.',
+      ctaText: 'Get Started Now'
+    }
+  );
+
+  const [admissionBanner, setAdmissionBanner] = useState<AdmissionBannerCmsConfig>(
+    websiteCmsConfig.admissionBannerConfig || INITIAL_WEBSITE_CMS_CONFIG.admissionBannerConfig || {
+      title: 'New Admission is Going On! Special 40% Scholarship Available.',
+      subtitle: 'Limited seats per lab batch. Enroll now to secure your workstation and personal mentorship slot.',
+      ctaText: 'Apply For Admission',
+      discountBadge: 'Special 40% Scholarship'
+    }
+  );
+
+  const [paymentMerchants, setPaymentMerchants] = useState<PaymentMerchantsCmsConfig>(
+    websiteCmsConfig.paymentMerchantsConfig || INITIAL_WEBSITE_CMS_CONFIG.paymentMerchantsConfig || {
+      bkashNumber: '01795077536',
+      nagadNumber: '01795077536',
+      rocketNumber: '01795077536',
+      upayNumber: '01795077536',
+      sslcommerzNote: 'Cards & Internet Banking'
+    }
+  );
+
+  // 1. Section Visibility (Legacy / Complementary)
   const [visibility, setVisibility] = useState<WebsiteSectionVisibility>(
     websiteCmsConfig.sectionVisibility || {
       heroBanner: true,
@@ -542,6 +651,30 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       if (websiteCmsConfig.footerConfig.showQuickNav !== undefined) setShowQuickNav(websiteCmsConfig.footerConfig.showQuickNav);
       if (websiteCmsConfig.footerConfig.showLegalLinks !== undefined) setShowLegalLinks(websiteCmsConfig.footerConfig.showLegalLinks);
     }
+    if (websiteCmsConfig.newSectionVisibility) {
+      setNewVisibility(websiteCmsConfig.newSectionVisibility);
+    }
+    if (websiteCmsConfig.aboutHeroConfig) {
+      setAboutHero(websiteCmsConfig.aboutHeroConfig);
+    }
+    if (websiteCmsConfig.whyChooseConfig) {
+      setWhyChoose(websiteCmsConfig.whyChooseConfig);
+    }
+    if (websiteCmsConfig.exclusiveSolutionsConfig) {
+      setExclusiveSolutions(websiteCmsConfig.exclusiveSolutionsConfig);
+    }
+    if (websiteCmsConfig.newsletterCtaConfig) {
+      setNewsletterCta(websiteCmsConfig.newsletterCtaConfig);
+    }
+    if (websiteCmsConfig.snakeCtaConfig) {
+      setSnakeCta(websiteCmsConfig.snakeCtaConfig);
+    }
+    if (websiteCmsConfig.admissionBannerConfig) {
+      setAdmissionBanner(websiteCmsConfig.admissionBannerConfig);
+    }
+    if (websiteCmsConfig.paymentMerchantsConfig) {
+      setPaymentMerchants(websiteCmsConfig.paymentMerchantsConfig);
+    }
   }, [websiteCmsConfig]);
 
   const handleToggleSection = (key: keyof WebsiteSectionVisibility) => {
@@ -706,6 +839,14 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       popularSearchTags: popularTagsString.split(',').map(s => s.trim()).filter(Boolean),
       headerSubtitle,
       headerEstText,
+      newSectionVisibility: newVisibility,
+      aboutHeroConfig: aboutHero,
+      whyChooseConfig: whyChoose,
+      exclusiveSolutionsConfig: exclusiveSolutions,
+      newsletterCtaConfig: newsletterCta,
+      snakeCtaConfig: snakeCta,
+      admissionBannerConfig: admissionBanner,
+      paymentMerchantsConfig: paymentMerchants,
       footerConfig: {
         bio: footerBio,
         copyrightText,
@@ -807,8 +948,27 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       {/* Quick Jump Section Links */}
       <div className="bg-slate-100/90 p-2.5 rounded-2xl border border-slate-200/90 overflow-x-auto flex items-center space-x-2 text-xs">
         <span className="text-[11px] font-black text-slate-500 uppercase px-2 shrink-0">দ্রুত সেকশনে যান:</span>
-        <a href="#sec-visibility" className="px-3 py-1.5 bg-white hover:bg-indigo-50 hover:text-indigo-600 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
-          👁️ সেকশন ভিজিবিলিটি
+        <a href="#sec-new-visibility" className="px-3 py-1.5 bg-indigo-600 text-white rounded-xl font-black shadow-xs shrink-0 transition-colors flex items-center space-x-1">
+          <span>⚡</span>
+          <span>১৬টি নতুন সেকশন অন/অফ</span>
+        </a>
+        <a href="#sec-abouthero" className="px-3 py-1.5 bg-white hover:bg-purple-50 hover:text-purple-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          🏢 অ্যাবাউট হিরো ও ৬টি কাউন্টার
+        </a>
+        <a href="#sec-whychoose" className="px-3 py-1.5 bg-white hover:bg-amber-50 hover:text-amber-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          ⭐ কেন নেক্সজেন (৯টি কার্ড)
+        </a>
+        <a href="#sec-exclusive" className="px-3 py-1.5 bg-white hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          💡 এক্সক্লুসিভ সল্যুশনস
+        </a>
+        <a href="#sec-newsletter" className="px-3 py-1.5 bg-white hover:bg-blue-50 hover:text-blue-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          📢 কাউন্সেলিং ও নিউজলেটার
+        </a>
+        <a href="#sec-banners" className="px-3 py-1.5 bg-white hover:bg-rose-50 hover:text-rose-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          🎯 স্নেক ও স্কলারশিপ ব্যানার
+        </a>
+        <a href="#sec-merchants" className="px-3 py-1.5 bg-white hover:bg-teal-50 hover:text-teal-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          💳 পেমেন্ট মার্চেন্ট নম্বর
         </a>
         <a href="#sec-delivery" className="px-3 py-1.5 bg-white hover:bg-blue-50 hover:text-blue-600 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
           🚀 ডেলিভারি ফরম্যাট
@@ -818,7 +978,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         </a>
         <a href="#sec-roadmap" className="px-3 py-1.5 bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 rounded-xl font-black shadow-2xs shrink-0 transition-colors flex items-center space-x-1">
           <span>🎓</span>
-          <span>ভর্তি রোডম্যাপ ও প্ল্যান (Admission Plan)</span>
+          <span>ভর্তি রোডম্যাপ</span>
         </a>
         <a href="#sec-headings" className="px-3 py-1.5 bg-white hover:bg-purple-50 hover:text-purple-600 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
           ✏️ পেজ হেডিংস
@@ -827,6 +987,28 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
           🦶 ওয়েবসাইট ফুটার
         </a>
       </div>
+
+      {/* PREMIER: NEW HOMEPAGE 16-SECTION SWITCHBOARD & MODULAR CONTENT EDITORS */}
+      <CmsNewHomepageSectionsEditor
+        newVisibility={newVisibility}
+        onChangeNewVisibility={setNewVisibility}
+        aboutHero={aboutHero}
+        onChangeAboutHero={setAboutHero}
+        whyChoose={whyChoose}
+        onChangeWhyChoose={setWhyChoose}
+        exclusiveSolutions={exclusiveSolutions}
+        onChangeExclusiveSolutions={setExclusiveSolutions}
+        newsletterCta={newsletterCta}
+        onChangeNewsletterCta={setNewsletterCta}
+        snakeCta={snakeCta}
+        onChangeSnakeCta={setSnakeCta}
+        admissionBanner={admissionBanner}
+        onChangeAdmissionBanner={setAdmissionBanner}
+        paymentMerchants={paymentMerchants}
+        onChangePaymentMerchants={setPaymentMerchants}
+        onSaveAll={() => handleSaveAll()}
+        saveFeedback={saveFeedback}
+      />
 
       {/* SECTION 1: GLOBAL SECTION VISIBILITY TOGGLES */}
       <div id="sec-visibility" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">

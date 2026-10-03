@@ -684,143 +684,187 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         />
       ) : (
         <>
-          {/* 1. HERO SECTION (EXACT UNIQUE IT INSTITUTE) */}
-          <UniqueItHero
-            categories={categories}
-            headline={websiteCmsConfig?.heroHeadline}
-            subtitle={websiteCmsConfig?.heroSubtitle}
-            videoUrl={websiteCmsConfig?.heroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8"}
-            videoThumbnailUrl={websiteCmsConfig?.heroVideoThumbnailUrl || "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80"}
-            onNavigateSubPage={navigateSubPage}
-            onOpenAdmission={() => {
-              setSelectedCourseForAdmission(null);
-              setIsAdmissionOpen(true);
-            }}
-            onSearchCourse={(query, cat) => {
-              setCourseSearchQuery(query);
-              if (cat && cat !== "All") {
-                const matched = categories.find(c => c.toLowerCase().includes(cat.toLowerCase()) || cat.toLowerCase().includes(c.toLowerCase()));
-                setSelectedCategory(matched || cat);
-              }
-              navigateSubPage("courses");
-            }}
-            onPlayVideo={() => setIsVideoModalOpen(true)}
-          />
+          {/* 1. HERO SECTION */}
+          {(websiteCmsConfig?.newSectionVisibility?.hero ?? true) && (
+            <UniqueItHero
+              categories={categories}
+              headline={websiteCmsConfig?.heroHeadline}
+              subtitle={websiteCmsConfig?.heroSubtitle}
+              videoUrl={websiteCmsConfig?.heroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8"}
+              videoThumbnailUrl={websiteCmsConfig?.heroVideoThumbnailUrl || "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80"}
+              onNavigateSubPage={navigateSubPage}
+              onOpenAdmission={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
+              onSearchCourse={(query, cat) => {
+                setCourseSearchQuery(query);
+                if (cat && cat !== "All") {
+                  const matched = categories.find(c => c.toLowerCase().includes(cat.toLowerCase()) || cat.toLowerCase().includes(c.toLowerCase()));
+                  setSelectedCategory(matched || cat);
+                }
+                navigateSubPage("courses");
+              }}
+              onPlayVideo={() => setIsVideoModalOpen(true)}
+            />
+          )}
 
           {/* 2. CATEGORY SLIDER CHIPS */}
-          <UniqueItCategorySlider
-            onSelectCategory={(catName) => {
-              const matched = categories.find(c => c.toLowerCase().includes(catName.toLowerCase()) || catName.toLowerCase().includes(c.toLowerCase()));
-              setSelectedCategory(matched || catName);
-              navigateSubPage("courses");
-            }}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.categorySlider ?? true) && (
+            <UniqueItCategorySlider
+              onSelectCategory={(catName) => {
+                const matched = categories.find(c => c.toLowerCase().includes(catName.toLowerCase()) || catName.toLowerCase().includes(c.toLowerCase()));
+                setSelectedCategory(matched || catName);
+                navigateSubPage("courses");
+              }}
+            />
+          )}
 
           {/* 3. POPULAR COURSES (3x3 Grid with All, Online, Offline, Pre Recorded filters) */}
-          <UniqueItPopularCourses
-            courses={courses}
-            onSelectCourseForAdmission={(c) => {
-              setSelectedCourseForAdmission(c);
-              setIsAdmissionOpen(true);
-            }}
-            onSelectCourseForDetails={(c) => {
-              setSelectedCourseForDetails(c);
-            }}
-            onViewAllCourses={() => navigateSubPage("courses")}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.popularCourses ?? true) && (
+            <UniqueItPopularCourses
+              courses={courses}
+              onSelectCourseForAdmission={(c) => {
+                setSelectedCourseForAdmission(c);
+                setIsAdmissionOpen(true);
+              }}
+              onSelectCourseForDetails={(c) => {
+                setSelectedCourseForDetails(c);
+              }}
+              onViewAllCourses={() => navigateSubPage("courses")}
+            />
+          )}
 
           {/* 4. EXPLORE CATEGORIES (4 Delivery Format Cards) */}
-          <UniqueItExploreCategories
-            onNavigateSubPage={navigateSubPage}
-            onFilterDeliveryMode={(mode) => {
-              setSelectedDeliveryMode(mode);
-            }}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.exploreCategories ?? true) && (
+            <UniqueItExploreCategories
+              onNavigateSubPage={navigateSubPage}
+              onFilterDeliveryMode={(mode) => {
+                setSelectedDeliveryMode(mode);
+              }}
+            />
+          )}
 
           {/* 5. ABOUT HERO & 6 STATS COUNTERS */}
-          <UniqueItAboutHero
-            onNavigateSubPage={navigateSubPage}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.aboutHero ?? true) && (
+            <UniqueItAboutHero
+              config={websiteCmsConfig?.aboutHeroConfig}
+              onNavigateSubPage={navigateSubPage}
+            />
+          )}
 
           {/* 6. ONLINE COURSES SECTION */}
-          <UniqueItOnlineCourses
-            courses={courses}
-            onSelectCourseForAdmission={(c) => {
-              setSelectedCourseForAdmission(c);
-              setIsAdmissionOpen(true);
-            }}
-            onSelectCourseForDetails={(c) => {
-              setSelectedCourseForDetails(c);
-            }}
-            onViewAllCourses={() => {
-              setSelectedDeliveryMode("Online");
-              navigateSubPage("courses");
-            }}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.onlineCourses ?? true) && (
+            <UniqueItOnlineCourses
+              courses={courses}
+              onSelectCourseForAdmission={(c) => {
+                setSelectedCourseForAdmission(c);
+                setIsAdmissionOpen(true);
+              }}
+              onSelectCourseForDetails={(c) => {
+                setSelectedCourseForDetails(c);
+              }}
+              onViewAllCourses={() => {
+                setSelectedDeliveryMode("Online");
+                navigateSubPage("courses");
+              }}
+            />
+          )}
 
           {/* 7. REAL RESULTS - SUCCESS STORIES */}
-          <UniqueItSuccessStories
-            stories={websiteCmsConfig?.studentSuccessConfig?.stories}
-            onViewAllStories={() => navigateSubPage("success-stories")}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.successStories ?? true) && (
+            <UniqueItSuccessStories
+              stories={websiteCmsConfig?.studentSuccessConfig?.stories}
+              onViewAllStories={() => navigateSubPage("success-stories")}
+            />
+          )}
 
           {/* 8. STUDENT REVIEWS */}
-          <UniqueItStudentReviews
-            reviews={websiteReviews}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.studentReviews ?? true) && (
+            <UniqueItStudentReviews
+              reviews={websiteReviews}
+            />
+          )}
 
-          {/* 9. WHY CHOOSE UNIQUE IT? (9 Interactive Feature Pillars) */}
-          <UniqueItWhyChoose />
+          {/* 9. WHY CHOOSE NEXGEN ACADEMY? (Interactive Feature Pillars) */}
+          {(websiteCmsConfig?.newSectionVisibility?.whyChoose ?? true) && (
+            <UniqueItWhyChoose
+              config={websiteCmsConfig?.whyChooseConfig}
+            />
+          )}
 
           {/* 10. UPGRADE YOUR LEARNING EXPERIENCE (Newsletter / Workshop CTA) */}
-          <UniqueItNewsletter />
+          {(websiteCmsConfig?.newSectionVisibility?.newsletterCta ?? true) && (
+            <UniqueItNewsletter
+              config={websiteCmsConfig?.newsletterCtaConfig}
+            />
+          )}
 
           {/* 11. CAMPUS LIFE PHOTO GALLERY */}
-          <UniqueItPhotoStrip />
+          {(websiteCmsConfig?.newSectionVisibility?.photoStrip ?? true) && (
+            <UniqueItPhotoStrip
+              galleryItems={websiteGallery}
+            />
+          )}
 
           {/* 12. FREQUENTLY ASKED QUESTIONS */}
-          <UniqueItFaq
-            faqs={websiteFaqs}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.faqs ?? true) && (
+            <UniqueItFaq
+              faqs={websiteFaqs}
+            />
+          )}
 
           {/* 13. EXCLUSIVE SOLUTIONS THAT SET US APART */}
-          <UniqueItExclusiveSolutions />
+          {(websiteCmsConfig?.newSectionVisibility?.exclusiveSolutions ?? true) && (
+            <UniqueItExclusiveSolutions
+              config={websiteCmsConfig?.exclusiveSolutionsConfig}
+            />
+          )}
 
           {/* 14. SO WHY DELAY? THE BEST TIME TO START IS TODAY (SNAKE CTA) */}
-          <UniqueItSnakeCta
-            onOpenAdmission={() => {
-              setSelectedCourseForAdmission(null);
-              setIsAdmissionOpen(true);
-            }}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.snakeCta ?? true) && (
+            <UniqueItSnakeCta
+              config={websiteCmsConfig?.snakeCtaConfig}
+              onOpenAdmission={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
+            />
+          )}
 
           {/* 15. ADMISSION IS GOING ON BANNER */}
-          <UniqueItAdmissionBanner
-            onNavigateSubPage={navigateSubPage}
-          />
+          {(websiteCmsConfig?.newSectionVisibility?.admissionBanner ?? true) && (
+            <UniqueItAdmissionBanner
+              config={websiteCmsConfig?.admissionBannerConfig}
+              onNavigateSubPage={navigateSubPage}
+            />
+          )}
         </>
       )}
 
       {/* FOOTER */}
-      <UniqueItFooter
-        onNavigateSubPage={navigateSubPage}
-        onOpenStudentLogin={() => {
-          if (onOpenStudentPortal) onOpenStudentPortal();
-          else setIsAdmissionOpen(true);
-        }}
-        onOpenStudentRegister={() => {
-          setSelectedCourseForAdmission(null);
-          setIsAdmissionOpen(true);
-        }}
-        onOpenPolicyModal={(policy) => setActivePolicyModal(policy)}
-        courses={courses}
-        instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
-        officialAddress={academySettings.officialAddress || 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215'}
-        officialEmail={academySettings.officialEmail || 'info@nexgenacademy.edu.bd'}
-        primaryPhone={academySettings.primarySupportPhone || '01798444444'}
-        helplines={academySettings.helplines || ['01798444444', '+880 1711-223344', '+880 1811-556677']}
-        onOpenStaffLogin={onOpenStaffLogin}
-      />
+      {(websiteCmsConfig?.newSectionVisibility?.footer ?? true) && (
+        <UniqueItFooter
+          onNavigateSubPage={navigateSubPage}
+          onOpenStudentLogin={() => {
+            if (onOpenStudentPortal) onOpenStudentPortal();
+            else setIsAdmissionOpen(true);
+          }}
+          onOpenStudentRegister={() => {
+            setSelectedCourseForAdmission(null);
+            setIsAdmissionOpen(true);
+          }}
+          onOpenPolicyModal={(policy) => setActivePolicyModal(policy)}
+          courses={courses}
+          instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
+          officialAddress={academySettings.officialAddress || 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215'}
+          officialEmail={academySettings.officialEmail || 'info@nexgenacademy.edu.bd'}
+          primaryPhone={academySettings.primarySupportPhone || '01798444444'}
+          helplines={academySettings.helplines || ['01798444444', '+880 1711-223344', '+880 1811-556677']}
+          onOpenStaffLogin={onOpenStaffLogin}
+          paymentMerchantsConfig={websiteCmsConfig?.paymentMerchantsConfig}
+        />
+      )}
 
       {/* FLOATING DISCOUNT BUTTON */}
       <UniqueItFloatingDiscount onClick={() => setShowExitIntent(true)} />

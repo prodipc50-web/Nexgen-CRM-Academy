@@ -879,7 +879,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
               ? parsed.hiringPartnersConfig.partners
               : (INITIAL_WEBSITE_CMS_CONFIG.hiringPartnersConfig?.partners || [])
           },
-          floatingActionWidget: { ...INITIAL_WEBSITE_CMS_CONFIG.floatingActionWidget, ...(parsed.floatingActionWidget || {}) }
+          floatingActionWidget: { ...INITIAL_WEBSITE_CMS_CONFIG.floatingActionWidget, ...(parsed.floatingActionWidget || {}) },
+          newSectionVisibility: { ...INITIAL_WEBSITE_CMS_CONFIG.newSectionVisibility, ...(parsed.newSectionVisibility || {}) },
+          aboutHeroConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.aboutHeroConfig, ...(parsed.aboutHeroConfig || {}) },
+          whyChooseConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.whyChooseConfig, ...(parsed.whyChooseConfig || {}) },
+          exclusiveSolutionsConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.exclusiveSolutionsConfig, ...(parsed.exclusiveSolutionsConfig || {}) },
+          newsletterCtaConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.newsletterCtaConfig, ...(parsed.newsletterCtaConfig || {}) },
+          snakeCtaConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.snakeCtaConfig, ...(parsed.snakeCtaConfig || {}) },
+          admissionBannerConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.admissionBannerConfig, ...(parsed.admissionBannerConfig || {}) },
+          paymentMerchantsConfig: { ...INITIAL_WEBSITE_CMS_CONFIG.paymentMerchantsConfig, ...(parsed.paymentMerchantsConfig || {}) }
         };
       } catch (e) {
         console.error('Error parsing website_cms_config', e);
@@ -4433,6 +4441,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         headerEstText: updates.headerEstText !== undefined ? updates.headerEstText : prev.headerEstText,
         upcomingBatchesCard: updates.upcomingBatchesCard ? { ...(prev.upcomingBatchesCard || {}), ...updates.upcomingBatchesCard } : prev.upcomingBatchesCard,
         heroSlides: Array.isArray(updates.heroSlides) ? updates.heroSlides : prev.heroSlides,
+        newSectionVisibility: updates.newSectionVisibility ? { ...(prev.newSectionVisibility || {}), ...updates.newSectionVisibility } : prev.newSectionVisibility,
+        aboutHeroConfig: updates.aboutHeroConfig ? { ...(prev.aboutHeroConfig || {}), ...updates.aboutHeroConfig } : prev.aboutHeroConfig,
+        whyChooseConfig: updates.whyChooseConfig ? { ...(prev.whyChooseConfig || {}), ...updates.whyChooseConfig } : prev.whyChooseConfig,
+        exclusiveSolutionsConfig: updates.exclusiveSolutionsConfig ? { ...(prev.exclusiveSolutionsConfig || {}), ...updates.exclusiveSolutionsConfig } : prev.exclusiveSolutionsConfig,
+        newsletterCtaConfig: updates.newsletterCtaConfig ? { ...(prev.newsletterCtaConfig || {}), ...updates.newsletterCtaConfig } : prev.newsletterCtaConfig,
+        snakeCtaConfig: updates.snakeCtaConfig ? { ...(prev.snakeCtaConfig || {}), ...updates.snakeCtaConfig } : prev.snakeCtaConfig,
+        admissionBannerConfig: updates.admissionBannerConfig ? { ...(prev.admissionBannerConfig || {}), ...updates.admissionBannerConfig } : prev.admissionBannerConfig,
+        paymentMerchantsConfig: updates.paymentMerchantsConfig ? { ...(prev.paymentMerchantsConfig || {}), ...updates.paymentMerchantsConfig } : prev.paymentMerchantsConfig,
         updatedAt: new Date().toISOString()
       };
       latestWebsiteCmsConfigRef.current = nextConfig;
