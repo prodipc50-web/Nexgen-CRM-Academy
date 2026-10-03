@@ -821,7 +821,112 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             />
           )}
 
-          {/* 14. SO WHY DELAY? THE BEST TIME TO START IS TODAY (SNAKE CTA) */}
+          {/* 14. GOOGLE LOCATION MAP & FARMGATE CAMPUS SHOWCASE */}
+          {(websiteCmsConfig?.newSectionVisibility?.locationMap ?? true) && (
+            <section className="py-16 sm:py-20 bg-slate-50/70 border-b border-slate-200/80">
+              <div className="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-10">
+                {/* Header */}
+                <div className="text-center max-w-3xl mx-auto space-y-3">
+                  <span className="inline-block px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-black text-xs uppercase tracking-wider">
+                    Physical Campus & Lab Location
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+                    Visit Our <span className="text-[#6b1cb0]">Farmgate Campus</span> & IT Lab
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                    সরাসরি ক্যাম্পাসে এসে হাই-কনফিগ এসি কম্পিউটার ল্যাব পরিদর্শন করুন, ফ্রি ক্যারিয়ার কাউন্সেলিং নিন এবং মেন্টরদের সাথে সরাসরি কথা বলে কোর্স বাছাই করুন।
+                  </p>
+                </div>
+
+                {/* Map Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                  {/* Left Column: Interactive Map Box */}
+                  <div className="lg:col-span-8 h-full min-h-[440px]">
+                    <CampusLocationMapBox
+                      embedUrl={websiteCmsConfig?.googleMapEmbedUrl}
+                      shareUrl={websiteCmsConfig?.googleMapShareUrl}
+                      address={academySettings.officialAddress || websiteCmsConfig?.officeAddress || 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215'}
+                      directions={websiteCmsConfig?.campusDirections || 'Located 2 minutes walk from Farmgate Metro Station, opposite to Green Super Market.'}
+                      instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
+                    />
+                  </div>
+
+                  {/* Right Column: Campus Details & Timings Cards */}
+                  <div className="lg:col-span-4 flex flex-col justify-between space-y-4">
+                    {/* Address Card */}
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-2">
+                      <div className="flex items-center space-x-2 text-indigo-600">
+                        <MapPin className="w-5 h-5 shrink-0" />
+                        <h4 className="font-black text-sm text-slate-900">হেড অফিস ও মূল ক্যাম্পাস</h4>
+                      </div>
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                        {academySettings.officialAddress || websiteCmsConfig?.officeAddress || 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215'}
+                      </p>
+                      <div className="pt-2 border-t border-slate-100 flex items-center space-x-2 text-[11px] text-slate-500">
+                        <Navigation className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                        <span>ফার্মগেট মেট্রো স্টেশন (Exit 3) থেকে মাত্র ২ মিনিট হাঁটার পথ</span>
+                      </div>
+                    </div>
+
+                    {/* Visiting Hours Card */}
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-2">
+                      <div className="flex items-center space-x-2 text-emerald-600">
+                        <Clock className="w-5 h-5 shrink-0" />
+                        <h4 className="font-black text-sm text-slate-900">ল্যাব ও অফিস সময়সূচি</h4>
+                      </div>
+                      <div className="space-y-1 text-xs text-slate-600">
+                        <div className="flex justify-between py-1 border-b border-slate-100">
+                          <span className="font-medium">শনিবার - বৃহস্পতিবার:</span>
+                          <span className="font-bold text-slate-900">সকাল ৯:০০ - রাত ৯:০০</span>
+                        </div>
+                        <div className="flex justify-between py-1">
+                          <span className="font-medium">শুক্রবার (জুম্মা বিরতি সহ):</span>
+                          <span className="font-bold text-slate-900">বিকাল ২:৩০ - রাত ৯:০০</span>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-emerald-700 font-bold bg-emerald-50 p-2 rounded-xl border border-emerald-200/60 mt-1">
+                        ✓ সপ্তাহে ৭ দিনই শিক্ষার্থীদের জন্য ফ্রি ল্যাব প্র্যাকটিস উন্মুক্ত
+                      </p>
+                    </div>
+
+                    {/* Hotline Direct Action Card */}
+                    <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-5 rounded-2xl shadow-md space-y-3">
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-indigo-300">
+                          Instant Assistance
+                        </span>
+                        <h4 className="text-sm font-black text-white mt-0.5">লোকেশন খুঁজে পেতে সমস্যা?</h4>
+                        <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                          আমাদের সাপোর্ট ডেস্কে ফোন করুন, আপনাকে সরাসরি গাইড করা হবে।
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2 pt-1">
+                        <a
+                          href={`tel:${academySettings.primarySupportPhone || '01798444444'}`}
+                          className="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold text-center flex items-center justify-center space-x-1.5 transition-colors"
+                        >
+                          <Phone className="w-3.5 h-3.5" />
+                          <span>{academySettings.primarySupportPhone || '01798444444'}</span>
+                        </a>
+                        <a
+                          href={websiteCmsConfig?.googleMapShareUrl || 'https://share.google/9W8K1XZHLbZxFpF8G'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-2 px-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-1 transition-colors border border-white/20"
+                          title="Open Google Maps"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>গুগল ম্যাপ</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* 15. SO WHY DELAY? THE BEST TIME TO START IS TODAY (SNAKE CTA) */}
           {(websiteCmsConfig?.newSectionVisibility?.snakeCta ?? true) && (
             <UniqueItSnakeCta
               config={websiteCmsConfig?.snakeCtaConfig}
@@ -832,7 +937,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             />
           )}
 
-          {/* 15. ADMISSION IS GOING ON BANNER */}
+          {/* 16. ADMISSION IS GOING ON BANNER */}
           {(websiteCmsConfig?.newSectionVisibility?.admissionBanner ?? true) && (
             <UniqueItAdmissionBanner
               config={websiteCmsConfig?.admissionBannerConfig}

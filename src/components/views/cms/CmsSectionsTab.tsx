@@ -91,6 +91,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       exclusiveSolutions: true,
       snakeCta: true,
       admissionBanner: true,
+      locationMap: true,
       footer: true
     }
   );
@@ -165,6 +166,23 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       upayNumber: '01795077536',
       sslcommerzNote: 'Cards & Internet Banking'
     }
+  );
+
+  // Google Location Map & Campus Showcase State
+  const [mapEmbedUrl, setMapEmbedUrl] = useState<string>(
+    websiteCmsConfig.googleMapEmbedUrl || INITIAL_WEBSITE_CMS_CONFIG.googleMapEmbedUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.848881261358!2d90.3887!3d23.7527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ1JzA5LjciTiA5MMKwMjMnMTkuMyJF!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd'
+  );
+  const [mapShareUrl, setMapShareUrl] = useState<string>(
+    websiteCmsConfig.googleMapShareUrl || 'https://share.google/9W8K1XZHLbZxFpF8G'
+  );
+  const [mapAddress, setMapAddress] = useState<string>(
+    websiteCmsConfig.officeAddress || academySettings.officialAddress || 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215'
+  );
+  const [mapDirections, setMapDirections] = useState<string>(
+    websiteCmsConfig.campusDirections || 'Located 2 minutes walk from Farmgate Metro Station (Exit 3), opposite to Green Super Market.'
+  );
+  const [mapHours, setMapHours] = useState<string>(
+    websiteCmsConfig.officeHours || 'Saturday to Friday: 9:00 AM - 8:30 PM'
   );
 
   // 1. Section Visibility (Legacy / Complementary)
@@ -675,6 +693,21 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     if (websiteCmsConfig.paymentMerchantsConfig) {
       setPaymentMerchants(websiteCmsConfig.paymentMerchantsConfig);
     }
+    if (websiteCmsConfig.googleMapEmbedUrl) {
+      setMapEmbedUrl(websiteCmsConfig.googleMapEmbedUrl);
+    }
+    if (websiteCmsConfig.googleMapShareUrl) {
+      setMapShareUrl(websiteCmsConfig.googleMapShareUrl);
+    }
+    if (websiteCmsConfig.officeAddress) {
+      setMapAddress(websiteCmsConfig.officeAddress);
+    }
+    if (websiteCmsConfig.campusDirections) {
+      setMapDirections(websiteCmsConfig.campusDirections);
+    }
+    if (websiteCmsConfig.officeHours) {
+      setMapHours(websiteCmsConfig.officeHours);
+    }
   }, [websiteCmsConfig]);
 
   const handleToggleSection = (key: keyof WebsiteSectionVisibility) => {
@@ -847,6 +880,11 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       snakeCtaConfig: snakeCta,
       admissionBannerConfig: admissionBanner,
       paymentMerchantsConfig: paymentMerchants,
+      googleMapEmbedUrl: mapEmbedUrl,
+      googleMapShareUrl: mapShareUrl,
+      officeAddress: mapAddress,
+      campusDirections: mapDirections,
+      officeHours: mapHours,
       footerConfig: {
         bio: footerBio,
         copyrightText,
@@ -950,7 +988,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         <span className="text-[11px] font-black text-slate-500 uppercase px-2 shrink-0">দ্রুত সেকশনে যান:</span>
         <a href="#sec-new-visibility" className="px-3 py-1.5 bg-indigo-600 text-white rounded-xl font-black shadow-xs shrink-0 transition-colors flex items-center space-x-1">
           <span>⚡</span>
-          <span>১৬টি নতুন সেকশন অন/অফ</span>
+          <span>১৭টি নতুন সেকশন অন/অফ</span>
         </a>
         <a href="#sec-abouthero" className="px-3 py-1.5 bg-white hover:bg-purple-50 hover:text-purple-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
           🏢 অ্যাবাউট হিরো ও ৬টি কাউন্টার
@@ -969,6 +1007,9 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         </a>
         <a href="#sec-merchants" className="px-3 py-1.5 bg-white hover:bg-teal-50 hover:text-teal-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
           💳 পেমেন্ট মার্চেন্ট নম্বর
+        </a>
+        <a href="#sec-map" className="px-3 py-1.5 bg-white hover:bg-indigo-50 hover:text-indigo-700 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
+          🗺️ গুগল লোকেশন ম্যাপ
         </a>
         <a href="#sec-delivery" className="px-3 py-1.5 bg-white hover:bg-blue-50 hover:text-blue-600 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
           🚀 ডেলিভারি ফরম্যাট
@@ -1006,6 +1047,31 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         onChangeAdmissionBanner={setAdmissionBanner}
         paymentMerchants={paymentMerchants}
         onChangePaymentMerchants={setPaymentMerchants}
+        mapEmbedUrl={mapEmbedUrl}
+        onChangeMapEmbedUrl={url => {
+          hasUserEditedRef.current = true;
+          setMapEmbedUrl(url);
+        }}
+        mapShareUrl={mapShareUrl}
+        onChangeMapShareUrl={url => {
+          hasUserEditedRef.current = true;
+          setMapShareUrl(url);
+        }}
+        mapAddress={mapAddress}
+        onChangeMapAddress={addr => {
+          hasUserEditedRef.current = true;
+          setMapAddress(addr);
+        }}
+        mapDirections={mapDirections}
+        onChangeMapDirections={dir => {
+          hasUserEditedRef.current = true;
+          setMapDirections(dir);
+        }}
+        mapHours={mapHours}
+        onChangeMapHours={hrs => {
+          hasUserEditedRef.current = true;
+          setMapHours(hrs);
+        }}
         onSaveAll={() => handleSaveAll()}
         saveFeedback={saveFeedback}
       />

@@ -42,10 +42,10 @@ export function getHomepageSeoMetadata(
   const phone = cmsConfig.whatsappSupportNumber || academySettings.primarySupportPhone || academySettings.helplines?.[0] || '01798444444';
   const email = academySettings.officialEmail || 'info@nexgenacademy.edu.bd';
 
-  const title = seo?.metaTitle || `${instituteName} - Best Computer Training Center in Farmgate, Dhaka`;
+  const title = seo?.metaTitle || 'NexGen Computer Academy - Professional IT Training in Bangladesh';
   const metaDescription =
     seo?.metaDescription ||
-    `${instituteName} at Farmgate, Dhaka (close to Panthapath, Tejgaon & Dhanmondi). 100% practical lab training in Computer Office Application, Advanced Excel, Web Dev & Freelancing with verifiable certification.`;
+    'Premier computer and IT training center in Bangladesh. 100% practical lab training with verifiable certificates.';
 
   const defaultKeywords = [
     // English & Commercial Intent Keywords

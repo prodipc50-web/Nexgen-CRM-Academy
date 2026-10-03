@@ -215,9 +215,9 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
   const currentSeo: GlobalSeoConfig = useMemo(() => {
     return (
       websiteCmsConfig.seo || {
-        metaTitle: 'Nexgen Computer Academy - Best Computer Training Center in Farmgate, Dhaka',
+        metaTitle: 'NexGen Computer Academy - Professional IT Training in Bangladesh',
         metaDescription:
-          'Govt recognized top IT training institute in Farmgate, Dhaka. Practical Computer Office Application, Advanced Excel, Web Dev, Graphic Design, Digital Marketing & AI courses with 100% lab practice & job placement.',
+          'Premier computer and IT training center in Bangladesh. 100% practical lab training with verifiable certificates.',
         keywords: [
           'Computer Course in Farmgate',
           'Computer Training Center in Farmgate',
@@ -227,9 +227,9 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
           'Best IT Training Institute in Farmgate'
         ],
         canonicalBaseUrl: 'https://nexgenacademy.edu.bd',
-        ogTitle: 'Nexgen Computer Academy | #1 Practical IT Training Center in Farmgate, Dhaka',
+        ogTitle: 'NexGen Computer Academy - Professional IT Training in Bangladesh',
         ogDescription:
-          'Master Office Application, Excel, MERN Web Dev, UI/UX Design & Digital Marketing with 1-on-1 practical lab guidance & verifiable certificates.',
+          'Premier computer and IT training center in Bangladesh. 100% practical lab training with verifiable certificates.',
         ogImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200',
         twitterHandle: '@nexgenacademybd',
         geoRegion: 'BD-13',
@@ -1425,6 +1425,39 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
                     value={formData.ogImageUrl}
                     onChange={e => setFormData({ ...formData, ogImageUrl: e.target.value })}
                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Social Share Card (OpenGraph / WhatsApp Link Preview) */}
+              <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 space-y-3">
+                <div className="flex items-center space-x-2 text-indigo-900">
+                  <span className="text-xs font-black uppercase tracking-wider">Social Share Card (WhatsApp & Facebook Link Preview)</span>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700">সোশ্যাল শেয়ার টাইটেল (Social Share Title / og:title)</label>
+                    <span className="text-[10px] text-slate-500 font-medium">লিংক শেয়ার করলে এই টাইটেলটি কার্ডে দেখাবে</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.ogTitle || ''}
+                    onChange={e => setFormData({ ...formData, ogTitle: e.target.value })}
+                    placeholder={formData.metaTitle || "NexGen Computer Academy - Professional IT Training in Bangladesh"}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700">সোশ্যাল শেয়ার বিবরণ (Social Share Description / og:description)</label>
+                    <span className="text-[10px] text-slate-500 font-medium">লিংক শেয়ার করলে এই বিবরণ কার্ডের নিচে দেখাবে</span>
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={formData.ogDescription || ''}
+                    onChange={e => setFormData({ ...formData, ogDescription: e.target.value })}
+                    placeholder={formData.metaDescription || "Premier computer and IT training center in Bangladesh. 100% practical lab training with verifiable certificates."}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
                 </div>
               </div>

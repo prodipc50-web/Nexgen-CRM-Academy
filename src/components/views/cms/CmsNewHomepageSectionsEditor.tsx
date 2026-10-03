@@ -36,7 +36,13 @@ import {
   Tag,
   Zap,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  MapPin,
+  Navigation,
+  ExternalLink,
+  Clock,
+  Building2,
+  Compass
 } from 'lucide-react';
 
 interface CmsNewHomepageSectionsEditorProps {
@@ -56,6 +62,16 @@ interface CmsNewHomepageSectionsEditorProps {
   onChangeAdmissionBanner: (updated: AdmissionBannerCmsConfig) => void;
   paymentMerchants: PaymentMerchantsCmsConfig;
   onChangePaymentMerchants: (updated: PaymentMerchantsCmsConfig) => void;
+  mapEmbedUrl?: string;
+  onChangeMapEmbedUrl?: (val: string) => void;
+  mapShareUrl?: string;
+  onChangeMapShareUrl?: (val: string) => void;
+  mapAddress?: string;
+  onChangeMapAddress?: (val: string) => void;
+  mapDirections?: string;
+  onChangeMapDirections?: (val: string) => void;
+  mapHours?: string;
+  onChangeMapHours?: (val: string) => void;
   onSaveAll: () => void;
   saveFeedback?: boolean;
 }
@@ -77,11 +93,21 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
   onChangeAdmissionBanner,
   paymentMerchants,
   onChangePaymentMerchants,
+  mapEmbedUrl,
+  onChangeMapEmbedUrl,
+  mapShareUrl,
+  onChangeMapShareUrl,
+  mapAddress,
+  onChangeMapAddress,
+  mapDirections,
+  onChangeMapDirections,
+  mapHours,
+  onChangeMapHours,
   onSaveAll,
   saveFeedback = false
 }) => {
   const [openSubAccordion, setOpenSubAccordion] = useState<
-    'switchboard' | 'aboutHero' | 'whyChoose' | 'exclusive' | 'newsletter' | 'banners' | 'merchants' | 'all'
+    'switchboard' | 'aboutHero' | 'whyChoose' | 'exclusive' | 'newsletter' | 'banners' | 'merchants' | 'map' | 'all'
   >('all');
 
   const toggleSection = (key: keyof NewHomepageSectionVisibility) => {
@@ -109,6 +135,7 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
       exclusiveSolutions: true,
       snakeCta: true,
       admissionBanner: true,
+      locationMap: true,
       footer: true
     });
   };
@@ -251,8 +278,16 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
       category: 'Banners & Footer'
     },
     {
-      key: 'footer',
+      key: 'locationMap',
       num: 17,
+      title: 'Google Location Map & Directions',
+      subtitle: 'ফার্মগেট ক্যাম্পাস গুগল লোকেশন ম্যাপ, মেট্রো রুট ও ভিজিটিং আওয়ার্স',
+      badge: 'Location Map',
+      category: 'Banners & Footer'
+    },
+    {
+      key: 'footer',
+      num: 18,
       title: 'Footer & Payment Merchants Strip',
       subtitle: 'ফার্মগেট ক্যাম্পাস ঠিকানা, বিকাশ/নগদ/রকেট মার্চেন্ট ও কপিরাইট',
       badge: 'Footer',
@@ -984,6 +1019,192 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
               placeholder="Cards & Net Banking"
               className="w-full p-2 bg-white border border-blue-300 rounded-xl text-xs font-bold text-slate-900"
             />
+          </div>
+        </div>
+      </div>
+
+      {/* 7. GOOGLE LOCATION MAP & PHYSICAL CAMPUS SHOWCASE */}
+      <div id="sec-map" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 text-[10px] font-black uppercase tracking-wider">
+                Homepage Section #14 • Interactive Geo Map
+              </span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                newVisibility.locationMap ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+              }`}>
+                {newVisibility.locationMap ? '✓ বর্তমানে হোমপেজে সক্রিয়' : '✕ লুকানো রয়েছে'}
+              </span>
+            </div>
+            <h3 className="font-black text-slate-900 text-lg flex items-center space-x-2 mt-1">
+              <MapPin className="w-5 h-5 text-indigo-600" />
+              <span>Google Location Map & Physical Campus Showcase (গুগল লোকেশন ম্যাপ ও ক্যাম্পাস তথ্য)</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              ফার্মগেট ক্যাম্পাস গুগল লোকেশন ম্যাপ এম্বেড লিংক, ডিরেক্ট গুগল ম্যাপ নেভিগেশন লিংক, ঠিকানা ও ভিজিটিং আওয়ার্স কাস্টমাইজ করুন।
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => toggleSection('locationMap')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                newVisibility.locationMap
+                  ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
+                  : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+              }`}
+            >
+              <span>{newVisibility.locationMap ? 'ম্যাপ সেকশন বন্ধ করুন' : 'ম্যাপ সেকশন চালু করুন'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onSaveAll}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>ম্যাপ তথ্য সেভ করুন</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Form: 7 Cols */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* Google Map Embed Iframe URL */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-xs text-slate-800 flex items-center space-x-1.5">
+                  <Navigation className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Google Map Embed URL (গুগল ম্যাপ এম্বেড আইফ্রেম লিংক)</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => onChangeMapEmbedUrl && onChangeMapEmbedUrl('https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.848881261358!2d90.3887!3d23.7527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ1JzA5LjciTiA5MMKwMjMnMTkuMyJF!5e0!3m2!1sen!2sbd!4v1620000000000!5m2!1sen!2sbd')}
+                  className="text-[10px] text-indigo-600 font-bold hover:underline cursor-pointer"
+                >
+                  রিসেট ডিফল্ট লিংক
+                </button>
+              </div>
+              <input
+                type="text"
+                value={mapEmbedUrl || ''}
+                onChange={e => onChangeMapEmbedUrl && onChangeMapEmbedUrl(e.target.value)}
+                placeholder="https://www.google.com/maps/embed?pb=..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+              <p className="text-[11px] text-slate-400">
+                গুগল ম্যাপে আপনার লোকেশন খুঁজে &quot;Share&quot; &gt; &quot;Embed a map&quot; অপশনে ক্লিক করে <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">src=&quot;...&quot;</code> এর ভিতরের লিংকটি এখানে পেস্ট করুন।
+              </p>
+            </div>
+
+            {/* Direct Google Maps Share / Navigation Link */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-xs text-slate-800 flex items-center space-x-1.5">
+                <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                <span>Google Map Direct Navigation URL (গুগল ম্যাপ সরাসরি লিংক)</span>
+              </label>
+              <input
+                type="text"
+                value={mapShareUrl || ''}
+                onChange={e => onChangeMapShareUrl && onChangeMapShareUrl(e.target.value)}
+                placeholder="https://maps.app.goo.gl/... অথবা https://share.google/..."
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+              <p className="text-[11px] text-slate-400">
+                শিক্ষার্থীরা &quot;Google Maps-এ দেখুন&quot; বাটনে ক্লিক করলে এই লিংকটি তাদের গুগল ম্যাপস অ্যাপ বা ব্রাউজারে ওপেন হবে।
+              </p>
+            </div>
+
+            {/* Physical Campus Address */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-xs text-slate-800 flex items-center space-x-1.5">
+                <Building2 className="w-3.5 h-3.5 text-slate-600" />
+                <span>Physical Campus Address (ক্যাম্পাসের পূর্ণাঙ্গ ঠিকানা)</span>
+              </label>
+              <input
+                type="text"
+                value={mapAddress || ''}
+                onChange={e => onChangeMapAddress && onChangeMapAddress(e.target.value)}
+                placeholder="Level-4, Farmgate Super Market, Farmgate, Dhaka-1215"
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Metro Rail & Landmark Directions */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-xs text-slate-800 flex items-center space-x-1.5">
+                <Compass className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Metro Station & Landmark Directions (মেট্রো স্টেশন ও ল্যান্ডমার্ক দিকনির্দেশনা)</span>
+              </label>
+              <input
+                type="text"
+                value={mapDirections || ''}
+                onChange={e => onChangeMapDirections && onChangeMapDirections(e.target.value)}
+                placeholder="ফার্মগেট মেট্রো স্টেশন (Exit 3) থেকে মাত্র ২ মিনিট হাঁটার পথ, আনন্দ সিনেমা হল সংলগ্ন।"
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Visiting / Lab Hours */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-xs text-slate-800 flex items-center space-x-1.5">
+                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                <span>Campus Lab & Visiting Hours (ল্যাব ও অফিস সময়সূচি)</span>
+              </label>
+              <input
+                type="text"
+                value={mapHours || ''}
+                onChange={e => onChangeMapHours && onChangeMapHours(e.target.value)}
+                placeholder="শনিবার - বৃহস্পতিবার: সকাল ৯:০০ - রাত ৯:০০ | শুক্রবার: বিকাল ২:৩০ - রাত ৯:০০"
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Right Live Preview: 5 Cols */}
+          <div className="lg:col-span-5 bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs text-slate-700 flex items-center space-x-1.5">
+                <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Live Interactive Map Preview</span>
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">
+                লাইভ প্রিভিউ
+              </span>
+            </div>
+
+            <div className="w-full h-64 rounded-xl overflow-hidden border border-slate-300 bg-slate-200 shadow-inner relative">
+              {mapEmbedUrl ? (
+                <iframe
+                  title="Campus Map Preview"
+                  src={mapEmbedUrl}
+                  className="w-full h-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 text-xs">
+                  <MapPin className="w-8 h-8 text-slate-300 mb-1" />
+                  <span>কোনো গুগল ম্যাপ লিংক দেওয়া নেই</span>
+                </div>
+              )}
+            </div>
+
+            <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs space-y-1.5">
+              <div className="font-bold text-slate-900 flex items-center space-x-1">
+                <MapPin className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                <span className="truncate">{mapAddress || 'ফার্মগেট ক্যাম্পাস'}</span>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-snug">
+                {mapDirections || 'মেট্রো স্টেশন সংলগ্ন'}
+              </p>
+              <div className="pt-1 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-600">
+                <span>ল্যাব সময়সূচি:</span>
+                <span className="font-bold text-emerald-700">{mapHours || 'সকাল ৯:০০ - রাত ৯:০০'}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

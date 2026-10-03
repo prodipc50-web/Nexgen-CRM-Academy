@@ -221,8 +221,8 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
 
   // SEO & Local SEO Engine (Rankings, Local Schema, SERP Previews, Sitemaps)
   seo: {
-    metaTitle: 'Nexgen Computer Academy - Best Computer Training Center in Farmgate, Dhaka',
-    metaDescription: 'Govt recognized top IT training institute in Farmgate, Dhaka. Practical Computer Office Application, Advanced Excel, Web Dev, Graphic Design, Digital Marketing & AI courses with 100% lab practice & job placement.',
+    metaTitle: 'NexGen Computer Academy - Professional IT Training in Bangladesh',
+    metaDescription: 'Premier computer and IT training center in Bangladesh. 100% practical lab training with verifiable certificates.',
     keywords: [
       'Computer Course in Farmgate',
       'Computer Training Center in Farmgate Dhaka',
@@ -272,8 +272,8 @@ export const INITIAL_WEBSITE_CMS_CONFIG: WebsiteCmsConfig = {
       'লাইভ জুম ক্লাস ও রেকর্ডেড ক্লাস সুবিধা সহ আইটি কোর্স'
     ],
     canonicalBaseUrl: 'https://nexgenacademy.edu.bd',
-    ogTitle: 'Nexgen Computer Academy | #1 Practical IT Training Center in Farmgate, Dhaka',
-    ogDescription: 'Master Office Application, Excel, MERN Web Dev, UI/UX Design & Digital Marketing with 1-on-1 practical lab guidance & verifiable certificates.',
+    ogTitle: 'NexGen Computer Academy - Professional IT Training in Bangladesh',
+    ogDescription: 'Premier computer and IT training center in Bangladesh. 100% practical lab training with verifiable certificates.',
     ogImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&auto=format&fit=crop&q=80',
     twitterHandle: '@nexgenacademybd',
     geoRegion: 'BD-13',
@@ -1302,6 +1302,7 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     exclusiveSolutions: true,
     snakeCta: true,
     admissionBanner: true,
+    locationMap: true,
     footer: true
   },
 

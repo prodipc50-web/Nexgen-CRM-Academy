@@ -1985,6 +1985,7 @@ export interface NewHomepageSectionVisibility {
   exclusiveSolutions?: boolean;
   snakeCta?: boolean;
   admissionBanner?: boolean;
+  locationMap?: boolean;
   footer?: boolean;
 }
 
