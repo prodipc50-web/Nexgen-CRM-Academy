@@ -36,25 +36,25 @@ import { AboutUsSubPage } from './subpages/AboutUsSubPage';
 import { ContactUsSubPage } from './subpages/ContactUsSubPage';
 import { VerifyCertificateSubPage } from './subpages/VerifyCertificateSubPage';
 import { BlogSubPage } from './subpages/BlogSubPage';
-import { UniqueItTopBar } from './uniqueit/UniqueItTopBar';
-import { UniqueItNavbar } from './uniqueit/UniqueItNavbar';
-import { UniqueItHero } from './uniqueit/UniqueItHero';
-import { UniqueItCategorySlider } from './uniqueit/UniqueItCategorySlider';
-import { UniqueItPopularCourses } from './uniqueit/UniqueItPopularCourses';
-import { UniqueItExploreCategories } from './uniqueit/UniqueItExploreCategories';
-import { UniqueItAboutHero } from './uniqueit/UniqueItAboutHero';
-import { UniqueItOnlineCourses } from './uniqueit/UniqueItOnlineCourses';
-import { UniqueItSuccessStories } from './uniqueit/UniqueItSuccessStories';
-import { UniqueItStudentReviews } from './uniqueit/UniqueItStudentReviews';
-import { UniqueItWhyChoose } from './uniqueit/UniqueItWhyChoose';
-import { UniqueItNewsletter } from './uniqueit/UniqueItNewsletter';
-import { UniqueItPhotoStrip } from './uniqueit/UniqueItPhotoStrip';
-import { UniqueItFaq } from './uniqueit/UniqueItFaq';
-import { UniqueItExclusiveSolutions } from './uniqueit/UniqueItExclusiveSolutions';
-import { UniqueItSnakeCta } from './uniqueit/UniqueItSnakeCta';
-import { UniqueItAdmissionBanner } from './uniqueit/UniqueItAdmissionBanner';
-import { UniqueItFooter } from './uniqueit/UniqueItFooter';
-import { UniqueItFloatingDiscount } from './uniqueit/UniqueItFloatingDiscount';
+import { UniqueItTopBar } from './nexgen/NexgenTopBar';
+import { UniqueItNavbar } from './nexgen/NexgenNavbar';
+import { UniqueItHero } from './nexgen/NexgenHero';
+import { NexgenCategorySlider as UniqueItCategorySlider } from './nexgen/NexgenCategorySlider';
+import { UniqueItPopularCourses } from './nexgen/NexgenPopularCourses';
+import { NexgenExploreCategories as UniqueItExploreCategories } from './nexgen/NexgenExploreCategories';
+import { NexgenAboutHero as UniqueItAboutHero } from './nexgen/NexgenAboutHero';
+import { UniqueItOnlineCourses } from './nexgen/NexgenOnlineCourses';
+import { UniqueItSuccessStories } from './nexgen/NexgenSuccessStories';
+import { UniqueItStudentReviews } from './nexgen/NexgenStudentReviews';
+import { UniqueItWhyChoose } from './nexgen/NexgenWhyChoose';
+import { UniqueItNewsletter } from './nexgen/NexgenNewsletter';
+import { UniqueItPhotoStrip } from './nexgen/NexgenPhotoStrip';
+import { NexgenFaq as UniqueItFaq } from './nexgen/NexgenFaq';
+import { NexgenExclusiveSolutions as UniqueItExclusiveSolutions } from './nexgen/NexgenExclusiveSolutions';
+import { UniqueItSnakeCta } from './nexgen/NexgenSnakeCta';
+import { NexgenAdmissionBanner as UniqueItAdmissionBanner } from './nexgen/NexgenAdmissionBanner';
+import { UniqueItFooter } from './nexgen/NexgenFooter';
+import { UniqueItFloatingDiscount } from './nexgen/NexgenFloatingDiscount';
 import {
   Home,
   Phone,
@@ -124,7 +124,7 @@ import {
   getDeviceType
 } from '../../utils/analyticsTracker';
 import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
-import { getHomepageSeoMetadata, applySeoMetadata } from '../../utils/seoHelper';
+import { getHomepageSeoMetadata, applySeoMetadata, isDirectVideo, formatMediaEmbedUrl } from '../../utils/seoHelper';
 
 interface PublicWebsiteViewProps {
   onOpenStaffLogin: () => void;
@@ -690,8 +690,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               categories={categories}
               headline={websiteCmsConfig?.heroHeadline}
               subtitle={websiteCmsConfig?.heroSubtitle}
+              badgeText={websiteCmsConfig?.heroBadgeText}
+              primaryCtaText={websiteCmsConfig?.heroPrimaryCtaText}
+              secondaryCtaText={websiteCmsConfig?.heroSecondaryCtaText}
+              admissionCtaText={websiteCmsConfig?.heroCtaText}
               videoUrl={websiteCmsConfig?.heroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8"}
               videoThumbnailUrl={websiteCmsConfig?.heroVideoThumbnailUrl || "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80"}
+              videoBadgeText={websiteCmsConfig?.heroVideoBadgeText || `${academySettings.instituteName || 'NexGen'} Campus`}
+              videoCaptionText={websiteCmsConfig?.heroVideoCaption || "সরাসরি ফার্মগেট ক্যাম্পাসে প্র্যাকটিক্যাল ল্যাব ও অনলাইন ক্লাস"}
               onNavigateSubPage={navigateSubPage}
               onOpenAdmission={() => {
                 setSelectedCourseForAdmission(null);
@@ -990,13 +996,22 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             >
               <X className="w-5 h-5" />
             </button>
-            <iframe
-              src={websiteCmsConfig?.heroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8?autoplay=1"}
-              title="NexGen Computer Academy Video"
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            {isDirectVideo(websiteCmsConfig?.heroVideoUrl || '') ? (
+              <video
+                src={websiteCmsConfig?.heroVideoUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-contain bg-black"
+              />
+            ) : (
+              <iframe
+                src={formatMediaEmbedUrl(websiteCmsConfig?.heroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8", true)}
+                title="NexGen Computer Academy Video"
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            )}
           </div>
         </div>
       )}

@@ -23,7 +23,8 @@ import {
   Users,
   Search,
   ShieldAlert,
-  Calendar
+  Calendar,
+  Video
 } from 'lucide-react';
 import { SeminarsWorkshopsView } from './SeminarsWorkshopsView';
 import { CmsHeroTab } from './cms/CmsHeroTab';
@@ -93,7 +94,7 @@ export const WebsiteCMSView: React.FC<WebsiteCMSViewProps> = ({
     { id: 'security_shield', label: 'Cyber Security & Anti-Bot Shield', icon: ShieldAlert, count: null, isHot: true, isNew: true },
     { id: 'sections', label: 'Page Sections & Roadmap Plan', icon: Layout, count: null, isHot: true, isNew: true },
     { id: 'seo', label: 'SEO & Local Search Hub', icon: Search, count: null, isHot: true, isPhase4: true },
-    { id: 'hero', label: 'Hero & Banner Slider', icon: Layers, count: null, isHot: false },
+    { id: 'hero', label: 'Hero Section & Video Studio', icon: Video, count: null, isHot: true, isNew: true },
     { id: 'seminars', label: 'Seminars & Masterclasses', icon: Calendar, count: null },
     { id: 'trainers', label: 'Faculty & Mentors', icon: Users, count: null, isNew: true },
     { id: 'reviews', label: 'Student Reviews', icon: MessageSquare, count: null, isNew: true },

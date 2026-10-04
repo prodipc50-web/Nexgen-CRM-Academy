@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
-import { Save, Info, UserCheck, ShieldCheck, Monitor, Award, Plus, Trash2, Crop, Upload, Image as ImageIcon, Sparkles, X } from 'lucide-react';
+import { AboutHeroCmsConfig, AboutHeroCmsStat } from '../../../types';
+import { INITIAL_WEBSITE_CMS_CONFIG } from '../../../data/websiteSeedData';
+import { Save, Info, UserCheck, ShieldCheck, Monitor, Award, Plus, Trash2, Crop, Upload, Image as ImageIcon, Sparkles, X, BarChart3, Building } from 'lucide-react';
 import { ImageUploadCropModal } from '../../common/ImageUploadCropModal';
 import { compressLogoOrAvatar } from '../../../utils/imageCompressor';
 
@@ -11,6 +13,26 @@ interface CmsAboutTabProps {
 export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig } = useAcademy();
   const hasUserEditedRef = useRef(false);
+
+  // Homepage About Hero & Stats Configuration
+  const [aboutHero, setAboutHero] = useState<AboutHeroCmsConfig>(
+    websiteCmsConfig.aboutHeroConfig || INITIAL_WEBSITE_CMS_CONFIG.aboutHeroConfig || {
+      tagline: 'Trusted for 12 Years',
+      headline: 'From Beginner to IT Professionals We Close That Gap.',
+      description:
+        'For 12 years, NexGen Computer Academy has had one goal — turn ordinary people into extraordinary IT professionals. Technology is no longer just for engineers and computer scientists. Today every business, every industry, and every career path runs on digital skills.',
+      labBadgeText: 'Modern AC Lab • Farmgate Campus',
+      imageUrl: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
+      stats: [
+        { id: 'st-1', value: '20000 +', label: 'Successful Students', color: 'purple' },
+        { id: 'st-2', value: '9000 +', label: 'Expert Freelancers', color: 'red' },
+        { id: 'st-3', value: '2000 +', label: 'Skilled Job Holders', color: 'purple' },
+        { id: 'st-4', value: '5000 +', label: 'Industry Expert', color: 'red' },
+        { id: 'st-5', value: '95 %', label: 'Success Ratio', color: 'purple' },
+        { id: 'st-6', value: '100 +', label: 'Companies', color: 'red' }
+      ]
+    }
+  );
 
   const about = websiteCmsConfig.aboutUs || {
     storyTitle: 'Pioneering Industry-Aligned IT Education in Bangladesh',
@@ -140,9 +162,19 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
     e.preventDefault();
     hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({
-      aboutUs: formData
+      aboutUs: formData,
+      aboutHeroConfig: aboutHero
     });
-    onSuccessToast('About Us & Leadership section updated successfully!');
+    onSuccessToast('About Us, Homepage About Hero & Stats Counters updated successfully!');
+  };
+
+  const handleUpdateStat = (index: number, field: keyof AboutHeroCmsStat, val: any) => {
+    hasUserEditedRef.current = true;
+    setAboutHero(prev => {
+      const stats = [...(prev.stats || [])];
+      stats[index] = { ...stats[index], [field]: val };
+      return { ...prev, stats };
+    });
   };
 
   return (
@@ -161,7 +193,7 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
               </span>
             </h3>
             <p className="text-xs text-slate-400">
-              প্রতিষ্ঠানের ইতিহাস, মিশন-ভিশন, লিডারশিপ বাণী ও অ্যাকাডেমি সুবিধা পরিবর্তন করে সংরক্ষণ করুন।
+              হোমপেজ অ্যাবাউট হিরোর ৬টি কাউন্টার, প্রতিষ্ঠানের ইতিহাস, মিশন-ভিশন ও লিডারশিপ বাণী পরিবর্তন করুন।
             </p>
           </div>
         </div>
@@ -171,8 +203,157 @@ export const CmsAboutTab: React.FC<CmsAboutTabProps> = ({ onSuccessToast }) => {
             className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            <span>Save About Us Settings (সংরক্ষণ করুন)</span>
+            <span>Save About Us & Stats (সংরক্ষণ করুন)</span>
           </button>
+        </div>
+      </div>
+
+      {/* 0. HOMEPAGE ABOUT HERO & 6 STATS COUNTERS (হোমপেজ সেকশন #৫) */}
+      <div className="bg-white p-6 rounded-3xl border-2 border-purple-200 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-100">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="px-2.5 py-0.5 rounded-lg bg-purple-100 text-purple-800 text-[10px] font-black uppercase tracking-wider">
+                Homepage Section #5 • Live Stats & Hero
+              </span>
+            </div>
+            <h3 className="font-black text-slate-900 text-lg flex items-center space-x-2 mt-1">
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+              <span>Homepage About Hero & 6 Stats Counters (হোমপেজ অ্যাবাউট হিরো ও ৬টি কাউন্টার)</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              হোমপেজে প্রদর্শিত ১২ বছরের আস্থা, মূল শিরোনাম ও ৬টি সফলতার সংখ্যাসূচক কার্ড কাস্টমাইজ করুন।
+            </p>
+          </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all self-start sm:self-auto cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>কাউন্টার সেভ করুন</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div className="space-y-1">
+            <label className="font-bold text-slate-800 block">ট্যাগলাইন (Tagline Badge)</label>
+            <input
+              type="text"
+              value={aboutHero.tagline}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setAboutHero({ ...aboutHero, tagline: e.target.value });
+              }}
+              placeholder="Trusted for 12 Years"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-purple-700"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="font-bold text-slate-800 block">ল্যাব ব্যাজ টেক্সট (Lab Badge)</label>
+            <input
+              type="text"
+              value={aboutHero.labBadgeText}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setAboutHero({ ...aboutHero, labBadgeText: e.target.value });
+              }}
+              placeholder="Modern AC Lab • Farmgate Campus"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-emerald-700"
+            />
+          </div>
+
+          <div className="md:col-span-2 space-y-1">
+            <label className="font-bold text-slate-800 block">প্রধান শিরোনাম (Headline)</label>
+            <input
+              type="text"
+              value={aboutHero.headline}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setAboutHero({ ...aboutHero, headline: e.target.value });
+              }}
+              placeholder="From Beginner to IT Professionals We Close That Gap."
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 text-sm"
+            />
+          </div>
+
+          <div className="md:col-span-2 space-y-1">
+            <label className="font-bold text-slate-800 block">বিস্তারিত বিবরণ (Description)</label>
+            <textarea
+              rows={3}
+              value={aboutHero.description}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setAboutHero({ ...aboutHero, description: e.target.value });
+              }}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl leading-relaxed text-slate-700"
+            />
+          </div>
+
+          <div className="md:col-span-2 space-y-1">
+            <label className="font-bold text-slate-800 block">ছবি লিংক (Image URL)</label>
+            <input
+              type="text"
+              value={aboutHero.imageUrl}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setAboutHero({ ...aboutHero, imageUrl: e.target.value });
+              }}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-slate-600"
+            />
+          </div>
+        </div>
+
+        {/* 6 Stats Counters Grid */}
+        <div className="space-y-3 pt-2">
+          <label className="font-bold text-xs text-slate-900 block">
+            ৬টি পরিসংখ্যান কাউন্টার কার্ড (6 Statistics Counter Cards):
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {aboutHero.stats.map((st, idx) => (
+              <div
+                key={st.id || `stat-${idx}`}
+                className={`p-3 rounded-2xl border ${
+                  st.color === 'red' ? 'bg-rose-50/70 border-rose-200' : 'bg-purple-50/70 border-purple-200'
+                } space-y-2`}
+              >
+                <div className="flex items-center justify-between text-[11px] font-bold">
+                  <span className={st.color === 'red' ? 'text-rose-700' : 'text-purple-700'}>
+                    কাউন্টার #{idx + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleUpdateStat(idx, 'color', st.color === 'red' ? 'purple' : 'red')}
+                    className="px-2 py-0.5 rounded-md bg-white border text-[10px] font-bold cursor-pointer"
+                  >
+                    কালার: {st.color === 'red' ? 'লাল' : 'পার্পল'}
+                  </button>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-600 block">সংখ্যা / ভ্যালু</label>
+                  <input
+                    type="text"
+                    value={st.value}
+                    onChange={e => handleUpdateStat(idx, 'value', e.target.value)}
+                    placeholder="20000 +"
+                    className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl font-black text-sm text-slate-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-slate-600 block">লেবেল / বর্ণনা</label>
+                  <input
+                    type="text"
+                    value={st.label}
+                    onChange={e => handleUpdateStat(idx, 'label', e.target.value)}
+                    placeholder="Successful Students"
+                    className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl font-semibold text-xs text-slate-800"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       {/* Academy Story & Founding */}

@@ -719,3 +719,42 @@ Disallow: /erp/
 Sitemap: ${baseUrl}/sitemap.xml
 `;
 }
+
+/**
+ * Detects whether a URL is a direct video stream/file (data:video, blob:, or .mp4/.webm/.ogg)
+ */
+export function isDirectVideo(url?: string): boolean {
+  if (!url) return false;
+  const s = url.trim().toLowerCase();
+  return (
+    s.startsWith('data:video') ||
+    s.startsWith('blob:') ||
+    /\.(mp4|webm|ogg|mov)($|\?)/i.test(s)
+  );
+}
+
+/**
+ * Formats video URL for player/embed (supports YouTube, Vimeo, or direct video)
+ */
+export function formatMediaEmbedUrl(url?: string, autoplay = true): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (isDirectVideo(trimmed)) return trimmed;
+
+  if (trimmed.includes('youtube.com/embed/')) {
+    if (autoplay && !trimmed.includes('autoplay=')) {
+      return trimmed.includes('?') ? `${trimmed}&autoplay=1` : `${trimmed}?autoplay=1`;
+    }
+    return trimmed;
+  }
+
+  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = trimmed.match(regExp);
+  if (match && match[1]) {
+    return autoplay
+      ? `https://www.youtube.com/embed/${match[1]}?autoplay=1`
+      : `https://www.youtube.com/embed/${match[1]}`;
+  }
+  return trimmed;
+}
+

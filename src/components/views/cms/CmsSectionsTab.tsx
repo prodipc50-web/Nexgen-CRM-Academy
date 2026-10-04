@@ -72,7 +72,7 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
   const [saveFeedback, setSaveFeedback] = useState(false);
   const hasUserEditedRef = useRef(false);
 
-  // 0. Modern Homepage 16-Section Switchboard (New Unique IT / NexGen Layout)
+  // 0. Modern Homepage 17-Section Switchboard (NexGen Layout)
   const [newVisibility, setNewVisibility] = useState<NewHomepageSectionVisibility>(
     websiteCmsConfig.newSectionVisibility || INITIAL_WEBSITE_CMS_CONFIG.newSectionVisibility || {
       topBar: true,

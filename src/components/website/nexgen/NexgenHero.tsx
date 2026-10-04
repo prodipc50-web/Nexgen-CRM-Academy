@@ -20,7 +20,7 @@ interface UniqueItHeroProps {
   onPlayVideo?: () => void;
 }
 
-export const UniqueItHero: React.FC<UniqueItHeroProps> = ({
+export const NexgenHero: React.FC<UniqueItHeroProps> = ({
   categories = [
     'All',
     'Graphic Design',
@@ -163,7 +163,7 @@ export const UniqueItHero: React.FC<UniqueItHeroProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search your favorite course"
-                  className="flex-1 px-4 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 bg-transparent outline-hidden"
+                  className="flex-1 min-w-0 px-3 sm:px-4 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 bg-transparent outline-hidden"
                 />
 
                 {/* Search Button */}
@@ -185,6 +185,10 @@ export const UniqueItHero: React.FC<UniqueItHeroProps> = ({
                 src={videoThumbnailUrl}
                 alt="NexGen Computer Academy Classroom and Studio"
                 className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80';
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/20 to-transparent"></div>
 
@@ -221,3 +225,5 @@ export const UniqueItHero: React.FC<UniqueItHeroProps> = ({
     </section>
   );
 };
+
+export { NexgenHero as UniqueItHero };

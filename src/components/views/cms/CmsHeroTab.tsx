@@ -5,31 +5,131 @@ import {
   Save,
   Sparkles,
   Bell,
-  Percent,
   Sliders,
   Crop,
   Image as ImageIcon,
-  CheckCircle2
+  CheckCircle2,
+  Play,
+  Upload,
+  Video,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  RefreshCw,
+  BookOpen,
+  Laptop,
+  Check,
+  X,
+  Search,
+  FileVideo,
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 import { LogoCropResizeModal } from '../../common/LogoCropResizeModal';
+import { ImageUploadCropModal } from '../../common/ImageUploadCropModal';
 import { NexgenLogo } from '../../common/NexgenLogo';
 import { HeroBannerEditor } from '../../cms/HeroBannerEditor';
+import { isDirectVideo, formatMediaEmbedUrl } from '../../../utils/seoHelper';
 
 interface CmsHeroTabProps {
   onSuccessToast: (msg: string) => void;
+}
+
+function formatYouTubeEmbedUrl(url: string): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (trimmed.includes('youtube.com/embed/')) return trimmed;
+  // Match watch?v=ID or youtu.be/ID or youtube.com/shorts/ID
+  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = trimmed.match(regExp);
+  if (match && match[1]) {
+    return `https://www.youtube.com/embed/${match[1]}`;
+  }
+  return trimmed;
 }
 
 export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings, updateAcademySettings } = useAcademy();
   const hasUserEditedRef = useRef(false);
 
-  // Top Header Brand Bar States (matching user screenshot)
-  const [headerBrandName, setHeaderBrandName] = useState(academySettings.instituteName || "Nexgen Computer Academy");
+  // Top Header Brand Bar States
+  const [headerBrandName, setHeaderBrandName] = useState(academySettings.instituteName || 'NexGen Computer Academy');
   const [headerSubtitle, setHeaderSubtitle] = useState(
-    websiteCmsConfig.headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training & Career Incubator`
+    websiteCmsConfig.headerSubtitle || `${academySettings.campusName || 'Farmgate Campus'} • Govt. Standard IT Training & Career Incubator`
   );
-  const [headerEstText, setHeaderEstText] = useState(websiteCmsConfig.headerEstText || "EST. 2018");
+  const [headerEstText, setHeaderEstText] = useState(websiteCmsConfig.headerEstText || 'EST. 2018');
   const [brandSavedFeedback, setBrandSavedFeedback] = useState(false);
+  const [isLogoCropModalOpen, setIsLogoCropModalOpen] = useState(false);
+  const [isThumbnailCropModalOpen, setIsThumbnailCropModalOpen] = useState(false);
+  const [isVideoTestModalOpen, setIsVideoTestModalOpen] = useState(false);
+  const [saveFeedback, setSaveFeedback] = useState(false);
+  const [showLegacySliderStudio, setShowLegacySliderStudio] = useState(false);
+
+  // Video Upload & Direct Media States
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
+  const [videoSourceType, setVideoSourceType] = useState<'youtube' | 'upload'>(
+    isDirectVideo(websiteCmsConfig.heroVideoUrl || '') ? 'upload' : 'youtube'
+  );
+  const [videoUploadError, setVideoUploadError] = useState<string | null>(null);
+  const [isProcessingVideo, setIsProcessingVideo] = useState(false);
+  const [videoFileMeta, setVideoFileMeta] = useState<{ name: string; sizeMb: string } | null>(null);
+
+  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setVideoUploadError(null);
+
+    if (!file.type.startsWith('video/')) {
+      setVideoUploadError('অনুগ্রহ করে একটি বৈধ ভিডিও ফাইল নির্বাচন করুন (MP4, WebM, Ogg, QuickTime)');
+      return;
+    }
+
+    const sizeInMb = file.size / (1024 * 1024);
+    if (sizeInMb > 60) {
+      setVideoUploadError(`ভিডিও ফাইলটির সাইজ (${sizeInMb.toFixed(1)}MB) অনেক বড়। দ্রুত পারফরম্যান্স ও লোডিং স্পিডের জন্য ৬০ মেগাবাইটের কম সাইজের ভিডিও আপলোড করুন।`);
+      return;
+    }
+
+    setIsProcessingVideo(true);
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      hasUserEditedRef.current = true;
+      setFormData(prev => ({
+        ...prev,
+        heroVideoUrl: dataUrl
+      }));
+      setVideoFileMeta({
+        name: file.name,
+        sizeMb: sizeInMb.toFixed(1)
+      });
+      setVideoSourceType('upload');
+      setIsProcessingVideo(false);
+      onSuccessToast(`ভিডিও সফলভাবে লোড হয়েছে: ${file.name} (${sizeInMb.toFixed(1)} MB)`);
+    };
+
+    reader.onerror = () => {
+      setIsProcessingVideo(false);
+      setVideoUploadError('ভিডিও ফাইলটি পড়তে ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveUploadedVideo = () => {
+    hasUserEditedRef.current = true;
+    setFormData(prev => ({
+      ...prev,
+      heroVideoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8'
+    }));
+    setVideoFileMeta(null);
+    setVideoSourceType('youtube');
+    if (videoFileInputRef.current) videoFileInputRef.current.value = '';
+    onSuccessToast('ভিডিও রিসেট হয়ে ডিফল্ট ইউটিউব ভিডিওতে ফিরিয়ে নেওয়া হয়েছে।');
+  };
 
   useEffect(() => {
     if (!hasUserEditedRef.current && academySettings.instituteName) {
@@ -59,37 +159,26 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     });
     setBrandSavedFeedback(true);
     setTimeout(() => setBrandSavedFeedback(false), 3000);
-    onSuccessToast("ওয়েবসাইটের হেডার ব্র্যান্ড, লোগো, স্লোগান ও প্রতিষ্ঠার সাল সফলভাবে সংরক্ষিত হয়েছে!");
+    onSuccessToast('হেডার ব্র্যান্ড, লোগো ও ক্যাম্পাস স্লোগান সফলভাবে সংরক্ষিত হয়েছে!');
   };
 
   const [formData, setFormData] = useState({
-    heroStyle: websiteCmsConfig.heroStyle || 'split-video',
-    heroHeadline: websiteCmsConfig.heroHeadline || '',
-    heroSubtitle: websiteCmsConfig.heroSubtitle || '',
-    heroVideoUrl: websiteCmsConfig.heroVideoUrl || '',
-    heroVideoBadgeText: websiteCmsConfig.heroVideoBadgeText || 'কম্পিউটার বা ফ্রিল্যান্সিং শিখে ক্যারিয়ার গড়ার উপায়',
-    heroVideoThumbnailUrl: websiteCmsConfig.heroVideoThumbnailUrl || '',
-    heroBadgeText: websiteCmsConfig.heroBadgeText || '',
-    heroCtaText: websiteCmsConfig.heroCtaText || '',
-    heroPrimaryCtaText: websiteCmsConfig.heroPrimaryCtaText || websiteCmsConfig.heroCtaText || 'Get Admission',
-    heroSecondaryCtaText: websiteCmsConfig.heroSecondaryCtaText || 'Learn more',
-    topNoticeTicker: websiteCmsConfig.topNoticeTicker || '',
-    totalTrained: websiteCmsConfig.heroStats?.totalTrained || '8,500+',
-    successRate: websiteCmsConfig.heroStats?.successRate || '96.4%',
-    expertTrainers: websiteCmsConfig.heroStats?.expertTrainers || '28+',
-    jobPlacementRatio: websiteCmsConfig.heroStats?.jobPlacementRatio || '89.2%',
-    promoTitle: websiteCmsConfig.promoBanner?.title || '',
-    promoDescription: websiteCmsConfig.promoBanner?.description || '',
-    promoCode: websiteCmsConfig.promoBanner?.discountCode || '',
-    promoExpiresAt: websiteCmsConfig.promoBanner?.expiresAt || '',
-    promoEnabled: websiteCmsConfig.promoBanner?.enabled ?? true,
-    upcomingCardBadge: websiteCmsConfig.upcomingBatchesCard?.badgeText || '40% Offer',
-    upcomingCardTitle: websiteCmsConfig.upcomingBatchesCard?.title || 'Upcoming Batches',
-    upcomingCardHeading: websiteCmsConfig.upcomingBatchesCard?.heading || 'Apply for Direct Admission',
-    upcomingCardDescription: websiteCmsConfig.upcomingBatchesCard?.description || 'Fast-track your IT career with practical project portfolios and certified diplomas.',
-    upcomingCardFeatureNote: websiteCmsConfig.upcomingBatchesCard?.featureNote || 'Free Lifetime Lab Access',
-    upcomingCardCtaText: websiteCmsConfig.upcomingBatchesCard?.ctaText || 'Free Seminars →',
-    upcomingCardCtaLink: websiteCmsConfig.upcomingBatchesCard?.ctaLink || '#seminars'
+    heroHeadline: websiteCmsConfig.heroHeadline || 'Learn IT Skills Today. Lead the Digital World Tomorrow.',
+    heroSubtitle:
+      websiteCmsConfig.heroSubtitle ||
+      "Thousands of people in Bangladesh are stuck - not because they lack talent, but because they never got the right training. At NexGen Computer Academy, we teach you exactly what today's job market needs. Real tools. Real projects. Real mentors. And real results that follow you for life.",
+    heroBadgeText: websiteCmsConfig.heroBadgeText || 'Your Future Starts Here',
+    heroPrimaryCtaText: websiteCmsConfig.heroPrimaryCtaText || 'Online Course',
+    heroSecondaryCtaText: websiteCmsConfig.heroSecondaryCtaText || 'Offline Course',
+    heroCtaText: websiteCmsConfig.heroCtaText || 'Admission Now',
+    heroVideoUrl: websiteCmsConfig.heroVideoUrl || 'https://www.youtube.com/embed/y9jMfwwsqf8',
+    heroVideoBadgeText: websiteCmsConfig.heroVideoBadgeText || 'NexGen Academy Campus',
+    heroVideoThumbnailUrl:
+      websiteCmsConfig.heroVideoThumbnailUrl ||
+      'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80',
+    heroVideoCaption:
+      websiteCmsConfig.heroVideoCaption || 'সরাসরি ফার্মগেট ক্যাম্পাসে প্র্যাকটিক্যাল ল্যাব ও অনলাইন ক্লাস',
+    topNoticeTicker: websiteCmsConfig.topNoticeTicker || '⚡ নতুন ব্যাচে ভর্তি চলছে! স্পেশাল ৪০% স্কলারশিপ সুবিধা ও ফ্রি ডেমো ক্লাস।'
   });
 
   const [slides, setSlides] = useState<HeroBannerSlide[]>(
@@ -98,51 +187,42 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       : [
           {
             id: 'slide-1',
-            title: websiteCmsConfig.heroHeadline || 'Build Your Tech Career with Hands-on Industry Training',
+            title: websiteCmsConfig.heroHeadline || 'Learn IT Skills Today. Lead the Digital World Tomorrow.',
             subtitle: websiteCmsConfig.heroSubtitle || 'Master in-demand IT skills from top industry practitioners.',
-            badgeText: websiteCmsConfig.heroBadgeText || 'Govt. Recognized IT Training Institute • Dhaka',
-            ctaText: websiteCmsConfig.heroCtaText || 'Explore Courses & Get Free Counseling',
+            badgeText: websiteCmsConfig.heroBadgeText || 'Your Future Starts Here',
+            ctaText: websiteCmsConfig.heroCtaText || 'Admission Now',
             ctaLink: '#courses',
             secondaryCtaText: 'Free Career Counseling',
             secondaryCtaLink: '#seminars',
-            imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1280&q=80',
+            imageUrl:
+              websiteCmsConfig.heroVideoThumbnailUrl ||
+              'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1280&q=80',
             isActive: true
           }
         ]
   );
 
-  // Sync state when websiteCmsConfig updates from cloud/other tab
+  // Sync state when websiteCmsConfig updates
   useEffect(() => {
     if (hasUserEditedRef.current) return;
 
     setFormData({
-      heroStyle: websiteCmsConfig.heroStyle || 'split-video',
-      heroHeadline: websiteCmsConfig.heroHeadline || '',
-      heroSubtitle: websiteCmsConfig.heroSubtitle || '',
-      heroVideoUrl: websiteCmsConfig.heroVideoUrl || '',
-      heroVideoBadgeText: websiteCmsConfig.heroVideoBadgeText || 'কম্পিউটার বা ফ্রিল্যান্সিং শিখে ক্যারিয়ার গড়ার উপায়',
-      heroVideoThumbnailUrl: websiteCmsConfig.heroVideoThumbnailUrl || '',
-      heroBadgeText: websiteCmsConfig.heroBadgeText || '',
-      heroCtaText: websiteCmsConfig.heroCtaText || '',
-      heroPrimaryCtaText: websiteCmsConfig.heroPrimaryCtaText || websiteCmsConfig.heroCtaText || 'Get Admission',
-      heroSecondaryCtaText: websiteCmsConfig.heroSecondaryCtaText || 'Learn more',
-      topNoticeTicker: websiteCmsConfig.topNoticeTicker || '',
-      totalTrained: websiteCmsConfig.heroStats?.totalTrained || '8,500+',
-      successRate: websiteCmsConfig.heroStats?.successRate || '96.4%',
-      expertTrainers: websiteCmsConfig.heroStats?.expertTrainers || '28+',
-      jobPlacementRatio: websiteCmsConfig.heroStats?.jobPlacementRatio || '89.2%',
-      promoTitle: websiteCmsConfig.promoBanner?.title || '',
-      promoDescription: websiteCmsConfig.promoBanner?.description || '',
-      promoCode: websiteCmsConfig.promoBanner?.discountCode || '',
-      promoExpiresAt: websiteCmsConfig.promoBanner?.expiresAt || '',
-      promoEnabled: websiteCmsConfig.promoBanner?.enabled ?? true,
-      upcomingCardBadge: websiteCmsConfig.upcomingBatchesCard?.badgeText || '40% Offer',
-      upcomingCardTitle: websiteCmsConfig.upcomingBatchesCard?.title || 'Upcoming Batches',
-      upcomingCardHeading: websiteCmsConfig.upcomingBatchesCard?.heading || 'Apply for Direct Admission',
-      upcomingCardDescription: websiteCmsConfig.upcomingBatchesCard?.description || 'Fast-track your IT career with practical project portfolios and certified diplomas.',
-      upcomingCardFeatureNote: websiteCmsConfig.upcomingBatchesCard?.featureNote || 'Free Lifetime Lab Access',
-      upcomingCardCtaText: websiteCmsConfig.upcomingBatchesCard?.ctaText || 'Free Seminars →',
-      upcomingCardCtaLink: websiteCmsConfig.upcomingBatchesCard?.ctaLink || '#seminars'
+      heroHeadline: websiteCmsConfig.heroHeadline || 'Learn IT Skills Today. Lead the Digital World Tomorrow.',
+      heroSubtitle:
+        websiteCmsConfig.heroSubtitle ||
+        "Thousands of people in Bangladesh are stuck - not because they lack talent, but because they never got the right training. At NexGen Computer Academy, we teach you exactly what today's job market needs. Real tools. Real projects. Real mentors. And real results that follow you for life.",
+      heroBadgeText: websiteCmsConfig.heroBadgeText || 'Your Future Starts Here',
+      heroPrimaryCtaText: websiteCmsConfig.heroPrimaryCtaText || 'Online Course',
+      heroSecondaryCtaText: websiteCmsConfig.heroSecondaryCtaText || 'Offline Course',
+      heroCtaText: websiteCmsConfig.heroCtaText || 'Admission Now',
+      heroVideoUrl: websiteCmsConfig.heroVideoUrl || 'https://www.youtube.com/embed/y9jMfwwsqf8',
+      heroVideoBadgeText: websiteCmsConfig.heroVideoBadgeText || 'NexGen Academy Campus',
+      heroVideoThumbnailUrl:
+        websiteCmsConfig.heroVideoThumbnailUrl ||
+        'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80',
+      heroVideoCaption:
+        websiteCmsConfig.heroVideoCaption || 'সরাসরি ফার্মগেট ক্যাম্পাসে প্র্যাকটিক্যাল ল্যাব ও অনলাইন ক্লাস',
+      topNoticeTicker: websiteCmsConfig.topNoticeTicker || '⚡ নতুন ব্যাচে ভর্তি চলছে! স্পেশাল ৪০% স্কলারশিপ সুবিধা ও ফ্রি ডেমো ক্লাস।'
     });
 
     if (websiteCmsConfig.heroSlides && websiteCmsConfig.heroSlides.length > 0) {
@@ -150,146 +230,54 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     }
   }, [websiteCmsConfig]);
 
-  const [isLogoCropModalOpen, setIsLogoCropModalOpen] = useState(false);
-  const [saveFeedback, setSaveFeedback] = useState(false);
-
-  // Two-way sync: When slides update from HeroBannerEditor
-  const handleUpdateSlides = (newSlides: HeroBannerSlide[]) => {
-    hasUserEditedRef.current = true;
-    setSlides(newSlides);
-    if (newSlides.length > 0 && newSlides[0]) {
-      const s0 = newSlides[0];
-      setFormData(prev => ({
-        ...prev,
-        heroHeadline: s0.title || prev.heroHeadline,
-        heroSubtitle: s0.subtitle || prev.heroSubtitle,
-        heroBadgeText: s0.badgeText || prev.heroBadgeText,
-        heroCtaText: s0.ctaText || prev.heroCtaText
-      }));
-    }
-    updateWebsiteCmsConfig({
-      heroSlides: newSlides,
-      ...(newSlides[0] ? {
-        heroHeadline: newSlides[0].title,
-        heroSubtitle: newSlides[0].subtitle,
-        heroBadgeText: newSlides[0].badgeText,
-        heroCtaText: newSlides[0].ctaText
-      } : {})
-    });
-  };
-
-  // Two-way sync: When user types in fallback inputs, reflect to slide[0]
-  const handleHeadlineChange = (val: string) => {
-    hasUserEditedRef.current = true;
-    setFormData(prev => ({ ...prev, heroHeadline: val }));
-    setSlides(prev => {
-      if (!prev || prev.length === 0) return prev;
-      const copy = [...prev];
-      copy[0] = { ...copy[0], title: val };
-      return copy;
-    });
-  };
-
-  const handleSubtitleChange = (val: string) => {
-    hasUserEditedRef.current = true;
-    setFormData(prev => ({ ...prev, heroSubtitle: val }));
-    setSlides(prev => {
-      if (!prev || prev.length === 0) return prev;
-      const copy = [...prev];
-      copy[0] = { ...copy[0], subtitle: val };
-      return copy;
-    });
-  };
-
-  const handleBadgeChange = (val: string) => {
-    hasUserEditedRef.current = true;
-    setFormData(prev => ({ ...prev, heroBadgeText: val }));
-    setSlides(prev => {
-      if (!prev || prev.length === 0) return prev;
-      const copy = [...prev];
-      copy[0] = { ...copy[0], badgeText: val };
-      return copy;
-    });
-  };
-
-  const handleCtaChange = (val: string) => {
-    hasUserEditedRef.current = true;
-    setFormData(prev => ({ ...prev, heroCtaText: val }));
-    setSlides(prev => {
-      if (!prev || prev.length === 0) return prev;
-      const copy = [...prev];
-      copy[0] = { ...copy[0], ctaText: val };
-      return copy;
-    });
-  };
-
-  // Unified Save Function (triggered by top sticky button, banner studio save button, or bottom submit)
+  // Unified Save Function
   const handleSaveAllHero = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     hasUserEditedRef.current = false;
 
-    const syncedSlides = slides.length > 0 ? [
-      {
-        ...slides[0],
-        title: formData.heroHeadline || slides[0].title,
-        subtitle: formData.heroSubtitle || slides[0].subtitle,
-        badgeText: formData.heroBadgeText || slides[0].badgeText,
-        ctaText: formData.heroCtaText || slides[0].ctaText
-      },
-      ...slides.slice(1)
-    ] : slides;
+    const formattedVideoUrl = isDirectVideo(formData.heroVideoUrl)
+      ? formData.heroVideoUrl
+      : formatMediaEmbedUrl(formData.heroVideoUrl, false);
+
+    const syncedSlides =
+      slides.length > 0
+        ? [
+            {
+              ...slides[0],
+              title: formData.heroHeadline || slides[0].title,
+              subtitle: formData.heroSubtitle || slides[0].subtitle,
+              badgeText: formData.heroBadgeText || slides[0].badgeText,
+              ctaText: formData.heroCtaText || slides[0].ctaText
+            },
+            ...slides.slice(1)
+          ]
+        : slides;
 
     if (headerBrandName.trim() && headerBrandName !== academySettings.instituteName) {
       updateAcademySettings({ instituteName: headerBrandName.trim() });
     }
+
     updateWebsiteCmsConfig({
       headerSubtitle: headerSubtitle.trim(),
       headerEstText: headerEstText.trim(),
-      heroStyle: formData.heroStyle as 'split-video' | 'slider',
-      heroHeadline: formData.heroHeadline || (syncedSlides[0]?.title || ''),
-      heroSubtitle: formData.heroSubtitle || (syncedSlides[0]?.subtitle || ''),
-      heroVideoUrl: formData.heroVideoUrl,
+      heroHeadline: formData.heroHeadline,
+      heroSubtitle: formData.heroSubtitle,
+      heroBadgeText: formData.heroBadgeText,
+      heroPrimaryCtaText: formData.heroPrimaryCtaText,
+      heroSecondaryCtaText: formData.heroSecondaryCtaText,
+      heroCtaText: formData.heroCtaText,
+      heroVideoUrl: formattedVideoUrl,
       heroVideoBadgeText: formData.heroVideoBadgeText,
       heroVideoThumbnailUrl: formData.heroVideoThumbnailUrl,
-      heroBadgeText: formData.heroBadgeText || (syncedSlides[0]?.badgeText || ''),
-      heroCtaText: formData.heroCtaText || (syncedSlides[0]?.ctaText || ''),
-      heroPrimaryCtaText: formData.heroPrimaryCtaText || formData.heroCtaText || 'Get Admission',
-      heroSecondaryCtaText: formData.heroSecondaryCtaText || 'Learn more',
+      heroVideoCaption: formData.heroVideoCaption,
       topNoticeTicker: formData.topNoticeTicker,
-      heroSlides: syncedSlides,
-      heroStats: {
-        totalTrained: formData.totalTrained,
-        successRate: formData.successRate,
-        expertTrainers: formData.expertTrainers,
-        jobPlacementRatio: formData.jobPlacementRatio
-      },
-      promoBanner: {
-        enabled: formData.promoEnabled,
-        title: formData.promoTitle,
-        description: formData.promoDescription,
-        discountCode: formData.promoCode,
-        expiresAt: formData.promoExpiresAt
-      },
-      upcomingBatchesCard: {
-        badgeText: formData.upcomingCardBadge,
-        title: formData.upcomingCardTitle,
-        heading: formData.upcomingCardHeading,
-        description: formData.upcomingCardDescription,
-        featureNote: formData.upcomingCardFeatureNote,
-        ctaText: formData.upcomingCardCtaText,
-        ctaLink: formData.upcomingCardCtaLink,
-        pinnedCourseIds: websiteCmsConfig.upcomingBatchesCard?.pinnedCourseIds || []
-      }
+      heroSlides: syncedSlides
     });
 
-    setSlides(syncedSlides);
+    setFormData(prev => ({ ...prev, heroVideoUrl: formattedVideoUrl }));
     setSaveFeedback(true);
     setTimeout(() => setSaveFeedback(false), 3000);
-    onSuccessToast('হিরো সেকশন, ব্যানার স্লাইডার ও অ্যানাউন্সমেন্ট সফলভাবে সংরক্ষিত ও লাইভ হয়েছে!');
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    handleSaveAllHero(e);
+    onSuccessToast('হোমপেজ হিরো সেকশন, ভিডিও ও থাম্বনেইল সেটিংস সফলভাবে সংরক্ষিত ও লাইভ হয়েছে!');
   };
 
   // Keyboard shortcut Ctrl+S or Cmd+S
@@ -314,13 +302,13 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
           </div>
           <div>
             <h3 className="font-black text-white text-sm sm:text-base flex items-center space-x-2">
-              <span>Hero & Banner Slider Settings (হিরো ব্যানার হাব)</span>
+              <span>Homepage Hero & Video Studio (হিরো ও ভিডিও স্টুডিও)</span>
               <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] uppercase font-bold">
                 Live Auto-Sync
               </span>
             </h3>
             <p className="text-xs text-slate-400">
-              ব্যানার স্লাইডার, হেডলাইন ও অ্যানাউন্সমেন্ট এডিট করে যেকোনো বাটন থেকে সেভ করুন।
+              নতুন স্প্লিট হিরো ডিজাইন, ইউটিউব ভিডিও লিংক, থাম্বনেইল আপলোড, হেডলাইন ও অ্যাকশন বাটন কন্ট্রোল করুন।
             </p>
           </div>
         </div>
@@ -336,12 +324,485 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
             }`}
           >
             {saveFeedback ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
-            <span>{saveFeedback ? 'সব সংরক্ষিত হয়েছে (Saved!)' : 'Save All Changes (সব সংরক্ষণ করুন)'}</span>
+            <span>{saveFeedback ? 'সব সংরক্ষিত হয়েছে (Saved!)' : 'Save Hero Settings (হিরো সংরক্ষণ করুন)'}</span>
           </button>
         </div>
       </div>
 
-      {/* 0. WEBSITE HEADER BRANDING, LOGO & CAMPUS TAGLINE EDITOR (Matches user screenshot) */}
+      {/* 1. PREMIER: NEW DESIGN SPLIT HERO & VIDEO STUDIO (নতুন ডিজাইনের মূল হিরো কনফিগ) */}
+      <div className="bg-white p-6 rounded-3xl border-2 border-indigo-200 shadow-md space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-indigo-100">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="px-2.5 py-0.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black uppercase tracking-wider">
+                Active Homepage Design • Modern Split Hero
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                ✓ লাইভ হোমপেজে সক্রিয়
+              </span>
+            </div>
+            <h3 className="font-black text-slate-900 text-xl flex items-center space-x-2 mt-1.5">
+              <Video className="w-6 h-6 text-purple-600" />
+              <span>Modern Split Hero & Video Studio (হিরো কনটেন্ট ও ভিডিও এডিটর)</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              বামের টেক্সট, হেডলাইন, ৩টি অ্যাকশন বাটন এবং ডানের ইউটিউব ভিডিও ও থাম্বনেইল পোস্টার ইমেজ সরাসরি এডিট করুন।
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleSaveAllHero()}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all self-start sm:self-auto cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>সেভ করুন</span>
+          </button>
+        </div>
+
+        {/* Two-Column Editor Layout: Form Left (7 Cols), Live Preview Right (5 Cols) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Form Controls */}
+          <div className="lg:col-span-7 space-y-5">
+            {/* Top Badge Pill */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-xs text-slate-800 flex items-center justify-between">
+                <span>১. হিরো টপ ব্যাজ পিল (Hero Top Badge Pill)</span>
+                <span className="text-[10px] text-purple-600 font-bold">হেডলাইনের ঠিক উপরে প্রদর্শিত</span>
+              </label>
+              <input
+                type="text"
+                value={formData.heroBadgeText}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setFormData({ ...formData, heroBadgeText: e.target.value });
+                }}
+                placeholder="e.g. Your Future Starts Here"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs text-purple-900 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Main Headline */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-xs text-slate-800 flex items-center justify-between">
+                <span>২. মূল হেডলাইন (Primary Headline)</span>
+                <span className="text-[10px] text-slate-500">হোমপেজের প্রধান শিরোনাম</span>
+              </label>
+              <textarea
+                rows={2}
+                value={formData.heroHeadline}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setFormData({ ...formData, heroHeadline: e.target.value });
+                }}
+                placeholder="Learn IT Skills Today. Lead the Digital World Tomorrow."
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-sm text-slate-900 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none leading-relaxed"
+              />
+              <p className="text-[10px] text-slate-400">
+                💡 টিপস: আপনি আপনার পছন্দমতো স্লোগান বা শিরোনাম লিখতে পারেন।
+              </p>
+            </div>
+
+            {/* Subtitle / Value Proposition */}
+            <div className="space-y-1.5">
+              <label className="font-bold text-xs text-slate-800 flex items-center justify-between">
+                <span>৩. সাবটাইটেল ও পরিচিতি বিবরণ (Hero Subtitle)</span>
+                <span className="text-[10px] text-slate-500">হেডলাইনের নিচের অনুচ্ছেদ</span>
+              </label>
+              <textarea
+                rows={4}
+                value={formData.heroSubtitle}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setFormData({ ...formData, heroSubtitle: e.target.value });
+                }}
+                placeholder="Thousands of people in Bangladesh are stuck - not because they lack talent..."
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-xs text-slate-700 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none leading-relaxed"
+              />
+            </div>
+
+            {/* 3 Action Buttons */}
+            <div className="p-4 bg-purple-50/60 rounded-2xl border border-purple-200/80 space-y-3">
+              <label className="font-bold text-xs text-purple-950 block">
+                ৪. হিরো অ্যাকশন বাটনসমূহ (Action Buttons Labels):
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Button 1 */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-rose-600 block">১ম বাটন (লাল/গোলাপি)</span>
+                  <input
+                    type="text"
+                    value={formData.heroPrimaryCtaText}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroPrimaryCtaText: e.target.value });
+                    }}
+                    placeholder="Online Course"
+                    className="w-full px-3 py-2 bg-white border border-rose-200 rounded-xl font-bold text-xs text-rose-700"
+                  />
+                </div>
+
+                {/* Button 2 */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-slate-700 block">২য় বাটন (সাদা/আউটলাইন)</span>
+                  <input
+                    type="text"
+                    value={formData.heroSecondaryCtaText}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroSecondaryCtaText: e.target.value });
+                    }}
+                    placeholder="Offline Course"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-xs text-slate-800"
+                  />
+                </div>
+
+                {/* Button 3 */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-orange-600 block">৩য় বাটন (কমলা গ্র্যাডিয়েন্ট)</span>
+                  <input
+                    type="text"
+                    value={formData.heroCtaText}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroCtaText: e.target.value });
+                    }}
+                    placeholder="Admission Now"
+                    className="w-full px-3 py-2 bg-white border border-orange-300 rounded-xl font-bold text-xs text-orange-700"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Video Controls Card */}
+            <div className="p-4 sm:p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/80">
+                <span className="font-black text-xs text-slate-900 flex items-center space-x-1.5">
+                  <Video className="w-4 h-4 text-rose-600" />
+                  <span>৫. হিরো ভিডিও ও মিডিয়া স্টুডিও (Video Upload & Media)</span>
+                </span>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsVideoTestModalOpen(true)}
+                    className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10px] font-bold flex items-center space-x-1 cursor-pointer transition-colors"
+                  >
+                    <Play className="w-3 h-3 fill-rose-600" />
+                    <span>ভিডিও টেস্ট প্লে</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Video Source Switcher: YouTube Link vs Direct Upload */}
+              <div className="flex items-center p-1 bg-white border border-slate-200 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setVideoSourceType('youtube')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                    videoSourceType === 'youtube'
+                      ? 'bg-rose-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Video className="w-3.5 h-3.5" />
+                  <span>YouTube ভিডিও লিংক</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVideoSourceType('upload')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                    videoSourceType === 'upload'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <FileVideo className="w-3.5 h-3.5" />
+                  <span>সরাসরি ভিডিও ফাইল আপলোড (MP4 / WebM)</span>
+                </button>
+              </div>
+
+              {/* YouTube Video URL Input */}
+              {videoSourceType === 'youtube' ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-xs text-slate-800 flex items-center space-x-1">
+                      <span>YouTube Video URL (ইউটিউব ভিডিও লিংক)</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        hasUserEditedRef.current = true;
+                        setFormData({ ...formData, heroVideoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8' });
+                        onSuccessToast('ডিফল্ট ক্যাম্পাস ইউটিউব ভিডিও রিসেট হয়েছে');
+                      }}
+                      className="text-[10px] text-indigo-600 font-bold hover:underline cursor-pointer"
+                    >
+                      রিসেট ডিফল্ট ভিডিও
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.heroVideoUrl.startsWith('data:video') ? '' : formData.heroVideoUrl}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroVideoUrl: e.target.value });
+                    }}
+                    onBlur={() => {
+                      const formatted = formatMediaEmbedUrl(formData.heroVideoUrl, false);
+                      if (formatted !== formData.heroVideoUrl) {
+                        setFormData(prev => ({ ...prev, heroVideoUrl: formatted }));
+                      }
+                    }}
+                    placeholder="e.g. https://www.youtube.com/watch?v=y9jMfwwsqf8 বা embed লিংক"
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl font-mono text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                  <p className="text-[10px] text-slate-400">
+                    💡 যে কোনো সাধারণ ইউটিউব ভিডিও লিংক (watch?v= বা youtu.be/) পেস্ট করলেই সিস্টেম নিজে থেকেই এটিকে সঠিক প্লেয়ার ফরম্যাটে কনভার্ট করে নেবে।
+                  </p>
+                </div>
+              ) : (
+                /* Direct Video File Upload Box */
+                <div className="space-y-3">
+                  <input
+                    type="file"
+                    ref={videoFileInputRef}
+                    accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                    onChange={handleVideoFileUpload}
+                    className="hidden"
+                  />
+
+                  {formData.heroVideoUrl.startsWith('data:video') || isDirectVideo(formData.heroVideoUrl) ? (
+                    <div className="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-2xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                            <FileVideo className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-black text-indigo-950 block">
+                              {videoFileMeta?.name || 'আপলোডকৃত লোকাল ভিডিও (.mp4)'}
+                            </span>
+                            <span className="text-[10px] text-indigo-700 font-medium">
+                              {videoFileMeta?.sizeMb ? `সাইজ: ${videoFileMeta.sizeMb} MB • ` : ''}সরাসরি প্লেয়ারে সক্রিয়
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-1.5">
+                          <button
+                            type="button"
+                            onClick={() => videoFileInputRef.current?.click()}
+                            className="px-2.5 py-1.5 bg-white hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                          >
+                            পরিবর্তন
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleRemoveUploadedVideo}
+                            className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg transition-colors cursor-pointer"
+                            title="রিমুভ করুন"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Small inline player */}
+                      <div className="rounded-xl overflow-hidden border border-indigo-200 bg-black aspect-video max-h-44 flex items-center justify-center">
+                        <video
+                          src={formData.heroVideoUrl}
+                          controls
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => videoFileInputRef.current?.click()}
+                      className="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-white hover:bg-indigo-50/40 p-6 rounded-2xl text-center cursor-pointer transition-all space-y-2 group"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 group-hover:bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto transition-transform group-hover:scale-110">
+                        <Upload className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-xs text-slate-800 block">
+                          কম্পিউটার থেকে ভিডিও ফাইল আপলোড করুন
+                        </span>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          ক্লিক করে MP4 বা WebM ফাইল সিলেক্ট করুন (সর্বোচ্চ ৬০ মেগাবাইট)
+                        </p>
+                      </div>
+                      <span className="inline-block px-3 py-1 bg-indigo-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                        {isProcessingVideo ? 'ভিডিও আপলোড হচ্ছে...' : 'ভিডিও ফাইল ব্রাউজ করুন'}
+                      </span>
+                    </div>
+                  )}
+
+                  {videoUploadError && (
+                    <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center space-x-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{videoUploadError}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Video Thumbnail / Poster Image URL with Upload Button */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-xs text-slate-800">
+                    Video Thumbnail / Poster Image (ভিডিও পোস্টার ছবি)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsThumbnailCropModalOpen(true)}
+                    className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>ছবি আপলোড ও ক্রপ করুন</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={formData.heroVideoThumbnailUrl}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroVideoThumbnailUrl: e.target.value });
+                    }}
+                    placeholder="https://images.unsplash.com/... বা আপলোড বাটনে ক্লিক করুন"
+                    className="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Watermark & Caption */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="space-y-1">
+                  <label className="font-bold text-xs text-slate-800 block">
+                    Watermark Tag (ভিডিওর ওপর ছোট ব্যাজ)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.heroVideoBadgeText}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroVideoBadgeText: e.target.value });
+                    }}
+                    placeholder="NexGen Academy Campus"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-indigo-700"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-xs text-slate-800 block">
+                    Video Caption Pill (ভিডিওর নিচের ক্যাপশন)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.heroVideoCaption}
+                    onChange={e => {
+                      hasUserEditedRef.current = true;
+                      setFormData({ ...formData, heroVideoCaption: e.target.value });
+                    }}
+                    placeholder="সরাসরি ফার্মগেট ক্যাম্পাসে প্র্যাকটিক্যাল ল্যাব ও অনলাইন ক্লাস"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Live Interactive Preview */}
+          <div className="lg:col-span-5 bg-gradient-to-b from-slate-50 to-indigo-50/40 p-4 sm:p-5 rounded-2xl border border-indigo-100 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-indigo-200/60">
+              <span className="font-black text-xs text-indigo-950 flex items-center space-x-1.5">
+                <Eye className="w-4 h-4 text-indigo-600" />
+                <span>Live Hero Layout Preview (লাইভ প্রিভিউ)</span>
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">
+                ওয়েবসাইটে যেমন দেখাবে
+              </span>
+            </div>
+
+            {/* Miniature Video Card Preview */}
+            <div className="relative rounded-2xl overflow-hidden border-2 border-white shadow-xl bg-slate-900 group">
+              <img
+                src={formData.heroVideoThumbnailUrl}
+                alt="Hero Thumbnail Preview"
+                className="w-full aspect-[16/10] object-cover"
+                onError={e => {
+                  (e.target as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
+
+              {/* Watermark */}
+              <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-black text-slate-900 flex items-center space-x-1 shadow-sm">
+                <span className="text-[#1e1b4b]">{formData.heroVideoBadgeText || 'NexGen Academy Campus'}</span>
+              </div>
+
+              {/* Play Button */}
+              <button
+                type="button"
+                onClick={() => setIsVideoTestModalOpen(true)}
+                className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-white/95 text-rose-600 shadow-xl flex items-center justify-center cursor-pointer transition-transform hover:scale-110"
+                title="Test Video Player"
+              >
+                <div className="w-9 h-9 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-md">
+                  <Play className="w-4 h-4 fill-white ml-0.5" />
+                </div>
+              </button>
+
+              {/* Bottom Caption Pill */}
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl text-white text-[10px] flex items-center justify-between border border-white/10">
+                <span className="font-bold truncate max-w-[200px]">
+                  {formData.heroVideoCaption || 'সরাসরি ফার্মগেট ক্যাম্পাসে প্র্যাকটিক্যাল ল্যাব ও অনলাইন ক্লাস'}
+                </span>
+                <span className="text-[9px] text-amber-300 font-black uppercase tracking-wider shrink-0 ml-1">
+                  Watch Video
+                </span>
+              </div>
+            </div>
+
+            {/* Left Content Card Summary */}
+            <div className="p-3.5 bg-white rounded-xl border border-slate-200 text-xs space-y-2.5 shadow-2xs">
+              <div className="inline-block px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-black border border-purple-200">
+                ✓ {formData.heroBadgeText}
+              </div>
+              <h4 className="font-black text-slate-900 text-sm leading-snug line-clamp-2">
+                {formData.heroHeadline}
+              </h4>
+              <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+                {formData.heroSubtitle}
+              </p>
+              <div className="flex items-center gap-1.5 pt-1">
+                <span className="px-2.5 py-1 bg-rose-600 text-white rounded-full text-[9px] font-bold">
+                  {formData.heroPrimaryCtaText}
+                </span>
+                <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-[9px] font-bold border border-slate-200">
+                  {formData.heroSecondaryCtaText}
+                </span>
+                <span className="px-2.5 py-1 bg-orange-500 text-white rounded-full text-[9px] font-bold">
+                  {formData.heroCtaText}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleSaveAllHero()}
+              className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-sm flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save Hero Settings (হিরো সংরক্ষণ করুন)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. WEBSITE HEADER BRANDING, LOGO & CAMPUS TAGLINE EDITOR */}
       <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
@@ -361,16 +822,16 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
             className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-sm flex items-center space-x-1.5 transition-transform active:scale-95 shrink-0 self-start sm:self-auto cursor-pointer"
           >
             {brandSavedFeedback ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-100" /> : <Save className="w-3.5 h-3.5" />}
-            <span>{brandSavedFeedback ? "সংরক্ষিত হয়েছে (Saved)" : "Save Header Brand"}</span>
+            <span>{brandSavedFeedback ? 'সংরক্ষিত হয়েছে (Saved)' : 'Save Header Brand'}</span>
           </button>
         </div>
 
-        {/* Visual Mock of Website Header (Exact replica of user screenshot) */}
+        {/* Visual Mock of Website Header */}
         <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-white space-y-2">
           <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider pb-1">
             <span>Live Header Navigation Preview (ওয়েবসাইটে যেমন দেখাবে)</span>
             <span className="text-emerald-400 flex items-center space-x-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>Synchronized</span>
             </span>
           </div>
@@ -383,14 +844,14 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               <div className="min-w-0">
                 <div className="flex items-center space-x-2">
                   <span className="text-sm sm:text-base lg:text-lg font-black text-slate-950 tracking-tight leading-none truncate">
-                    {headerBrandName || "Nexgen Computer Academy"}
+                    {headerBrandName || 'NexGen Computer Academy'}
                   </span>
                   <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-wider shrink-0">
-                    {headerEstText || "EST. 2018"}
+                    {headerEstText || 'EST. 2018'}
                   </span>
                 </div>
                 <p className="text-[11px] sm:text-xs text-slate-600 font-semibold truncate mt-1">
-                  {headerSubtitle || `${academySettings.campusName || "Farmgate Campus"} • Govt. Standard IT Training & Career Incubator`}
+                  {headerSubtitle || `${academySettings.campusName || 'Farmgate Campus'} • Govt. Standard IT Training & Career Incubator`}
                 </p>
               </div>
             </div>
@@ -421,7 +882,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                 hasUserEditedRef.current = true;
                 setHeaderBrandName(e.target.value);
               }}
-              placeholder="যেমন: Nexgen Computer Academy"
+              placeholder="যেমন: NexGen Computer Academy"
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
             />
           </div>
@@ -460,504 +921,184 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               placeholder="e.g. Farmgate Campus • Govt. Standard IT Training & Career Incubator"
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
             />
-            <p className="text-[10px] text-slate-500 pt-0.5">
-              💡 টিপস: আপনি আপনার ব্রাঞ্চের নাম ও স্লোগান (যেমন: <strong className="text-slate-700">ফার্মগেট ক্যাম্পাস • সরকারি মানের প্র্যাকটিক্যাল আইটি ল্যাব</strong>) লিখে দিতে পারেন।
-            </p>
           </div>
         </div>
       </div>
 
-      {/* 1. HERO BANNER SLIDER STUDIO (ইন্টারেক্টিভ হিরো ব্যানার স্টুডিও) */}
-      <HeroBannerEditor
-        slides={slides}
-        onChangeSlides={handleUpdateSlides}
-        onSave={() => handleSaveAllHero()}
-        onSuccessToast={onSuccessToast}
-      />
-
-      {/* 2. Top Notice Ticker */}
-      <form onSubmit={handleSaveAllHero} className="space-y-6">
-        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl space-y-2">
-          <div className="flex items-center space-x-2 text-amber-700 font-bold text-xs uppercase tracking-wider">
-            <Bell className="w-4 h-4 text-amber-600" />
-            <span>Top Header Announcement & Notice Ticker</span>
-          </div>
-          <input
-            type="text"
-            value={formData.topNoticeTicker}
-            onChange={e => setFormData({ ...formData, topNoticeTicker: e.target.value })}
-            placeholder="e.g. ⚡ Special Admission Open with 40% Scholarship..."
-            className="w-full p-2.5 bg-white border border-amber-300 rounded-xl text-xs font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-          />
-          <p className="text-[11px] text-amber-700">
-            This scrolling/fixed ticker appears at the very top of the public website above the navigation bar.
-          </p>
-          <div className="flex justify-end pt-1">
-            <button
-              type="button"
-              onClick={() => handleSaveAllHero()}
-              className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>Save Notice Ticker (নোটিশ সেভ করুন)</span>
-            </button>
-          </div>
+      {/* 3. TOP NOTICE ANNOUNCEMENT TICKER */}
+      <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl space-y-2">
+        <div className="flex items-center space-x-2 text-amber-700 font-bold text-xs uppercase tracking-wider">
+          <Bell className="w-4 h-4 text-amber-600" />
+          <span>Top Header Announcement & Notice Ticker (টপ নোটিশ অ্যানাউন্সমেন্ট)</span>
         </div>
-
-        {/* 3. Main Hero Default Texts & Video Split Hero */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <div className="flex items-center space-x-2 text-indigo-950 font-black text-sm">
-              <Sparkles className="w-4 h-4 text-indigo-600" />
-              <span>Hero Style & Content Customization (হিরো লেআউট ও ভিডিও কনফিগ)</span>
-            </div>
-          </div>
-
-          {/* Hero Style Selection: Modern Split Video vs Slider */}
-          <div className="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-2">
-            <label className="font-bold text-xs text-indigo-950 block">Hero Section Presentation Style (হোমপেজ হিরো স্টাইল):</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <label
-                className={`p-3 rounded-xl border flex items-center space-x-3 cursor-pointer transition-all ${
-                  formData.heroStyle === 'split-video'
-                    ? 'bg-white border-indigo-600 shadow-xs text-indigo-950 font-black'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="heroStyle"
-                  value="split-video"
-                  checked={formData.heroStyle === 'split-video'}
-                  onChange={() => {
-                    hasUserEditedRef.current = true;
-                    setFormData({ ...formData, heroStyle: 'split-video' });
-                  }}
-                  className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-                />
-                <div>
-                  <div className="font-bold">Modern Split Video Hero (Youthins Style)</div>
-                  <div className="text-[10px] text-slate-500 font-normal">বামে টাইটেল, ডেসক্রিপশন ও অ্যাকশন বাটন এবং ডানে 16:9 হাইলাইট ভিডিও প্লেয়ার</div>
-                </div>
-              </label>
-
-              <label
-                className={`p-3 rounded-xl border flex items-center space-x-3 cursor-pointer transition-all ${
-                  formData.heroStyle === 'slider'
-                    ? 'bg-white border-indigo-600 shadow-xs text-indigo-950 font-black'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="heroStyle"
-                  value="slider"
-                  checked={formData.heroStyle === 'slider'}
-                  onChange={() => {
-                    hasUserEditedRef.current = true;
-                    setFormData({ ...formData, heroStyle: 'slider' });
-                  }}
-                  className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-                />
-                <div>
-                  <div className="font-bold">Multi-Slide Banner Studio</div>
-                  <div className="text-[10px] text-slate-500 font-normal">পূর্ণাঙ্গ ব্যাকগ্রাউন্ড ইমেজ, অটো-রোটেটিং স্লাইডার ও ব্যানার স্টুডিও</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div className="space-y-3 text-xs">
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Hero Top Badge Pill</label>
-              <input
-                type="text"
-                value={formData.heroBadgeText}
-                onChange={e => handleBadgeChange(e.target.value)}
-                placeholder="e.g. Govt. Recognized IT Training Institute • Dhaka, Bangladesh"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Primary Hero Headline *</label>
-              <input
-                type="text"
-                required
-                value={formData.heroHeadline}
-                onChange={e => handleHeadlineChange(e.target.value)}
-                placeholder="e.g. NexGen Computer Academy: Computer & Freelancing Training Center in Farmgate"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Hero Subtitle & Value Proposition *</label>
-              <textarea
-                rows={3}
-                required
-                value={formData.heroSubtitle}
-                onChange={e => handleSubtitleChange(e.target.value)}
-                placeholder="e.g. Master in-demand IT skills from top industry practitioners..."
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 leading-relaxed focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-              <div className="font-bold text-slate-900">হিরো ভিডিও ও থাম্বনেইল সেটিংস (Modern Split Video):</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    YouTube Video URL (ইউটিউব ভিডিও লিংক)
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.heroVideoUrl}
-                    onChange={e => {
-                      hasUserEditedRef.current = true;
-                      setFormData({ ...formData, heroVideoUrl: e.target.value });
-                    }}
-                    placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                    className="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    Video Badge Text (ভিডিওর ওপর ছোট ব্যাজ)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.heroVideoBadgeText}
-                    onChange={e => {
-                      hasUserEditedRef.current = true;
-                      setFormData({ ...formData, heroVideoBadgeText: e.target.value });
-                    }}
-                    placeholder="e.g. কম্পিউটার বা ফ্রিল্যান্সিং শিখে ক্যারিয়ার গড়ার উপায়"
-                    className="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-xs text-rose-600 font-bold"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="font-bold text-slate-700 block mb-1">
-                    Video Poster / Thumbnail Image URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.heroVideoThumbnailUrl}
-                    onChange={e => {
-                      hasUserEditedRef.current = true;
-                      setFormData({ ...formData, heroVideoThumbnailUrl: e.target.value });
-                    }}
-                    placeholder="e.g. https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80"
-                    className="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-xs text-slate-600"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Primary CTA Button Label (১ম বাটন)</label>
-                <input
-                  type="text"
-                  value={formData.heroPrimaryCtaText}
-                  onChange={e => {
-                    hasUserEditedRef.current = true;
-                    setFormData({ ...formData, heroPrimaryCtaText: e.target.value, heroCtaText: e.target.value });
-                  }}
-                  placeholder="e.g. Get Admission / ভর্তি আবেদন"
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-rose-600 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Secondary CTA Button Label (২য় বাটন)</label>
-                <input
-                  type="text"
-                  value={formData.heroSecondaryCtaText}
-                  onChange={e => {
-                    hasUserEditedRef.current = true;
-                    setFormData({ ...formData, heroSecondaryCtaText: e.target.value });
-                  }}
-                  placeholder="e.g. Learn more / বিস্তারিত দেখুন"
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. Hero Live Counter Stats */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center space-x-2 text-indigo-950 font-black text-sm pb-2 border-b border-slate-100">
-            <Sliders className="w-4 h-4 text-indigo-600" />
-            <span>Live Achievements & Key Statistics</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Total Students Trained</label>
-              <input
-                type="text"
-                value={formData.totalTrained}
-                onChange={e => setFormData({ ...formData, totalTrained: e.target.value })}
-                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-black text-indigo-600 text-center"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Success & Pass Rate</label>
-              <input
-                type="text"
-                value={formData.successRate}
-                onChange={e => setFormData({ ...formData, successRate: e.target.value })}
-                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-black text-emerald-600 text-center"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Industry Expert Trainers</label>
-              <input
-                type="text"
-                value={formData.expertTrainers}
-                onChange={e => setFormData({ ...formData, expertTrainers: e.target.value })}
-                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-black text-amber-600 text-center"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Job & Freelance Ratio</label>
-              <input
-                type="text"
-                value={formData.jobPlacementRatio}
-                onChange={e => setFormData({ ...formData, jobPlacementRatio: e.target.value })}
-                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl font-black text-indigo-600 text-center"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* 5. Special Offer Promo Banner */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <div className="flex items-center space-x-2 text-indigo-950 font-black text-sm">
-              <Percent className="w-4 h-4 text-emerald-600" />
-              <span>Special Promotional Banner & Coupon</span>
-            </div>
-            <label className="flex items-center space-x-2 text-xs font-bold text-slate-700 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.promoEnabled}
-                onChange={e => setFormData({ ...formData, promoEnabled: e.target.checked })}
-                className="rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
-              />
-              <span>Enable Promo Banner</span>
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Promo Title</label>
-              <input
-                type="text"
-                value={formData.promoTitle}
-                onChange={e => setFormData({ ...formData, promoTitle: e.target.value })}
-                placeholder="e.g. Up to 45% Early Bird Discount!"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Promo Coupon Code</label>
-              <input
-                type="text"
-                value={formData.promoCode}
-                onChange={e => setFormData({ ...formData, promoCode: e.target.value })}
-                placeholder="e.g. NEXGEN2026"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono uppercase text-indigo-600 font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Offer Expiration Date</label>
-              <input
-                type="date"
-                value={formData.promoExpiresAt}
-                onChange={e => setFormData({ ...formData, promoExpiresAt: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Promo Short Description</label>
-              <input
-                type="text"
-                value={formData.promoDescription}
-                onChange={e => setFormData({ ...formData, promoDescription: e.target.value })}
-                placeholder="e.g. Enroll in upcoming weekend batches and get lifetime lab access."
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-3 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => handleSaveAllHero()}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>Save Hero Headlines & Promos (হেডলাইন সেভ করুন)</span>
-            </button>
-          </div>
-        </div>
-
-        {/* 4. Upcoming Batches / Offer Card Settings in Hero */}
-        <div className="bg-white p-5 rounded-2xl border border-amber-200 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-amber-50">
-            <div className="flex items-center space-x-2 text-amber-950 font-black text-sm">
-              <Sparkles className="w-4 h-4 text-amber-600" />
-              <span>Upcoming Batches & Admission Offer Card (হিরো সেকশনের ডানপাশের অ্যাডমিশন কার্ড)</span>
-            </div>
-            <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-              Hero Side Card
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Offer Badge Pill (অফার ব্যাজ)</label>
-              <input
-                type="text"
-                value={formData.upcomingCardBadge}
-                onChange={e => setFormData({ ...formData, upcomingCardBadge: e.target.value })}
-                placeholder="e.g. 40% Offer"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-amber-700"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Card Small Label (লেবেল)</label>
-              <input
-                type="text"
-                value={formData.upcomingCardTitle}
-                onChange={e => setFormData({ ...formData, upcomingCardTitle: e.target.value })}
-                placeholder="e.g. Upcoming Batches"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Main Heading (প্রধান শিরোনাম)</label>
-              <input
-                type="text"
-                value={formData.upcomingCardHeading}
-                onChange={e => setFormData({ ...formData, upcomingCardHeading: e.target.value })}
-                placeholder="e.g. Apply for Direct Admission"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Feature Note (নিচের বিশেষ সুবিধা)</label>
-              <input
-                type="text"
-                value={formData.upcomingCardFeatureNote}
-                onChange={e => setFormData({ ...formData, upcomingCardFeatureNote: e.target.value })}
-                placeholder="e.g. Free Lifetime Lab Access"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-emerald-600"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="font-bold text-slate-700 block mb-1">Card Description (বিবরণ)</label>
-              <input
-                type="text"
-                value={formData.upcomingCardDescription}
-                onChange={e => setFormData({ ...formData, upcomingCardDescription: e.target.value })}
-                placeholder="e.g. Fast-track your IT career with practical project portfolios and certified diplomas."
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Bottom CTA Button Text (বাটন টেক্সট)</label>
-              <input
-                type="text"
-                value={formData.upcomingCardCtaText}
-                onChange={e => setFormData({ ...formData, upcomingCardCtaText: e.target.value })}
-                placeholder="e.g. Free Seminars →"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-700"
-              />
-            </div>
-
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Bottom CTA Button Link (বাটন লিংক)</label>
-              <input
-                type="text"
-                value={formData.upcomingCardCtaLink}
-                onChange={e => setFormData({ ...formData, upcomingCardCtaLink: e.target.value })}
-                placeholder="e.g. #seminars"
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px]"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-3 border-t border-amber-100">
-            <button
-              type="button"
-              onClick={() => handleSaveAllHero()}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>Save Upcoming Batches Card (অফার কার্ড সেভ করুন)</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Global Save Button */}
-        <div className="flex justify-end pt-4">
+        <input
+          type="text"
+          value={formData.topNoticeTicker}
+          onChange={e => {
+            hasUserEditedRef.current = true;
+            setFormData({ ...formData, topNoticeTicker: e.target.value });
+          }}
+          placeholder="e.g. ⚡ Special Admission Open with 40% Scholarship..."
+          className="w-full p-2.5 bg-white border border-amber-300 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
+        <div className="flex justify-end pt-1">
           <button
-            type="submit"
-            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all hover:scale-105 cursor-pointer"
+            type="button"
+            onClick={() => handleSaveAllHero()}
+            className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
           >
-            <Save className="w-4 h-4" />
-            <span>Save All Hero & Announcements</span>
+            <Save className="w-3.5 h-3.5" />
+            <span>Save Notice Ticker (নোটিশ সেভ করুন)</span>
           </button>
         </div>
-      </form>
-
-      {/* Floating Persistent Quick Save Button */}
-      <div className="fixed bottom-6 right-6 z-40 flex items-center space-x-2 bg-slate-900/95 backdrop-blur-md text-white p-2.5 rounded-2xl shadow-2xl border border-indigo-500/40 animate-in fade-in slide-in-from-bottom-3 duration-300">
-        <div className="hidden sm:flex flex-col pr-1 text-right">
-          <span className="text-[11px] font-black text-indigo-300">হিরো ব্যানার সেভ</span>
-          <span className="text-[9px] text-slate-400">Ctrl + S অথবা বাটনে চাপুন</span>
-        </div>
-        <button
-          type="button"
-          onClick={() => handleSaveAllHero()}
-          className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-lg flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
-        >
-          {saveFeedback ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
-          <span>{saveFeedback ? 'সব সংরক্ষিত হয়েছে (Saved!)' : 'Save All Hero Changes (সংরক্ষণ করুন)'}</span>
-        </button>
       </div>
 
-      {/* Logo Crop & Resize Modal */}
-      <LogoCropResizeModal
-        isOpen={isLogoCropModalOpen}
-        onClose={() => setIsLogoCropModalOpen(false)}
-        currentLogoUrl={academySettings.customLogoUrl}
-        onSaveLogo={(dataUrl) => {
-          updateAcademySettings({ customLogoUrl: dataUrl });
-          onSuccessToast('Institute logo updated & saved successfully!');
-        }}
-        onResetLogo={() => {
-          updateAcademySettings({ customLogoUrl: '' });
-          onSuccessToast('Logo reset to default brandmark');
-        }}
-      />
+      {/* 4. LEGACY MULTI-SLIDE CAROUSEL STUDIO (ঐচ্ছিক ব্যাকআপ স্লাইডার স্টুডিও) */}
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowLegacySliderStudio(!showLegacySliderStudio)}
+          className="w-full p-5 text-left flex items-center justify-between bg-slate-50/70 hover:bg-slate-100 transition-colors cursor-pointer"
+        >
+          <div className="flex items-center space-x-3">
+            <span className="p-2 bg-indigo-50 text-indigo-700 rounded-xl">
+              <Sliders className="w-4 h-4" />
+            </span>
+            <div>
+              <h4 className="font-black text-sm text-slate-900">
+                Legacy Multi-Slide Carousel Studio (ঐচ্ছিক ব্যাকআপ স্লাইডার স্টুডিও)
+              </h4>
+              <p className="text-xs text-slate-500">
+                যদি ভবিষ্যতে নতুন স্প্লিট হিরোর বদলে পুরোনো রোটেটিং স্লাইডার ব্যবহার করতে চান।
+              </p>
+            </div>
+          </div>
+          {showLegacySliderStudio ? (
+            <ChevronUp className="w-5 h-5 text-slate-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-slate-500" />
+          )}
+        </button>
+
+        {showLegacySliderStudio && (
+          <div className="p-6 border-t border-slate-200 space-y-4">
+            <HeroBannerEditor
+              slides={slides}
+              onChangeSlides={newSlides => {
+                hasUserEditedRef.current = true;
+                setSlides(newSlides);
+                updateWebsiteCmsConfig({ heroSlides: newSlides });
+              }}
+              onSave={() => handleSaveAllHero()}
+              onSuccessToast={onSuccessToast}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* MODAL: Logo Crop / Resize */}
+      {isLogoCropModalOpen && (
+        <LogoCropResizeModal
+          isOpen={isLogoCropModalOpen}
+          onClose={() => setIsLogoCropModalOpen(false)}
+          currentLogoUrl={academySettings.customLogoUrl}
+          onSaveLogo={newLogoDataUrl => {
+            updateAcademySettings({ customLogoUrl: newLogoDataUrl });
+            onSuccessToast('লোগো সফলভাবে আপডেট ও ক্রপ করা হয়েছে!');
+          }}
+        />
+      )}
+
+      {/* MODAL: Video Poster / Thumbnail Upload & Crop Modal */}
+      {isThumbnailCropModalOpen && (
+        <ImageUploadCropModal
+          isOpen={isThumbnailCropModalOpen}
+          onClose={() => setIsThumbnailCropModalOpen(false)}
+          currentImageUrl={formData.heroVideoThumbnailUrl}
+          title="Upload & Crop Video Thumbnail / Poster"
+          subtitle="হিরো ভিডিওর কভার বা পোস্টার ইমেজ আপলোড করুন ও নিখুঁত 16:9 ফ্রেম অনুযায়ী ক্রপ করুন।"
+          aspectRatio="16:9"
+          recommendedSize="1200 × 675px (16:9 HD)"
+          presetImages={[
+            {
+              label: 'Modern Computer Lab & Workstations',
+              category: 'Campus',
+              url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80'
+            },
+            {
+              label: 'Interactive Coding & Lab Class',
+              category: 'Classroom',
+              url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&auto=format&fit=crop&q=80'
+            },
+            {
+              label: 'High-end Studio & Mentor Guidance',
+              category: 'Mentorship',
+              url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&auto=format&fit=crop&q=80'
+            }
+          ]}
+          onSaveImage={croppedUrl => {
+            hasUserEditedRef.current = true;
+            setFormData(prev => ({ ...prev, heroVideoThumbnailUrl: croppedUrl }));
+            setIsThumbnailCropModalOpen(false);
+            onSuccessToast('ভিডিও থাম্বনেইল সফলভাবে আপলোড ও ক্রপ হয়েছে! সেটিংস সেভ করতে পারেন।');
+          }}
+        />
+      )}
+
+      {/* MODAL: Video Play Test Modal */}
+      {isVideoTestModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl max-w-3xl w-full">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between text-white">
+              <span className="font-bold text-sm flex items-center space-x-2">
+                <Video className="w-4 h-4 text-rose-500" />
+                <span>Video Player Test (ইউটিউব ভিডিও প্রিভিউ)</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsVideoTestModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="aspect-video w-full bg-black">
+              {formData.heroVideoUrl ? (
+                isDirectVideo(formData.heroVideoUrl) ? (
+                  <video
+                    src={formData.heroVideoUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <iframe
+                    title="Hero Video Test"
+                    src={formatMediaEmbedUrl(formData.heroVideoUrl, true)}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                )
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 text-sm">
+                  <span>কোনো ভিডিও লিংক পাওয়া যায়নি</span>
+                </div>
+              )}
+            </div>
+            <div className="p-3 bg-slate-950 text-slate-400 text-xs flex items-center justify-between">
+              <span>{formData.heroVideoCaption}</span>
+              <button
+                type="button"
+                onClick={() => setIsVideoTestModalOpen(false)}
+                className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold"
+              >
+                বন্ধ করুন
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

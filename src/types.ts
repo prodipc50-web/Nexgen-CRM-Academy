@@ -1952,6 +1952,7 @@ export interface WebsiteCmsConfig {
   // 22. Modern Split Video Hero Options
   heroVideoBadgeText?: string;
   heroVideoThumbnailUrl?: string;
+  heroVideoCaption?: string;
 
   // 23. New Modular Homepage Design Configurations & Section Controls
   newSectionVisibility?: NewHomepageSectionVisibility;
