@@ -10,6 +10,9 @@ interface UniqueItFooterProps {
   onOpenPolicyModal?: (policy: 'terms' | 'privacy') => void;
   courses?: Course[];
   instituteName?: string;
+  brandPrimary?: string;
+  brandAccent?: string;
+  brandSubline?: string;
   officialAddress?: string;
   officialEmail?: string;
   primaryPhone?: string;
@@ -25,6 +28,9 @@ export const NexgenFooter: React.FC<UniqueItFooterProps> = ({
   onOpenPolicyModal,
   courses,
   instituteName = 'NexGen Computer Academy',
+  brandPrimary = 'NexGen',
+  brandAccent = 'Computer Academy',
+  brandSubline = 'Computer Training Institute',
   officialAddress = 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215',
   officialEmail = 'info@nexgenacademy.edu.bd',
   primaryPhone = '01798444444',
@@ -36,14 +42,16 @@ export const NexgenFooter: React.FC<UniqueItFooterProps> = ({
   const nagadNumber = paymentMerchantsConfig?.nagadNumber || '01795077536';
   const rocketNumber = paymentMerchantsConfig?.rocketNumber || '01795077536';
   const sslcommerzNote = paymentMerchantsConfig?.sslcommerzNote || 'Cards & Net Banking';
-  const popularCourses = [
-    'Graphic Design with AI Online Course',
-    'Digital Marketing Online Course',
-    'Microsoft Office Application Course Online',
-    'Professional UI/UX Design Course Online',
-    'Professional Video Editing Course Online | Beginner to Pro',
-    'AutoCAD 2D Course Online'
-  ];
+  const popularCourses = courses && courses.length > 0
+    ? courses.slice(0, 6).map(c => c.name)
+    : [
+        'Graphic Design with AI Online Course',
+        'Digital Marketing Online Course',
+        'Microsoft Office Application Course Online',
+        'Professional UI/UX Design Course Online',
+        'Professional Video Editing Course Online | Beginner to Pro',
+        'AutoCAD 2D Course Online'
+      ];
 
   return (
     <footer className="bg-[#081a38] text-slate-300 text-xs">
@@ -248,33 +256,99 @@ export const NexgenFooter: React.FC<UniqueItFooterProps> = ({
       {/* Payment Merchants Strip */}
       <div className="bg-[#051329] border-y border-slate-800/80 py-8">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-4">
-          <h4 className="text-center text-white font-black text-xs uppercase tracking-widest">
-            Our Payment Merchant
-          </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {/* bKash */}
-            <div className="bg-white rounded-xl p-3 text-center border border-slate-700 flex flex-col items-center justify-center space-y-1">
-              <span className="text-pink-600 font-black text-sm tracking-wide">bKash</span>
-              <span className="text-[10px] text-slate-800 font-mono font-bold">{bkashNumber}</span>
-            </div>
+          <div className="text-center space-y-1">
+            <h4 className="text-white font-black text-sm uppercase tracking-widest">
+              {paymentMerchantsConfig?.sectionTitle || 'Make Payment'}
+            </h4>
+            {paymentMerchantsConfig?.sectionSubtitle && (
+              <p className="text-[11px] text-slate-400 max-w-xl mx-auto">
+                {paymentMerchantsConfig.sectionSubtitle}
+              </p>
+            )}
+          </div>
 
-            {/* Nagad */}
-            <div className="bg-white rounded-xl p-3 text-center border border-slate-700 flex flex-col items-center justify-center space-y-1">
-              <span className="text-orange-600 font-black text-sm tracking-wide">নগদ</span>
-              <span className="text-[10px] text-slate-800 font-mono font-bold">{nagadNumber}</span>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {paymentMerchantsConfig?.merchants && paymentMerchantsConfig.merchants.length > 0 ? (
+              paymentMerchantsConfig.merchants
+                .filter(m => m.isActive !== false)
+                .map((m) => {
+                  const isMakePayment = m.type === 'make_payment';
+                  const isSendMoney = m.type === 'send_money';
+                  const typeLabel = isMakePayment ? 'Make Payment' : isSendMoney ? 'Send Money' : 'Merchant';
+                  const badgeStyle = isMakePayment
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    : isSendMoney
+                    ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                    : 'bg-purple-500/20 text-purple-300 border-purple-500/40';
 
-            {/* Rocket */}
-            <div className="bg-white rounded-xl p-3 text-center border border-slate-700 flex flex-col items-center justify-center space-y-1">
-              <span className="text-purple-700 font-black text-sm tracking-wide">Rocket</span>
-              <span className="text-[10px] text-slate-800 font-mono font-bold">{rocketNumber}</span>
-            </div>
+                  return (
+                    <div
+                      key={m.id}
+                      className="bg-slate-900/90 rounded-2xl p-4 text-center border border-slate-700/80 flex flex-col items-center justify-between space-y-2 hover:border-slate-500 transition-colors shadow-sm"
+                    >
+                      <div className="space-y-1 w-full">
+                        <span className="text-white font-black text-sm block truncate">{m.provider}</span>
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${badgeStyle}`}>
+                          {typeLabel}
+                        </span>
+                      </div>
+                      <div className="space-y-0.5 w-full">
+                        <span className="text-xs text-amber-300 font-mono font-bold block select-all">
+                          {m.accountNumber}
+                        </span>
+                        {m.note && (
+                          <span className="text-[10px] text-slate-400 block truncate" title={m.note}>
+                            {m.note}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+            ) : (
+              <>
+                {/* Fallback standard 4 cards with Make Payment badge */}
+                <div className="bg-slate-900/90 rounded-2xl p-4 text-center border border-slate-700/80 flex flex-col items-center justify-between space-y-2">
+                  <div className="space-y-1">
+                    <span className="text-pink-400 font-black text-sm block">bKash</span>
+                    <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                      Make Payment
+                    </span>
+                  </div>
+                  <span className="text-xs text-amber-300 font-mono font-bold block select-all">{bkashNumber}</span>
+                </div>
 
-            {/* SSLCommerz */}
-            <div className="bg-white rounded-xl p-3 text-center border border-slate-700 flex flex-col items-center justify-center space-y-1">
-              <span className="text-blue-700 font-black text-sm tracking-wide">sslcommerz</span>
-              <span className="text-[10px] text-slate-500 font-bold">{sslcommerzNote}</span>
-            </div>
+                <div className="bg-slate-900/90 rounded-2xl p-4 text-center border border-slate-700/80 flex flex-col items-center justify-between space-y-2">
+                  <div className="space-y-1">
+                    <span className="text-orange-400 font-black text-sm block">নগদ (Nagad)</span>
+                    <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                      Make Payment
+                    </span>
+                  </div>
+                  <span className="text-xs text-amber-300 font-mono font-bold block select-all">{nagadNumber}</span>
+                </div>
+
+                <div className="bg-slate-900/90 rounded-2xl p-4 text-center border border-slate-700/80 flex flex-col items-center justify-between space-y-2">
+                  <div className="space-y-1">
+                    <span className="text-purple-400 font-black text-sm block">Rocket</span>
+                    <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                      Make Payment
+                    </span>
+                  </div>
+                  <span className="text-xs text-amber-300 font-mono font-bold block select-all">{rocketNumber}</span>
+                </div>
+
+                <div className="bg-slate-900/90 rounded-2xl p-4 text-center border border-slate-700/80 flex flex-col items-center justify-between space-y-2">
+                  <div className="space-y-1">
+                    <span className="text-blue-400 font-black text-sm block">sslcommerz</span>
+                    <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border bg-purple-500/20 text-purple-300 border-purple-500/40">
+                      Merchant
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-300 font-bold block">{sslcommerzNote}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -287,11 +361,11 @@ export const NexgenFooter: React.FC<UniqueItFooterProps> = ({
             <NexgenLogo variant="crest" size={32} className="shrink-0" isDarkTheme />
             <div className="flex flex-col">
               <div className="flex items-center">
-                <span className="text-lg font-black text-white tracking-tight leading-none">NexGen</span>
-                <span className="text-lg font-black text-[#dc143c] ml-1 leading-none">Academy</span>
+                <span className="text-lg font-black text-white tracking-tight leading-none">{brandPrimary}</span>
+                <span className="text-lg font-black text-[#dc143c] ml-1 leading-none">{brandAccent}</span>
               </div>
               <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">
-                Computer Training Institute
+                {brandSubline}
               </span>
             </div>
           </div>

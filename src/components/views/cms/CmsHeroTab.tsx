@@ -31,6 +31,7 @@ import { ImageUploadCropModal } from '../../common/ImageUploadCropModal';
 import { NexgenLogo } from '../../common/NexgenLogo';
 import { HeroBannerEditor } from '../../cms/HeroBannerEditor';
 import { isDirectVideo, formatMediaEmbedUrl } from '../../../utils/seoHelper';
+import { saveVideoBlob, getVideoBlobUrl, deleteVideoBlob, getVideoMeta } from '../../../utils/videoStorage';
 
 interface CmsHeroTabProps {
   onSuccessToast: (msg: string) => void;
@@ -55,6 +56,9 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
 
   // Top Header Brand Bar States
   const [headerBrandName, setHeaderBrandName] = useState(academySettings.instituteName || 'NexGen Computer Academy');
+  const [brandPrimary, setBrandPrimary] = useState(websiteCmsConfig.brandPrimary || 'NexGen');
+  const [brandAccent, setBrandAccent] = useState(websiteCmsConfig.brandAccent || 'Computer Academy');
+  const [brandSubline, setBrandSubline] = useState(websiteCmsConfig.brandSubline || websiteCmsConfig.headerSubtitle || 'Computer Training Institute');
   const [headerSubtitle, setHeaderSubtitle] = useState(
     websiteCmsConfig.headerSubtitle || `${academySettings.campusName || 'Farmgate Campus'} • Govt. Standard IT Training & Career Incubator`
   );
@@ -69,13 +73,36 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   // Video Upload & Direct Media States
   const videoFileInputRef = useRef<HTMLInputElement>(null);
   const [videoSourceType, setVideoSourceType] = useState<'youtube' | 'upload'>(
-    isDirectVideo(websiteCmsConfig.heroVideoUrl || '') ? 'upload' : 'youtube'
+    isDirectVideo(websiteCmsConfig.heroVideoUrl || '') || websiteCmsConfig.heroVideoUrl?.startsWith('indexeddb:') ? 'upload' : 'youtube'
   );
   const [videoUploadError, setVideoUploadError] = useState<string | null>(null);
   const [isProcessingVideo, setIsProcessingVideo] = useState(false);
   const [videoFileMeta, setVideoFileMeta] = useState<{ name: string; sizeMb: string } | null>(null);
+  const [localVideoPreviewUrl, setLocalVideoPreviewUrl] = useState<string | null>(null);
 
-  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Resolve stored video blob on mount
+  useEffect(() => {
+    let active = true;
+    const url = websiteCmsConfig.heroVideoUrl || '';
+    if (url.startsWith('indexeddb:')) {
+      getVideoBlobUrl(url).then(blobUrl => {
+        if (active && blobUrl) {
+          setLocalVideoPreviewUrl(blobUrl);
+          getVideoMeta(url).then(meta => {
+            if (active && meta) {
+              setVideoFileMeta({ name: meta.name, sizeMb: meta.sizeMb.toFixed(1) });
+              setVideoSourceType('upload');
+            }
+          });
+        }
+      });
+    }
+    return () => {
+      active = false;
+    };
+  }, [websiteCmsConfig.heroVideoUrl]);
+
+  const handleVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -87,20 +114,25 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     }
 
     const sizeInMb = file.size / (1024 * 1024);
-    if (sizeInMb > 60) {
-      setVideoUploadError(`ভিডিও ফাইলটির সাইজ (${sizeInMb.toFixed(1)}MB) অনেক বড়। দ্রুত পারফরম্যান্স ও লোডিং স্পিডের জন্য ৬০ মেগাবাইটের কম সাইজের ভিডিও আপলোড করুন।`);
+    if (sizeInMb > 50) {
+      setVideoUploadError(`ভিডিও ফাইলটির সাইজ (${sizeInMb.toFixed(1)}MB) অনেক বড়। মসৃণ ও দ্রুত পারফরম্যান্সের জন্য ৫০ মেগাবাইটের কম সাইজের ভিডিও আপলোড করুন, অথবা বড় ভিডিওর ক্ষেত্রে YouTube লিংক ব্যবহার করুন।`);
       return;
     }
 
     setIsProcessingVideo(true);
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
+    try {
+      // Revoke previous object url to prevent memory leaks
+      if (localVideoPreviewUrl) {
+        URL.revokeObjectURL(localVideoPreviewUrl);
+      }
+      // Store into asynchronous IndexedDB blob store: zero localStorage explosion, zero browser freeze!
+      const key = await saveVideoBlob('hero-video', file, file.name);
+      const previewUrl = URL.createObjectURL(file);
       hasUserEditedRef.current = true;
+      setLocalVideoPreviewUrl(previewUrl);
       setFormData(prev => ({
         ...prev,
-        heroVideoUrl: dataUrl
+        heroVideoUrl: key
       }));
       setVideoFileMeta({
         name: file.name,
@@ -108,19 +140,20 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       });
       setVideoSourceType('upload');
       setIsProcessingVideo(false);
-      onSuccessToast(`ভিডিও সফলভাবে লোড হয়েছে: ${file.name} (${sizeInMb.toFixed(1)} MB)`);
-    };
-
-    reader.onerror = () => {
+      onSuccessToast(`ভিডিও সফলভাবে সংরক্ষিত হয়েছে: ${file.name} (${sizeInMb.toFixed(1)} MB)। মেমরি অপটিমাইজড ও ব্রাউজার ফাস্ট থাকবে!`);
+    } catch (err: any) {
       setIsProcessingVideo(false);
-      setVideoUploadError('ভিডিও ফাইলটি পড়তে ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
-    };
-
-    reader.readAsDataURL(file);
+      setVideoUploadError('ভিডিও ফাইলটি সেভ করতে সমস্যা হয়েছে: ' + (err?.message || 'Error'));
+    }
   };
 
-  const handleRemoveUploadedVideo = () => {
+  const handleRemoveUploadedVideo = async () => {
     hasUserEditedRef.current = true;
+    await deleteVideoBlob('hero-video');
+    if (localVideoPreviewUrl) {
+      URL.revokeObjectURL(localVideoPreviewUrl);
+      setLocalVideoPreviewUrl(null);
+    }
     setFormData(prev => ({
       ...prev,
       heroVideoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8'
@@ -150,16 +183,21 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
 
   const handleSaveHeaderBrand = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (headerBrandName.trim() && headerBrandName !== academySettings.instituteName) {
-      updateAcademySettings({ instituteName: headerBrandName.trim() });
+    const resolvedFullName = `${brandPrimary.trim()} ${brandAccent.trim()}`.trim();
+    if (resolvedFullName) {
+      updateAcademySettings({ instituteName: resolvedFullName });
+      setHeaderBrandName(resolvedFullName);
     }
     updateWebsiteCmsConfig({
-      headerSubtitle: headerSubtitle.trim(),
+      brandPrimary: brandPrimary.trim(),
+      brandAccent: brandAccent.trim(),
+      brandSubline: brandSubline.trim(),
+      headerSubtitle: brandSubline.trim() || headerSubtitle.trim(),
       headerEstText: headerEstText.trim()
     });
     setBrandSavedFeedback(true);
     setTimeout(() => setBrandSavedFeedback(false), 3000);
-    onSuccessToast('হেডার ব্র্যান্ড, লোগো ও ক্যাম্পাস স্লোগান সফলভাবে সংরক্ষিত হয়েছে!');
+    onSuccessToast('হেডার ও ফুটার ব্র্যান্ডিং (NexGen Computer Academy & Computer Training Institute) সফলভাবে সংরক্ষিত হয়েছে!');
   };
 
   const [formData, setFormData] = useState({
@@ -253,12 +291,17 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
           ]
         : slides;
 
-    if (headerBrandName.trim() && headerBrandName !== academySettings.instituteName) {
-      updateAcademySettings({ instituteName: headerBrandName.trim() });
+    const resolvedFullName = `${brandPrimary.trim()} ${brandAccent.trim()}`.trim();
+    if (resolvedFullName) {
+      updateAcademySettings({ instituteName: resolvedFullName });
+      setHeaderBrandName(resolvedFullName);
     }
 
     updateWebsiteCmsConfig({
-      headerSubtitle: headerSubtitle.trim(),
+      brandPrimary: brandPrimary.trim(),
+      brandAccent: brandAccent.trim(),
+      brandSubline: brandSubline.trim(),
+      headerSubtitle: brandSubline.trim() || headerSubtitle.trim(),
       headerEstText: headerEstText.trim(),
       heroHeadline: formData.heroHeadline,
       heroSubtitle: formData.heroSubtitle,
@@ -570,7 +613,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                     className="hidden"
                   />
 
-                  {formData.heroVideoUrl.startsWith('data:video') || isDirectVideo(formData.heroVideoUrl) ? (
+                  {formData.heroVideoUrl.startsWith('data:video') || isDirectVideo(formData.heroVideoUrl) || formData.heroVideoUrl.startsWith('indexeddb:') ? (
                     <div className="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-2xl space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
@@ -608,11 +651,18 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
 
                       {/* Small inline player */}
                       <div className="rounded-xl overflow-hidden border border-indigo-200 bg-black aspect-video max-h-44 flex items-center justify-center">
-                        <video
-                          src={formData.heroVideoUrl}
-                          controls
-                          className="w-full h-full object-contain"
-                        />
+                        {localVideoPreviewUrl ? (
+                          <video
+                            src={localVideoPreviewUrl}
+                            controls
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <div className="text-center p-4 text-slate-400 text-xs flex flex-col items-center justify-center space-y-2">
+                            <div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                            <span>ভিডিও লোড হচ্ছে...</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -868,29 +918,47 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         </div>
 
         {/* Direct Input Fields Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-          {/* 1. Institute Name */}
-          <div className="md:col-span-2 space-y-1">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-1">
+          {/* Brand Primary Name */}
+          <div className="md:col-span-4 space-y-1">
             <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
-              <span>১. প্রতিষ্ঠানের নাম (Institute Brand Name)</span>
-              <span className="text-[10px] text-indigo-600 font-semibold">ওয়েবসাইট ও সার্টিফিকেটে ব্যবহৃত</span>
+              <span>১. ব্র্যান্ড মূল নাম (Primary Brand Name)</span>
+              <span className="text-[10px] text-slate-500">কালো রঙের বোল্ড টেক্সট</span>
             </label>
             <input
               type="text"
-              value={headerBrandName}
+              value={brandPrimary}
               onChange={e => {
                 hasUserEditedRef.current = true;
-                setHeaderBrandName(e.target.value);
+                setBrandPrimary(e.target.value);
               }}
-              placeholder="যেমন: NexGen Computer Academy"
+              placeholder="e.g. NexGen"
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
             />
           </div>
 
-          {/* 2. Established Badge */}
-          <div className="space-y-1">
+          {/* Brand Accent Name */}
+          <div className="md:col-span-4 space-y-1">
             <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
-              <span>২. প্রতিষ্ঠার সাল ব্যাজ</span>
+              <span>২. ব্র্যান্ড হাইলাইট শব্দ (Brand Accent)</span>
+              <span className="text-[10px] text-[#dc143c] font-bold">লাল রঙের হাইলাইট টেক্সট</span>
+            </label>
+            <input
+              type="text"
+              value={brandAccent}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setBrandAccent(e.target.value);
+              }}
+              placeholder="e.g. Computer Academy"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-rose-200 rounded-xl font-black text-[#dc143c] text-xs focus:bg-white focus:ring-2 focus:ring-rose-500 outline-none"
+            />
+          </div>
+
+          {/* Established Badge */}
+          <div className="md:col-span-4 space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>৩. প্রতিষ্ঠার সাল ব্যাজ</span>
               <span className="text-[10px] text-slate-400 font-mono">EST. 2018</span>
             </label>
             <input
@@ -905,22 +973,41 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
             />
           </div>
 
-          {/* 3. Header Subtitle / Campus Tagline */}
-          <div className="md:col-span-3 space-y-1">
+          {/* Header & Footer Subline / Slogan */}
+          <div className="md:col-span-8 space-y-1">
             <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
-              <span>৩. ক্যাম্পাস ও স্লোগান সাবটাইটেল (Header Subtitle / Tagline)</span>
-              <span className="text-[10px] text-slate-500">নামের ঠিক নিচে ছোট অক্ষরে প্রদর্শিত হয়</span>
+              <span>৪. হেডার ও ফুটার সাবলাইন স্লোগান (Subline / Tagline)</span>
+              <span className="text-[10px] text-indigo-600 font-bold">লোগোর ঠিক নিচে প্রদর্শিত হয়</span>
             </label>
             <input
               type="text"
-              value={headerSubtitle}
+              value={brandSubline}
               onChange={e => {
                 hasUserEditedRef.current = true;
-                setHeaderSubtitle(e.target.value);
+                setBrandSubline(e.target.value);
               }}
-              placeholder="e.g. Farmgate Campus • Govt. Standard IT Training & Career Incubator"
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+              placeholder="e.g. COMPUTER TRAINING INSTITUTE"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
             />
+          </div>
+
+          {/* Live Preview Box */}
+          <div className="md:col-span-4 bg-slate-50 rounded-2xl p-3 border border-slate-200 flex flex-col justify-center">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+              লাইভ লোগো প্রিভিউ (Header & Footer)
+            </span>
+            <div className="flex items-center space-x-2">
+              <NexgenLogo variant="crest" size={28} className="shrink-0" />
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <span className="text-sm font-black text-slate-900 leading-none">{brandPrimary || 'NexGen'}</span>
+                  <span className="text-sm font-black text-[#dc143c] ml-1 leading-none">{brandAccent || 'Computer Academy'}</span>
+                </div>
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5">
+                  {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1064,9 +1151,9 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
             </div>
             <div className="aspect-video w-full bg-black">
               {formData.heroVideoUrl ? (
-                isDirectVideo(formData.heroVideoUrl) ? (
+                isDirectVideo(formData.heroVideoUrl) || formData.heroVideoUrl.startsWith('indexeddb:') || formData.heroVideoUrl.startsWith('blob:') ? (
                   <video
-                    src={formData.heroVideoUrl}
+                    src={localVideoPreviewUrl || formData.heroVideoUrl}
                     controls
                     autoPlay
                     className="w-full h-full object-contain"

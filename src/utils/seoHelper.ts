@@ -729,6 +729,7 @@ export function isDirectVideo(url?: string): boolean {
   return (
     s.startsWith('data:video') ||
     s.startsWith('blob:') ||
+    s.startsWith('indexeddb:') ||
     /\.(mp4|webm|ogg|mov)($|\?)/i.test(s)
   );
 }

@@ -10,7 +10,9 @@ import {
   NewsletterCtaCmsConfig,
   SnakeCtaCmsConfig,
   AdmissionBannerCmsConfig,
-  PaymentMerchantsCmsConfig
+  PaymentMerchantsCmsConfig,
+  PaymentMerchantItem,
+  PaymentMethodType
 } from '../../../types';
 import {
   Sliders,
@@ -946,20 +948,23 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
       </div>
 
       {/* 6. PAYMENT MERCHANTS STRIP IN FOOTER */}
-      <div id="sec-merchants" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+      <div id="sec-merchants" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <div className="flex items-center space-x-2">
               <span className="px-2.5 py-0.5 rounded-lg bg-teal-100 text-teal-800 text-[10px] font-black uppercase tracking-wider">
-                Footer Strip #17
+                Footer Strip #17 • Payment Gateway & Make Payment
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                ✓ লাইভ ফুটারে সক্রিয়
               </span>
             </div>
             <h3 className="font-black text-slate-900 text-lg flex items-center space-x-2 mt-1">
               <CreditCard className="w-5 h-5 text-teal-600" />
-              <span>Payment Merchants Strip in Footer (ফুটার মার্চেন্ট ও পেমেন্ট নম্বর)</span>
+              <span>Make Payment & Payment Methods (ফুটার পেমেন্ট ও মার্চেন্ট অপশন)</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              ওয়েবসাইটের একদম নিচে প্রদর্শিত বিকাশ, নগদ, রকেট মার্চেন্ট নম্বর ও কার্ড পেমেন্ট নোট এডিট করুন।
+              ওয়েবসাইটের ফুটারে মেক পেমেন্ট, সেন্ড মানি ও মার্চেন্ট নম্বর ডাইনামিকভাবে এডিট, নতুন মেথড যোগ ও ড্রপডাউন পরিবর্তন করুন।
             </p>
           </div>
           <button
@@ -968,57 +973,311 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
             className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all self-start sm:self-auto cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
-            <span>মার্চেন্ট সেভ করুন</span>
+            <span>পেমেন্ট সেটিংস সেভ করুন</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* bKash */}
-          <div className="p-3.5 rounded-2xl bg-pink-50 border border-pink-200 space-y-1.5">
-            <span className="text-pink-600 font-black text-sm block">bKash Merchant</span>
+        {/* Section Heading & Subtitle */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-teal-50/50 rounded-2xl border border-teal-100">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>পেমেন্ট সেকশন শিরোনাম (Section Title)</span>
+              <span className="text-[10px] text-teal-700 font-bold">ডিফল্ট: Make Payment</span>
+            </label>
             <input
               type="text"
-              value={paymentMerchants.bkashNumber || ''}
-              onChange={e => onChangePaymentMerchants({ ...paymentMerchants, bkashNumber: e.target.value })}
-              placeholder="01795077536"
-              className="w-full p-2 bg-white border border-pink-300 rounded-xl text-xs font-mono font-bold text-slate-900"
+              value={paymentMerchants.sectionTitle ?? 'Make Payment'}
+              onChange={e => onChangePaymentMerchants({ ...paymentMerchants, sectionTitle: e.target.value })}
+              placeholder="e.g. Make Payment বা Our Payment Merchant"
+              className="w-full p-2 bg-white border border-teal-200 rounded-xl text-xs font-bold text-slate-900"
             />
           </div>
 
-          {/* Nagad */}
-          <div className="p-3.5 rounded-2xl bg-orange-50 border border-orange-200 space-y-1.5">
-            <span className="text-orange-600 font-black text-sm block">নগদ মার্চেন্ট</span>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>সাবটাইটেল / নির্দেশনামূলক টেক্সট</span>
+              <span className="text-[10px] text-slate-500">ঐচ্ছিক</span>
+            </label>
             <input
               type="text"
-              value={paymentMerchants.nagadNumber || ''}
-              onChange={e => onChangePaymentMerchants({ ...paymentMerchants, nagadNumber: e.target.value })}
-              placeholder="01795077536"
-              className="w-full p-2 bg-white border border-orange-300 rounded-xl text-xs font-mono font-bold text-slate-900"
+              value={paymentMerchants.sectionSubtitle || ''}
+              onChange={e => onChangePaymentMerchants({ ...paymentMerchants, sectionSubtitle: e.target.value })}
+              placeholder="আমাদের যেকোনো অফিশিয়াল মার্চেন্ট বা পেমেন্ট মাধ্যমে সরাসরি ফি পরিশোধ করুন"
+              className="w-full p-2 bg-white border border-teal-200 rounded-xl text-xs font-medium text-slate-800"
             />
           </div>
+        </div>
 
-          {/* Rocket */}
-          <div className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 space-y-1.5">
-            <span className="text-purple-700 font-black text-sm block">Rocket Merchant</span>
-            <input
-              type="text"
-              value={paymentMerchants.rocketNumber || ''}
-              onChange={e => onChangePaymentMerchants({ ...paymentMerchants, rocketNumber: e.target.value })}
-              placeholder="01795077536"
-              className="w-full p-2 bg-white border border-purple-300 rounded-xl text-xs font-mono font-bold text-slate-900"
-            />
+        {/* Payment Methods List */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+              <span>পেমেন্ট মেথড তালিকা (Payment Methods List)</span>
+              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">
+                {(paymentMerchants.merchants && paymentMerchants.merchants.length > 0
+                  ? paymentMerchants.merchants
+                  : [1, 2, 3, 4]
+                ).length} টি মেথড
+              </span>
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                const currentList: PaymentMerchantItem[] =
+                  paymentMerchants.merchants && paymentMerchants.merchants.length > 0
+                    ? [...paymentMerchants.merchants]
+                    : [
+                        {
+                          id: 'pm-1',
+                          provider: 'bKash',
+                          type: paymentMerchants.bkashType || 'make_payment',
+                          accountNumber: paymentMerchants.bkashNumber || '01795077536',
+                          note: 'Select "Make Payment" in bKash App',
+                          isActive: true
+                        },
+                        {
+                          id: 'pm-2',
+                          provider: 'নগদ (Nagad)',
+                          type: paymentMerchants.nagadType || 'make_payment',
+                          accountNumber: paymentMerchants.nagadNumber || '01795077536',
+                          note: 'Select "Make Payment"',
+                          isActive: true
+                        },
+                        {
+                          id: 'pm-3',
+                          provider: 'Rocket',
+                          type: paymentMerchants.rocketType || 'make_payment',
+                          accountNumber: paymentMerchants.rocketNumber || '01795077536',
+                          note: 'Select "Make Payment"',
+                          isActive: true
+                        },
+                        {
+                          id: 'pm-4',
+                          provider: 'sslcommerz',
+                          type: 'merchant',
+                          accountNumber: 'Cards & Net Banking',
+                          note: paymentMerchants.sslcommerzNote || 'Instant Online Gateway',
+                          isActive: true
+                        }
+                      ];
+
+                currentList.push({
+                  id: 'pm-' + Date.now(),
+                  provider: 'New Payment Method',
+                  type: 'make_payment',
+                  accountNumber: '017XXXXXXXX',
+                  note: 'Make Payment',
+                  isActive: true
+                });
+
+                onChangePaymentMerchants({
+                  ...paymentMerchants,
+                  merchants: currentList
+                });
+              }}
+              className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ নতুন পেমেন্ট মেথড যোগ করুন</span>
+            </button>
           </div>
 
-          {/* SSLCommerz */}
-          <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 space-y-1.5">
-            <span className="text-blue-700 font-black text-sm block">SSLCommerz / Cards</span>
-            <input
-              type="text"
-              value={paymentMerchants.sslcommerzNote || ''}
-              onChange={e => onChangePaymentMerchants({ ...paymentMerchants, sslcommerzNote: e.target.value })}
-              placeholder="Cards & Net Banking"
-              className="w-full p-2 bg-white border border-blue-300 rounded-xl text-xs font-bold text-slate-900"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {(paymentMerchants.merchants && paymentMerchants.merchants.length > 0
+              ? paymentMerchants.merchants
+              : [
+                  {
+                    id: 'pm-1',
+                    provider: 'bKash',
+                    type: (paymentMerchants.bkashType || 'make_payment') as PaymentMethodType,
+                    accountNumber: paymentMerchants.bkashNumber || '01795077536',
+                    note: 'Select "Make Payment" in bKash App',
+                    isActive: true
+                  },
+                  {
+                    id: 'pm-2',
+                    provider: 'নগদ (Nagad)',
+                    type: (paymentMerchants.nagadType || 'make_payment') as PaymentMethodType,
+                    accountNumber: paymentMerchants.nagadNumber || '01795077536',
+                    note: 'Select "Make Payment"',
+                    isActive: true
+                  },
+                  {
+                    id: 'pm-3',
+                    provider: 'Rocket',
+                    type: (paymentMerchants.rocketType || 'make_payment') as PaymentMethodType,
+                    accountNumber: paymentMerchants.rocketNumber || '01795077536',
+                    note: 'Select "Make Payment"',
+                    isActive: true
+                  },
+                  {
+                    id: 'pm-4',
+                    provider: 'sslcommerz',
+                    type: 'merchant' as PaymentMethodType,
+                    accountNumber: 'Cards & Net Banking',
+                    note: paymentMerchants.sslcommerzNote || 'Instant Online Gateway',
+                    isActive: true
+                  }
+                ]
+            ).map((item, idx) => {
+              const currentList: PaymentMerchantItem[] =
+                paymentMerchants.merchants && paymentMerchants.merchants.length > 0
+                  ? [...paymentMerchants.merchants]
+                  : [
+                      {
+                        id: 'pm-1',
+                        provider: 'bKash',
+                        type: (paymentMerchants.bkashType || 'make_payment') as PaymentMethodType,
+                        accountNumber: paymentMerchants.bkashNumber || '01795077536',
+                        note: 'Select "Make Payment" in bKash App',
+                        isActive: true
+                      },
+                      {
+                        id: 'pm-2',
+                        provider: 'নগদ (Nagad)',
+                        type: (paymentMerchants.nagadType || 'make_payment') as PaymentMethodType,
+                        accountNumber: paymentMerchants.nagadNumber || '01795077536',
+                        note: 'Select "Make Payment"',
+                        isActive: true
+                      },
+                      {
+                        id: 'pm-3',
+                        provider: 'Rocket',
+                        type: (paymentMerchants.rocketType || 'make_payment') as PaymentMethodType,
+                        accountNumber: paymentMerchants.rocketNumber || '01795077536',
+                        note: 'Select "Make Payment"',
+                        isActive: true
+                      },
+                      {
+                        id: 'pm-4',
+                        provider: 'sslcommerz',
+                        type: 'merchant' as PaymentMethodType,
+                        accountNumber: 'Cards & Net Banking',
+                        note: paymentMerchants.sslcommerzNote || 'Instant Online Gateway',
+                        isActive: true
+                      }
+                    ];
+
+              const updateItem = (updates: Partial<PaymentMerchantItem>) => {
+                currentList[idx] = { ...currentList[idx], ...updates };
+                // Keep backward compatible fields updated
+                const bKashObj = currentList.find(m => m.provider.toLowerCase().includes('bkash'));
+                const nagadObj = currentList.find(m => m.provider.toLowerCase().includes('nagad') || m.provider.includes('নগদ'));
+                const rocketObj = currentList.find(m => m.provider.toLowerCase().includes('rocket') || m.provider.includes('রকেট'));
+                const sslObj = currentList.find(m => m.provider.toLowerCase().includes('ssl'));
+
+                onChangePaymentMerchants({
+                  ...paymentMerchants,
+                  merchants: currentList,
+                  bkashNumber: bKashObj?.accountNumber || paymentMerchants.bkashNumber,
+                  bkashType: bKashObj?.type || paymentMerchants.bkashType,
+                  nagadNumber: nagadObj?.accountNumber || paymentMerchants.nagadNumber,
+                  nagadType: nagadObj?.type || paymentMerchants.nagadType,
+                  rocketNumber: rocketObj?.accountNumber || paymentMerchants.rocketNumber,
+                  rocketType: rocketObj?.type || paymentMerchants.rocketType,
+                  sslcommerzNote: sslObj?.accountNumber || paymentMerchants.sslcommerzNote
+                });
+              };
+
+              const removeItem = () => {
+                const filtered = currentList.filter((_, i) => i !== idx);
+                onChangePaymentMerchants({
+                  ...paymentMerchants,
+                  merchants: filtered
+                });
+              };
+
+              return (
+                <div
+                  key={item.id || idx}
+                  className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2.5 flex flex-col justify-between"
+                >
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                      পেমেন্ট মাধ্যম #{idx + 1}
+                    </span>
+                    <div className="flex items-center space-x-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 flex items-center space-x-1 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={item.isActive !== false}
+                          onChange={e => updateItem({ isActive: e.target.checked })}
+                          className="rounded text-teal-600 focus:ring-teal-500 w-3.5 h-3.5"
+                        />
+                        <span>{item.isActive !== false ? 'সক্রিয়' : 'বন্ধ'}</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={removeItem}
+                        className="text-slate-400 hover:text-rose-600 p-1 transition-colors cursor-pointer"
+                        title="এই পেমেন্ট মাধ্যমটি ডিলিট করুন"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Provider Name */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700 block">
+                      প্রোভাইডারের নাম (Provider Name)
+                    </label>
+                    <input
+                      type="text"
+                      value={item.provider}
+                      onChange={e => updateItem({ provider: e.target.value })}
+                      placeholder="e.g. bKash / নগদ / Rocket"
+                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                    />
+                  </div>
+
+                  {/* Dropdown for Type: make_payment / send_money / merchant */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700 block">
+                      পেমেন্ট টাইপ (Payment Type)
+                    </label>
+                    <select
+                      value={item.type || 'make_payment'}
+                      onChange={e => updateItem({ type: e.target.value as PaymentMethodType })}
+                      className="w-full p-2 bg-white border border-teal-300 rounded-xl text-xs font-bold text-teal-900 focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
+                    >
+                      <option value="make_payment">✓ Make Payment (মেক পেমেন্ট)</option>
+                      <option value="send_money">💸 Send Money (সেন্ড মানি - পার্সোনাল)</option>
+                      <option value="merchant">🏢 Merchant (মার্চেন্ট অ্যাকাউন্ট)</option>
+                    </select>
+                  </div>
+
+                  {/* Account Number */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700 block">
+                      হিসাব / মার্চেন্ট নম্বর (Account Number)
+                    </label>
+                    <input
+                      type="text"
+                      value={item.accountNumber}
+                      onChange={e => updateItem({ accountNumber: e.target.value })}
+                      placeholder="e.g. 01795077536"
+                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900"
+                    />
+                  </div>
+
+                  {/* Note / Instruction */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 block">
+                      সংক্ষিপ্ত নোট / নির্দেশনা (Note)
+                    </label>
+                    <input
+                      type="text"
+                      value={item.note || ''}
+                      onChange={e => updateItem({ note: e.target.value })}
+                      placeholder="e.g. Select Make Payment in App"
+                      className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-medium text-slate-600"
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

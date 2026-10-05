@@ -1387,12 +1387,60 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
   },
 
   paymentMerchantsConfig: {
+    sectionTitle: 'Make Payment',
+    sectionSubtitle: 'আমাদের যেকোনো অফিশিয়াল মার্চেন্ট বা পেমেন্ট মাধ্যমে সরাসরি ভর্তি ফি ও কোর্স ফি পরিশোধ করুন।',
+    merchants: [
+      {
+        id: 'pm-1',
+        provider: 'bKash',
+        type: 'make_payment',
+        accountNumber: '01795077536',
+        accountName: 'NexGen Computer Academy',
+        note: 'Select "Make Payment" in bKash App',
+        isActive: true
+      },
+      {
+        id: 'pm-2',
+        provider: 'নগদ (Nagad)',
+        type: 'make_payment',
+        accountNumber: '01795077536',
+        accountName: 'NexGen Computer Academy',
+        note: 'Select "Merchant Pay / Make Payment"',
+        isActive: true
+      },
+      {
+        id: 'pm-3',
+        provider: 'Rocket',
+        type: 'make_payment',
+        accountNumber: '01795077536',
+        accountName: 'NexGen Computer Academy',
+        note: 'Biller Code / Make Payment',
+        isActive: true
+      },
+      {
+        id: 'pm-4',
+        provider: 'sslcommerz',
+        type: 'merchant',
+        accountNumber: 'Cards & Net Banking',
+        accountName: 'Visa, Mastercard, Amex, MFS',
+        note: 'Instant Online Gateway',
+        isActive: true
+      }
+    ],
     bkashNumber: '01795077536',
+    bkashType: 'make_payment',
     nagadNumber: '01795077536',
+    nagadType: 'make_payment',
     rocketNumber: '01795077536',
+    rocketType: 'make_payment',
     upayNumber: '01795077536',
+    upayType: 'make_payment',
     sslcommerzNote: 'Cards & Internet Banking'
-  }
+  },
+
+  brandPrimary: 'NexGen',
+  brandAccent: 'Computer Academy',
+  brandSubline: 'Computer Training Institute'
 };
 
 export const INITIAL_WEBSITE_BLOGS: WebsiteBlogPost[] = [

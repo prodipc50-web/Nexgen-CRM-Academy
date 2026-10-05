@@ -5,6 +5,9 @@ import { NexgenLogo } from '../../common/NexgenLogo';
 
 interface UniqueItNavbarProps {
   instituteName?: string;
+  brandPrimary?: string;
+  brandAccent?: string;
+  brandSubline?: string;
   activeSubPage: WebsiteSubPage;
   onNavigateSubPage: (page: WebsiteSubPage) => void;
   onOpenAdmission: () => void;
@@ -17,6 +20,9 @@ interface UniqueItNavbarProps {
 
 export const NexgenNavbar: React.FC<UniqueItNavbarProps> = ({
   instituteName = 'NexGen Computer Academy',
+  brandPrimary = 'NexGen',
+  brandAccent = 'Computer Academy',
+  brandSubline = 'Computer Training Institute',
   activeSubPage,
   onNavigateSubPage,
   onOpenAdmission,
@@ -59,14 +65,14 @@ export const NexgenNavbar: React.FC<UniqueItNavbarProps> = ({
           <div className="flex flex-col">
             <div className="flex items-center">
               <span className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
-                NexGen
+                {brandPrimary}
               </span>
               <span className="text-lg sm:text-2xl font-black text-[#dc143c] ml-1 leading-none">
-                Academy
+                {brandAccent}
               </span>
             </div>
             <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
-              Computer Training Institute
+              {brandSubline}
             </span>
           </div>
         </div>

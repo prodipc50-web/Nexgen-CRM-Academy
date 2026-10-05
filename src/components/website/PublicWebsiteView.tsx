@@ -55,6 +55,7 @@ import { UniqueItSnakeCta } from './nexgen/NexgenSnakeCta';
 import { NexgenAdmissionBanner as UniqueItAdmissionBanner } from './nexgen/NexgenAdmissionBanner';
 import { UniqueItFooter } from './nexgen/NexgenFooter';
 import { UniqueItFloatingDiscount } from './nexgen/NexgenFloatingDiscount';
+import { getVideoBlobUrl } from '../../utils/videoStorage';
 import {
   Home,
   Phone,
@@ -282,6 +283,48 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
   const [isInstallmentModalOpen, setIsInstallmentModalOpen] = useState(false);
   const [selectedCourseForInstallment, setSelectedCourseForInstallment] = useState<Course | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [resolvedHeroVideoUrl, setResolvedHeroVideoUrl] = useState<string>(websiteCmsConfig?.heroVideoUrl || '');
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+
+  // Brand Name & Subline resolution
+  const brandPrimary = websiteCmsConfig?.brandPrimary || 'NexGen';
+  const brandAccent = websiteCmsConfig?.brandAccent || 'Computer Academy';
+  const brandSubline = websiteCmsConfig?.brandSubline || websiteCmsConfig?.headerSubtitle || 'Computer Training Institute';
+
+  // Resolve IndexedDB video if applicable
+  React.useEffect(() => {
+    let active = true;
+    let createdBlobUrl = '';
+    const rawUrl = websiteCmsConfig?.heroVideoUrl || '';
+    if (rawUrl.startsWith('indexeddb:')) {
+      setIsVideoLoading(true);
+      getVideoBlobUrl(rawUrl).then(url => {
+        if (active) {
+          if (url) {
+            createdBlobUrl = url;
+            setResolvedHeroVideoUrl(url);
+          } else {
+            setResolvedHeroVideoUrl('https://www.youtube.com/embed/y9jMfwwsqf8');
+          }
+          setIsVideoLoading(false);
+        }
+      }).catch(() => {
+        if (active) {
+          setResolvedHeroVideoUrl('https://www.youtube.com/embed/y9jMfwwsqf8');
+          setIsVideoLoading(false);
+        }
+      });
+    } else {
+      setResolvedHeroVideoUrl(rawUrl || 'https://www.youtube.com/embed/y9jMfwwsqf8');
+      setIsVideoLoading(false);
+    }
+    return () => {
+      active = false;
+      if (createdBlobUrl) {
+        URL.revokeObjectURL(createdBlobUrl);
+      }
+    };
+  }, [websiteCmsConfig?.heroVideoUrl]);
 
   // Auto-apply dynamic Homepage SEO metadata, Canonical URL & JSON-LD Schemas
   React.useEffect(() => {
@@ -560,6 +603,9 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       {/* 2. MAIN NAVBAR */}
       <UniqueItNavbar
         instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
+        brandPrimary={brandPrimary}
+        brandAccent={brandAccent}
+        brandSubline={brandSubline}
         activeSubPage={activeSubPage}
         onNavigateSubPage={navigateSubPage}
         onOpenAdmission={() => {
@@ -694,7 +740,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               primaryCtaText={websiteCmsConfig?.heroPrimaryCtaText}
               secondaryCtaText={websiteCmsConfig?.heroSecondaryCtaText}
               admissionCtaText={websiteCmsConfig?.heroCtaText}
-              videoUrl={websiteCmsConfig?.heroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8"}
+              videoUrl={resolvedHeroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8"}
               videoThumbnailUrl={websiteCmsConfig?.heroVideoThumbnailUrl || "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80"}
               videoBadgeText={websiteCmsConfig?.heroVideoBadgeText || `${academySettings.instituteName || 'NexGen'} Campus`}
               videoCaptionText={websiteCmsConfig?.heroVideoCaption || "সরাসরি ফার্মগেট ক্যাম্পাসে প্র্যাকটিক্যাল ল্যাব ও অনলাইন ক্লাস"}
@@ -968,10 +1014,13 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           onOpenPolicyModal={(policy) => setActivePolicyModal(policy)}
           courses={courses}
           instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
+          brandPrimary={brandPrimary}
+          brandAccent={brandAccent}
+          brandSubline={brandSubline}
           officialAddress={academySettings.officialAddress || 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215'}
           officialEmail={academySettings.officialEmail || 'info@nexgenacademy.edu.bd'}
-          primaryPhone={academySettings.primarySupportPhone || '01798444444'}
-          helplines={academySettings.helplines || ['01798444444', '+880 1711-223344', '+880 1811-556677']}
+          primaryPhone={multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}
+          helplines={multiplePhones.length > 0 ? multiplePhones.map(p => p.number) : (academySettings.helplines || ['01798444444', '+880 1711-223344', '+880 1811-556677'])}
           onOpenStaffLogin={onOpenStaffLogin}
           paymentMerchantsConfig={websiteCmsConfig?.paymentMerchantsConfig}
         />
@@ -996,16 +1045,21 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             >
               <X className="w-5 h-5" />
             </button>
-            {isDirectVideo(websiteCmsConfig?.heroVideoUrl || '') ? (
+            {isVideoLoading || resolvedHeroVideoUrl.startsWith('indexeddb:') ? (
+              <div className="w-full h-full flex flex-col items-center justify-center text-white space-y-3 bg-black">
+                <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm font-bold">ভিডিও প্রস্তুত হচ্ছে...</span>
+              </div>
+            ) : resolvedHeroVideoUrl.startsWith('blob:') || isDirectVideo(resolvedHeroVideoUrl) ? (
               <video
-                src={websiteCmsConfig?.heroVideoUrl}
+                src={resolvedHeroVideoUrl}
                 controls
                 autoPlay
                 className="w-full h-full object-contain bg-black"
               />
             ) : (
               <iframe
-                src={formatMediaEmbedUrl(websiteCmsConfig?.heroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8", true)}
+                src={formatMediaEmbedUrl(resolvedHeroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8", true)}
                 title="NexGen Computer Academy Video"
                 className="w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

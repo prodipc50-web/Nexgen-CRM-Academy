@@ -1904,6 +1904,9 @@ export interface WebsiteCmsConfig {
   popularSearchTags?: string[];
   headerSubtitle?: string;
   headerEstText?: string;
+  brandPrimary?: string; // e.g. "NexGen"
+  brandAccent?: string; // e.g. "Computer Academy"
+  brandSubline?: string; // e.g. "Computer Training Institute"
 
   // 8. Section Visibility Controls (Show/Hide any section on the public site)
   sectionVisibility?: WebsiteSectionVisibility;
@@ -2054,11 +2057,31 @@ export interface AdmissionBannerCmsConfig {
   discountBadge?: string;
 }
 
+export type PaymentMethodType = 'make_payment' | 'send_money' | 'merchant';
+
+export interface PaymentMerchantItem {
+  id: string;
+  provider: string; // e.g. 'bKash' | 'Nagad' | 'Rocket' | 'Upay' | 'SSLCommerz' | 'Bank Transfer'
+  type: PaymentMethodType; // 'make_payment' | 'send_money' | 'merchant'
+  accountNumber: string;
+  accountName?: string;
+  note?: string;
+  isActive: boolean;
+}
+
 export interface PaymentMerchantsCmsConfig {
+  sectionTitle?: string; // e.g. "Make Payment" or "Our Payment Gateway"
+  sectionSubtitle?: string;
+  merchants?: PaymentMerchantItem[];
+  // Legacy fields for backward compatibility
   bkashNumber?: string;
+  bkashType?: PaymentMethodType;
   nagadNumber?: string;
+  nagadType?: PaymentMethodType;
   rocketNumber?: string;
+  rocketType?: PaymentMethodType;
   upayNumber?: string;
+  upayType?: PaymentMethodType;
   sslcommerzNote?: string;
 }
 

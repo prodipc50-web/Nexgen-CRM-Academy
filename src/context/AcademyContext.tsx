@@ -812,9 +812,19 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           ? parsed.googleMapEmbedUrl
           : INITIAL_WEBSITE_CMS_CONFIG.googleMapEmbedUrl;
 
+        // Sanitize legacy or large base64 video string that can cause browser memory crash
+        let safeHeroVideoUrl = parsed.heroVideoUrl;
+        if (safeHeroVideoUrl && (safeHeroVideoUrl.startsWith('data:video') || safeHeroVideoUrl.length > 2000)) {
+          safeHeroVideoUrl = 'indexeddb:hero-video';
+        }
+
         return {
           ...INITIAL_WEBSITE_CMS_CONFIG,
           ...parsed,
+          heroVideoUrl: safeHeroVideoUrl || INITIAL_WEBSITE_CMS_CONFIG.heroVideoUrl,
+          brandPrimary: parsed.brandPrimary !== undefined ? parsed.brandPrimary : (INITIAL_WEBSITE_CMS_CONFIG.brandPrimary || 'NexGen'),
+          brandAccent: parsed.brandAccent !== undefined ? parsed.brandAccent : (INITIAL_WEBSITE_CMS_CONFIG.brandAccent || 'Computer Academy'),
+          brandSubline: parsed.brandSubline !== undefined ? parsed.brandSubline : (INITIAL_WEBSITE_CMS_CONFIG.brandSubline || 'Computer Training Institute'),
           googleMapShareUrl: effectiveShareUrl,
           googleMapEmbedUrl: effectiveEmbedUrl,
           marketing: marketingConfig,
@@ -4439,6 +4449,12 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         popularSearchTags: Array.isArray(updates.popularSearchTags) ? updates.popularSearchTags : prev.popularSearchTags,
         headerSubtitle: updates.headerSubtitle !== undefined ? updates.headerSubtitle : prev.headerSubtitle,
         headerEstText: updates.headerEstText !== undefined ? updates.headerEstText : prev.headerEstText,
+        brandPrimary: updates.brandPrimary !== undefined ? updates.brandPrimary : (prev.brandPrimary || 'NexGen'),
+        brandAccent: updates.brandAccent !== undefined ? updates.brandAccent : (prev.brandAccent || 'Computer Academy'),
+        brandSubline: updates.brandSubline !== undefined ? updates.brandSubline : (prev.brandSubline || 'Computer Training Institute'),
+        heroVideoUrl: (updates.heroVideoUrl && (updates.heroVideoUrl.startsWith('data:video') || updates.heroVideoUrl.length > 2000))
+          ? 'indexeddb:hero-video'
+          : (updates.heroVideoUrl !== undefined ? updates.heroVideoUrl : prev.heroVideoUrl),
         upcomingBatchesCard: updates.upcomingBatchesCard ? { ...(prev.upcomingBatchesCard || {}), ...updates.upcomingBatchesCard } : prev.upcomingBatchesCard,
         heroSlides: Array.isArray(updates.heroSlides) ? updates.heroSlides : prev.heroSlides,
         newSectionVisibility: updates.newSectionVisibility ? { ...(prev.newSectionVisibility || {}), ...updates.newSectionVisibility } : prev.newSectionVisibility,

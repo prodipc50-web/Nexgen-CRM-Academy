@@ -66,9 +66,10 @@ interface CmsSectionsTabProps {
 }
 
 import { CmsNewHomepageSectionsEditor } from './CmsNewHomepageSectionsEditor';
+import { NexgenLogo } from '../../common/NexgenLogo';
 
 export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }) => {
-  const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings } = useAcademy();
+  const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings, updateAcademySettings } = useAcademy();
   const [saveFeedback, setSaveFeedback] = useState(false);
   const hasUserEditedRef = useRef(false);
 
@@ -565,6 +566,15 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
   const [headerEstText, setHeaderEstText] = useState<string>(
     websiteCmsConfig.headerEstText || "EST. 2018"
   );
+  const [brandPrimary, setBrandPrimary] = useState<string>(
+    websiteCmsConfig.brandPrimary || 'NexGen'
+  );
+  const [brandAccent, setBrandAccent] = useState<string>(
+    websiteCmsConfig.brandAccent || 'Computer Academy'
+  );
+  const [brandSubline, setBrandSubline] = useState<string>(
+    websiteCmsConfig.brandSubline || 'Computer Training Institute'
+  );
 
   // 6. Footer Config
   const [footerBio, setFooterBio] = useState<string>(
@@ -659,6 +669,15 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     }
     if (websiteCmsConfig.headerEstText !== undefined) {
       setHeaderEstText(websiteCmsConfig.headerEstText);
+    }
+    if (websiteCmsConfig.brandPrimary !== undefined) {
+      setBrandPrimary(websiteCmsConfig.brandPrimary);
+    }
+    if (websiteCmsConfig.brandAccent !== undefined) {
+      setBrandAccent(websiteCmsConfig.brandAccent);
+    }
+    if (websiteCmsConfig.brandSubline !== undefined) {
+      setBrandSubline(websiteCmsConfig.brandSubline);
     }
     if (websiteCmsConfig.footerConfig) {
       if (websiteCmsConfig.footerConfig.bio !== undefined) setFooterBio(websiteCmsConfig.footerConfig.bio);
@@ -808,6 +827,10 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
   const handleSaveAll = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     hasUserEditedRef.current = false;
+    const resolvedFullName = `${brandPrimary.trim()} ${brandAccent.trim()}`.trim();
+    if (resolvedFullName && updateAcademySettings) {
+      updateAcademySettings({ instituteName: resolvedFullName });
+    }
     updateWebsiteCmsConfig({
       sectionVisibility: visibility,
       deliveryModesConfig: {
@@ -870,8 +893,11 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       verifyCertificateSectionConfig: verifyCertificateHeading,
       placementsSectionConfig: placementsHeading,
       popularSearchTags: popularTagsString.split(',').map(s => s.trim()).filter(Boolean),
-      headerSubtitle,
-      headerEstText,
+      brandPrimary: brandPrimary.trim(),
+      brandAccent: brandAccent.trim(),
+      brandSubline: brandSubline.trim(),
+      headerSubtitle: brandSubline.trim() || headerSubtitle.trim(),
+      headerEstText: headerEstText.trim(),
       newSectionVisibility: newVisibility,
       aboutHeroConfig: aboutHero,
       whyChooseConfig: whyChoose,
@@ -986,6 +1012,10 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
       {/* Quick Jump Section Links */}
       <div className="bg-slate-100/90 p-2.5 rounded-2xl border border-slate-200/90 overflow-x-auto flex items-center space-x-2 text-xs">
         <span className="text-[11px] font-black text-slate-500 uppercase px-2 shrink-0">দ্রুত সেকশনে যান:</span>
+        <a href="#sec-branding" className="px-3 py-1.5 bg-indigo-700 text-white rounded-xl font-black shadow-xs shrink-0 transition-colors flex items-center space-x-1">
+          <span>🏛️</span>
+          <span>ব্র্যান্ডিং ও হেডার-ফুটার</span>
+        </a>
         <a href="#sec-new-visibility" className="px-3 py-1.5 bg-indigo-600 text-white rounded-xl font-black shadow-xs shrink-0 transition-colors flex items-center space-x-1">
           <span>⚡</span>
           <span>১৭টি নতুন সেকশন অন/অফ</span>
@@ -1027,6 +1057,128 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         <a href="#sec-footer" className="px-3 py-1.5 bg-white hover:bg-slate-200 rounded-xl font-bold text-slate-700 shadow-2xs shrink-0 transition-colors">
           🦶 ওয়েবসাইট ফুটার
         </a>
+      </div>
+
+      {/* 🏛️ INSTITUTION BRANDING & HEADER/FOOTER SUBLINE (MANUAL EDIT) */}
+      <div id="sec-branding" className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+              🏛️
+            </div>
+            <div>
+              <h4 className="font-black text-sm text-slate-900 flex items-center space-x-2">
+                <span>প্রতিষ্ঠান ব্র্যান্ডিং, লোগো নাম ও হেডার-ফুটার স্লোগান (Branding Setup)</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                  Header & Footer Editable
+                </span>
+              </h4>
+              <p className="text-xs text-slate-500">
+                হেডার নেভিগেশন বার এবং ফুটারের লোগো টাইটেল ও সাবলাইন স্লোগান সরাসরি কাস্টমাইজ করুন।
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleSaveAll()}
+            className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold border border-indigo-200 transition-colors cursor-pointer self-start sm:self-auto"
+          >
+            সেটিংস সেভ করুন
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          {/* Brand Primary Name */}
+          <div className="md:col-span-4 space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>১. ব্র্যান্ড মূল নাম (Brand Primary)</span>
+              <span className="text-[10px] text-slate-500">কালো বোল্ড টেক্সট</span>
+            </label>
+            <input
+              type="text"
+              value={brandPrimary}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setBrandPrimary(e.target.value);
+              }}
+              placeholder="e.g. Nexgen"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
+
+          {/* Brand Accent Name */}
+          <div className="md:col-span-4 space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>২. ব্র্যান্ড হাইলাইট শব্দ (Brand Accent)</span>
+              <span className="text-[10px] text-[#dc143c] font-bold">লাল হাইলাইট</span>
+            </label>
+            <input
+              type="text"
+              value={brandAccent}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setBrandAccent(e.target.value);
+              }}
+              placeholder="e.g. Computer Academy"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-rose-200 rounded-xl font-black text-[#dc143c] text-xs focus:bg-white focus:ring-2 focus:ring-rose-500 outline-none"
+            />
+          </div>
+
+          {/* Established Year Badge */}
+          <div className="md:col-span-4 space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>৩. প্রতিষ্ঠার সাল ব্যাজ</span>
+              <span className="text-[10px] text-slate-400 font-mono">EST. 2018</span>
+            </label>
+            <input
+              type="text"
+              value={headerEstText}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setHeaderEstText(e.target.value);
+              }}
+              placeholder="e.g. EST. 2018"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-700 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
+
+          {/* Subline / Tagline */}
+          <div className="md:col-span-8 space-y-1">
+            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>৪. হেডার ও ফুটার সাবলাইন স্লোগান (Subline / Tagline)</span>
+              <span className="text-[10px] text-indigo-600 font-bold">লোগোর ঠিক নিচে প্রদর্শিত হয়</span>
+            </label>
+            <input
+              type="text"
+              value={brandSubline}
+              onChange={e => {
+                hasUserEditedRef.current = true;
+                setBrandSubline(e.target.value);
+              }}
+              placeholder="e.g. Computer Training Institute"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+          </div>
+
+          {/* Live Preview Box */}
+          <div className="md:col-span-4 bg-slate-900 rounded-2xl p-3.5 border border-slate-800 flex flex-col justify-center text-white">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5 block">
+              লাইভ প্রিভিউ (Navbar & Footer Preview):
+            </span>
+            <div className="flex items-center space-x-2.5">
+              <NexgenLogo variant="crest" size={32} className="shrink-0" isDarkTheme />
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <span className="text-sm font-black text-white leading-none">{brandPrimary || 'Nexgen'}</span>
+                  <span className="text-sm font-black text-[#dc143c] ml-1 leading-none">{brandAccent || 'Computer Academy'}</span>
+                </div>
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                  {brandSubline || 'Computer Training Institute'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* PREMIER: NEW HOMEPAGE 16-SECTION SWITCHBOARD & MODULAR CONTENT EDITORS */}
