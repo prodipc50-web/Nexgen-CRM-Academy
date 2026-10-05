@@ -44,7 +44,7 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                 key={mode}
                 type="button"
                 onClick={() => setActiveFilter(mode)}
-                className={`min-w-[110px] sm:min-w-[130px] px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
+                className={`min-w-[80px] sm:min-w-[120px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
                   activeFilter === mode
                     ? 'bg-[#dc143c] text-white shadow-sm'
                     : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300'
@@ -140,7 +140,7 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                   <div className="grid grid-cols-2 gap-1.5 py-2 border-y border-slate-100 text-[11px] text-slate-600">
                     <div className="flex items-center space-x-1.5">
                       <Calendar className="w-3 h-3 text-slate-400" />
-                      <span>Class: {c.totalClasses || 3}</span>
+                      <span>Class: {c.totalClasses || 36}</span>
                     </div>
                     <div className="flex items-center space-x-1.5">
                       <Clock className="w-3 h-3 text-slate-400" />

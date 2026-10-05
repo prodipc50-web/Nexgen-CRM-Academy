@@ -30,19 +30,29 @@ export const NexgenSuccessStories: React.FC<UniqueItSuccessStoriesProps> = ({
     },
     {
       id: '3',
-      title: 'Success Graphic Designer',
-      role: 'Graphic Designer',
+      title: 'Top-Rated Freelancer Story',
+      role: 'UI/UX & Brand Identity Designer',
       thumbnail: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+      videoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8'
     },
     {
       id: '4',
-      title: 'Success Graphic Designer',
-      role: 'Graphic Designer With Freelancer',
+      title: 'Digital Marketing Specialist Story',
+      role: 'Agency SEO & Media Buyer',
       thumbnail: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+      videoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8'
     }
   ];
+
+  const items = stories && stories.length > 0
+    ? stories.slice(0, 4).map((s, idx) => ({
+        id: s.id || `story-${idx}`,
+        title: s.studentName ? `${s.studentName}'s Journey` : defaultStories[idx % defaultStories.length].title,
+        role: s.companyOrPlatform || s.courseName || defaultStories[idx % defaultStories.length].role,
+        thumbnail: s.videoThumbnailUrl || s.avatarUrl || defaultStories[idx % defaultStories.length].thumbnail,
+        videoUrl: s.videoEmbedUrl || defaultStories[idx % defaultStories.length].videoUrl
+      }))
+    : defaultStories;
 
   return (
     <section className="py-16 sm:py-20 bg-white border-b border-slate-100">
@@ -62,7 +72,7 @@ export const NexgenSuccessStories: React.FC<UniqueItSuccessStoriesProps> = ({
 
         {/* 4 Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {defaultStories.map((item) => (
+          {items.map((item) => (
             <div
               key={item.id}
               onClick={() => setActiveVideoUrl(item.videoUrl)}

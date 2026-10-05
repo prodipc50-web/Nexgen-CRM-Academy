@@ -93,11 +93,11 @@ export const NexgenHero: React.FC<UniqueItHeroProps> = ({
             </p>
 
             {/* Action Buttons Row */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => onNavigateSubPage('courses')}
-                className="px-5 py-2.5 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white text-xs font-black shadow-sm transition-all flex items-center space-x-2 cursor-pointer active:scale-95"
+                className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#e11d48] hover:bg-[#be123c] text-white text-[11px] sm:text-xs font-black shadow-sm transition-all flex items-center space-x-1.5 sm:space-x-2 cursor-pointer active:scale-95"
               >
                 <BookOpen className="w-3.5 h-3.5" />
                 <span>{primaryCtaText}</span>
@@ -106,7 +106,7 @@ export const NexgenHero: React.FC<UniqueItHeroProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigateSubPage('courses')}
-                className="px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-xs font-black shadow-2xs transition-all flex items-center space-x-2 cursor-pointer active:scale-95"
+                className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-[11px] sm:text-xs font-black shadow-2xs transition-all flex items-center space-x-1.5 sm:space-x-2 cursor-pointer active:scale-95"
               >
                 <Laptop className="w-3.5 h-3.5 text-slate-600" />
                 <span>{secondaryCtaText}</span>
@@ -115,7 +115,7 @@ export const NexgenHero: React.FC<UniqueItHeroProps> = ({
               <button
                 type="button"
                 onClick={onOpenAdmission}
-                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#ea580c] to-[#f97316] hover:from-[#c2410c] hover:to-[#ea580c] text-white text-xs font-black shadow-sm transition-all flex items-center space-x-2 cursor-pointer active:scale-95"
+                className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#ea580c] to-[#f97316] hover:from-[#c2410c] hover:to-[#ea580c] text-white text-[11px] sm:text-xs font-black shadow-sm transition-all flex items-center space-x-1.5 sm:space-x-2 cursor-pointer active:scale-95"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-200" />
                 <span>{admissionCtaText}</span>
@@ -124,16 +124,16 @@ export const NexgenHero: React.FC<UniqueItHeroProps> = ({
 
             {/* Search Bar with Category Dropdown */}
             <form onSubmit={handleSearchSubmit} className="pt-2 max-w-xl">
-              <div className="flex items-center bg-white rounded-full p-1.5 border border-purple-200 shadow-sm focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-200 transition-all">
+              <div className="flex items-center bg-white rounded-full p-1 sm:p-1.5 border border-purple-200 shadow-sm focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-200 transition-all">
                 {/* Category Dropdown Button */}
-                <div className="relative">
+                <div className="relative shrink-0">
                   <button
                     type="button"
                     onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                    className="px-4 py-2 rounded-full bg-[#6b1cb0] hover:bg-[#581594] text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer shrink-0"
+                    className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#6b1cb0] hover:bg-[#581594] text-white text-[10px] sm:text-xs font-bold flex items-center space-x-1 sm:space-x-1.5 transition-colors cursor-pointer shrink-0"
                   >
-                    <span className="truncate max-w-[90px]">{selectedCategory}</span>
-                    <ChevronDown className="w-3.5 h-3.5" />
+                    <span className="truncate max-w-[65px] sm:max-w-[90px]">{selectedCategory}</span>
+                    <ChevronDown className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </button>
 
                   {categoryDropdownOpen && (

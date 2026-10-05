@@ -19,26 +19,26 @@ export const NexgenTopBar: React.FC<UniqueItTopBarProps> = ({
   onOpenCmsAdmin
 }) => {
   return (
-    <div className="bg-[#6b1cb0] text-white text-[12px] py-2 px-4 font-medium tracking-wide border-b border-purple-900/30">
-      <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-4 sm:space-x-6">
+    <div className="bg-[#6b1cb0] text-white text-[11px] sm:text-[12px] py-1.5 sm:py-2 px-3 sm:px-4 font-medium tracking-wide border-b border-purple-900/30 overflow-x-hidden">
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-2">
+        <div className="flex items-center space-x-3 sm:space-x-6 shrink-0">
           <a
             href={`tel:${phone.replace(/\s+/g, '')}`}
             className="flex items-center space-x-1.5 hover:text-amber-200 transition-colors"
           >
             <Phone className="w-3.5 h-3.5" />
-            <span>{phone}</span>
+            <span className="font-semibold">{phone}</span>
           </a>
           <a
             href={`mailto:${email}`}
-            className="hidden sm:flex items-center space-x-1.5 hover:text-amber-200 transition-colors"
+            className="hidden md:flex items-center space-x-1.5 hover:text-amber-200 transition-colors"
           >
             <Mail className="w-3.5 h-3.5" />
             <span>{email}</span>
           </a>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
           {isAuthenticated ? (
             <div className="flex items-center space-x-1.5">
               {onOpenCmsAdmin && (
@@ -76,7 +76,7 @@ export const NexgenTopBar: React.FC<UniqueItTopBarProps> = ({
             <button
               type="button"
               onClick={onOpenDiscount}
-              className="bg-[#ff5722] hover:bg-[#f4511e] text-white text-[11px] font-black uppercase px-3 py-0.5 rounded-full shadow-xs transition-all flex items-center space-x-1 cursor-pointer active:scale-95"
+              className="bg-[#ff5722] hover:bg-[#f4511e] text-white text-[10px] sm:text-[11px] font-black uppercase px-2.5 sm:px-3 py-0.5 rounded-full shadow-xs transition-all flex items-center space-x-1 cursor-pointer active:scale-95 shrink-0"
             >
               <Tag className="w-3 h-3" />
               <span>GET DISCOUNT</span>

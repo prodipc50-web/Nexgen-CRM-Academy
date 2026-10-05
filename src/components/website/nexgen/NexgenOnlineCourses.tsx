@@ -110,7 +110,7 @@ export const NexgenOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
                   <div className="grid grid-cols-2 gap-1.5 py-2 border-y border-slate-100 text-[11px] text-slate-600">
                     <div className="flex items-center space-x-1.5">
                       <Calendar className="w-3 h-3 text-slate-400" />
-                      <span>Class: {c.totalClasses || 2}</span>
+                      <span>Class: {c.totalClasses || 32}</span>
                     </div>
                     <div className="flex items-center space-x-1.5">
                       <Clock className="w-3 h-3 text-slate-400" />

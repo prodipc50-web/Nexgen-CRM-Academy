@@ -53,19 +53,19 @@ export const NexgenNavbar: React.FC<UniqueItNavbarProps> = ({
         {/* Brand Logo */}
         <div
           onClick={() => onNavigateSubPage('home')}
-          className="flex items-center space-x-2.5 cursor-pointer select-none group"
+          className="flex items-center space-x-2 sm:space-x-2.5 cursor-pointer select-none group shrink-0"
         >
-          <NexgenLogo variant="crest" size={38} className="shrink-0 transition-transform group-hover:scale-105" />
+          <NexgenLogo variant="crest" size={34} className="shrink-0 transition-transform group-hover:scale-105 sm:w-[38px] sm:h-[38px]" />
           <div className="flex flex-col">
             <div className="flex items-center">
-              <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+              <span className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
                 NexGen
               </span>
-              <span className="text-xl sm:text-2xl font-black text-[#dc143c] ml-1 leading-none">
+              <span className="text-lg sm:text-2xl font-black text-[#dc143c] ml-1 leading-none">
                 Academy
               </span>
             </div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+            <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
               Computer Training Institute
             </span>
           </div>
@@ -325,7 +325,7 @@ export const NexgenNavbar: React.FC<UniqueItNavbarProps> = ({
           <button
             type="button"
             onClick={onOpenStudentLogin}
-            className="px-4 py-2 rounded-full bg-gradient-to-r from-[#ea580c] to-[#f97316] hover:from-[#c2410c] hover:to-[#ea580c] text-white text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center space-x-1.5"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-[#ea580c] to-[#f97316] hover:from-[#c2410c] hover:to-[#ea580c] text-white text-[11px] sm:text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center space-x-1.5"
           >
             <User className="w-3.5 h-3.5" />
             <span>Student Login</span>
