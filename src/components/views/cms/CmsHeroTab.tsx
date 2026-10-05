@@ -998,12 +998,12 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
             </span>
             <div className="flex items-center space-x-2">
               <NexgenLogo variant="crest" size={28} className="shrink-0" />
-              <div className="flex flex-col">
-                <div className="flex items-center">
-                  <span className="text-sm font-black text-slate-900 leading-none">{brandPrimary || 'NexGen'}</span>
-                  <span className="text-sm font-black text-[#dc143c] ml-1 leading-none">{brandAccent || 'Computer Academy'}</span>
+              <div className="flex flex-col justify-center">
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 leading-tight sm:leading-none">
+                  <span className="text-[12px] sm:text-sm font-black text-slate-900 leading-tight">{brandPrimary || 'NexGen'}</span>
+                  <span className="text-[11px] sm:text-sm font-black text-[#dc143c] leading-tight">{brandAccent || 'Computer Academy'}</span>
                 </div>
-                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5">
+                <span className="text-[7.5px] sm:text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5 sm:mt-1">
                   {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
                 </span>
               </div>

@@ -284,13 +284,14 @@ export const UniqueItFooter: React.FC<UniqueItFooterProps> = ({
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center space-x-2.5">
-            <NexgenLogo variant="crest" size={32} className="shrink-0" isDarkTheme />
-            <div className="flex flex-col">
-              <div className="flex items-center">
-                <span className="text-lg font-black text-white tracking-tight leading-none">NexGen</span>
-                <span className="text-lg font-black text-[#dc143c] ml-1 leading-none">Academy</span>
+            <NexgenLogo variant="crest" size={30} className="shrink-0 sm:w-[34px] sm:h-[34px]" isDarkTheme />
+            <div className="flex flex-col justify-center">
+              {/* 2-line layout on mobile, 1-line on sm+ */}
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 leading-tight sm:leading-none">
+                <span className="text-[12px] sm:text-base md:text-lg font-black text-white tracking-tight leading-tight">NexGen</span>
+                <span className="text-[11px] sm:text-base md:text-lg font-black text-[#dc143c] tracking-tight leading-tight">Computer Academy</span>
               </div>
-              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">
+              <span className="text-[7px] sm:text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 sm:mt-1 truncate max-w-[160px] sm:max-w-none">
                 Computer Training Institute
               </span>
             </div>

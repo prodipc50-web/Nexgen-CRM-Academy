@@ -1166,13 +1166,13 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
               লাইভ প্রিভিউ (Navbar & Footer Preview):
             </span>
             <div className="flex items-center space-x-2.5">
-              <NexgenLogo variant="crest" size={32} className="shrink-0" isDarkTheme />
-              <div className="flex flex-col">
-                <div className="flex items-center">
-                  <span className="text-sm font-black text-white leading-none">{brandPrimary || 'Nexgen'}</span>
-                  <span className="text-sm font-black text-[#dc143c] ml-1 leading-none">{brandAccent || 'Computer Academy'}</span>
+              <NexgenLogo variant="crest" size={30} className="shrink-0" isDarkTheme />
+              <div className="flex flex-col justify-center">
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 leading-tight sm:leading-none">
+                  <span className="text-[12px] sm:text-sm font-black text-white leading-tight">{brandPrimary || 'Nexgen'}</span>
+                  <span className="text-[11px] sm:text-sm font-black text-[#dc143c] leading-tight">{brandAccent || 'Computer Academy'}</span>
                 </div>
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                <span className="text-[7.5px] sm:text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 sm:mt-1">
                   {brandSubline || 'Computer Training Institute'}
                 </span>
               </div>

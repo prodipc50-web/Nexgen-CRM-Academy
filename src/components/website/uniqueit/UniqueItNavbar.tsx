@@ -53,19 +53,20 @@ export const UniqueItNavbar: React.FC<UniqueItNavbarProps> = ({
         {/* Brand Logo */}
         <div
           onClick={() => onNavigateSubPage('home')}
-          className="flex items-center space-x-2.5 cursor-pointer select-none group"
+          className="flex items-center space-x-2 sm:space-x-2.5 cursor-pointer select-none group shrink-0"
         >
-          <NexgenLogo variant="crest" size={38} className="shrink-0 transition-transform group-hover:scale-105" />
-          <div className="flex flex-col">
-            <div className="flex items-center">
-              <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">
+          <NexgenLogo variant="crest" size={30} className="shrink-0 transition-transform group-hover:scale-105 sm:w-[36px] sm:h-[36px]" />
+          <div className="flex flex-col justify-center">
+            {/* 2-line layout on mobile, 1-line on sm+ screens */}
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 leading-tight sm:leading-none">
+              <span className="text-[12px] sm:text-base md:text-xl font-black text-slate-900 tracking-tight leading-tight">
                 NexGen
               </span>
-              <span className="text-xl sm:text-2xl font-black text-[#dc143c] ml-1 leading-none">
-                Academy
+              <span className="text-[11px] sm:text-base md:text-xl font-black text-[#dc143c] tracking-tight leading-tight">
+                Computer Academy
               </span>
             </div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+            <span className="text-[7px] sm:text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 sm:mt-1 truncate max-w-[140px] sm:max-w-none">
               Computer Training Institute
             </span>
           </div>
