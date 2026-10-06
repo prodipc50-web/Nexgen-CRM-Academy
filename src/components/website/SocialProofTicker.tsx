@@ -127,7 +127,7 @@ export const SocialProofTicker: React.FC = () => {
 
   return (
     <div
-      className={`fixed bottom-5 z-40 max-w-xs sm:max-w-sm transition-all duration-500 ease-out transform ${
+      className={`fixed bottom-16 sm:bottom-5 z-40 max-w-xs sm:max-w-sm transition-all duration-500 ease-out transform ${
         config?.position === 'bottom_right' ? 'right-4 sm:right-6' : 'left-4 sm:left-6'
       } ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0 pointer-events-none'}`}
     >

@@ -68,6 +68,22 @@ h1:lang(bn), h2:lang(bn), h3:lang(bn), h4:lang(bn),
   white-space: nowrap;
 }
 
+@keyframes bannerMarquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-banner-marquee {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: bannerMarquee 26s linear infinite;
+}
+
+.animate-banner-marquee:hover {
+  animation-play-state: paused;
+}
+
 .font-erp {
   font-family: var(--font-erp);
 }

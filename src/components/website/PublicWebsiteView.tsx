@@ -55,7 +55,6 @@ import { UniqueItSnakeCta } from './nexgen/NexgenSnakeCta';
 import { NexgenAdmissionBanner as UniqueItAdmissionBanner } from './nexgen/NexgenAdmissionBanner';
 import { UniqueItFooter } from './nexgen/NexgenFooter';
 import { UniqueItFloatingDiscount } from './nexgen/NexgenFloatingDiscount';
-import { NexgenMobileStickyBar } from './nexgen/NexgenMobileStickyBar';
 import { NexgenUrgencyBanner } from './nexgen/NexgenUrgencyBanner';
 import { getVideoBlobUrl } from '../../utils/videoStorage';
 import {
@@ -1013,6 +1012,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             <UniqueItAdmissionBanner
               config={websiteCmsConfig?.admissionBannerConfig}
               onNavigateSubPage={navigateSubPage}
+              onOpenAdmission={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
             />
           )}
         </>
@@ -1051,17 +1054,6 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
 
       {/* FLOATING DISCOUNT BUTTON */}
       <UniqueItFloatingDiscount onClick={() => setShowExitIntent(true)} />
-
-      {/* MOBILE STICKY CRO ACTION BAR (Call, WhatsApp, Fast Admission) */}
-      <NexgenMobileStickyBar
-        onOpenAdmission={() => {
-          setSelectedCourseForAdmission(null);
-          setIsAdmissionOpen(true);
-        }}
-        phone={multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}
-        whatsappNumber={websiteCmsConfig?.floatingActionWidget?.whatsappNumber || multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}
-        instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
-      />
 
       {/* HERO & SUCCESS STORY VIDEO MODAL */}
       {isVideoModalOpen && (
@@ -1184,14 +1176,14 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       {/* CRO TOOL 1: EXIT-INTENT DISCOUNT VOUCHER MODAL */}
       {showExitIntent && (
         <div
-          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200"
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-150"
           onClick={() => {
             setShowExitIntent(false);
             sessionStorage.setItem('nca_exit_intent_dismissed', 'true');
           }}
         >
           <div
-            className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-indigo-100 relative text-center space-y-4"
+            className="bg-white rounded-3xl max-w-md w-full p-5 sm:p-7 shadow-2xl border border-indigo-100 relative text-center space-y-4 my-auto max-h-[92dvh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <button
