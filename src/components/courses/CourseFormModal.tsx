@@ -3,6 +3,7 @@ import { useAcademy } from '../../context/AcademyContext';
 import { Course, CourseModule, CourseStatus, DurationUnit } from '../../types';
 import { DEFAULT_LEARNING_FEATURES, DEFAULT_TARGET_AUDIENCES } from '../../data/seedData';
 import { generateSlug } from '../../utils/seoHelper';
+import { compressLogoOrAvatar } from '../../utils/imageCompressor';
 import {
   X,
   BookOpen,
@@ -828,21 +829,43 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
                   <span className="text-[10px] text-slate-400">High-res Web Image Link</span>
                 </div>
 
-                <div className="flex space-x-3">
-                  {thumbnailUrl && (
-                    <img
-                      src={thumbnailUrl}
-                      alt="Preview"
-                      className="w-16 h-12 object-cover rounded-lg border border-slate-200 shrink-0"
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex-1 flex space-x-2">
+                    {thumbnailUrl && (
+                      <img
+                        src={thumbnailUrl}
+                        alt="Preview"
+                        className="w-16 h-12 object-cover rounded-lg border border-slate-200 shrink-0"
+                      />
+                    )}
+                    <input
+                      type="url"
+                      placeholder="Paste image URL (https://...)"
+                      value={thumbnailUrl}
+                      onChange={e => setThumbnailUrl(e.target.value)}
+                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:border-indigo-600 outline-none"
                     />
-                  )}
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/photo-..."
-                    value={thumbnailUrl}
-                    onChange={e => setThumbnailUrl(e.target.value)}
-                    className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:border-indigo-600 outline-none"
-                  />
+                  </div>
+                  <label className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold border border-indigo-200 cursor-pointer flex items-center justify-center space-x-1.5 shrink-0 transition-colors">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload Photo</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          try {
+                            const compressed = await compressLogoOrAvatar(file, 800);
+                            setThumbnailUrl(compressed);
+                          } catch (err) {
+                            console.error('Error compressing image:', err);
+                          }
+                        }
+                      }}
+                    />
+                  </label>
                 </div>
 
                 {/* Quick Presets */}
