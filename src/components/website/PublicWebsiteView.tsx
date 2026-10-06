@@ -881,6 +881,12 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           {(websiteCmsConfig?.newSectionVisibility?.faqs ?? true) && (
             <UniqueItFaq
               faqs={websiteFaqs}
+              supportPhone={multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}
+              whatsappNumber={websiteCmsConfig.floatingActionWidget?.whatsappNumber || academySettings.primarySupportPhone}
+              onOpenCounseling={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
             />
           )}
 
