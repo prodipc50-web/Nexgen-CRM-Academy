@@ -12,6 +12,8 @@ import {
   SnakeCtaCmsConfig,
   AdmissionBannerCmsConfig,
   PaymentMerchantsCmsConfig,
+  FreeCounselingBannerConfig,
+  ExpatTrustBannerConfig,
   LearningDeliveryFormatCard,
   AdmissionRoadmapStep,
   WebsiteSectionVisibility,
@@ -499,6 +501,41 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
     websiteCmsConfig.counselingBannerConfig?.subtitle ||
       'আপনার নাম ও মোবাইল নম্বর দিয়ে রিকোয়েস্ট পাঠান। আমাদের মেন্টর আপনাকে ফোন করে ফ্রি ক্যারিয়ার গাইডলাইন প্রদান করবেন।'
   );
+  const [counselingBannerHotline, setCounselingBannerHotline] = useState<string>(
+    websiteCmsConfig.counselingBannerConfig?.hotlineOverride || ''
+  );
+  const [counselingBannerWhatsapp, setCounselingBannerWhatsapp] = useState<string>(
+    websiteCmsConfig.counselingBannerConfig?.whatsappOverride || ''
+  );
+
+  const [expatTrustBanner, setExpatTrustBanner] = useState<ExpatTrustBannerConfig>(
+    websiteCmsConfig.expatTrustBannerConfig || {
+      enabled: true,
+      tagText: 'প্রবাসী বাংলাদেশি লার্নার্স হাব • Expat & NRI Hub',
+      title: 'প্রবাসে থেকেই শিখুন ইন-ডিমান্ড আইটি ও ফ্রিল্যান্সিং স্কিল',
+      subtitle:
+        'বিশ্বের যেকোনো দেশ থেকে আপনার সুবিধাজনক সময়ে সরাসরি ইন্টারেক্টিভ লাইভ ক্লাসে অংশ নিন অথবা দেশে থাকা পরিবারের প্রিয়জনকে স্বাবলম্বী করতে কোর্স উপহার দিন।',
+      whatsappOverride: '',
+      features: [
+        {
+          title: 'টাইমজোন ফ্রেন্ডলি লাইভ ক্লাস',
+          desc: 'মধ্যপ্রাচ্য, ইউরোপ, আমেরিকা ও মালয়েশিয়ার সময় উপযোগী স্পেশাল ইভনিং ও উইকেন্ড ব্যাচ।'
+        },
+        {
+          title: 'আন্তর্জাতিক পেমেন্ট সুবিধা',
+          desc: 'Visa, Mastercard, Amex বা এক্সচেঞ্জ রেমিট্যান্সের মাধ্যমে সরাসরি ফি পরিশোধের সুযোগ।'
+        },
+        {
+          title: 'পরিবারের জন্য গিফট এনরোলমেন্ট',
+          desc: 'প্রবাসে থেকে দেশে থাকা ভাই-বোন, সন্তান বা প্রিয়জনের জন্য সহজ ১-ক্লিক কোর্স বুকিং।'
+        },
+        {
+          title: 'ডেডিকেটেড ১-অন-১ সাপোর্ট',
+          desc: 'লাইভ ক্লাস রেকর্ডিং ও যেকোনো প্রয়োজনে হোয়াটসঅ্যাপে সার্বক্ষণিক মেন্টর সহায়তা।'
+        }
+      ]
+    }
+  );
 
   // 5. Section Heading Overrides
   const [coursesHeading, setCoursesHeading] = useState<SectionHeadingConfig>({
@@ -877,11 +914,14 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         subtitle: courseComparisonSubtitle
       },
       counselingBannerConfig: {
-        enabled: visibility.counselingBanner !== false,
+        enabled: newVisibility.freeCounselingBanner !== false,
         tagText: counselingBannerTag,
         title: counselingBannerTitle,
-        subtitle: counselingBannerSubtitle
+        subtitle: counselingBannerSubtitle,
+        hotlineOverride: counselingBannerHotline,
+        whatsappOverride: counselingBannerWhatsapp
       },
+      expatTrustBannerConfig: expatTrustBanner,
       coursesSectionConfig: coursesHeading,
       mentorsSectionConfig: mentorsHeading,
       blogSectionConfig: blogHeading,
@@ -1223,6 +1263,27 @@ export const CmsSectionsTab: React.FC<CmsSectionsTabProps> = ({ onSuccessToast }
         onChangeMapHours={hrs => {
           hasUserEditedRef.current = true;
           setMapHours(hrs);
+        }}
+        counselingBanner={{
+          enabled: newVisibility.freeCounselingBanner !== false,
+          tagText: counselingBannerTag,
+          title: counselingBannerTitle,
+          subtitle: counselingBannerSubtitle,
+          hotlineOverride: counselingBannerHotline,
+          whatsappOverride: counselingBannerWhatsapp
+        }}
+        onChangeCounselingBanner={updated => {
+          hasUserEditedRef.current = true;
+          if (updated.tagText !== undefined) setCounselingBannerTag(updated.tagText);
+          if (updated.title !== undefined) setCounselingBannerTitle(updated.title);
+          if (updated.subtitle !== undefined) setCounselingBannerSubtitle(updated.subtitle);
+          if (updated.hotlineOverride !== undefined) setCounselingBannerHotline(updated.hotlineOverride);
+          if (updated.whatsappOverride !== undefined) setCounselingBannerWhatsapp(updated.whatsappOverride);
+        }}
+        expatTrustBanner={expatTrustBanner}
+        onChangeExpatTrustBanner={updated => {
+          hasUserEditedRef.current = true;
+          setExpatTrustBanner(updated);
         }}
         onSaveAll={() => handleSaveAll()}
         saveFeedback={saveFeedback}

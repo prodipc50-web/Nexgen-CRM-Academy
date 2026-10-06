@@ -12,7 +12,9 @@ import {
   AdmissionBannerCmsConfig,
   PaymentMerchantsCmsConfig,
   PaymentMerchantItem,
-  PaymentMethodType
+  PaymentMethodType,
+  FreeCounselingBannerConfig,
+  ExpatTrustBannerConfig
 } from '../../../types';
 import {
   Sliders,
@@ -74,6 +76,10 @@ interface CmsNewHomepageSectionsEditorProps {
   onChangeMapDirections?: (val: string) => void;
   mapHours?: string;
   onChangeMapHours?: (val: string) => void;
+  counselingBanner?: FreeCounselingBannerConfig;
+  onChangeCounselingBanner?: (updated: FreeCounselingBannerConfig) => void;
+  expatTrustBanner?: ExpatTrustBannerConfig;
+  onChangeExpatTrustBanner?: (updated: ExpatTrustBannerConfig) => void;
   onSaveAll: () => void;
   saveFeedback?: boolean;
 }
@@ -105,6 +111,10 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
   onChangeMapDirections,
   mapHours,
   onChangeMapHours,
+  counselingBanner,
+  onChangeCounselingBanner,
+  expatTrustBanner,
+  onChangeExpatTrustBanner,
   onSaveAll,
   saveFeedback = false
 }) => {
@@ -122,9 +132,14 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
   const handleEnableAllSections = () => {
     onChangeNewVisibility({
       topBar: true,
+      urgencyBanner: true,
       hero: true,
+      accreditationTrust: true,
       categorySlider: true,
       popularCourses: true,
+      homepageSeminars: true,
+      freeCounselingBanner: true,
+      expatTrustBanner: true,
       exploreCategories: true,
       aboutHero: true,
       onlineCourses: true,
@@ -136,6 +151,34 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
       faqs: true,
       exclusiveSolutions: true,
       snakeCta: true,
+      admissionBanner: true,
+      locationMap: true,
+      footer: true
+    });
+  };
+
+  const handleApplyRecommendedLayout = () => {
+    onChangeNewVisibility({
+      topBar: true,
+      urgencyBanner: true,
+      hero: true,
+      accreditationTrust: true,
+      categorySlider: true,
+      popularCourses: true,
+      homepageSeminars: true,
+      freeCounselingBanner: true,
+      expatTrustBanner: true,
+      exploreCategories: true,
+      aboutHero: true,
+      onlineCourses: false, // Streamlined: courses covered in popularCourses tabs
+      successStories: true,
+      studentReviews: true,
+      whyChoose: true,
+      newsletterCta: false, // Streamlined: free counseling lead banner already captures high-intent leads
+      photoStrip: true,
+      faqs: true,
+      exclusiveSolutions: false, // Streamlined: merged with Why Choose Us
+      snakeCta: false, // Streamlined: avoid back-to-back CTA banners
       admissionBanner: true,
       locationMap: true,
       footer: true
@@ -160,16 +203,32 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
       category: 'Header'
     },
     {
-      key: 'hero',
+      key: 'urgencyBanner',
       num: 2,
+      title: 'CRO Urgency Countdown Bar',
+      subtitle: 'টপ কাউন্টডাউন টাইমার ও সীমিত আসন বুকিং নোটিশ স্ট্রিপ',
+      badge: 'Urgency',
+      category: 'Header'
+    },
+    {
+      key: 'hero',
+      num: 3,
       title: 'Hero Video & Live Search',
       subtitle: 'স্প্লিট ভিডিও থাম্বনেইল, হেডলাইন, সাবটাইটেল ও কোর্স সার্চ',
       badge: 'Core Hero',
       category: 'Hero & Courses'
     },
     {
+      key: 'accreditationTrust',
+      num: 4,
+      title: 'Accreditation & Govt Trust Strip (BTEB & ISO)',
+      subtitle: 'বাংলাদেশ কারিগরি শিক্ষা বোর্ড স্ট্যান্ডার্ড, ISO ও এসি ল্যাব ট্রাস্ট ব্যাজ',
+      badge: 'Govt Trust',
+      category: 'Hero & Courses'
+    },
+    {
       key: 'categorySlider',
-      num: 3,
+      num: 5,
       title: 'Category Slider Chips',
       subtitle: 'জনপ্রিয় কোর্স ক্যাটাগরি স্লাইডার চিপস (ডিজাইন, ওয়েব, মার্কেটিং)',
       badge: 'Interactive',
@@ -177,15 +236,39 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'popularCourses',
-      num: 4,
+      num: 6,
       title: 'Popular Courses Grid (3x3)',
       subtitle: 'সকল কোর্স, অনলাইন, অফলাইন ও প্রি-রেকর্ডেড ফিল্টার সহ গ্রিড',
       badge: 'Courses',
       category: 'Hero & Courses'
     },
     {
+      key: 'homepageSeminars',
+      num: 7,
+      title: 'Upcoming Free Seminars Showcase (Live Masterclasses)',
+      subtitle: 'আসন্ন ফ্রি ক্যারিয়ার সেমিনার ও ১-ক্লিক ফ্রি সিট বুকিং কার্ডস',
+      badge: 'Seminars',
+      category: 'Hero & Courses'
+    },
+    {
+      key: 'freeCounselingBanner',
+      num: 8,
+      title: 'Free Career Counseling Call Banner',
+      subtitle: 'সরাসরি ফোন ও লোকেশন ভিত্তিক ফ্রি কাউন্সেলিং কল রিকোয়েস্ট লিড ফর্ম',
+      badge: 'Leads',
+      category: 'Hero & Courses'
+    },
+    {
+      key: 'expatTrustBanner',
+      num: 9,
+      title: 'Expat & Overseas Learners Hub (NRI Support)',
+      subtitle: 'প্রবাসীদের জন্য স্পেশাল নাইট ব্যাচ, আন্তর্জাতিক ভিসা/মাস্টারকার্ড পেমেন্ট ও সাপোর্ট',
+      badge: 'Global NRI',
+      category: 'Trust & Community'
+    },
+    {
       key: 'exploreCategories',
-      num: 5,
+      num: 10,
       title: 'Explore Categories (4 Formats)',
       subtitle: 'অফলাইন ল্যাব, অনলাইন লাইভ, সেলফ-পেসড ও কর্পোরেট ট্রেনিং কার্ডস',
       badge: 'Delivery',
@@ -193,7 +276,7 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'aboutHero',
-      num: 6,
+      num: 11,
       title: 'About Hero & 6 Stat Counters',
       subtitle: '১২ বছরের অভিজ্ঞতা, ২০,০০০+ শিক্ষার্থী ও ৬টি লাইভ কাউন্টার',
       badge: 'Impact',
@@ -201,15 +284,15 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'onlineCourses',
-      num: 7,
-      title: 'Online Interactive Courses',
-      subtitle: 'অনলাইন লাইভ ব্যাচ ও ল্যাব ভিত্তিক স্পেশাল কোর্স সেকশন',
-      badge: 'Courses',
+      num: 12,
+      title: 'Online Interactive Courses Grid',
+      subtitle: 'অনলাইন লাইভ ব্যাচ সেকশন (💡 টিপস: পপুলার কোর্সের অনলাইন ট্যাবে অলরেডি অন্তর্ভুক্ত)',
+      badge: 'Optional Duplicate',
       category: 'Hero & Courses'
     },
     {
       key: 'successStories',
-      num: 8,
+      num: 13,
       title: 'Real Student Success Stories',
       subtitle: 'সফল ফ্রিল্যান্সার ও গ্র্যাজুয়েটদের রিয়েল ইনকাম ও ভিডিও কার্ডস',
       badge: 'Proof',
@@ -217,7 +300,7 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'studentReviews',
-      num: 9,
+      num: 14,
       title: 'Student Reviews & Ratings',
       subtitle: 'শিক্ষার্থীদের রেটিং ও অভিজ্ঞতার রিভিউ ক্যারোসেল',
       badge: 'Reviews',
@@ -225,7 +308,7 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'whyChoose',
-      num: 10,
+      num: 15,
       title: 'Why Choose NexGen Academy? (9 Cards)',
       subtitle: '১ শিক্ষার্থী ১টি কম্পিউটার, লাইফটাইম সাপোর্ট সহ ৯টি পিলার',
       badge: 'Value',
@@ -233,15 +316,15 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'newsletterCta',
-      num: 11,
+      num: 16,
       title: 'Career Counseling & Newsletter CTA',
-      subtitle: 'ফ্রি মাস্টারক্লাস ও ক্যারিয়ার কাউন্সেলিং জয়েনিং ব্যানার',
-      badge: 'Leads',
+      subtitle: 'নিউজলেটার ও ক্যারিয়ার জয়েনিং (💡 টিপস: সেকশন #৮ ফ্রি কাউন্সেলিং লিড ফর্ম সক্রিয় থাকলে এটি বন্ধ রাখলে পেজ ক্লিন থাকে)',
+      badge: 'Optional Duplicate',
       category: 'Trust & Community'
     },
     {
       key: 'photoStrip',
-      num: 12,
+      num: 17,
       title: 'Campus Life Photo Strip',
       subtitle: 'আধুনিক এসি কম্পিউটার ল্যাব ও ক্লাসরুমের বাস্তব ছবি গ্যালারি',
       badge: 'Campus',
@@ -249,31 +332,31 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'faqs',
-      num: 13,
+      num: 18,
       title: 'Frequently Asked Questions (FAQ)',
-      subtitle: 'সাধারণ প্রশ্নোত্তর ও অ্যাকর্ডিয়ন সেকশন',
+      subtitle: 'বাংলা ও ইংরেজি মিক্সড প্রশ্ন ও অ্যাকর্ডিয়ন সেকশন',
       badge: 'FAQ',
       category: 'Trust & Community'
     },
     {
       key: 'exclusiveSolutions',
-      num: 14,
+      num: 19,
       title: 'Exclusive Solutions That Set Us Apart',
-      subtitle: 'কমিউনিটি সাপোর্ট, রিয়েল প্রজেক্ট ও লাইফটাইম সাপোর্ট ৪টি পিলার',
-      badge: 'Solutions',
+      subtitle: 'কমিউনিটি সাপোর্ট ও রিয়েল প্রজেক্ট (💡 টিপস: Why Choose Us-এ অন্তর্ভুক্ত)',
+      badge: 'Optional Duplicate',
       category: 'Banners & Footer'
     },
     {
       key: 'snakeCta',
-      num: 15,
+      num: 20,
       title: 'Snake CTA Banner (So Why Delay?)',
-      subtitle: 'The best time to start is today - ওভাল এনরোলমেন্ট ব্যানার',
-      badge: 'Action CTA',
+      subtitle: 'The best time to start is today (💡 টিপস: সেকশন #২১ অ্যাডমিশন ব্যানারে কভার করা)',
+      badge: 'Optional Duplicate',
       category: 'Banners & Footer'
     },
     {
       key: 'admissionBanner',
-      num: 16,
+      num: 21,
       title: 'Admission Is Going On (40% Scholarship)',
       subtitle: 'স্পেশাল ৪০% স্কলারশিপ ব্যানার ও সেমিনার রেজিস্ট্রেশন বাটন',
       badge: 'Offer Strip',
@@ -281,7 +364,7 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'locationMap',
-      num: 17,
+      num: 22,
       title: 'Google Location Map & Directions',
       subtitle: 'ফার্মগেট ক্যাম্পাস গুগল লোকেশন ম্যাপ, মেট্রো রুট ও ভিজিটিং আওয়ার্স',
       badge: 'Location Map',
@@ -289,7 +372,7 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
     },
     {
       key: 'footer',
-      num: 18,
+      num: 23,
       title: 'Footer & Payment Merchants Strip',
       subtitle: 'ফার্মগেট ক্যাম্পাস ঠিকানা, বিকাশ/নগদ/রকেট মার্চেন্ট ও কপিরাইট',
       badge: 'Footer',
@@ -323,14 +406,23 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleApplyRecommendedLayout}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs flex items-center space-x-1.5 shadow-xs transition-all cursor-pointer hover:scale-105 active:scale-95"
+              title="অপ্রয়োজনীয় ডুপ্লিকেট সেকশন বন্ধ করে হাই-কনভার্টিং সুপার ক্লিন লেআউট চালু করুন"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+              <span>🚀 রিকমেন্ডেড ক্লিন লেআউট</span>
+            </button>
             <button
               type="button"
               onClick={handleEnableAllSections}
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center space-x-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center space-x-1.5 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>সব সেকশন চালু করুন</span>
+              <span>সব সেকশন চালু</span>
             </button>
             <button
               type="button"
@@ -942,6 +1034,241 @@ export const CmsNewHomepageSectionsEditor: React.FC<CmsNewHomepageSectionsEditor
                 placeholder="Browse Course"
                 className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
               />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5.5 FREE CAREER COUNSELING LEAD CALL BANNER */}
+      <div id="sec-freecounseling" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                Homepage Section #8 • High-Converting Lead Magnet
+              </span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                newVisibility.freeCounselingBanner ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+              }`}>
+                {newVisibility.freeCounselingBanner ? '✓ বর্তমানে হোমপেজে সক্রিয়' : '✕ লুকানো রয়েছে'}
+              </span>
+            </div>
+            <h3 className="font-black text-slate-900 text-lg flex items-center space-x-2 mt-1">
+              <Phone className="w-5 h-5 text-emerald-600" />
+              <span>Free Career Counseling Lead Call Banner (ফ্রি ক্যারিয়ার কাউন্সেলিং ও লিড ফর্ম)</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              হোমপেজে সেমিনারের নিচে প্রদর্শিত ১-ক্লিক ফ্রি ক্যারিয়ার কাউন্সেলিং কলব্যাক ফর্মের হেডিং, সাবটাইটেল ও নম্বর কাস্টমাইজ করুন।
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => toggleSection('freeCounselingBanner')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                newVisibility.freeCounselingBanner
+                  ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
+                  : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+              }`}
+            >
+              <span>{newVisibility.freeCounselingBanner ? 'সেকশন বন্ধ করুন' : 'সেকশন চালু করুন'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onSaveAll}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>সেভ করুন</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">ব্যাজ / ট্যাগ টেক্সট (Tag Badge)</label>
+            <input
+              type="text"
+              value={counselingBanner?.tagText || ''}
+              onChange={e => onChangeCounselingBanner && onChangeCounselingBanner({ ...counselingBanner, tagText: e.target.value })}
+              placeholder="১০০% ফ্রি ক্যারিয়ার কাউন্সেলিং ও গাইডলাইন"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">হটলাইন নম্বর ওভাররাইড (Optional Hotline Override)</label>
+            <input
+              type="text"
+              value={counselingBanner?.hotlineOverride || ''}
+              onChange={e => onChangeCounselingBanner && onChangeCounselingBanner({ ...counselingBanner, hotlineOverride: e.target.value })}
+              placeholder="01798444444 (খালি রাখলে মূল হেল্পলাইন ব্যবহৃত হবে)"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-bold text-slate-700 mb-1">মূল শিরোনাম (Title)</label>
+            <input
+              type="text"
+              value={counselingBanner?.title || ''}
+              onChange={e => onChangeCounselingBanner && onChangeCounselingBanner({ ...counselingBanner, title: e.target.value })}
+              placeholder="সঠিক কোর্স নির্বাচনে সিদ্ধান্ত নিতে পারছেন না?"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-bold text-slate-700 mb-1">সাবটাইটেল ও বর্ণনা (Subtitle)</label>
+            <textarea
+              rows={2}
+              value={counselingBanner?.subtitle || ''}
+              onChange={e => onChangeCounselingBanner && onChangeCounselingBanner({ ...counselingBanner, subtitle: e.target.value })}
+              placeholder="আপনার শিক্ষাগত যোগ্যতা ও আগ্রহ অনুযায়ী কোন আইটি স্কিল দিয়ে সফল ফ্রিল্যান্সিং বা জব ক্যারিয়ার গড়া সম্ভব..."
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 5.6 EXPAT & OVERSEAS LEARNERS HUB (NRI SUPPORT) */}
+      <div id="sec-expattrust" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 text-[10px] font-black uppercase tracking-wider">
+                Homepage Section #9 • Global & Overseas Outreach
+              </span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                newVisibility.expatTrustBanner ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+              }`}>
+                {newVisibility.expatTrustBanner ? '✓ বর্তমানে হোমপেজে সক্রিয়' : '✕ লুকানো রয়েছে'}
+              </span>
+            </div>
+            <h3 className="font-black text-slate-900 text-lg flex items-center space-x-2 mt-1">
+              <Compass className="w-5 h-5 text-indigo-600" />
+              <span>Expat & Overseas Learners Hub (প্রবাসী বাংলাদেশি লার্নার্স হাব কাস্টমাইজেশন)</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              প্রবাসীদের জন্য স্পেশাল নাইট ব্যাচ, আন্তর্জাতিক ভিসা/মাস্টারকার্ড পেমেন্ট ও ডেডিকেটেড হোয়াটসঅ্যাপ সাপোর্ট ব্যানার এডিট করুন।
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => toggleSection('expatTrustBanner')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                newVisibility.expatTrustBanner
+                  ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
+                  : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+              }`}
+            >
+              <span>{newVisibility.expatTrustBanner ? 'সেকশন বন্ধ করুন' : 'সেকশন চালু করুন'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onSaveAll}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>সেভ করুন</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">ব্যাজ টেক্সট (Tag Badge)</label>
+              <input
+                type="text"
+                value={expatTrustBanner?.tagText || ''}
+                onChange={e => onChangeExpatTrustBanner && onChangeExpatTrustBanner({ ...expatTrustBanner, tagText: e.target.value })}
+                placeholder="প্রবাসী বাংলাদেশি লার্নার্স হাব • Expat & NRI Hub"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">ডেডিকেটেড হোয়াটসঅ্যাপ নম্বর (Expat WhatsApp Helpline)</label>
+              <input
+                type="text"
+                value={expatTrustBanner?.whatsappOverride || ''}
+                onChange={e => onChangeExpatTrustBanner && onChangeExpatTrustBanner({ ...expatTrustBanner, whatsappOverride: e.target.value })}
+                placeholder="8801798444444"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-slate-700 mb-1">ব্যানার প্রধান শিরোনাম (Title)</label>
+              <input
+                type="text"
+                value={expatTrustBanner?.title || ''}
+                onChange={e => onChangeExpatTrustBanner && onChangeExpatTrustBanner({ ...expatTrustBanner, title: e.target.value })}
+                placeholder="প্রবাসে থেকেই শিখুন ইন-ডিমান্ড আইটি ও ফ্রিল্যান্সিং স্কিল"
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-slate-700 mb-1">সাবটাইটেল ও বিস্তারিত বিবরণ (Subtitle)</label>
+              <textarea
+                rows={2}
+                value={expatTrustBanner?.subtitle || ''}
+                onChange={e => onChangeExpatTrustBanner && onChangeExpatTrustBanner({ ...expatTrustBanner, subtitle: e.target.value })}
+                placeholder="বিশ্বের যেকোনো দেশ থেকে আপনার সুবিধাজনক সময়ে সরাসরি ইন্টারেক্টিভ লাইভ ক্লাসে অংশ নিন..."
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed"
+              />
+            </div>
+          </div>
+
+          {/* 4 Feature Points Editor */}
+          <div className="pt-2 border-t border-slate-100">
+            <h5 className="font-bold text-xs text-slate-800 mb-2">৪টি বিশেষ প্রবাসী ফিচার কার্ড (4 Expat Highlight Pillars)</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(expatTrustBanner?.features || [
+                { title: 'টাইমজোন ফ্রেন্ডলি লাইভ ক্লাস', desc: 'মধ্যপ্রাচ্য, ইউরোপ, আমেরিকা ও মালয়েশিয়ার সময় উপযোগী স্পেশাল ইভনিং ও উইকেন্ড ব্যাচ।' },
+                { title: 'আন্তর্জাতিক পেমেন্ট সুবিধা', desc: 'Visa, Mastercard, Amex বা এক্সচেঞ্জ রেমিট্যান্সের মাধ্যমে সরাসরি ফি পরিশোধের সুযোগ।' },
+                { title: 'পরিবারের জন্য গিফট এনরোলমেন্ট', desc: 'প্রবাসে থেকে দেশে থাকা ভাই-বোন, সন্তান বা প্রিয়জনের জন্য সহজ ১-ক্লিক কোর্স বুকিং।' },
+                { title: 'ডেডিকেটেড ১-অন-১ সাপোর্ট', desc: 'লাইভ ক্লাস রেকর্ডিং ও যেকোনো প্রয়োজনে হোয়াটসঅ্যাপে সার্বক্ষণিক মেন্টর সহায়তা।' }
+              ]).map((feat, idx) => (
+                <div key={idx} className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
+                      ফিচার #{idx + 1}
+                    </span>
+                    <input
+                      type="text"
+                      value={feat.title}
+                      onChange={e => {
+                        if (!onChangeExpatTrustBanner) return;
+                        const currentFeatures = [...(expatTrustBanner?.features || [
+                          { title: 'টাইমজোন ফ্রেন্ডলি লাইভ ক্লাস', desc: 'মধ্যপ্রাচ্য, ইউরোপ, আমেরিকা ও মালয়েশিয়ার সময় উপযোগী স্পেশাল ইভনিং ও উইকেন্ড ব্যাচ।' },
+                          { title: 'আন্তর্জাতিক পেমেন্ট সুবিধা', desc: 'Visa, Mastercard, Amex বা এক্সচেঞ্জ রেমিট্যান্সের মাধ্যমে সরাসরি ফি পরিশোধের সুযোগ।' },
+                          { title: 'পরিবারের জন্য গিফট এনরোলমেন্ট', desc: 'প্রবাসে থেকে দেশে থাকা ভাই-বোন, সন্তান বা প্রিয়জনের জন্য সহজ ১-ক্লিক কোর্স বুকিং।' },
+                          { title: 'ডেডিকেটেড ১-অন-১ সাপোর্ট', desc: 'লাইভ ক্লাস রেকর্ডিং ও যেকোনো প্রয়োজনে হোয়াটসঅ্যাপে সার্বক্ষণিক মেন্টর সহায়তা।' }
+                        ])];
+                        currentFeatures[idx] = { ...currentFeatures[idx], title: e.target.value };
+                        onChangeExpatTrustBanner({ ...expatTrustBanner, features: currentFeatures });
+                      }}
+                      className="flex-1 font-bold text-xs p-1 bg-white border border-slate-200 rounded-lg text-slate-900"
+                      placeholder="ফিচার শিরোনাম"
+                    />
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={feat.desc}
+                    onChange={e => {
+                      if (!onChangeExpatTrustBanner) return;
+                      const currentFeatures = [...(expatTrustBanner?.features || [
+                        { title: 'টাইমজোন ফ্রেন্ডলি লাইভ ক্লাস', desc: 'মধ্যপ্রাচ্য, ইউরোপ, আমেরিকা ও মালয়েশিয়ার সময় উপযোগী স্পেশাল ইভনিং ও উইকেন্ড ব্যাচ।' },
+                        { title: 'আন্তর্জাতিক পেমেন্ট সুবিধা', desc: 'Visa, Mastercard, Amex বা এক্সচেঞ্জ রেমিট্যান্সের মাধ্যমে সরাসরি ফি পরিশোধের সুযোগ।' },
+                        { title: 'পরিবারের জন্য গিফট এনরোলমেন্ট', desc: 'প্রবাসে থেকে দেশে থাকা ভাই-বোন, সন্তান বা প্রিয়জনের জন্য সহজ ১-ক্লিক কোর্স বুকিং।' },
+                        { title: 'ডেডিকেটেড ১-অন-১ সাপোর্ট', desc: 'লাইভ ক্লাস রেকর্ডিং ও যেকোনো প্রয়োজনে হোয়াটসঅ্যাপে সার্বক্ষণিক মেন্টর সহায়তা।' }
+                      ])];
+                      currentFeatures[idx] = { ...currentFeatures[idx], desc: e.target.value };
+                      onChangeExpatTrustBanner({ ...expatTrustBanner, features: currentFeatures });
+                    }}
+                    className="w-full text-[11px] p-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 leading-snug"
+                    placeholder="ফিচার বিবরণ"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>

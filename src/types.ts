@@ -1974,6 +1974,7 @@ export interface WebsiteCmsConfig {
   snakeCtaConfig?: SnakeCtaCmsConfig;
   admissionBannerConfig?: AdmissionBannerCmsConfig;
   paymentMerchantsConfig?: PaymentMerchantsCmsConfig;
+  expatTrustBannerConfig?: ExpatTrustBannerConfig;
 
   // Metadata & Persistence Timestamp
   updatedAt?: string;
@@ -1984,8 +1985,12 @@ export interface NewHomepageSectionVisibility {
   topBar?: boolean;
   urgencyBanner?: boolean;
   hero?: boolean;
+  accreditationTrust?: boolean;
   categorySlider?: boolean;
   popularCourses?: boolean;
+  homepageSeminars?: boolean;
+  freeCounselingBanner?: boolean;
+  expatTrustBanner?: boolean;
   exploreCategories?: boolean;
   aboutHero?: boolean;
   onlineCourses?: boolean;
@@ -2397,6 +2402,20 @@ export interface FreeCounselingBannerConfig {
   subtitle?: string;
   hotlineOverride?: string;
   whatsappOverride?: string;
+}
+
+export interface ExpatTrustBannerFeature {
+  title: string;
+  desc: string;
+}
+
+export interface ExpatTrustBannerConfig {
+  enabled?: boolean;
+  tagText?: string;
+  title?: string;
+  subtitle?: string;
+  whatsappOverride?: string;
+  features?: ExpatTrustBannerFeature[];
 }
 
 export interface SystemSnapshotMetadata {

@@ -19,12 +19,18 @@ interface FreeCounselingLeadBannerProps {
   courses: Course[];
   title?: string;
   subtitle?: string;
+  tagText?: string;
+  hotlineOverride?: string;
+  whatsappOverride?: string;
 }
 
 export const FreeCounselingLeadBanner: React.FC<FreeCounselingLeadBannerProps> = ({
   courses,
   title,
-  subtitle
+  subtitle,
+  tagText,
+  hotlineOverride,
+  whatsappOverride
 }) => {
   const { submitPublicLead, websiteCmsConfig, academySettings } = useAcademy();
 
@@ -38,11 +44,13 @@ export const FreeCounselingLeadBanner: React.FC<FreeCounselingLeadBannerProps> =
   const [errorMessage, setErrorMessage] = useState('');
 
   const hotline =
+    hotlineOverride ||
     websiteCmsConfig?.multiplePhones?.[0]?.number ||
     academySettings.primarySupportPhone ||
     (academySettings.helplines && academySettings.helplines[0]) ||
     '01798444444';
   const whatsappNumber =
+    whatsappOverride ||
     websiteCmsConfig?.marketing?.floatingWhatsAppNumber ||
     academySettings.primarySupportPhone?.replace(/[^0-9]/g, '') ||
     '8801798444444';
@@ -105,7 +113,7 @@ export const FreeCounselingLeadBanner: React.FC<FreeCounselingLeadBannerProps> =
           <div className="lg:col-span-5 space-y-3">
             <div className="inline-flex items-center space-x-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold border border-indigo-200/60">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>১০০% ফ্রি ক্যারিয়ার কাউন্সেলিং ও গাইডলাইন</span>
+              <span>{tagText || '১০০% ফ্রি ক্যারিয়ার কাউন্সেলিং ও গাইডলাইন'}</span>
             </div>
 
             <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-950 leading-tight">

@@ -56,6 +56,8 @@ import { NexgenAdmissionBanner as UniqueItAdmissionBanner } from './nexgen/Nexge
 import { UniqueItFooter } from './nexgen/NexgenFooter';
 import { UniqueItFloatingDiscount } from './nexgen/NexgenFloatingDiscount';
 import { NexgenUrgencyBanner } from './nexgen/NexgenUrgencyBanner';
+import { NexgenHomepageSeminars } from './nexgen/NexgenHomepageSeminars';
+import { NexgenExpatTrustBanner } from './nexgen/NexgenExpatTrustBanner';
 import { getVideoBlobUrl } from '../../utils/videoStorage';
 import {
   Home,
@@ -779,6 +781,16 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             />
           )}
 
+          {/* 1.5 ACCREDITATION & GOVT RECOGNITION TRUST STRIP (UY Lab Standard) */}
+          {(websiteCmsConfig?.newSectionVisibility?.accreditationTrust ?? true) && (
+            <AccreditationTrustStrip
+              onOpenCounselingModal={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
+            />
+          )}
+
           {/* 2. CATEGORY SLIDER CHIPS */}
           {(websiteCmsConfig?.newSectionVisibility?.categorySlider ?? true) && (
             <UniqueItCategorySlider
@@ -805,6 +817,43 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             />
           )}
 
+          {/* 3.5 UPCOMING FREE SEMINARS & WORKSHOPS (High-converting Funnel) */}
+          {(websiteCmsConfig?.newSectionVisibility?.homepageSeminars ?? true) && (
+            <NexgenHomepageSeminars
+              seminars={seminars}
+              onOpenSeminarReg={handleOpenSeminar}
+              onViewAllSeminars={() => navigateSubPage('seminars')}
+            />
+          )}
+
+          {/* 3.6 FREE CAREER COUNSELING & CALL REQUEST BANNER */}
+          {(websiteCmsConfig?.newSectionVisibility?.freeCounselingBanner ?? true) && (
+            <FreeCounselingLeadBanner
+              courses={courses}
+              title={websiteCmsConfig?.counselingBannerConfig?.title}
+              subtitle={websiteCmsConfig?.counselingBannerConfig?.subtitle}
+              tagText={websiteCmsConfig?.counselingBannerConfig?.tagText}
+              hotlineOverride={websiteCmsConfig?.counselingBannerConfig?.hotlineOverride}
+              whatsappOverride={websiteCmsConfig?.counselingBannerConfig?.whatsappOverride}
+            />
+          )}
+
+          {/* 3.7 EXPAT & OVERSEAS BANGLADESHI LEARNERS HUB (NRI Support) */}
+          {(websiteCmsConfig?.newSectionVisibility?.expatTrustBanner ?? true) && (
+            <NexgenExpatTrustBanner
+              onOpenAdmission={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
+              whatsappNumber={
+                websiteCmsConfig?.expatTrustBannerConfig?.whatsappOverride ||
+                websiteCmsConfig.floatingActionWidget?.whatsappNumber ||
+                academySettings.primarySupportPhone
+              }
+              config={websiteCmsConfig?.expatTrustBannerConfig}
+            />
+          )}
+
           {/* 4. EXPLORE CATEGORIES (4 Delivery Format Cards) */}
           {(websiteCmsConfig?.newSectionVisibility?.exploreCategories ?? true) && (
             <UniqueItExploreCategories
@@ -823,8 +872,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             />
           )}
 
-          {/* 6. ONLINE COURSES SECTION */}
-          {(websiteCmsConfig?.newSectionVisibility?.onlineCourses ?? true) && (
+          {/* 6. ONLINE COURSES SECTION (Streamlined: courses covered in Popular Courses tabs) */}
+          {(websiteCmsConfig?.newSectionVisibility?.onlineCourses ?? false) && (
             <UniqueItOnlineCourses
               courses={courses}
               onSelectCourseForAdmission={(c) => {
@@ -890,8 +939,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             />
           )}
 
-          {/* 13. EXCLUSIVE SOLUTIONS THAT SET US APART */}
-          {(websiteCmsConfig?.newSectionVisibility?.exclusiveSolutions ?? true) && (
+          {/* 13. EXCLUSIVE SOLUTIONS THAT SET US APART (Streamlined: merged with Why Choose Us) */}
+          {(websiteCmsConfig?.newSectionVisibility?.exclusiveSolutions ?? false) && (
             <UniqueItExclusiveSolutions
               config={websiteCmsConfig?.exclusiveSolutionsConfig}
             />
@@ -1002,8 +1051,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             </section>
           )}
 
-          {/* 15. SO WHY DELAY? THE BEST TIME TO START IS TODAY (SNAKE CTA) */}
-          {(websiteCmsConfig?.newSectionVisibility?.snakeCta ?? true) && (
+          {/* 15. SO WHY DELAY? (Streamlined: avoid dual CTA banners right before footer) */}
+          {(websiteCmsConfig?.newSectionVisibility?.snakeCta ?? false) && (
             <UniqueItSnakeCta
               config={websiteCmsConfig?.snakeCtaConfig}
               onOpenAdmission={() => {

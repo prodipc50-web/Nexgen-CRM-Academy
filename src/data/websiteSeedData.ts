@@ -1287,20 +1287,25 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
   // New Design Homepage Configurations & Section Controls
   newSectionVisibility: {
     topBar: true,
+    urgencyBanner: true,
     hero: true,
+    accreditationTrust: true,
     categorySlider: true,
     popularCourses: true,
+    homepageSeminars: true,
+    freeCounselingBanner: true,
+    expatTrustBanner: true,
     exploreCategories: true,
     aboutHero: true,
-    onlineCourses: true,
+    onlineCourses: false, // Streamlined: courses covered in popularCourses tabs
     successStories: true,
     studentReviews: true,
     whyChoose: true,
-    newsletterCta: true,
+    newsletterCta: false, // Streamlined: free counseling lead banner already captures high-intent leads
     photoStrip: true,
     faqs: true,
-    exclusiveSolutions: true,
-    snakeCta: true,
+    exclusiveSolutions: false, // Streamlined: merged with Why Choose Us
+    snakeCta: false, // Streamlined: avoid back-to-back CTA banners
     admissionBanner: true,
     locationMap: true,
     footer: true
@@ -1384,6 +1389,32 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
     subtitle: 'Limited seats per lab batch. Enroll now to secure your workstation and personal mentorship slot.',
     ctaText: 'Apply For Admission',
     discountBadge: 'Special 40% Scholarship'
+  },
+
+  expatTrustBannerConfig: {
+    enabled: true,
+    tagText: 'প্রবাসী বাংলাদেশি লার্নার্স হাব • Expat & NRI Hub',
+    title: 'প্রবাসে থেকেই শিখুন ইন-ডিমান্ড আইটি ও ফ্রিল্যান্সিং স্কিল',
+    subtitle: 'বিশ্বের যেকোনো দেশ থেকে আপনার সুবিধাজনক সময়ে সরাসরি ইন্টারেক্টিভ লাইভ ক্লাসে অংশ নিন অথবা দেশে থাকা পরিবারের প্রিয়জনকে স্বাবলম্বী করতে কোর্স উপহার দিন।',
+    whatsappOverride: '01798444444',
+    features: [
+      {
+        title: 'টাইমজোন ফ্রেন্ডলি লাইভ ক্লাস',
+        desc: 'মধ্যপ্রাচ্য, ইউরোপ, আমেরিকা ও মালয়েশিয়ার সময় উপযোগী স্পেশাল ইভনিং ও উইকেন্ড ব্যাচ।'
+      },
+      {
+        title: 'আন্তর্জাতিক পেমেন্ট সুবিধা',
+        desc: 'Visa, Mastercard, Amex বা এক্সচেঞ্জ রেমিট্যান্সের মাধ্যমে সরাসরি ফি পরিশোধের সুযোগ।'
+      },
+      {
+        title: 'পরিবারের জন্য গিফট এনরোলমেন্ট',
+        desc: 'প্রবাসে থেকে দেশে থাকা ভাই-বোন, সন্তান বা প্রিয়জনের জন্য সহজ ১-ক্লিক কোর্স বুকিং।'
+      },
+      {
+        title: 'ডেডিকেটেড ১-অন-১ সাপোর্ট',
+        desc: 'লাইভ ক্লাস রেকর্ডিং ও যেকোনো প্রয়োজনে হোয়াটসঅ্যাপে সার্বক্ষণিক মেন্টর সহায়তা।'
+      }
+    ]
   },
 
   paymentMerchantsConfig: {
