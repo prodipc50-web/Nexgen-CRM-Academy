@@ -825,6 +825,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           brandPrimary: parsed.brandPrimary !== undefined ? parsed.brandPrimary : (INITIAL_WEBSITE_CMS_CONFIG.brandPrimary || 'NexGen'),
           brandAccent: parsed.brandAccent !== undefined ? parsed.brandAccent : (INITIAL_WEBSITE_CMS_CONFIG.brandAccent || 'Computer Academy'),
           brandSubline: parsed.brandSubline !== undefined ? parsed.brandSubline : (INITIAL_WEBSITE_CMS_CONFIG.brandSubline || 'Computer Training Institute'),
+          customLogoUrl: parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.customLogoUrl,
+          headerLogoUrl: parsed.headerLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.headerLogoUrl,
+          footerLogoUrl: parsed.footerLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.footerLogoUrl,
+          logoSizeMobile: parsed.logoSizeMobile || INITIAL_WEBSITE_CMS_CONFIG.logoSizeMobile || 38,
+          logoSizeDesktop: parsed.logoSizeDesktop || INITIAL_WEBSITE_CMS_CONFIG.logoSizeDesktop || 46,
+          footerLogoSizeMobile: parsed.footerLogoSizeMobile || INITIAL_WEBSITE_CMS_CONFIG.footerLogoSizeMobile || 34,
+          footerLogoSizeDesktop: parsed.footerLogoSizeDesktop || INITIAL_WEBSITE_CMS_CONFIG.footerLogoSizeDesktop || 40,
+          logoShape: parsed.logoShape || INITIAL_WEBSITE_CMS_CONFIG.logoShape || 'contain',
           googleMapShareUrl: effectiveShareUrl,
           googleMapEmbedUrl: effectiveEmbedUrl,
           marketing: marketingConfig,
@@ -1418,6 +1426,20 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (Array.isArray(cat.seminars)) setSeminars(cat.seminars);
             if (Array.isArray(cat.publicCertificates)) setPublicCertificates(cat.publicCertificates);
           }
+        }
+      })
+      .catch(() => {});
+
+    // Fast initial fetch for dedicated /api/cms/config to guarantee latest cross-device hero video & settings
+    fetch('/api/cms/config', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then(cmsRes => {
+        if (cmsRes && cmsRes.success && cmsRes.config && typeof cmsRes.config === 'object') {
+          setWebsiteCmsConfig(prev => {
+            const merged = { ...prev, ...cmsRes.config };
+            latestWebsiteCmsConfigRef.current = merged;
+            return merged;
+          });
         }
       })
       .catch(() => {});
@@ -4452,6 +4474,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         brandPrimary: updates.brandPrimary !== undefined ? updates.brandPrimary : (prev.brandPrimary || 'NexGen'),
         brandAccent: updates.brandAccent !== undefined ? updates.brandAccent : (prev.brandAccent || 'Computer Academy'),
         brandSubline: updates.brandSubline !== undefined ? updates.brandSubline : (prev.brandSubline || 'Computer Training Institute'),
+        customLogoUrl: updates.customLogoUrl !== undefined ? updates.customLogoUrl : prev.customLogoUrl,
+        headerLogoUrl: updates.headerLogoUrl !== undefined ? updates.headerLogoUrl : prev.headerLogoUrl,
+        footerLogoUrl: updates.footerLogoUrl !== undefined ? updates.footerLogoUrl : prev.footerLogoUrl,
+        logoSizeMobile: updates.logoSizeMobile !== undefined ? updates.logoSizeMobile : prev.logoSizeMobile,
+        logoSizeDesktop: updates.logoSizeDesktop !== undefined ? updates.logoSizeDesktop : prev.logoSizeDesktop,
+        footerLogoSizeMobile: updates.footerLogoSizeMobile !== undefined ? updates.footerLogoSizeMobile : prev.footerLogoSizeMobile,
+        footerLogoSizeDesktop: updates.footerLogoSizeDesktop !== undefined ? updates.footerLogoSizeDesktop : prev.footerLogoSizeDesktop,
+        logoShape: updates.logoShape !== undefined ? updates.logoShape : prev.logoShape,
         heroVideoUrl: (updates.heroVideoUrl && (updates.heroVideoUrl.startsWith('data:video') || updates.heroVideoUrl.length > 2000))
           ? 'indexeddb:hero-video'
           : (updates.heroVideoUrl !== undefined ? updates.heroVideoUrl : prev.heroVideoUrl),
@@ -4498,6 +4528,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         },
         body: JSON.stringify(catalogToPush)
       }).catch(e => console.warn('CMS direct server sync notice:', e));
+
+      fetch('/api/cms/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(activeCms)
+      }).catch(e => console.warn('CMS direct config sync notice:', e));
 
       setDoc(doc(db, 'academy_data', 'public_catalog'), catalogToPush, { merge: true }).catch(err => {
         console.warn('CMS direct Firestore sync notice:', err);

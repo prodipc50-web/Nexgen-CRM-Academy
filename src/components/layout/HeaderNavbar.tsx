@@ -62,7 +62,9 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
     admissions,
     cloudSyncStatus,
     lastCloudSyncTime,
-    syncToCloudNow
+    syncToCloudNow,
+    academySettings,
+    websiteCmsConfig
   } = useAcademy();
   const [showQuickMenu, setShowQuickMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -98,10 +100,16 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
           </button>
         )}
         <div className="flex items-center space-x-2.5">
-          <NexgenLogo variant="crest" size={42} />
+          <NexgenLogo
+            variant="crest"
+            size={42}
+            customLogoUrl={academySettings?.customLogoUrl || websiteCmsConfig?.customLogoUrl || websiteCmsConfig?.headerLogoUrl}
+          />
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-black text-slate-900 leading-none tracking-tight">Nexgen Computer Academy</h1>
+              <h1 className="text-lg font-black text-slate-900 leading-none tracking-tight">
+                {academySettings?.instituteName || 'NexGen Computer Academy'}
+              </h1>
               <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">
                 ERP v2.6
               </span>

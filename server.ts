@@ -107,8 +107,31 @@ if (!fs.existsSync(DATA_DIR)) {
 const CATALOG_FILE = path.join(DATA_DIR, "public_catalog.json");
 const CRM_BACKUP_FILE = path.join(DATA_DIR, "crm_private_data.json");
 const LEADS_FILE = path.join(DATA_DIR, "incoming_leads.json");
+const CMS_CONFIG_FILE = path.join(DATA_DIR, "cms_config.json");
+const MEDIA_DIR = path.join(DATA_DIR, "media");
+
+if (!fs.existsSync(MEDIA_DIR)) {
+  try {
+    fs.mkdirSync(MEDIA_DIR, { recursive: true });
+  } catch (e) {
+    console.warn("Could not create media directory:", e);
+  }
+}
+
 let inMemoryCatalog: any = null;
 let inMemoryIncomingLeads: any[] = [];
+let inMemoryCmsConfig: any = null;
+
+// Load persisted CMS config on server boot if available
+if (fs.existsSync(CMS_CONFIG_FILE)) {
+  try {
+    const raw = fs.readFileSync(CMS_CONFIG_FILE, "utf-8");
+    inMemoryCmsConfig = JSON.parse(raw);
+    console.log("Loaded persistent CMS config from server storage.");
+  } catch (e) {
+    console.warn("Failed to load CMS config:", e);
+  }
+}
 
 // Load persisted catalog on server boot if available
 if (fs.existsSync(CATALOG_FILE)) {
@@ -210,6 +233,137 @@ app.post("/api/crm/backup", rateLimiter, verifyStaffAuth, (req, res) => {
     return res.json({ success: true, timestamp: new Date().toISOString() });
   } catch (err: any) {
     return res.status(500).json({ error: "Failed to backup CRM data" });
+  }
+});
+
+// GET /api/cms/config - Authoritative CMS configuration synchronized across PC and mobile
+app.get("/api/cms/config", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  if (inMemoryCmsConfig) {
+    return res.json({ success: true, config: inMemoryCmsConfig });
+  }
+  if (fs.existsSync(CMS_CONFIG_FILE)) {
+    try {
+      inMemoryCmsConfig = JSON.parse(fs.readFileSync(CMS_CONFIG_FILE, "utf-8"));
+      return res.json({ success: true, config: inMemoryCmsConfig });
+    } catch (e) {
+      console.warn("Could not read CMS config file:", e);
+    }
+  }
+  return res.json({ success: true, config: null });
+});
+
+// POST /api/cms/config - Save updated CMS configuration to server disk for cross-device synchronization
+app.post("/api/cms/config", rateLimiter, (req, res) => {
+  try {
+    const payload = req.body;
+    if (!payload || typeof payload !== "object") {
+      return res.status(400).json({ error: "Invalid CMS configuration payload" });
+    }
+
+    inMemoryCmsConfig = {
+      ...(inMemoryCmsConfig || {}),
+      ...payload,
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      fs.writeFileSync(CMS_CONFIG_FILE, JSON.stringify(inMemoryCmsConfig, null, 2), "utf-8");
+    } catch (e) {
+      console.warn("Could not write CMS config to disk:", e);
+    }
+
+    return res.json({ success: true, updatedAt: inMemoryCmsConfig.updatedAt });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to persist CMS config" });
+  }
+});
+
+// POST /api/upload-media - Upload video/image to server for cross-device streaming
+app.post("/api/upload-media", rateLimiter, (req, res) => {
+  try {
+    const { name, dataUrl } = req.body;
+    if (!dataUrl || typeof dataUrl !== "string") {
+      return res.status(400).json({ error: "Missing dataUrl in payload" });
+    }
+
+    const matches = dataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ error: "Invalid base64 data URL format" });
+    }
+
+    const mimeType = matches[1];
+    const buffer = Buffer.from(matches[2], "base64");
+
+    const ext = name && path.extname(name) ? path.extname(name).toLowerCase() : (mimeType.includes("video") ? ".mp4" : ".png");
+    const safeBaseName = (name ? path.basename(name, ext).replace(/[^a-zA-Z0-9_-]/g, "_") : "upload") || "media";
+    const finalFilename = `${safeBaseName}_${Date.now()}${ext}`;
+    const targetPath = path.join(MEDIA_DIR, finalFilename);
+
+    fs.writeFileSync(targetPath, buffer);
+    const publicUrl = `/api/media/${finalFilename}`;
+
+    return res.json({
+      success: true,
+      url: publicUrl,
+      filename: finalFilename,
+      sizeBytes: buffer.length,
+      mimeType
+    });
+  } catch (err: any) {
+    console.error("Error uploading media:", err);
+    return res.status(500).json({ error: err?.message || "Failed to upload media" });
+  }
+});
+
+// GET /api/media/:filename - Stream video/media with HTTP Range support for mobile/desktop
+app.get("/api/media/:filename", (req, res) => {
+  const safeFilename = path.basename(req.params.filename);
+  const filePath = path.join(MEDIA_DIR, safeFilename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send("Media file not found");
+  }
+
+  const stat = fs.statSync(filePath);
+  const fileSize = stat.size;
+  const ext = path.extname(safeFilename).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".ogg": "video/ogg",
+    ".mov": "video/quicktime",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml"
+  };
+  const contentType = mimeTypes[ext] || "application/octet-stream";
+
+  const range = req.headers.range;
+  if (range && contentType.startsWith("video/")) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+    const chunksize = end - start + 1;
+    const file = fs.createReadStream(filePath, { start, end });
+    const head = {
+      "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+      "Accept-Ranges": "bytes",
+      "Content-Length": chunksize,
+      "Content-Type": contentType
+    };
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      "Content-Length": fileSize,
+      "Content-Type": contentType,
+      "Accept-Ranges": "bytes"
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(filePath).pipe(res);
   }
 });
 

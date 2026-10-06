@@ -4,6 +4,7 @@ interface NexgenLogoProps {
   variant?: 'full' | 'crest' | 'icon' | 'horizontal';
   className?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number;
+  desktopSize?: number;
   showTagline?: boolean;
   customLogoUrl?: string;
   titleFontSize?: number;
@@ -13,12 +14,14 @@ interface NexgenLogoProps {
   isDarkTheme?: boolean;
   titleClassName?: string;
   taglineClassName?: string;
+  shape?: 'contain' | 'square' | 'wide';
 }
 
 export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   variant = 'full',
   className = '',
   size = 'md',
+  desktopSize,
   showTagline = true,
   customLogoUrl,
   titleFontSize,
@@ -27,7 +30,8 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   tagline,
   isDarkTheme = false,
   titleClassName,
-  taglineClassName
+  taglineClassName,
+  shape = 'contain'
 }) => {
   const [logoSrc, setLogoSrc] = useState<string | null>(customLogoUrl || null);
   const [imageError, setImageError] = useState(false);
@@ -42,6 +46,43 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     logoFontSize: 16,
     taglineFontSize: 11
   });
+
+  const resolveCustomLogo = () => {
+    if (customLogoUrl) {
+      setLogoSrc(customLogoUrl);
+      setImageError(false);
+      return;
+    }
+    const stored = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+    if (stored) {
+      setLogoSrc(stored);
+      setImageError(false);
+      return;
+    }
+    try {
+      const storedSettings = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings');
+      if (storedSettings) {
+        const parsed = JSON.parse(storedSettings);
+        if (parsed.customLogoUrl) {
+          setLogoSrc(parsed.customLogoUrl);
+          setImageError(false);
+          return;
+        }
+      }
+      const storedCms = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_website_cms_config');
+      if (storedCms) {
+        const parsedCms = JSON.parse(storedCms);
+        if (parsedCms.customLogoUrl || parsedCms.headerLogoUrl) {
+          setLogoSrc(parsedCms.customLogoUrl || parsedCms.headerLogoUrl);
+          setImageError(false);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setLogoSrc(null);
+  };
 
   useEffect(() => {
     try {
@@ -58,34 +99,16 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     } catch (e) {
       console.error(e);
     }
-  }, []);
+    resolveCustomLogo();
+  }, [customLogoUrl]);
 
   useEffect(() => {
     const handleUpdate = () => {
-      const stored = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
-      if (stored) {
-        setLogoSrc(stored);
-        setImageError(false);
-      } else {
-        setLogoSrc(null);
-      }
+      resolveCustomLogo();
     };
 
     window.addEventListener('nexgen-logo-updated', handleUpdate);
     return () => window.removeEventListener('nexgen-logo-updated', handleUpdate);
-  }, []);
-
-  useEffect(() => {
-    if (customLogoUrl) {
-      setLogoSrc(customLogoUrl);
-      setImageError(false);
-    } else {
-      const stored = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
-      if (stored) {
-        setLogoSrc(stored);
-        setImageError(false);
-      }
-    }
   }, [customLogoUrl]);
   // Size mapper
   let dimension = 48;
@@ -401,28 +424,90 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     </svg>
   );
 
+  const effectiveMobileDim = dimension;
+  const effectiveDesktopDim = desktopSize || (typeof size === 'number' ? Math.round(size * 1.15) : dimension);
+
   // If custom logo image is provided and valid
-  const CustomImageLogo = ({ width = dimension, height = dimension }: { width?: number; height?: number }) => (
-    <img
-      src={logoSrc!}
-      alt="Institute Logo"
-      referrerPolicy="no-referrer"
-      onError={() => setImageError(true)}
-      style={{ width: `${width}px`, height: `${height}px` }}
-      className="object-contain shrink-0 drop-shadow-xs"
-    />
-  );
+  const CustomImageLogo = ({
+    mobileDim = effectiveMobileDim,
+    desktopDim = effectiveDesktopDim,
+    width,
+    height
+  }: {
+    mobileDim?: number;
+    desktopDim?: number;
+    width?: number;
+    height?: number;
+  }) => {
+    const isSquare = shape === 'square';
+    const isWide = shape === 'wide';
+    const effectiveMob = width || mobileDim;
+    const effectiveDesk = width || desktopDim;
+
+    return (
+      <div className="inline-flex items-center justify-center shrink-0 select-none">
+        {/* Mobile View */}
+        <div
+          className="sm:hidden inline-flex items-center justify-center"
+          style={{
+            height: height ? `${height}px` : `${effectiveMob}px`,
+            maxWidth: isSquare ? `${effectiveMob}px` : isWide ? `${Math.round(effectiveMob * 3.5)}px` : `${Math.round(effectiveMob * 2.8)}px`
+          }}
+        >
+          <img
+            src={logoSrc!}
+            alt={instituteName || 'Institute Logo'}
+            referrerPolicy="no-referrer"
+            onError={() => setImageError(true)}
+            style={{
+              maxHeight: height ? `${height}px` : `${effectiveMob}px`,
+              maxWidth: isSquare ? `${effectiveMob}px` : isWide ? `${Math.round(effectiveMob * 3.5)}px` : `${Math.round(effectiveMob * 2.8)}px`
+            }}
+            className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 drop-shadow-xs"
+          />
+        </div>
+
+        {/* Desktop View (sm+) */}
+        <div
+          className="hidden sm:inline-flex items-center justify-center"
+          style={{
+            height: height ? `${height}px` : `${effectiveDesk}px`,
+            maxWidth: isSquare ? `${effectiveDesk}px` : isWide ? `${Math.round(effectiveDesk * 3.5)}px` : `${Math.round(effectiveDesk * 2.8)}px`
+          }}
+        >
+          <img
+            src={logoSrc!}
+            alt={instituteName || 'Institute Logo'}
+            referrerPolicy="no-referrer"
+            onError={() => setImageError(true)}
+            style={{
+              maxHeight: height ? `${height}px` : `${effectiveDesk}px`,
+              maxWidth: isSquare ? `${effectiveDesk}px` : isWide ? `${Math.round(effectiveDesk * 3.5)}px` : `${Math.round(effectiveDesk * 2.8)}px`
+            }}
+            className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 drop-shadow-xs"
+          />
+        </div>
+      </div>
+    );
+  };
 
   const hasCustomImg = !!logoSrc && !imageError;
 
   // Variant routing
   if (variant === 'crest' || variant === 'icon') {
     return (
-      <div className={`inline-flex items-center justify-center ${className}`}>
+      <div className={`inline-flex items-center justify-center shrink-0 ${className}`}>
         {hasCustomImg ? (
-          <CustomImageLogo width={dimension} height={dimension} />
+          <CustomImageLogo mobileDim={effectiveMobileDim} desktopDim={effectiveDesktopDim} />
         ) : (
-          <CrestOnly width={dimension} height={dimension} />
+          <>
+            <span className="sm:hidden inline-flex items-center justify-center">
+              <CrestOnly width={effectiveMobileDim} height={effectiveMobileDim} />
+            </span>
+            <span className="hidden sm:inline-flex items-center justify-center">
+              <CrestOnly width={effectiveDesktopDim} height={effectiveDesktopDim} />
+            </span>
+          </>
         )}
       </div>
     );
@@ -436,7 +521,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     return (
       <div className={`inline-flex items-center space-x-2.5 sm:space-x-3.5 max-w-full ${className}`}>
         {hasCustomImg ? (
-          <CustomImageLogo width={dimension} height={dimension} />
+          <CustomImageLogo mobileDim={effectiveMobileDim} desktopDim={effectiveDesktopDim} />
         ) : (
           <CrestOnly width={dimension} height={dimension} />
         )}

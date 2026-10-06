@@ -3,7 +3,7 @@ import { MapPin, Phone, Mail, Facebook, Youtube, Instagram, Twitter, ShieldCheck
 import { WebsiteSubPage, Course, PaymentMerchantsCmsConfig } from '../../../types';
 import { NexgenLogo } from '../../common/NexgenLogo';
 
-interface UniqueItFooterProps {
+interface NexgenFooterProps {
   onNavigateSubPage: (page: WebsiteSubPage) => void;
   onOpenStudentLogin: () => void;
   onOpenStudentRegister: () => void;
@@ -13,6 +13,10 @@ interface UniqueItFooterProps {
   brandPrimary?: string;
   brandAccent?: string;
   brandSubline?: string;
+  customLogoUrl?: string;
+  footerLogoSizeMobile?: number;
+  footerLogoSizeDesktop?: number;
+  logoShape?: 'contain' | 'square' | 'wide';
   officialAddress?: string;
   officialEmail?: string;
   primaryPhone?: string;
@@ -21,7 +25,7 @@ interface UniqueItFooterProps {
   paymentMerchantsConfig?: PaymentMerchantsCmsConfig;
 }
 
-export const NexgenFooter: React.FC<UniqueItFooterProps> = ({
+export const NexgenFooter: React.FC<NexgenFooterProps> = ({
   onNavigateSubPage,
   onOpenStudentLogin,
   onOpenStudentRegister,
@@ -31,6 +35,10 @@ export const NexgenFooter: React.FC<UniqueItFooterProps> = ({
   brandPrimary = 'NexGen',
   brandAccent = 'Computer Academy',
   brandSubline = 'Computer Training Institute',
+  customLogoUrl,
+  footerLogoSizeMobile,
+  footerLogoSizeDesktop,
+  logoShape,
   officialAddress = 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215',
   officialEmail = 'info@nexgenacademy.edu.bd',
   primaryPhone = '01798444444',
@@ -356,20 +364,28 @@ export const NexgenFooter: React.FC<UniqueItFooterProps> = ({
       {/* Bottom Copyright & Socials */}
       <div className="bg-[#030d1c] py-6">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Logo */}
-          <div className="flex items-center space-x-2.5">
-            <NexgenLogo variant="crest" size={30} className="shrink-0 sm:w-[34px] sm:h-[34px]" isDarkTheme />
-            <div className="flex flex-col justify-center">
-              {/* 2-line layout on mobile, 1-line on sm+ */}
-              <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 leading-tight sm:leading-none">
-                <span className="text-[12px] sm:text-base md:text-lg font-black text-white tracking-tight leading-tight">
+          {/* Logo & Brand text */}
+          <div className="flex items-center space-x-2.5 sm:space-x-3">
+            <NexgenLogo
+              variant="crest"
+              size={footerLogoSizeMobile || 34}
+              desktopSize={footerLogoSizeDesktop || 40}
+              customLogoUrl={customLogoUrl}
+              shape={logoShape || 'contain'}
+              className="shrink-0"
+              isDarkTheme
+            />
+            <div className="flex flex-col justify-center min-w-0">
+              {/* Single clean line for brand name (not broken into 2 lines) */}
+              <div className="flex flex-row items-baseline space-x-1.5 leading-none whitespace-nowrap">
+                <span className="text-xs sm:text-sm md:text-base font-black text-white tracking-tight leading-none whitespace-nowrap">
                   {brandPrimary}
                 </span>
-                <span className="text-[11px] sm:text-base md:text-lg font-black text-[#dc143c] tracking-tight leading-tight">
+                <span className="text-xs sm:text-sm md:text-base font-black text-[#dc143c] tracking-tight leading-none whitespace-nowrap">
                   {brandAccent}
                 </span>
               </div>
-              <span className="text-[7px] sm:text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 sm:mt-1 truncate max-w-[160px] sm:max-w-none">
+              <span className="text-[7.5px] sm:text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 truncate max-w-[200px] sm:max-w-none">
                 {brandSubline}
               </span>
             </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle2, BookOpen, Laptop, Sparkles, Search, Play, ChevronDown } from 'lucide-react';
 import { WebsiteSubPage } from '../../../types';
 
-interface UniqueItHeroProps {
+interface NexgenHeroProps {
   categories?: string[];
   headline?: string;
   subtitle?: string;
@@ -20,7 +20,7 @@ interface UniqueItHeroProps {
   onPlayVideo?: () => void;
 }
 
-export const NexgenHero: React.FC<UniqueItHeroProps> = ({
+export const NexgenHero: React.FC<NexgenHeroProps> = ({
   categories = [
     'All',
     'Graphic Design',

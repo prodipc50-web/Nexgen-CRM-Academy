@@ -77,6 +77,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     resetToSeedData,
     academySettings,
     updateAcademySettings,
+    websiteCmsConfig,
+    updateWebsiteCmsConfig,
     leadSourcesList,
     addLeadSource,
     updateLeadSource,
@@ -1579,8 +1581,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
             
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
               <div className="flex items-center space-x-3.5">
-                <div className="p-2.5 bg-slate-50 rounded-2xl border border-slate-200 shadow-2xs">
-                  <NexgenLogo variant="crest" size={54} />
+                <div className="p-2 bg-slate-50 rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-center">
+                  <NexgenLogo
+                    variant="crest"
+                    size={54}
+                    customLogoUrl={academySettings.customLogoUrl || (typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO') || undefined : undefined)}
+                  />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-900">Active Academy Logo</p>
@@ -1589,13 +1595,40 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+                <label className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl shadow-2xs inline-flex items-center space-x-1.5 transition-colors cursor-pointer border border-slate-200">
+                  <Upload className="w-4 h-4 text-indigo-600" />
+                  <span>Direct Upload (ফাইল আপলোড)</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 5 * 1024 * 1024) {
+                        alert('লোগো সাইজ ৫MB এর বেশি হওয়া যাবে না।');
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const res = reader.result as string;
+                        localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', res);
+                        window.dispatchEvent(new Event('nexgen-logo-updated'));
+                        updateAcademySettings({ customLogoUrl: res });
+                        updateWebsiteCmsConfig({ customLogoUrl: res, headerLogoUrl: res, footerLogoUrl: res });
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+
                 <button
                   type="button"
                   onClick={() => setIsLogoCropModalOpen(true)}
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow-xs inline-flex items-center space-x-1.5 transition-colors"
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow-xs inline-flex items-center space-x-1.5 transition-colors cursor-pointer"
                 >
                   <Crop className="w-4 h-4" />
-                  <span>Manual Crop & Resize Logo (লোগো ক্রপ ও রিসাইজ)</span>
+                  <span>Manual Crop & Resize (ক্রপ ও সাইজ)</span>
                 </button>
 
                 {localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO') && (
@@ -1606,12 +1639,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                         localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
                         window.dispatchEvent(new Event('nexgen-logo-updated'));
                         updateAcademySettings({ customLogoUrl: '' });
+                        updateWebsiteCmsConfig({ customLogoUrl: '', headerLogoUrl: '', footerLogoUrl: '' });
                       }
                     }}
-                    className="px-3.5 py-2.5 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs rounded-xl transition-colors inline-flex items-center space-x-1"
+                    className="px-3 py-2.5 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs rounded-xl transition-colors inline-flex items-center space-x-1 cursor-pointer"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Reset Logo</span>
+                    <span>Reset</span>
                   </button>
                 )}
               </div>

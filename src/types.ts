@@ -1907,6 +1907,14 @@ export interface WebsiteCmsConfig {
   brandPrimary?: string; // e.g. "NexGen"
   brandAccent?: string; // e.g. "Computer Academy"
   brandSubline?: string; // e.g. "Computer Training Institute"
+  customLogoUrl?: string; // Global custom logo url
+  headerLogoUrl?: string;
+  footerLogoUrl?: string;
+  logoSizeMobile?: number; // Header logo size in px on mobile (default: 38)
+  logoSizeDesktop?: number; // Header logo size in px on desktop (default: 46)
+  footerLogoSizeMobile?: number; // Footer logo size in px on mobile (default: 34)
+  footerLogoSizeDesktop?: number; // Footer logo size in px on desktop (default: 40)
+  logoShape?: 'contain' | 'square' | 'wide'; // Logo fit display style
 
   // 8. Section Visibility Controls (Show/Hide any section on the public site)
   sectionVisibility?: WebsiteSectionVisibility;

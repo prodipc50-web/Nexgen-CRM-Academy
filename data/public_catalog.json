@@ -1105,6 +1105,10 @@
     "heroSubtitle": "Master in-demand IT skills from top industry practitioners. 100% practical lab sessions, live freelance mentorship & verified corporate job placement assistance in Dhaka.",
     "heroBadgeText": "Govt. Recognized IT Training Institute • Dhaka, Bangladesh",
     "heroCtaText": "Explore Courses & Get Free Counseling",
+    "heroVideoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "heroVideoBadgeText": "NexGen Academy Campus",
+    "heroVideoThumbnailUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80",
+    "heroVideoCaption": "সরাসরি ফার্মগেট ক্যাম্পাসে প্র্যাকটিক্যাল ল্যাব ও অনলাইন ক্লাস",
     "heroStats": {
       "totalTrained": "8,500+",
       "successRate": "96.4%",

@@ -33,14 +33,14 @@ export const NexgenSuccessStories: React.FC<UniqueItSuccessStoriesProps> = ({
       title: 'Top-Rated Freelancer Story',
       role: 'UI/UX & Brand Identity Designer',
       thumbnail: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
-      videoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8'
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
     },
     {
       id: '4',
       title: 'Digital Marketing Specialist Story',
       role: 'Agency SEO & Media Buyer',
       thumbnail: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80',
-      videoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8'
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
     }
   ];
 

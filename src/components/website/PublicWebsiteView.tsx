@@ -304,18 +304,18 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             createdBlobUrl = url;
             setResolvedHeroVideoUrl(url);
           } else {
-            setResolvedHeroVideoUrl('https://www.youtube.com/embed/y9jMfwwsqf8');
+            setResolvedHeroVideoUrl('https://www.youtube.com/embed/dQw4w9WgXcQ');
           }
           setIsVideoLoading(false);
         }
       }).catch(() => {
         if (active) {
-          setResolvedHeroVideoUrl('https://www.youtube.com/embed/y9jMfwwsqf8');
+          setResolvedHeroVideoUrl('https://www.youtube.com/embed/dQw4w9WgXcQ');
           setIsVideoLoading(false);
         }
       });
     } else {
-      setResolvedHeroVideoUrl(rawUrl || 'https://www.youtube.com/embed/y9jMfwwsqf8');
+      setResolvedHeroVideoUrl(rawUrl || 'https://www.youtube.com/embed/dQw4w9WgXcQ');
       setIsVideoLoading(false);
     }
     return () => {
@@ -606,6 +606,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         brandPrimary={brandPrimary}
         brandAccent={brandAccent}
         brandSubline={brandSubline}
+        customLogoUrl={websiteCmsConfig?.customLogoUrl || websiteCmsConfig?.headerLogoUrl || academySettings?.customLogoUrl}
+        logoSizeMobile={websiteCmsConfig?.logoSizeMobile || 38}
+        logoSizeDesktop={websiteCmsConfig?.logoSizeDesktop || 46}
+        logoShape={websiteCmsConfig?.logoShape || 'contain'}
         activeSubPage={activeSubPage}
         onNavigateSubPage={navigateSubPage}
         onOpenAdmission={() => {
@@ -740,7 +744,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               primaryCtaText={websiteCmsConfig?.heroPrimaryCtaText}
               secondaryCtaText={websiteCmsConfig?.heroSecondaryCtaText}
               admissionCtaText={websiteCmsConfig?.heroCtaText}
-              videoUrl={resolvedHeroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8"}
+              videoUrl={resolvedHeroVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ"}
               videoThumbnailUrl={websiteCmsConfig?.heroVideoThumbnailUrl || "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80"}
               videoBadgeText={websiteCmsConfig?.heroVideoBadgeText || `${academySettings.instituteName || 'NexGen'} Campus`}
               videoCaptionText={websiteCmsConfig?.heroVideoCaption || "সরাসরি ফার্মগেট ক্যাম্পাসে প্র্যাকটিক্যাল ল্যাব ও অনলাইন ক্লাস"}
@@ -1017,6 +1021,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           brandPrimary={brandPrimary}
           brandAccent={brandAccent}
           brandSubline={brandSubline}
+          customLogoUrl={websiteCmsConfig?.customLogoUrl || websiteCmsConfig?.footerLogoUrl || websiteCmsConfig?.headerLogoUrl || academySettings?.customLogoUrl}
+          footerLogoSizeMobile={websiteCmsConfig?.footerLogoSizeMobile || 34}
+          footerLogoSizeDesktop={websiteCmsConfig?.footerLogoSizeDesktop || 40}
+          logoShape={websiteCmsConfig?.logoShape || 'contain'}
           officialAddress={academySettings.officialAddress || 'Level-4, Farmgate Super Market, Farmgate, Dhaka-1215'}
           officialEmail={academySettings.officialEmail || 'info@nexgenacademy.edu.bd'}
           primaryPhone={multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}
@@ -1059,7 +1067,7 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               />
             ) : (
               <iframe
-                src={formatMediaEmbedUrl(resolvedHeroVideoUrl || "https://www.youtube.com/embed/y9jMfwwsqf8", true)}
+                src={formatMediaEmbedUrl(resolvedHeroVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ", true)}
                 title="NexGen Computer Academy Video"
                 className="w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

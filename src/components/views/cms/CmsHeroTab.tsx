@@ -24,7 +24,9 @@ import {
   Search,
   FileVideo,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Smartphone,
+  Monitor
 } from 'lucide-react';
 import { LogoCropResizeModal } from '../../common/LogoCropResizeModal';
 import { ImageUploadCropModal } from '../../common/ImageUploadCropModal';
@@ -64,6 +66,16 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
   );
   const [headerEstText, setHeaderEstText] = useState(websiteCmsConfig.headerEstText || 'EST. 2018');
   const [brandSavedFeedback, setBrandSavedFeedback] = useState(false);
+  const [customLogoUrl, setCustomLogoUrl] = useState(
+    websiteCmsConfig.customLogoUrl || websiteCmsConfig.headerLogoUrl || academySettings.customLogoUrl || ''
+  );
+  const [logoSizeMobile, setLogoSizeMobile] = useState<number>(websiteCmsConfig.logoSizeMobile || 38);
+  const [logoSizeDesktop, setLogoSizeDesktop] = useState<number>(websiteCmsConfig.logoSizeDesktop || 46);
+  const [footerLogoSizeMobile, setFooterLogoSizeMobile] = useState<number>(websiteCmsConfig.footerLogoSizeMobile || 34);
+  const [footerLogoSizeDesktop, setFooterLogoSizeDesktop] = useState<number>(websiteCmsConfig.footerLogoSizeDesktop || 40);
+  const [logoShape, setLogoShape] = useState<'contain' | 'square' | 'wide'>(websiteCmsConfig.logoShape || 'contain');
+  const [previewDeviceMode, setPreviewDeviceMode] = useState<'mobile' | 'desktop'>('mobile');
+  const logoFileInputRef = useRef<HTMLInputElement>(null);
   const [isLogoCropModalOpen, setIsLogoCropModalOpen] = useState(false);
   const [isThumbnailCropModalOpen, setIsThumbnailCropModalOpen] = useState(false);
   const [isVideoTestModalOpen, setIsVideoTestModalOpen] = useState(false);
@@ -125,14 +137,41 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       if (localVideoPreviewUrl) {
         URL.revokeObjectURL(localVideoPreviewUrl);
       }
-      // Store into asynchronous IndexedDB blob store: zero localStorage explosion, zero browser freeze!
-      const key = await saveVideoBlob('hero-video', file, file.name);
+      
       const previewUrl = URL.createObjectURL(file);
       hasUserEditedRef.current = true;
       setLocalVideoPreviewUrl(previewUrl);
+
+      // 1. First save to IndexedDB as local instant buffer
+      const indexedDbKey = await saveVideoBlob('hero-video', file, file.name);
+
+      // 2. Upload to server disk (/api/upload-media) so video streams smoothly on mobile and cross-device
+      let serverVideoUrl = indexedDbKey;
+      try {
+        const reader = new FileReader();
+        const readPromise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Failed to read video file'));
+        });
+        reader.readAsDataURL(file);
+        const dataUrl = await readPromise;
+
+        const uploadRes = await fetch('/api/upload-media', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: file.name, dataUrl })
+        });
+        const uploadJson = await uploadRes.json();
+        if (uploadJson.success && uploadJson.url) {
+          serverVideoUrl = uploadJson.url;
+        }
+      } catch (uploadErr) {
+        console.warn('Server media upload fallback notice:', uploadErr);
+      }
+
       setFormData(prev => ({
         ...prev,
-        heroVideoUrl: key
+        heroVideoUrl: serverVideoUrl
       }));
       setVideoFileMeta({
         name: file.name,
@@ -140,7 +179,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       });
       setVideoSourceType('upload');
       setIsProcessingVideo(false);
-      onSuccessToast(`ভিডিও সফলভাবে সংরক্ষিত হয়েছে: ${file.name} (${sizeInMb.toFixed(1)} MB)। মেমরি অপটিমাইজড ও ব্রাউজার ফাস্ট থাকবে!`);
+      onSuccessToast(`ভিডিও সফলভাবে আপলোড ও সংরক্ষিত হয়েছে: ${file.name} (${sizeInMb.toFixed(1)} MB)। মোবাইল ও পিসি সব জায়গায় মসৃণভাবে চলবে!`);
     } catch (err: any) {
       setIsProcessingVideo(false);
       setVideoUploadError('ভিডিও ফাইলটি সেভ করতে সমস্যা হয়েছে: ' + (err?.message || 'Error'));
@@ -154,9 +193,10 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       URL.revokeObjectURL(localVideoPreviewUrl);
       setLocalVideoPreviewUrl(null);
     }
+    const defaultUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
     setFormData(prev => ({
       ...prev,
-      heroVideoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8'
+      heroVideoUrl: defaultUrl
     }));
     setVideoFileMeta(null);
     setVideoSourceType('youtube');
@@ -185,19 +225,81 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     if (e) e.preventDefault();
     const resolvedFullName = `${brandPrimary.trim()} ${brandAccent.trim()}`.trim();
     if (resolvedFullName) {
-      updateAcademySettings({ instituteName: resolvedFullName });
+      updateAcademySettings({
+        instituteName: resolvedFullName,
+        customLogoUrl: customLogoUrl.trim()
+      });
       setHeaderBrandName(resolvedFullName);
+    } else {
+      updateAcademySettings({
+        customLogoUrl: customLogoUrl.trim()
+      });
     }
+
+    if (customLogoUrl.trim()) {
+      localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', customLogoUrl.trim());
+    } else {
+      localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+    }
+    window.dispatchEvent(new Event('nexgen-logo-updated'));
+
     updateWebsiteCmsConfig({
       brandPrimary: brandPrimary.trim(),
       brandAccent: brandAccent.trim(),
       brandSubline: brandSubline.trim(),
       headerSubtitle: brandSubline.trim() || headerSubtitle.trim(),
-      headerEstText: headerEstText.trim()
+      headerEstText: headerEstText.trim(),
+      customLogoUrl: customLogoUrl.trim(),
+      headerLogoUrl: customLogoUrl.trim(),
+      footerLogoUrl: customLogoUrl.trim(),
+      logoSizeMobile: Number(logoSizeMobile) || 38,
+      logoSizeDesktop: Number(logoSizeDesktop) || 46,
+      footerLogoSizeMobile: Number(footerLogoSizeMobile) || 34,
+      footerLogoSizeDesktop: Number(footerLogoSizeDesktop) || 40,
+      logoShape: logoShape
     });
     setBrandSavedFeedback(true);
     setTimeout(() => setBrandSavedFeedback(false), 3000);
-    onSuccessToast('হেডার ও ফুটার ব্র্যান্ডিং (NexGen Computer Academy & Computer Training Institute) সফলভাবে সংরক্ষিত হয়েছে!');
+    onSuccessToast('লোগো, সাইজ ও ব্র্যান্ডিং সফলভাবে সংরক্ষিত ও লাইভ হয়েছে!');
+  };
+
+  const handleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('লোগো ইমেজ ফাইলের সাইজ ৫MB এর বেশি হওয়া যাবে না।');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setCustomLogoUrl(result);
+      localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', result);
+      window.dispatchEvent(new Event('nexgen-logo-updated'));
+      updateAcademySettings({ customLogoUrl: result });
+      updateWebsiteCmsConfig({
+        customLogoUrl: result,
+        headerLogoUrl: result,
+        footerLogoUrl: result
+      });
+      onSuccessToast('কাস্টম লোগো তাৎক্ষণিকভাবে আপলোড ও লাইভ যুক্ত হয়েছে!');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetLogoToEmblem = () => {
+    if (confirm('অফিসিয়াল ডিফল্ট NexGen শিল্ড এমব্লেমে রিসেট করতে চান?')) {
+      setCustomLogoUrl('');
+      localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+      window.dispatchEvent(new Event('nexgen-logo-updated'));
+      updateAcademySettings({ customLogoUrl: '' });
+      updateWebsiteCmsConfig({
+        customLogoUrl: '',
+        headerLogoUrl: '',
+        footerLogoUrl: ''
+      });
+      onSuccessToast('অফিসিয়াল NexGen শিল্ড এমব্লেম রিস্টোর হয়েছে!');
+    }
   };
 
   const [formData, setFormData] = useState({
@@ -209,7 +311,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     heroPrimaryCtaText: websiteCmsConfig.heroPrimaryCtaText || 'Online Course',
     heroSecondaryCtaText: websiteCmsConfig.heroSecondaryCtaText || 'Offline Course',
     heroCtaText: websiteCmsConfig.heroCtaText || 'Admission Now',
-    heroVideoUrl: websiteCmsConfig.heroVideoUrl || 'https://www.youtube.com/embed/y9jMfwwsqf8',
+    heroVideoUrl: websiteCmsConfig.heroVideoUrl || 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     heroVideoBadgeText: websiteCmsConfig.heroVideoBadgeText || 'NexGen Academy Campus',
     heroVideoThumbnailUrl:
       websiteCmsConfig.heroVideoThumbnailUrl ||
@@ -253,7 +355,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       heroPrimaryCtaText: websiteCmsConfig.heroPrimaryCtaText || 'Online Course',
       heroSecondaryCtaText: websiteCmsConfig.heroSecondaryCtaText || 'Offline Course',
       heroCtaText: websiteCmsConfig.heroCtaText || 'Admission Now',
-      heroVideoUrl: websiteCmsConfig.heroVideoUrl || 'https://www.youtube.com/embed/y9jMfwwsqf8',
+      heroVideoUrl: websiteCmsConfig.heroVideoUrl || 'https://www.youtube.com/embed/dQw4w9WgXcQ',
       heroVideoBadgeText: websiteCmsConfig.heroVideoBadgeText || 'NexGen Academy Campus',
       heroVideoThumbnailUrl:
         websiteCmsConfig.heroVideoThumbnailUrl ||
@@ -303,6 +405,14 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       brandSubline: brandSubline.trim(),
       headerSubtitle: brandSubline.trim() || headerSubtitle.trim(),
       headerEstText: headerEstText.trim(),
+      customLogoUrl: customLogoUrl.trim(),
+      headerLogoUrl: customLogoUrl.trim(),
+      footerLogoUrl: customLogoUrl.trim(),
+      logoSizeMobile: Number(logoSizeMobile) || 38,
+      logoSizeDesktop: Number(logoSizeDesktop) || 46,
+      footerLogoSizeMobile: Number(footerLogoSizeMobile) || 34,
+      footerLogoSizeDesktop: Number(footerLogoSizeDesktop) || 40,
+      logoShape: logoShape,
       heroHeadline: formData.heroHeadline,
       heroSubtitle: formData.heroSubtitle,
       heroBadgeText: formData.heroBadgeText,
@@ -574,7 +684,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                       type="button"
                       onClick={() => {
                         hasUserEditedRef.current = true;
-                        setFormData({ ...formData, heroVideoUrl: 'https://www.youtube.com/embed/y9jMfwwsqf8' });
+                        setFormData({ ...formData, heroVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' });
                         onSuccessToast('ডিফল্ট ক্যাম্পাস ইউটিউব ভিডিও রিসেট হয়েছে');
                       }}
                       className="text-[10px] text-indigo-600 font-bold hover:underline cursor-pointer"
@@ -595,7 +705,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                         setFormData(prev => ({ ...prev, heroVideoUrl: formatted }));
                       }
                     }}
-                    placeholder="e.g. https://www.youtube.com/watch?v=y9jMfwwsqf8 বা embed লিংক"
+                    placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ বা embed লিংক"
                     className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl font-mono text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
                   <p className="text-[10px] text-slate-400">
@@ -853,77 +963,298 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       </div>
 
       {/* 2. WEBSITE HEADER BRANDING, LOGO & CAMPUS TAGLINE EDITOR */}
-      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        {/* Hidden File Input for Direct Logo Upload */}
+        <input
+          type="file"
+          ref={logoFileInputRef}
+          onChange={handleLogoFileUpload}
+          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+          className="hidden"
+        />
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
             <h4 className="text-sm sm:text-base font-black text-slate-900 flex items-center space-x-2">
               <span className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-black shrink-0">
                 🏷️
               </span>
-              <span>Website Top Header Branding & Logo (হেডার ব্র্যান্ডিং ও লোগো এডিটর)</span>
+              <span>Header & Footer Branding, Logo & Manual Sizing (লোগো ও ব্র্যান্ডিং কন্ট্রোল)</span>
             </h4>
             <p className="text-xs text-slate-500 mt-1">
-              ওয়েবসাইটের একদম উপরে নেভিগেশন বারে প্রদর্শিত লোগো, প্রতিষ্ঠানের নাম, প্রতিষ্ঠার সাল ব্যাজ ও ক্যাম্পাস স্লোগান এখান থেকে সরাসরি পরিবর্তন করুন।
+              ওয়েবসাইটের হেডার ও ফুটারে প্রতিষ্ঠানের নাম, লোগো ইমেজ আপলোড, এবং মোবাইল ও ডেস্কটপে লোগোর সাইজ ম্যানুয়ালি নিখুঁতভাবে নির্ধারণ করুন।
             </p>
           </div>
           <button
             type="button"
             onClick={handleSaveHeaderBrand}
-            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-sm flex items-center space-x-1.5 transition-transform active:scale-95 shrink-0 self-start sm:self-auto cursor-pointer"
+            className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-sm flex items-center space-x-2 transition-all shrink-0 self-start sm:self-auto cursor-pointer"
           >
-            {brandSavedFeedback ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-100" /> : <Save className="w-3.5 h-3.5" />}
-            <span>{brandSavedFeedback ? 'সংরক্ষিত হয়েছে (Saved)' : 'Save Header Brand'}</span>
+            {brandSavedFeedback ? <CheckCircle2 className="w-4 h-4 text-emerald-100" /> : <Save className="w-4 h-4" />}
+            <span>{brandSavedFeedback ? 'সংরক্ষিত হয়েছে (Saved)' : 'Save Logo & Brand Settings'}</span>
           </button>
         </div>
 
-        {/* Visual Mock of Website Header */}
-        <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-white space-y-2">
-          <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider pb-1">
-            <span>Live Header Navigation Preview (ওয়েবসাইটে যেমন দেখাবে)</span>
-            <span className="text-emerald-400 flex items-center space-x-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Synchronized</span>
-            </span>
-          </div>
-
-          <div className="bg-white text-slate-900 p-3 sm:p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-            <div className="flex items-center space-x-3 min-w-0">
-              <div className="p-1.5 bg-slate-50 rounded-2xl border border-slate-200/90 shadow-2xs shrink-0">
-                <NexgenLogo variant="crest" size={44} />
+        {/* Logo Management Box */}
+        <div className="p-4 sm:p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3.5">
+              <div className="w-14 h-14 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-center p-1.5 shrink-0 overflow-hidden">
+                <NexgenLogo
+                  variant="crest"
+                  size={46}
+                  customLogoUrl={customLogoUrl}
+                  shape={logoShape}
+                  className="shrink-0"
+                />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm sm:text-base lg:text-lg font-black text-slate-950 tracking-tight leading-none truncate">
-                    {headerBrandName || 'NexGen Computer Academy'}
-                  </span>
-                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-wider shrink-0">
-                    {headerEstText || 'EST. 2018'}
-                  </span>
-                </div>
-                <p className="text-[11px] sm:text-xs text-slate-600 font-semibold truncate mt-1">
-                  {headerSubtitle || `${academySettings.campusName || 'Farmgate Campus'} • Govt. Standard IT Training & Career Incubator`}
+              <div>
+                <p className="text-xs font-black text-slate-900">
+                  {customLogoUrl ? 'Active Custom Uploaded Logo (কাস্টম লোগো সক্রিয়)' : 'Official NexGen Shield Emblem (ডিফল্ট শিল্ড এমব্লেম)'}
+                </p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  হেডার, ফুটার, ওয়েবসাইট, আইডি কার্ড ও সার্টিফিকেটে স্বয়ংক্রিয়ভাবে লাইভ হবে।
                 </p>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsLogoCropModalOpen(true)}
-              className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs rounded-xl transition-colors flex items-center space-x-1.5 shrink-0 cursor-pointer"
-            >
-              <Crop className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Change / Crop Logo</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => logoFileInputRef.current?.click()}
+                className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center space-x-1.5 cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload Logo File (লোগো ফাইল আপলোড)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsLogoCropModalOpen(true)}
+                className="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl transition-colors flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+              >
+                <Crop className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Manual Crop / Resize</span>
+              </button>
+
+              {customLogoUrl && (
+                <button
+                  type="button"
+                  onClick={handleResetLogoToEmblem}
+                  className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-xs rounded-xl transition-colors flex items-center space-x-1 cursor-pointer"
+                  title="Restore Official Shield"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Reset to Default</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Logo URL Input & Shape Mode */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pt-2 border-t border-slate-200/80">
+            <div className="md:col-span-8 space-y-1">
+              <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                <span>লোগো ইমেজ লিঙ্ক (Direct Image URL - Optional)</span>
+                <span className="text-[10px] text-slate-400">অনলাইন ইমেজ লিঙ্ক পেস্ট করতে পারেন</span>
+              </label>
+              <input
+                type="text"
+                value={customLogoUrl}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setCustomLogoUrl(e.target.value);
+                }}
+                placeholder="https://... বা সরাসরি ফাইল আপলোড করুন"
+                className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-medium focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-4 space-y-1">
+              <label className="text-xs font-bold text-slate-700">
+                লোগো ফিট ডিসপ্লে মোড (Logo Fit Mode)
+              </label>
+              <div className="grid grid-cols-3 gap-1.5 bg-white p-1 rounded-xl border border-slate-200 text-[11px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    hasUserEditedRef.current = true;
+                    setLogoShape('contain');
+                  }}
+                  className={`py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                    logoShape === 'contain'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  স্বাভাবিক Fit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    hasUserEditedRef.current = true;
+                    setLogoShape('square');
+                  }}
+                  className={`py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                    logoShape === 'square'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  বর্গাকার
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    hasUserEditedRef.current = true;
+                    setLogoShape('wide');
+                  }}
+                  className={`py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                    logoShape === 'wide'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  ওয়াইড
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Direct Input Fields Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-1">
+        {/* Responsive Logo Sizing Sliders (Mobile & Desktop) */}
+        <div className="p-4 sm:p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-4">
+          <div className="flex items-center space-x-2 text-xs font-black text-indigo-950 uppercase tracking-wider">
+            <Sliders className="w-4 h-4 text-indigo-600" />
+            <span>Manual Logo Size Settings (মোবাইল ও ডেস্কটপ সাইজ অ্যাডজাস্টমেন্ট)</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 1. Header Logo Mobile */}
+            <div className="bg-white p-3.5 rounded-xl border border-indigo-100 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-800 flex items-center space-x-1">
+                  <Smartphone className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>হেডার লোগো (মোবাইল)</span>
+                </span>
+                <span className="font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md text-[11px] font-mono">
+                  {logoSizeMobile}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="24"
+                max="64"
+                value={logoSizeMobile}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setLogoSizeMobile(Number(e.target.value));
+                }}
+                className="w-full accent-indigo-600 cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>ছোট (24px)</span>
+                <span>ডিফল্ট: 38px</span>
+                <span>বড় (64px)</span>
+              </div>
+            </div>
+
+            {/* 2. Header Logo Desktop */}
+            <div className="bg-white p-3.5 rounded-xl border border-indigo-100 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-800 flex items-center space-x-1">
+                  <Monitor className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>হেডার লোগো (ডেস্কটপ)</span>
+                </span>
+                <span className="font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md text-[11px] font-mono">
+                  {logoSizeDesktop}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="28"
+                max="80"
+                value={logoSizeDesktop}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setLogoSizeDesktop(Number(e.target.value));
+                }}
+                className="w-full accent-indigo-600 cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>ছোট (28px)</span>
+                <span>ডিফল্ট: 46px</span>
+                <span>বড় (80px)</span>
+              </div>
+            </div>
+
+            {/* 3. Footer Logo Mobile */}
+            <div className="bg-white p-3.5 rounded-xl border border-indigo-100 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-800 flex items-center space-x-1">
+                  <Smartphone className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>ফুটার লোগো (মোবাইল)</span>
+                </span>
+                <span className="font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md text-[11px] font-mono">
+                  {footerLogoSizeMobile}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="24"
+                max="60"
+                value={footerLogoSizeMobile}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setFooterLogoSizeMobile(Number(e.target.value));
+                }}
+                className="w-full accent-indigo-600 cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>ছোট (24px)</span>
+                <span>ডিফল্ট: 34px</span>
+                <span>বড় (60px)</span>
+              </div>
+            </div>
+
+            {/* 4. Footer Logo Desktop */}
+            <div className="bg-white p-3.5 rounded-xl border border-indigo-100 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-800 flex items-center space-x-1">
+                  <Monitor className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>ফুটার লোগো (ডেস্কটপ)</span>
+                </span>
+                <span className="font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md text-[11px] font-mono">
+                  {footerLogoSizeDesktop}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min="28"
+                max="70"
+                value={footerLogoSizeDesktop}
+                onChange={e => {
+                  hasUserEditedRef.current = true;
+                  setFooterLogoSizeDesktop(Number(e.target.value));
+                }}
+                className="w-full accent-indigo-600 cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>ছোট (28px)</span>
+                <span>ডিফল্ট: 40px</span>
+                <span>বড় (70px)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Direct Input Fields Grid for Branding Text */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           {/* Brand Primary Name */}
           <div className="md:col-span-4 space-y-1">
             <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
               <span>১. ব্র্যান্ড মূল নাম (Primary Brand Name)</span>
-              <span className="text-[10px] text-slate-500">কালো রঙের বোল্ড টেক্সট</span>
+              <span className="text-[10px] text-slate-500">বোল্ড টেক্সট</span>
             </label>
             <input
               type="text"
@@ -941,7 +1272,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
           <div className="md:col-span-4 space-y-1">
             <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
               <span>২. ব্র্যান্ড হাইলাইট শব্দ (Brand Accent)</span>
-              <span className="text-[10px] text-[#dc143c] font-bold">লাল রঙের হাইলাইট টেক্সট</span>
+              <span className="text-[10px] text-[#dc143c] font-bold">লাল রঙের হাইলাইট</span>
             </label>
             <input
               type="text"
@@ -974,10 +1305,10 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
           </div>
 
           {/* Header & Footer Subline / Slogan */}
-          <div className="md:col-span-8 space-y-1">
+          <div className="md:col-span-12 space-y-1">
             <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
               <span>৪. হেডার ও ফুটার সাবলাইন স্লোগান (Subline / Tagline)</span>
-              <span className="text-[10px] text-indigo-600 font-bold">লোগোর ঠিক নিচে প্রদর্শিত হয়</span>
+              <span className="text-[10px] text-indigo-600 font-bold">লোগো নামের ঠিক নিচে প্রদর্শিত হয়</span>
             </label>
             <input
               type="text"
@@ -990,24 +1321,199 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
             />
           </div>
+        </div>
 
-          {/* Live Preview Box */}
-          <div className="md:col-span-4 bg-slate-50 rounded-2xl p-3 border border-slate-200 flex flex-col justify-center">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">
-              লাইভ লোগো প্রিভিউ (Header & Footer)
-            </span>
+        {/* Live Interactive Header & Footer Preview (Mobile vs Desktop) */}
+        <div className="p-4 sm:p-5 bg-slate-900 rounded-2xl border border-slate-800 text-white space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
             <div className="flex items-center space-x-2">
-              <NexgenLogo variant="crest" size={28} className="shrink-0" />
-              <div className="flex flex-col justify-center">
-                <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 leading-tight sm:leading-none">
-                  <span className="text-[12px] sm:text-sm font-black text-slate-900 leading-tight">{brandPrimary || 'NexGen'}</span>
-                  <span className="text-[11px] sm:text-sm font-black text-[#dc143c] leading-tight">{brandAccent || 'Computer Academy'}</span>
+              <Eye className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-black uppercase tracking-wider text-slate-200">
+                লাইভ প্রিভিউ (Live Header & Footer Preview)
+              </span>
+            </div>
+
+            {/* Device Switcher */}
+            <div className="flex items-center space-x-2 bg-slate-800 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setPreviewDeviceMode('mobile')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                  previewDeviceMode === 'mobile'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>মোবাইল প্রিভিউ (Mobile 360px)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewDeviceMode('desktop')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                  previewDeviceMode === 'desktop'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span>ডেস্কটপ প্রিভিউ (Desktop)</span>
+              </button>
+            </div>
+          </div>
+
+          {previewDeviceMode === 'mobile' ? (
+            /* Mobile Simulation Frame */
+            <div className="max-w-[360px] mx-auto bg-slate-950 rounded-2xl p-3 border border-slate-700 shadow-xl space-y-3">
+              <span className="text-[10px] text-indigo-400 font-bold block text-center uppercase tracking-wider">
+                মোবাইল স্ক্রিনে যেমন দেখাবে (Mobile Screen View)
+              </span>
+
+              {/* Mobile Header Bar Mock */}
+              <div className="bg-white text-slate-900 px-3 py-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <NexgenLogo
+                    variant="crest"
+                    size={logoSizeMobile}
+                    desktopSize={logoSizeMobile}
+                    customLogoUrl={customLogoUrl}
+                    shape={logoShape}
+                    className="shrink-0"
+                  />
+                  <div className="flex flex-col justify-center min-w-0">
+                    <div className="flex flex-col leading-tight">
+                      <span className="text-[12px] font-black text-slate-900 tracking-tight leading-tight">
+                        {brandPrimary || 'NexGen'}
+                      </span>
+                      <span className="text-[11px] font-black text-[#dc143c] tracking-tight leading-tight">
+                        {brandAccent || 'Computer Academy'}
+                      </span>
+                    </div>
+                    <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 truncate max-w-[130px]">
+                      {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-[7.5px] sm:text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5 sm:mt-1">
-                  {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
-                </span>
+                <div className="w-7 h-7 bg-slate-100 rounded-lg flex flex-col items-center justify-center space-y-0.5 shrink-0">
+                  <div className="w-3.5 h-0.5 bg-slate-700 rounded-full" />
+                  <div className="w-3.5 h-0.5 bg-slate-700 rounded-full" />
+                  <div className="w-3.5 h-0.5 bg-slate-700 rounded-full" />
+                </div>
+              </div>
+
+              {/* Mobile Footer Bar Mock (Clean Single Line for brandPrimary & brandAccent) */}
+              <div className="bg-[#030d1c] text-white p-3 rounded-xl border border-slate-800 space-y-2">
+                <div className="flex items-center space-x-2">
+                  <NexgenLogo
+                    variant="crest"
+                    size={footerLogoSizeMobile}
+                    desktopSize={footerLogoSizeMobile}
+                    customLogoUrl={customLogoUrl}
+                    shape={logoShape}
+                    className="shrink-0"
+                    isDarkTheme
+                  />
+                  <div className="flex flex-col justify-center min-w-0">
+                    {/* Clean single-line layout */}
+                    <div className="flex flex-row items-baseline space-x-1 leading-none whitespace-nowrap">
+                      <span className="text-xs font-black text-white tracking-tight leading-none whitespace-nowrap">
+                        {brandPrimary || 'NexGen'}
+                      </span>
+                      <span className="text-xs font-black text-[#dc143c] tracking-tight leading-none whitespace-nowrap">
+                        {brandAccent || 'Computer Academy'}
+                      </span>
+                    </div>
+                    <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 truncate max-w-[170px]">
+                      {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-[9px] text-slate-500 text-center pt-1 border-t border-slate-800/80">
+                  Copyright © 2026 {brandPrimary} {brandAccent}. All rights reserved
+                </p>
               </div>
             </div>
+          ) : (
+            /* Desktop Simulation Frame */
+            <div className="space-y-3">
+              {/* Desktop Header Mock */}
+              <div className="bg-white text-slate-900 px-5 py-3 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <NexgenLogo
+                    variant="crest"
+                    size={logoSizeDesktop}
+                    desktopSize={logoSizeDesktop}
+                    customLogoUrl={customLogoUrl}
+                    shape={logoShape}
+                    className="shrink-0"
+                  />
+                  <div className="flex flex-col justify-center min-w-0">
+                    <div className="flex flex-row items-baseline space-x-1.5 leading-none">
+                      <span className="text-lg font-black text-slate-900 tracking-tight leading-none">
+                        {brandPrimary || 'NexGen'}
+                      </span>
+                      <span className="text-lg font-black text-[#dc143c] tracking-tight leading-none">
+                        {brandAccent || 'Computer Academy'}
+                      </span>
+                    </div>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                      {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4 text-xs font-bold text-slate-600">
+                  <span className="text-[#e11d48]">Home</span>
+                  <span>Courses</span>
+                  <span>Seminars</span>
+                  <span>Success Story</span>
+                  <span className="px-3 py-1 bg-indigo-600 text-white rounded-lg text-xs font-bold">ভর্তি হোন</span>
+                </div>
+              </div>
+
+              {/* Desktop Footer Mock */}
+              <div className="bg-[#030d1c] text-white px-5 py-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <NexgenLogo
+                    variant="crest"
+                    size={footerLogoSizeDesktop}
+                    desktopSize={footerLogoSizeDesktop}
+                    customLogoUrl={customLogoUrl}
+                    shape={logoShape}
+                    className="shrink-0"
+                    isDarkTheme
+                  />
+                  <div className="flex flex-col justify-center">
+                    <div className="flex flex-row items-baseline space-x-1.5 leading-none">
+                      <span className="text-base font-black text-white tracking-tight leading-none">
+                        {brandPrimary || 'NexGen'}
+                      </span>
+                      <span className="text-base font-black text-[#dc143c] tracking-tight leading-none">
+                        {brandAccent || 'Computer Academy'}
+                      </span>
+                    </div>
+                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                      {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-400">
+                  Copyright © 2026 {brandPrimary} {brandAccent}. All rights reserved
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="button"
+              onClick={handleSaveHeaderBrand}
+              className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Save & Apply Live (সেভ ও সক্রিয় করুন)</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1088,9 +1594,15 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         <LogoCropResizeModal
           isOpen={isLogoCropModalOpen}
           onClose={() => setIsLogoCropModalOpen(false)}
-          currentLogoUrl={academySettings.customLogoUrl}
+          currentLogoUrl={customLogoUrl || academySettings.customLogoUrl}
           onSaveLogo={newLogoDataUrl => {
+            setCustomLogoUrl(newLogoDataUrl);
             updateAcademySettings({ customLogoUrl: newLogoDataUrl });
+            updateWebsiteCmsConfig({
+              customLogoUrl: newLogoDataUrl,
+              headerLogoUrl: newLogoDataUrl,
+              footerLogoUrl: newLogoDataUrl
+            });
             onSuccessToast('লোগো সফলভাবে আপডেট ও ক্রপ করা হয়েছে!');
           }}
         />

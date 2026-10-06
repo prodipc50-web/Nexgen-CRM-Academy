@@ -3,11 +3,15 @@ import { ChevronDown, Menu, User, BookOpen, Sparkles, ShieldCheck, Award, Phone 
 import { WebsiteSubPage } from '../../../types';
 import { NexgenLogo } from '../../common/NexgenLogo';
 
-interface UniqueItNavbarProps {
+interface NexgenNavbarProps {
   instituteName?: string;
   brandPrimary?: string;
   brandAccent?: string;
   brandSubline?: string;
+  customLogoUrl?: string;
+  logoSizeMobile?: number;
+  logoSizeDesktop?: number;
+  logoShape?: 'contain' | 'square' | 'wide';
   activeSubPage: WebsiteSubPage;
   onNavigateSubPage: (page: WebsiteSubPage) => void;
   onOpenAdmission: () => void;
@@ -18,11 +22,15 @@ interface UniqueItNavbarProps {
   onOpenCmsAdmin?: () => void;
 }
 
-export const NexgenNavbar: React.FC<UniqueItNavbarProps> = ({
+export const NexgenNavbar: React.FC<NexgenNavbarProps> = ({
   instituteName = 'NexGen Computer Academy',
   brandPrimary = 'NexGen',
   brandAccent = 'Computer Academy',
   brandSubline = 'Computer Training Institute',
+  customLogoUrl,
+  logoSizeMobile,
+  logoSizeDesktop,
+  logoShape,
   activeSubPage,
   onNavigateSubPage,
   onOpenAdmission,
@@ -59,10 +67,17 @@ export const NexgenNavbar: React.FC<UniqueItNavbarProps> = ({
         {/* Brand Logo */}
         <div
           onClick={() => onNavigateSubPage('home')}
-          className="flex items-center space-x-2 sm:space-x-2.5 cursor-pointer select-none group shrink-0"
+          className="flex items-center space-x-2 sm:space-x-3 cursor-pointer select-none group shrink-0"
         >
-          <NexgenLogo variant="crest" size={30} className="shrink-0 transition-transform group-hover:scale-105 sm:w-[36px] sm:h-[36px]" />
-          <div className="flex flex-col justify-center">
+          <NexgenLogo
+            variant="crest"
+            size={logoSizeMobile || 38}
+            desktopSize={logoSizeDesktop || 46}
+            customLogoUrl={customLogoUrl}
+            shape={logoShape || 'contain'}
+            className="shrink-0 transition-transform group-hover:scale-105"
+          />
+          <div className="flex flex-col justify-center min-w-0">
             {/* 2-line layout on mobile, 1-line on sm+ screens */}
             <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 leading-tight sm:leading-none">
               <span className="text-[12px] sm:text-base md:text-xl font-black text-slate-900 tracking-tight leading-tight">
@@ -72,7 +87,7 @@ export const NexgenNavbar: React.FC<UniqueItNavbarProps> = ({
                 {brandAccent}
               </span>
             </div>
-            <span className="text-[7px] sm:text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 sm:mt-1 truncate max-w-[140px] sm:max-w-none">
+            <span className="text-[7.5px] sm:text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 sm:mt-1 truncate max-w-[150px] sm:max-w-none">
               {brandSubline}
             </span>
           </div>

@@ -1440,7 +1440,12 @@ Plagiarism, submitting another student's work as your own, or illicit sharing of
 
   brandPrimary: 'NexGen',
   brandAccent: 'Computer Academy',
-  brandSubline: 'Computer Training Institute'
+  brandSubline: 'Computer Training Institute',
+  logoSizeMobile: 38,
+  logoSizeDesktop: 46,
+  footerLogoSizeMobile: 34,
+  footerLogoSizeDesktop: 40,
+  logoShape: 'contain'
 };
 
 export const INITIAL_WEBSITE_BLOGS: WebsiteBlogPost[] = [
