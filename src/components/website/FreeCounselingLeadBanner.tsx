@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   Clock,
   User,
-  BookOpen
+  BookOpen,
+  MapPin
 } from 'lucide-react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Course } from '../../types';
@@ -29,6 +30,7 @@ export const FreeCounselingLeadBanner: React.FC<FreeCounselingLeadBannerProps> =
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [location, setLocation] = useState('');
   const [interest, setInterest] = useState('');
   const [learningMode, setLearningMode] = useState<'Offline' | 'Online Live'>('Offline');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,6 +62,11 @@ export const FreeCounselingLeadBanner: React.FC<FreeCounselingLeadBannerProps> =
       return;
     }
 
+    if (!location.trim()) {
+      setErrorMessage('আপনার বর্তমান লোকেশন বা জেলা উল্লেখ করুন');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const selectedCourseObj = courses.find(c => c.name === interest);
@@ -67,16 +74,19 @@ export const FreeCounselingLeadBanner: React.FC<FreeCounselingLeadBannerProps> =
         fullName: name.trim(),
         studentName: name.trim(),
         phone: cleanPhone,
+        address: location.trim(),
+        location: location.trim(),
         courseId: selectedCourseObj?.id || courses[0]?.id || '',
         courseName: interest || 'General Career Counseling',
         source: 'Free Counseling Call Banner',
         learningMode: learningMode,
-        notes: `Interest: ${interest || 'Career Guidance'} | Preferred Mode: ${learningMode}`
+        notes: `Interest: ${interest || 'Career Guidance'} | Preferred Mode: ${learningMode} | Location: ${location.trim()}`
       });
 
       setIsSuccess(true);
       setName('');
       setPhone('');
+      setLocation('');
       setInterest('');
     } catch (err: any) {
       console.error('Lead submit error:', err);
@@ -204,7 +214,7 @@ export const FreeCounselingLeadBanner: React.FC<FreeCounselingLeadBannerProps> =
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {/* Name Input */}
                   <div className="relative">
                     <User className="w-4 h-4 text-slate-400 absolute left-3 top-3.5 pointer-events-none" />
@@ -226,6 +236,19 @@ export const FreeCounselingLeadBanner: React.FC<FreeCounselingLeadBannerProps> =
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="মোবাইল নম্বর (017...)*"
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:bg-white font-medium transition-colors"
+                    />
+                  </div>
+
+                  {/* Location Input */}
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-rose-500 absolute left-3 top-3.5 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="লোকেশন / জেলা *"
                       required
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-600 focus:bg-white font-medium transition-colors"
                     />

@@ -10,7 +10,10 @@ import {
   Calendar,
   Clock,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  MapPin,
+  Building2,
+  Globe2
 } from 'lucide-react';
 import { Course } from '../../types';
 import { useAcademy } from '../../context/AcademyContext';
@@ -34,12 +37,22 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [location, setLocation] = useState('');
+  const [learningMode, setLearningMode] = useState<'Offline' | 'Online Live'>('Offline');
   const [occupation, setOccupation] = useState('Student');
   const [preferredBatch, setPreferredBatch] = useState('Next Available Batch');
   const [honeypot, setHoneypot] = useState(''); // Anti-bot honeypot
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const popularLocations = [
+    'ফার্মগেট (ক্যাম্পাস সংলগ্ন)',
+    'মিরপুর, ঢাকা',
+    'ধানমন্ডি, ঢাকা',
+    'উত্তরা, ঢাকা',
+    'অনলাইন (অন্যান্য জেলা)'
+  ];
 
   if (!isOpen || !course) return null;
 
@@ -68,6 +81,11 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
       return;
     }
 
+    if (!location.trim()) {
+      setErrorMessage('অনুগ্রহ করে আপনার বর্তমান লোকেশন বা জেলা উল্লেখ করুন');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -79,6 +97,11 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
         fullName: name.trim(),
         phone: phone.trim(),
         email: email.trim() || undefined,
+        address: location.trim(),
+        location: location.trim(),
+        locationCity: location.trim(),
+        learningMode: learningMode,
+        preferredLearningMode: learningMode,
         interestedCourseId: course.id,
         courseId: course.id,
         courseName: course.name,
@@ -92,8 +115,8 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
         source: 'Website Syllabus Download',
         status: 'New' as const,
         priority: 'High' as const,
-        notes: `সিলেবাস ডাউনলোড করেছেন। পেশা: ${occupation}। ব্যাচ পছন্দ: ${preferredBatch}.`,
-        comments: `সিলেবাস ডাউনলোড করেছেন। পেশা: ${occupation}। ব্যাচ পছন্দ: ${preferredBatch}.`,
+        notes: `সিলেবাস ডাউনলোড করেছেন। মাধ্যম: ${learningMode}। লোকেশন: ${location.trim()}। পেশা: ${occupation}। ব্যাচ পছন্দ: ${preferredBatch}.`,
+        comments: `সিলেবাস ডাউনলোড করেছেন। মাধ্যম: ${learningMode}। লোকেশন: ${location.trim()}। পেশা: ${occupation}। ব্যাচ পছন্দ: ${preferredBatch}.`,
         utmSource: utmParams.utm_source || 'direct_website',
         utmMedium: utmParams.utm_medium,
         utmCampaign: utmParams.utm_campaign,
@@ -302,6 +325,83 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
                   />
                 </div>
                 <p className="text-[10px] text-slate-400">সিলেবাস লিঙ্ক ও বিস্তারিত ব্যাচ শিডিউল এই নম্বরে পাঠানো হবে</p>
+              </div>
+
+              {/* Learning Mode Selection (Offline vs Online) */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 block">
+                  ক্লাসের মাধ্যম (অফলাইন / অনলাইন) <span className="text-rose-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setLearningMode('Offline')}
+                    className={`p-2 rounded-xl border-2 cursor-pointer transition-all flex items-center space-x-2 text-left ${
+                      learningMode === 'Offline'
+                        ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 shadow-xs'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">ক্যাম্পাস ল্যাব</div>
+                      <div className="text-[10px] text-slate-500">ফার্মগেট ভেন্যু</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setLearningMode('Online Live')}
+                    className={`p-2 rounded-xl border-2 cursor-pointer transition-all flex items-center space-x-2 text-left ${
+                      learningMode === 'Online Live'
+                        ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 shadow-xs'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <Globe2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">অনলাইন লাইভ</div>
+                      <div className="text-[10px] text-slate-500">লাইভ জুম ক্লাস</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Location Input with Fast Selection Pills */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700 block">
+                    আপনার বর্তমান লোকেশন / জেলা <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-rose-600 font-bold">আবশ্যক</span>
+                </div>
+                <div className="relative">
+                  <MapPin className="w-4 h-4 text-rose-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    required
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="যেমন: ফার্মগেট, মিরপুর, উত্তরা বা আপনার জেলা"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-1 pt-0.5">
+                  {popularLocations.map((loc) => (
+                    <button
+                      key={loc}
+                      type="button"
+                      onClick={() => setLocation(loc)}
+                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
+                        location === loc
+                          ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-bold'
+                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      {loc}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Email & Occupation in 2 cols */}

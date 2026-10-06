@@ -1,6 +1,23 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
-import { X, Calendar, Clock, MapPin, User, Phone, Mail, CheckCircle2, Video, Sparkles, Send, MessageCircle, Navigation, ExternalLink } from 'lucide-react';
+import {
+  X,
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  Phone,
+  Mail,
+  CheckCircle2,
+  Video,
+  Sparkles,
+  Send,
+  MessageCircle,
+  Navigation,
+  ExternalLink,
+  Building2,
+  Globe2
+} from 'lucide-react';
 import { SeminarWorkshop } from '../../types';
 import {
   trackMetaPixelEvent,
@@ -23,9 +40,19 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [location, setLocation] = useState('');
+  const [attendanceMode, setAttendanceMode] = useState<'Offline' | 'Online Live'>('Offline');
   const [occupation, setOccupation] = useState('Student');
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  const popularLocations = [
+    'ফার্মগেট (ক্যাম্পাস সংলগ্ন)',
+    'মিরপুর, ঢাকা',
+    'ধানমন্ডি, ঢাকা',
+    'উত্তরা, ঢাকা',
+    'অনলাইন (অন্যান্য জেলা)'
+  ];
 
   if (!isOpen || !seminar) return null;
 
@@ -35,7 +62,12 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) {
-      setError('Please enter your full name and contact mobile number.');
+      setError('অনুগ্রহ করে আপনার পুরো নাম ও মোবাইল নম্বর লিখুন।');
+      return;
+    }
+
+    if (!location.trim()) {
+      setError('অনুগ্রহ করে আপনার বর্তমান লোকেশন বা জেলা উল্লেখ করুন।');
       return;
     }
 
@@ -44,7 +76,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
       const utms = getCapturedUtmParams();
       const device = getDeviceType();
 
-      const commentsText = `Free Seminar Registration: "${seminar.title}" on ${seminar.date} at ${seminar.time}. Occ: ${occupation}. Campaign: ${utms.utmCampaign || 'organic'}`;
+      const commentsText = `Free Seminar Registration: "${seminar.title}" on ${seminar.date} at ${seminar.time}. Mode: ${attendanceMode}, Location: ${location.trim()}. Occ: ${occupation}. Campaign: ${utms.utmCampaign || 'organic'}`;
       const sourceStr = utms.utmSource ? `Ad: ${utms.utmSource} (Seminar)` : 'Campus Seminar / Workshop';
 
       // 1. Submit to server authoritative persistence
@@ -61,6 +93,9 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
         source: sourceStr,
         comments: commentsText,
         occupation: occupation,
+        learningMode: attendanceMode,
+        address: location.trim(),
+        location: location.trim(),
         utmSource: utms.utmSource,
         utmMedium: utms.utmMedium,
         utmCampaign: utms.utmCampaign,
@@ -87,6 +122,10 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
         occupation: occupation as any,
         educationLevel: 'Graduate / Student',
         interestedCourseId: seminar.courseId || '',
+        learningMode: attendanceMode,
+        preferredLearningMode: attendanceMode,
+        address: location.trim(),
+        locationCity: location.trim(),
         leadSource: sourceStr,
         campaignId: utms.utmCampaign,
         utmSource: utms.utmSource,
@@ -95,7 +134,6 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
         utmContent: utms.utmContent,
         utmTerm: utms.utmTerm,
         deviceType: device,
-        locationCity: 'Dhaka',
         counselorId,
         counselorName,
         visitDate: seminar.date || todayDate,
@@ -241,6 +279,46 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
               </div>
             </div>
 
+            {/* Attendance Format (Campus Lab vs Online Zoom) */}
+            <div>
+              <label className="font-bold text-slate-700 block mb-1">
+                সেমিনারে অংশগ্রহণের মাধ্যম (অফলাইন / অনলাইন) *
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAttendanceMode('Offline')}
+                  className={`p-2 rounded-xl border-2 cursor-pointer transition-all flex items-center space-x-2 text-left ${
+                    attendanceMode === 'Offline'
+                      ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <Building2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <div>
+                    <div className="font-bold text-xs">ক্যাম্পাস সেমিনার</div>
+                    <div className="text-[10px] text-slate-500">ফার্মগেট ভেন্যু ল্যাব</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAttendanceMode('Online Live')}
+                  className={`p-2 rounded-xl border-2 cursor-pointer transition-all flex items-center space-x-2 text-left ${
+                    attendanceMode === 'Online Live'
+                      ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <Globe2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <div>
+                    <div className="font-bold text-xs">অনলাইন লাইভ</div>
+                    <div className="text-[10px] text-slate-500">জুম লাইভ ক্লাস</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="font-bold text-slate-700 block mb-1">Your Full Name *</label>
               <input
@@ -263,6 +341,43 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
                 onChange={e => setPhone(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 outline-none focus:bg-white focus:border-indigo-600"
               />
+            </div>
+
+            {/* Location Input with Fast Selection Pills */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-bold text-slate-700 block">
+                  আপনার বর্তমান লোকেশন / জেলা *
+                </label>
+                <span className="text-[10px] text-rose-600 font-bold">আবশ্যক</span>
+              </div>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-rose-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  required
+                  placeholder="যেমন: ফার্মগেট, মিরপুর, উত্তরা বা আপনার জেলা"
+                  value={location}
+                  onChange={e => setLocation(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 outline-none focus:bg-white focus:border-indigo-600"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {popularLocations.map((loc) => (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => setLocation(loc)}
+                    className={`text-[10px] px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
+                      location === loc
+                        ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-bold'
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    {loc}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">

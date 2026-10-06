@@ -55,6 +55,8 @@ import { UniqueItSnakeCta } from './nexgen/NexgenSnakeCta';
 import { NexgenAdmissionBanner as UniqueItAdmissionBanner } from './nexgen/NexgenAdmissionBanner';
 import { UniqueItFooter } from './nexgen/NexgenFooter';
 import { UniqueItFloatingDiscount } from './nexgen/NexgenFloatingDiscount';
+import { NexgenMobileStickyBar } from './nexgen/NexgenMobileStickyBar';
+import { NexgenUrgencyBanner } from './nexgen/NexgenUrgencyBanner';
 import { getVideoBlobUrl } from '../../utils/videoStorage';
 import {
   Home,
@@ -600,6 +602,19 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         />
       )}
 
+      {/* CRO URGENCY & SCARCITY COUNTDOWN BANNER */}
+      {(websiteCmsConfig?.newSectionVisibility?.urgencyBanner ?? true) && (
+        <NexgenUrgencyBanner
+          onOpenAdmission={() => {
+            setSelectedCourseForAdmission(null);
+            setIsAdmissionOpen(true);
+          }}
+          title={websiteCmsConfig?.topNoticeTicker || 'নতুন অফলাইন ল্যাব ও অনলাইন ব্যাচে ভর্তি চলছে! সীমিত সিট বাকি'}
+          badgeText={websiteCmsConfig?.heroBadgeText || 'Special Scholarship'}
+          buttonText="আসন বুকিং করুন"
+        />
+      )}
+
       {/* 2. MAIN NAVBAR */}
       <UniqueItNavbar
         instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
@@ -1037,6 +1052,17 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       {/* FLOATING DISCOUNT BUTTON */}
       <UniqueItFloatingDiscount onClick={() => setShowExitIntent(true)} />
 
+      {/* MOBILE STICKY CRO ACTION BAR (Call, WhatsApp, Fast Admission) */}
+      <NexgenMobileStickyBar
+        onOpenAdmission={() => {
+          setSelectedCourseForAdmission(null);
+          setIsAdmissionOpen(true);
+        }}
+        phone={multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}
+        whatsappNumber={websiteCmsConfig?.floatingActionWidget?.whatsappNumber || multiplePhones[0]?.number || academySettings.primarySupportPhone || '01798444444'}
+        instituteName={academySettings.instituteName || 'NexGen Computer Academy'}
+      />
+
       {/* HERO & SUCCESS STORY VIDEO MODAL */}
       {isVideoModalOpen && (
         <div
@@ -1249,6 +1275,11 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
             courseId: payload.courseId || (courses[0]?.id || ''),
             courseName: selectedCourseObj?.name || payload.courseId || '',
             interestedCourseId: payload.courseId || (courses[0]?.id || ''),
+            learningMode: payload.learningMode || 'Offline',
+            preferredLearningMode: payload.learningMode || 'Offline',
+            address: payload.location || '',
+            location: payload.location || '',
+            locationCity: payload.location || '',
             source: leadSourceStr,
             leadSource: leadSourceStr,
             notes: payload.notes || `[Website Popup] Promo Voucher Claimed`,

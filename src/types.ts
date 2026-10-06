@@ -1982,6 +1982,7 @@ export interface WebsiteCmsConfig {
 // New Design Homepage CMS Configs
 export interface NewHomepageSectionVisibility {
   topBar?: boolean;
+  urgencyBanner?: boolean;
   hero?: boolean;
   categorySlider?: boolean;
   popularCourses?: boolean;

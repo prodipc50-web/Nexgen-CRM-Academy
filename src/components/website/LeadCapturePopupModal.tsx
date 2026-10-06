@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, X, ArrowRight, CheckCircle2, Phone, User, BookOpen, Gift, ShieldCheck, Mail } from 'lucide-react';
+import {
+  Sparkles,
+  X,
+  ArrowRight,
+  CheckCircle2,
+  Phone,
+  User,
+  BookOpen,
+  Gift,
+  ShieldCheck,
+  Mail,
+  MapPin,
+  Building2,
+  Globe2,
+  Check
+} from 'lucide-react';
 import { LeadCapturePopupConfig, Course } from '../../types';
 
 interface LeadCapturePopupModalProps {
@@ -12,6 +27,8 @@ interface LeadCapturePopupModalProps {
     courseId?: string;
     source: string;
     notes?: string;
+    location?: string;
+    learningMode?: 'Offline' | 'Online Live';
   }) => Promise<boolean>;
 }
 
@@ -25,9 +42,19 @@ export const LeadCapturePopupModal: React.FC<LeadCapturePopupModalProps> = ({
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [courseId, setCourseId] = useState('');
+  const [location, setLocation] = useState('');
+  const [learningMode, setLearningMode] = useState<'Offline' | 'Online Live'>('Offline');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  const popularLocations = [
+    'ফার্মগেট (ক্যাম্পাস সংলগ্ন)',
+    'মিরপুর, ঢাকা',
+    'ধানমন্ডি, ঢাকা',
+    'উত্তরা, ঢাকা',
+    'অনলাইন (ঢাকার বাইরে)'
+  ];
 
   // Auto-trigger based on CMS settings (delay, scroll, or exit_intent)
   useEffect(() => {
@@ -101,6 +128,11 @@ export const LeadCapturePopupModal: React.FC<LeadCapturePopupModalProps> = ({
       return;
     }
 
+    if (!location.trim()) {
+      setErrorMsg('অনুগ্রহ করে আপনার বর্তমান লোকেশন বা জেলা উল্লেখ করুন');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const selectedCourse = courses.find(c => c.id === courseId);
@@ -109,8 +141,10 @@ export const LeadCapturePopupModal: React.FC<LeadCapturePopupModalProps> = ({
         phone: trimmedPhone,
         email: email.trim() || undefined,
         courseId: courseId || undefined,
+        location: location.trim(),
+        learningMode: learningMode,
         source: 'Website Popup Lead',
-        notes: `Popup Lead Offer Voucher: ${config?.discountText || 'Special Scholarship'}. Course: ${selectedCourse?.name || 'General Inquiry'}`
+        notes: `Popup Lead Offer Voucher: ${config?.discountText || 'Special Scholarship'}. Mode: ${learningMode}. Location: ${location.trim()}. Course: ${selectedCourse?.name || 'General Inquiry'}`
       });
 
       if (success) {
@@ -255,6 +289,83 @@ export const LeadCapturePopupModal: React.FC<LeadCapturePopupModalProps> = ({
                     placeholder="যেমন: 01711223344"
                     className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 font-medium focus:bg-white focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
                   />
+                </div>
+              </div>
+
+              {/* Learning Mode Selection (Offline vs Online) */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  ক্লাসের মাধ্যম (অফলাইন / অনলাইন) <span className="text-rose-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setLearningMode('Offline')}
+                    className={`p-2.5 rounded-xl border-2 cursor-pointer transition-all flex items-center space-x-2 text-left ${
+                      learningMode === 'Offline'
+                        ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 shadow-xs'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">অফলাইন ল্যাব</div>
+                      <div className="text-[10px] text-slate-500">ফার্মগেট ক্যাম্পাস</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setLearningMode('Online Live')}
+                    className={`p-2.5 rounded-xl border-2 cursor-pointer transition-all flex items-center space-x-2 text-left ${
+                      learningMode === 'Online Live'
+                        ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 shadow-xs'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <Globe2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <div>
+                      <div className="font-bold text-xs">অনলাইন লাইভ</div>
+                      <div className="text-[10px] text-slate-500">লাইভ জুম ক্লাস</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Location Input with Fast Selection Pills */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700">
+                    আপনার বর্তমান লোকেশন / জেলা <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-rose-600 font-bold">আবশ্যক</span>
+                </div>
+                <div className="relative">
+                  <MapPin className="w-4 h-4 text-rose-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    required
+                    value={location}
+                    onChange={e => setLocation(e.target.value)}
+                    placeholder="যেমন: ফার্মগেট, মিরপুর, উত্তরা বা আপনার জেলা"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 font-medium focus:bg-white focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {popularLocations.map((loc) => (
+                    <button
+                      key={loc}
+                      type="button"
+                      onClick={() => setLocation(loc)}
+                      className={`text-[10px] px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
+                        location === loc
+                          ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-bold'
+                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      {loc}
+                    </button>
+                  ))}
                 </div>
               </div>
 

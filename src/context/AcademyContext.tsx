@@ -255,8 +255,10 @@ interface AcademyContextType {
     studentName?: string;
     name?: string;
     phone: string;
+    phoneNumber?: string;
     email?: string;
     address?: string;
+    location?: string;
     branch?: string;
     preferredBranch?: string;
     education?: string;
@@ -280,6 +282,8 @@ interface AcademyContextType {
     notes?: string;
     landingPageUrl?: string;
     landingPage?: string;
+    deviceType?: string;
+    submittedAt?: string;
     utmSource?: string;
     utmMedium?: string;
     utmCampaign?: string;
@@ -2795,8 +2799,10 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     studentName?: string;
     name?: string;
     phone: string;
+    phoneNumber?: string;
     email?: string;
     address?: string;
+    location?: string;
     branch?: string;
     preferredBranch?: string;
     education?: string;
@@ -2820,6 +2826,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     notes?: string;
     landingPageUrl?: string;
     landingPage?: string;
+    deviceType?: string;
+    submittedAt?: string;
     utmSource?: string;
     utmMedium?: string;
     utmCampaign?: string;
