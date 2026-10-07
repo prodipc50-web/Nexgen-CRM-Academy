@@ -57,7 +57,7 @@ export const CampusLocationMapBox: React.FC<CampusLocationMapBoxProps> = ({
                 Farmgate Campus
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 truncate max-w-[240px] xs:max-w-[320px] sm:max-w-[420px] mt-0.5">
+            <p className="text-[11px] text-slate-500 line-clamp-2 sm:line-clamp-1 max-w-full mt-0.5 leading-snug break-words">
               {address}
             </p>
           </div>
@@ -158,19 +158,19 @@ export const CampusLocationMapBox: React.FC<CampusLocationMapBoxProps> = ({
       </div>
 
       {/* Bottom Bar: Address & Copy Action */}
-      <div className="bg-white p-3.5 sm:px-5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div className="flex items-center space-x-2 text-slate-700">
-          <Building2 className="w-4 h-4 text-indigo-600 shrink-0" />
-          <span className="font-semibold truncate max-w-[280px] sm:max-w-md">
+      <div className="bg-white p-3.5 sm:px-5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+        <div className="flex items-start sm:items-center space-x-2 text-slate-700 min-w-0 flex-1">
+          <Building2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5 sm:mt-0" />
+          <span className="font-semibold line-clamp-2 sm:line-clamp-1 max-w-full text-slate-800 leading-snug break-words">
             {directions || address}
           </span>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 shrink-0">
           <button
             type="button"
             onClick={handleCopyAddress}
-            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold flex items-center space-x-1 transition-colors cursor-pointer"
+            className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold flex items-center space-x-1 transition-colors cursor-pointer"
           >
             {copied ? (
               <>
@@ -189,10 +189,13 @@ export const CampusLocationMapBox: React.FC<CampusLocationMapBoxProps> = ({
             href={directNavigationUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center space-x-0.5 underline"
+            className="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold flex items-center space-x-1 underline shrink-0"
+            title="গুগল ম্যাপে সরাসরি দেখুন"
           >
-            <span>{directNavigationUrl}</span>
-            <ExternalLink className="w-2.5 h-2.5" />
+            <span className="max-w-[130px] sm:max-w-xs truncate">
+              {directNavigationUrl.startsWith('http') ? 'ম্যাপে ওপেন করুন' : directNavigationUrl}
+            </span>
+            <ExternalLink className="w-3 h-3 shrink-0" />
           </a>
         </div>
       </div>

@@ -108,12 +108,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-indigo-950/80 relative overflow-hidden">
         {/* Background decorative watermark */}
         <div className="absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none flex items-center pr-4">
-          <NexgenLogo variant="crest" size={160} />
+          <NexgenLogo variant="crest" size={160} isDarkTheme />
         </div>
 
         <div className="flex items-center space-x-4 relative z-10">
           <div className="hidden sm:block shrink-0 bg-white/10 p-2 rounded-2xl border border-white/10 backdrop-blur-xs">
-            <NexgenLogo variant="crest" size={52} />
+            <NexgenLogo variant="crest" size={52} isDarkTheme />
           </div>
           <div>
             <div className="flex items-center space-x-2">

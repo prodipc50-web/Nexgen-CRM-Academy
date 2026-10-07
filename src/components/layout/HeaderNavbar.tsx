@@ -99,22 +99,18 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
             <Menu className="w-5 h-5" />
           </button>
         )}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-3">
           <NexgenLogo
-            variant="crest"
-            size={42}
+            variant="horizontal"
+            size={34}
+            desktopSize={38}
             customLogoUrl={academySettings?.customLogoUrl || websiteCmsConfig?.customLogoUrl || websiteCmsConfig?.headerLogoUrl}
           />
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-black text-slate-900 leading-none tracking-tight">
-                {academySettings?.instituteName || 'NexGen Computer Academy'}
-              </h1>
-              <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">
-                ERP v2.6
-              </span>
-            </div>
-            <p className="text-xs text-slate-600 font-medium hidden sm:block">Office Management, CRM, Admissions & Training Operations</p>
+          <div className="hidden sm:flex items-center space-x-2 border-l border-slate-200 pl-3">
+            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">
+              ERP v2.6
+            </span>
+            <p className="text-xs text-slate-500 font-medium hidden md:block">Office & Academy Operations</p>
           </div>
         </div>
       </div>

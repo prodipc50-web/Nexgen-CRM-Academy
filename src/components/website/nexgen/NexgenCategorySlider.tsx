@@ -58,7 +58,7 @@ export const NexgenCategorySlider: React.FC<NexgenCategorySliderProps> = ({ onSe
           <button
             type="button"
             onClick={() => scroll('left')}
-            className="w-8 h-8 rounded-full border border-orange-400 text-orange-500 hover:bg-orange-50 flex items-center justify-center transition-colors cursor-pointer shrink-0 z-10 mr-2 active:scale-90"
+            className="w-9 h-9 sm:w-8 sm:h-8 min-w-[36px] min-h-[36px] rounded-full border border-orange-400 text-orange-500 hover:bg-orange-50 flex items-center justify-center transition-colors cursor-pointer shrink-0 z-10 mr-2 active:scale-90"
             title="Scroll Left"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -100,7 +100,7 @@ export const NexgenCategorySlider: React.FC<NexgenCategorySliderProps> = ({ onSe
           <button
             type="button"
             onClick={() => scroll('right')}
-            className="w-8 h-8 rounded-full border border-orange-400 text-orange-500 hover:bg-orange-50 flex items-center justify-center transition-colors cursor-pointer shrink-0 z-10 ml-2 active:scale-90"
+            className="w-9 h-9 sm:w-8 sm:h-8 min-w-[36px] min-h-[36px] rounded-full border border-orange-400 text-orange-500 hover:bg-orange-50 flex items-center justify-center transition-colors cursor-pointer shrink-0 z-10 ml-2 active:scale-90"
             title="Scroll Right"
           >
             <ChevronRight className="w-4 h-4" />

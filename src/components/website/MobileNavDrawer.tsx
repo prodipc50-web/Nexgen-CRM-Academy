@@ -181,21 +181,13 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
             <div className="p-4 sm:p-5 bg-white text-slate-900 flex items-center justify-between border-b border-slate-200 shrink-0">
               <div className="flex items-center space-x-3 min-w-0 flex-1">
                 <NexgenLogo
-                  variant="crest"
-                  size={websiteCmsConfig?.logoSizeMobile || 38}
-                  desktopSize={websiteCmsConfig?.logoSizeDesktop || 46}
+                  variant="horizontal"
+                  size={36}
+                  desktopSize={40}
                   customLogoUrl={websiteCmsConfig?.customLogoUrl || websiteCmsConfig?.headerLogoUrl || academySettings?.customLogoUrl}
                   shape={websiteCmsConfig?.logoShape || 'contain'}
                   className="shrink-0"
                 />
-                <div className="min-w-0 flex-1 border-l border-slate-200 pl-2">
-                  <h3 className="text-xs font-black text-slate-950 leading-tight">
-                    {academySettings.instituteName || 'NexGen Computer Academy'}
-                  </h3>
-                  <p className="text-[10px] text-slate-500 font-semibold truncate mt-0.5">
-                    {academySettings.campusName || 'Farmgate Campus, Dhaka'}
-                  </p>
-                </div>
               </div>
 
               {/* Close Button */}

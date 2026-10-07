@@ -999,10 +999,11 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         <div className="p-4 sm:p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center space-x-3.5">
-              <div className="w-14 h-14 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-center p-1.5 shrink-0 overflow-hidden">
+              <div className="h-14 px-3 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-center shrink-0 overflow-hidden">
                 <NexgenLogo
-                  variant="crest"
-                  size={46}
+                  variant="horizontal"
+                  size={32}
+                  desktopSize={36}
                   customLogoUrl={customLogoUrl}
                   shape={logoShape}
                   className="shrink-0"
@@ -1010,7 +1011,7 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
               </div>
               <div>
                 <p className="text-xs font-black text-slate-900">
-                  {customLogoUrl ? 'Active Custom Uploaded Logo (কাস্টম লোগো সক্রিয়)' : 'Official NexGen Shield Emblem (ডিফল্ট শিল্ড এমব্লেম)'}
+                  {customLogoUrl ? 'Active Custom Uploaded Logo (কাস্টম লোগো সক্রিয়)' : 'Official NexGen Brand Logo (অফিসিয়াল নেক্সজেন ব্র্যান্ড লোগো)'}
                 </p>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   হেডার, ফুটার, ওয়েবসাইট, আইডি কার্ড ও সার্টিফিকেটে স্বয়ংক্রিয়ভাবে লাইভ হবে।
@@ -1042,10 +1043,10 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
                   type="button"
                   onClick={handleResetLogoToEmblem}
                   className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-xs rounded-xl transition-colors flex items-center space-x-1 cursor-pointer"
-                  title="Restore Official Shield"
+                  title="Restore Official Brand Logo"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Reset to Default</span>
+                  <span>Reset to Official Logo</span>
                 </button>
               )}
             </div>
@@ -1371,28 +1372,41 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
 
               {/* Mobile Header Bar Mock */}
               <div className="bg-white text-slate-900 px-3 py-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-2xs">
-                <div className="flex items-center space-x-2 min-w-0">
-                  <NexgenLogo
-                    variant="crest"
-                    size={logoSizeMobile}
-                    desktopSize={logoSizeMobile}
-                    customLogoUrl={customLogoUrl}
-                    shape={logoShape}
-                    className="shrink-0"
-                  />
-                  <div className="flex flex-col justify-center min-w-0">
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-[12px] font-black text-slate-900 tracking-tight leading-tight">
-                        {brandPrimary || 'NexGen'}
-                      </span>
-                      <span className="text-[11px] font-black text-[#dc143c] tracking-tight leading-tight">
-                        {brandAccent || 'Computer Academy'}
-                      </span>
+                <div className="flex items-center min-w-0">
+                  {(brandPrimary !== 'NexGen' || brandAccent !== 'Computer Academy') && !customLogoUrl ? (
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <NexgenLogo
+                        variant="crest"
+                        size={logoSizeMobile}
+                        desktopSize={logoSizeMobile}
+                        customLogoUrl={customLogoUrl}
+                        shape={logoShape}
+                        className="shrink-0"
+                      />
+                      <div className="flex flex-col justify-center min-w-0">
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-[12px] font-black text-slate-900 tracking-tight leading-tight">
+                            {brandPrimary || 'NexGen'}
+                          </span>
+                          <span className="text-[11px] font-black text-[#dc143c] tracking-tight leading-tight">
+                            {brandAccent || 'Computer Academy'}
+                          </span>
+                        </div>
+                        <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 truncate max-w-[130px]">
+                          {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 truncate max-w-[130px]">
-                      {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
-                    </span>
-                  </div>
+                  ) : (
+                    <NexgenLogo
+                      variant="horizontal"
+                      size={logoSizeMobile}
+                      desktopSize={logoSizeMobile}
+                      customLogoUrl={customLogoUrl}
+                      shape={logoShape}
+                      className="shrink-0"
+                    />
+                  )}
                 </div>
                 <div className="w-7 h-7 bg-slate-100 rounded-lg flex flex-col items-center justify-center space-y-0.5 shrink-0">
                   <div className="w-3.5 h-0.5 bg-slate-700 rounded-full" />
@@ -1403,30 +1417,43 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
 
               {/* Mobile Footer Bar Mock (Clean Single Line for brandPrimary & brandAccent) */}
               <div className="bg-[#030d1c] text-white p-3 rounded-xl border border-slate-800 space-y-2">
-                <div className="flex items-center space-x-2">
-                  <NexgenLogo
-                    variant="crest"
-                    size={footerLogoSizeMobile}
-                    desktopSize={footerLogoSizeMobile}
-                    customLogoUrl={customLogoUrl}
-                    shape={logoShape}
-                    className="shrink-0"
-                    isDarkTheme
-                  />
-                  <div className="flex flex-col justify-center min-w-0">
-                    {/* Clean single-line layout */}
-                    <div className="flex flex-row items-baseline space-x-1 leading-none whitespace-nowrap">
-                      <span className="text-xs font-black text-white tracking-tight leading-none whitespace-nowrap">
-                        {brandPrimary || 'NexGen'}
-                      </span>
-                      <span className="text-xs font-black text-[#dc143c] tracking-tight leading-none whitespace-nowrap">
-                        {brandAccent || 'Computer Academy'}
-                      </span>
+                <div className="flex items-center">
+                  {(brandPrimary !== 'NexGen' || brandAccent !== 'Computer Academy') && !customLogoUrl ? (
+                    <div className="flex items-center space-x-2">
+                      <NexgenLogo
+                        variant="crest"
+                        size={footerLogoSizeMobile}
+                        desktopSize={footerLogoSizeMobile}
+                        customLogoUrl={customLogoUrl}
+                        shape={logoShape}
+                        className="shrink-0"
+                        isDarkTheme
+                      />
+                      <div className="flex flex-col justify-center min-w-0">
+                        <div className="flex flex-row items-baseline space-x-1 leading-none whitespace-nowrap">
+                          <span className="text-xs font-black text-white tracking-tight leading-none whitespace-nowrap">
+                            {brandPrimary || 'NexGen'}
+                          </span>
+                          <span className="text-xs font-black text-[#dc143c] tracking-tight leading-none whitespace-nowrap">
+                            {brandAccent || 'Computer Academy'}
+                          </span>
+                        </div>
+                        <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 truncate max-w-[170px]">
+                          {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 truncate max-w-[170px]">
-                      {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
-                    </span>
-                  </div>
+                  ) : (
+                    <NexgenLogo
+                      variant="horizontal"
+                      size={footerLogoSizeMobile}
+                      desktopSize={footerLogoSizeMobile}
+                      customLogoUrl={customLogoUrl}
+                      shape={logoShape}
+                      className="shrink-0"
+                      isDarkTheme
+                    />
+                  )}
                 </div>
                 <p className="text-[9px] text-slate-500 text-center pt-1 border-t border-slate-800/80">
                   Copyright © 2026 {brandPrimary} {brandAccent}. All rights reserved
@@ -1438,28 +1465,41 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
             <div className="space-y-3">
               {/* Desktop Header Mock */}
               <div className="bg-white text-slate-900 px-5 py-3 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs">
-                <div className="flex items-center space-x-3 min-w-0">
-                  <NexgenLogo
-                    variant="crest"
-                    size={logoSizeDesktop}
-                    desktopSize={logoSizeDesktop}
-                    customLogoUrl={customLogoUrl}
-                    shape={logoShape}
-                    className="shrink-0"
-                  />
-                  <div className="flex flex-col justify-center min-w-0">
-                    <div className="flex flex-row items-baseline space-x-1.5 leading-none">
-                      <span className="text-lg font-black text-slate-900 tracking-tight leading-none">
-                        {brandPrimary || 'NexGen'}
-                      </span>
-                      <span className="text-lg font-black text-[#dc143c] tracking-tight leading-none">
-                        {brandAccent || 'Computer Academy'}
-                      </span>
+                <div className="flex items-center min-w-0">
+                  {(brandPrimary !== 'NexGen' || brandAccent !== 'Computer Academy') && !customLogoUrl ? (
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <NexgenLogo
+                        variant="crest"
+                        size={logoSizeDesktop}
+                        desktopSize={logoSizeDesktop}
+                        customLogoUrl={customLogoUrl}
+                        shape={logoShape}
+                        className="shrink-0"
+                      />
+                      <div className="flex flex-col justify-center min-w-0">
+                        <div className="flex flex-row items-baseline space-x-1.5 leading-none">
+                          <span className="text-lg font-black text-slate-900 tracking-tight leading-none">
+                            {brandPrimary || 'NexGen'}
+                          </span>
+                          <span className="text-lg font-black text-[#dc143c] tracking-tight leading-none">
+                            {brandAccent || 'Computer Academy'}
+                          </span>
+                        </div>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                          {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
-                      {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
-                    </span>
-                  </div>
+                  ) : (
+                    <NexgenLogo
+                      variant="horizontal"
+                      size={logoSizeDesktop}
+                      desktopSize={logoSizeDesktop}
+                      customLogoUrl={customLogoUrl}
+                      shape={logoShape}
+                      className="shrink-0"
+                    />
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-4 text-xs font-bold text-slate-600">
@@ -1473,29 +1513,43 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
 
               {/* Desktop Footer Mock */}
               <div className="bg-[#030d1c] text-white px-5 py-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <NexgenLogo
-                    variant="crest"
-                    size={footerLogoSizeDesktop}
-                    desktopSize={footerLogoSizeDesktop}
-                    customLogoUrl={customLogoUrl}
-                    shape={logoShape}
-                    className="shrink-0"
-                    isDarkTheme
-                  />
-                  <div className="flex flex-col justify-center">
-                    <div className="flex flex-row items-baseline space-x-1.5 leading-none">
-                      <span className="text-base font-black text-white tracking-tight leading-none">
-                        {brandPrimary || 'NexGen'}
-                      </span>
-                      <span className="text-base font-black text-[#dc143c] tracking-tight leading-none">
-                        {brandAccent || 'Computer Academy'}
-                      </span>
+                <div className="flex items-center">
+                  {(brandPrimary !== 'NexGen' || brandAccent !== 'Computer Academy') && !customLogoUrl ? (
+                    <div className="flex items-center space-x-3">
+                      <NexgenLogo
+                        variant="crest"
+                        size={footerLogoSizeDesktop}
+                        desktopSize={footerLogoSizeDesktop}
+                        customLogoUrl={customLogoUrl}
+                        shape={logoShape}
+                        className="shrink-0"
+                        isDarkTheme
+                      />
+                      <div className="flex flex-col justify-center">
+                        <div className="flex flex-row items-baseline space-x-1.5 leading-none">
+                          <span className="text-base font-black text-white tracking-tight leading-none">
+                            {brandPrimary || 'NexGen'}
+                          </span>
+                          <span className="text-base font-black text-[#dc143c] tracking-tight leading-none">
+                            {brandAccent || 'Computer Academy'}
+                          </span>
+                        </div>
+                        <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                          {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
-                      {brandSubline || 'COMPUTER TRAINING INSTITUTE'}
-                    </span>
-                  </div>
+                  ) : (
+                    <NexgenLogo
+                      variant="horizontal"
+                      size={footerLogoSizeDesktop}
+                      desktopSize={footerLogoSizeDesktop}
+                      customLogoUrl={customLogoUrl}
+                      shape={logoShape}
+                      className="shrink-0"
+                      isDarkTheme
+                    />
+                  )}
                 </div>
 
                 <p className="text-xs text-slate-400">

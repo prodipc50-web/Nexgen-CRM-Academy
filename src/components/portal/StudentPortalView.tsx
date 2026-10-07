@@ -196,12 +196,9 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
         {/* Top Navbar */}
         <header className="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <NexgenLogo variant="crest" size={38} />
-            <div>
-              <h1 className="font-black text-sm text-white tracking-tight leading-none">
-                {academySettings.instituteName || 'Nexgen Computer Academy'}
-              </h1>
-              <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mt-0.5">
+            <NexgenLogo variant="horizontal" size={32} desktopSize={36} isDarkTheme />
+            <div className="hidden sm:block border-l border-slate-700 pl-3">
+              <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">
                 Student Self-Service Portal
               </p>
             </div>
@@ -309,12 +306,9 @@ export const StudentPortalView: React.FC<StudentPortalViewProps> = ({
       {/* Top Navbar */}
       <header className="bg-slate-900 text-white sticky top-0 z-40 px-4 sm:px-8 py-3.5 border-b border-slate-800 flex items-center justify-between shadow-lg print:hidden">
         <div className="flex items-center space-x-3">
-          <NexgenLogo variant="crest" size={38} />
-          <div>
-            <h1 className="font-black text-sm text-white tracking-tight leading-none">
-              {academySettings.instituteName || 'Nexgen Computer Academy'}
-            </h1>
-            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider mt-0.5">
+          <NexgenLogo variant="horizontal" size={32} desktopSize={36} isDarkTheme />
+          <div className="hidden sm:block border-l border-slate-700 pl-3">
+            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
               Verified Student Dashboard
             </p>
           </div>

@@ -17,6 +17,7 @@ import {
   Check
 } from 'lucide-react';
 import { Course } from '../../types';
+import { NexgenLogo } from '../common/NexgenLogo';
 import {
   trackMetaPixelEvent,
   getCapturedUtmParams,
@@ -214,14 +215,12 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         {/* Modal Top Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center shrink-0">
-              <GraduationCap className="w-5 h-5" />
-            </div>
+            <NexgenLogo variant="crest" size={36} className="shrink-0 drop-shadow-xs" />
             <div>
               <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-center space-x-1.5">
                 <span>অনলাইন ভর্তি ও সিট বুকিং</span>
                 <span className="text-[10px] font-black bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">
-                  সহজ ফর্ম
+                  NexGen
                 </span>
               </h3>
               <p className="text-[11px] text-slate-500">

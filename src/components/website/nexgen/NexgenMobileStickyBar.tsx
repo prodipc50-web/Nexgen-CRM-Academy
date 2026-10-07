@@ -27,7 +27,7 @@ export const NexgenMobileStickyBar: React.FC<NexgenMobileStickyBarProps> = ({
         {/* Direct Call Button */}
         <a
           href={`tel:${cleanPhone}`}
-          className="flex flex-col items-center justify-center py-1.5 px-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 transition-colors active:scale-95"
+          className="min-h-[46px] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 transition-colors active:scale-95"
           title="সরাসরি কল করুন"
         >
           <Phone className="w-4 h-4 text-emerald-600 mb-0.5" />
@@ -39,7 +39,7 @@ export const NexgenMobileStickyBar: React.FC<NexgenMobileStickyBarProps> = ({
           href={`https://wa.me/${waFull}?text=${prefilledWaMessage}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex flex-col items-center justify-center py-1.5 px-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 transition-colors active:scale-95"
+          className="min-h-[46px] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 transition-colors active:scale-95"
           title="WhatsApp-এ চ্যাট করুন"
         >
           <MessageCircle className="w-4 h-4 text-emerald-600 mb-0.5" />
@@ -50,7 +50,7 @@ export const NexgenMobileStickyBar: React.FC<NexgenMobileStickyBarProps> = ({
         <button
           type="button"
           onClick={onOpenAdmission}
-          className="flex flex-col items-center justify-center py-1.5 px-2 rounded-xl bg-gradient-to-r from-[#e11d48] to-[#dc2626] hover:from-[#be123c] hover:to-[#b91c1c] text-white shadow-xs transition-transform active:scale-95 cursor-pointer"
+          className="min-h-[46px] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl bg-gradient-to-r from-[#e11d48] to-[#dc2626] hover:from-[#be123c] hover:to-[#b91c1c] text-white shadow-xs transition-transform active:scale-95 cursor-pointer"
           title="অনলাইন ভর্তি ফর্ম"
         >
           <Sparkles className="w-4 h-4 text-amber-200 mb-0.5" />

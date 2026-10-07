@@ -76,12 +76,12 @@ export const NexgenExpatTrustBanner: React.FC<NexgenExpatTrustBannerProps> = ({
                 key={idx}
                 className="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 hover:border-indigo-400/50 hover:bg-white/10 transition-all duration-300 flex flex-col justify-between space-y-3"
               >
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shrink-0">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="space-y-1.5">
-                  <h3 className="font-bold text-white text-sm leading-snug">{feat.title}</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed font-normal">{feat.desc}</p>
+                  <h3 className="font-bold text-white text-sm leading-snug break-words">{feat.title}</h3>
+                  <p className="text-xs text-slate-300 leading-relaxed font-normal break-words">{feat.desc}</p>
                 </div>
               </div>
             );
@@ -92,13 +92,13 @@ export const NexgenExpatTrustBanner: React.FC<NexgenExpatTrustBannerProps> = ({
         <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/15 flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left">
           <div className="space-y-1">
             <div className="flex items-center justify-center md:justify-start space-x-2 text-amber-300 text-xs font-bold">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>১০০% আন্তর্জাতিক ভেরিফায়েড সার্টিফিকেট ও সাপোর্ট</span>
             </div>
-            <h4 className="text-base sm:text-lg font-black text-white">
+            <h4 className="text-base sm:text-lg font-black text-white leading-snug break-words">
               প্রবাস থেকে কোর্সের বিস্তারিত বা ভর্তি প্রক্রিয়া জানতে চান?
             </h4>
-            <p className="text-xs text-slate-300">
+            <p className="text-xs text-slate-300 leading-relaxed break-words">
               আমাদের এক্সক্লুসিভ আন্তর্জাতিক সাপোর্ট টিম ২৪/৭ আপনাদের সহায়তায় প্রস্তুত।
             </p>
           </div>
@@ -107,9 +107,9 @@ export const NexgenExpatTrustBanner: React.FC<NexgenExpatTrustBannerProps> = ({
             <button
               type="button"
               onClick={onOpenAdmission}
-              className="w-full sm:w-auto px-6 py-3 rounded-full bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-700 hover:to-amber-600 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto min-h-[46px] px-6 py-3 rounded-full bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-700 hover:to-amber-600 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center space-x-2"
             >
-              <Sparkles className="w-4 h-4 text-amber-200" />
+              <Sparkles className="w-4 h-4 text-amber-200 shrink-0" />
               <span>অনলাইনে ভর্তি আবেদন</span>
             </button>
 
@@ -117,9 +117,9 @@ export const NexgenExpatTrustBanner: React.FC<NexgenExpatTrustBannerProps> = ({
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-5 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto min-h-[46px] px-5 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center space-x-2"
             >
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 shrink-0" />
               <span>হোয়াটসঅ্যাপ সাপোর্ট</span>
             </a>
           </div>

@@ -109,22 +109,22 @@ export const AccreditationTrustStrip: React.FC<AccreditationTrustStripProps> = (
           {activeItems.map((item) => (
             <div
               key={item.id}
-              className="bg-slate-50/80 hover:bg-white border border-slate-200/90 hover:border-indigo-300 p-3 sm:p-3.5 rounded-2xl transition-all group flex flex-col justify-between space-y-2 shadow-2xs hover:shadow-xs"
+              className="bg-slate-50/80 hover:bg-white border border-slate-200/90 hover:border-indigo-300 p-3 sm:p-3.5 rounded-2xl transition-all group flex flex-col justify-between space-y-2 shadow-2xs hover:shadow-xs min-h-[120px] sm:min-h-0"
             >
               <div className="flex items-center justify-between gap-1">
-                <div className="p-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs group-hover:scale-105 transition-transform">
+                <div className="p-1.5 rounded-xl bg-white border border-slate-200 shadow-2xs group-hover:scale-105 transition-transform shrink-0">
                   {renderTrustIcon(item.iconName)}
                 </div>
-                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+                <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60 shrink-0 text-center truncate max-w-[90px] xs:max-w-none">
                   {item.badge}
                 </span>
               </div>
 
               <div>
-                <h4 className="font-bold text-xs sm:text-[13px] text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">
+                <h4 className="font-bold text-xs sm:text-[13px] text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug break-words">
                   {item.title}
                 </h4>
-                <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed break-words">
                   {item.subtitle}
                 </p>
               </div>

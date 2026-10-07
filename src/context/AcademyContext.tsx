@@ -822,6 +822,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           safeHeroVideoUrl = 'indexeddb:hero-video';
         }
 
+        // Logo versioning & migration to official brand assets
+        const logoVersion = typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_LOGO_VERSION') : null;
+        const isLegacyLogo = logoVersion !== 'v3_brand_2026';
+        const effectiveLogoUrl = isLegacyLogo ? '/logo.svg' : (parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.customLogoUrl || '/logo.svg');
+        const effectiveHeaderLogo = isLegacyLogo ? '/logo.svg' : (parsed.headerLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.headerLogoUrl || '/logo.svg');
+        const effectiveFooterLogo = isLegacyLogo ? '/logo-dark.svg' : (parsed.footerLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.footerLogoUrl || '/logo-dark.svg');
+
         return {
           ...INITIAL_WEBSITE_CMS_CONFIG,
           ...parsed,
@@ -829,13 +836,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           brandPrimary: parsed.brandPrimary !== undefined ? parsed.brandPrimary : (INITIAL_WEBSITE_CMS_CONFIG.brandPrimary || 'NexGen'),
           brandAccent: parsed.brandAccent !== undefined ? parsed.brandAccent : (INITIAL_WEBSITE_CMS_CONFIG.brandAccent || 'Computer Academy'),
           brandSubline: parsed.brandSubline !== undefined ? parsed.brandSubline : (INITIAL_WEBSITE_CMS_CONFIG.brandSubline || 'Computer Training Institute'),
-          customLogoUrl: parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.customLogoUrl,
-          headerLogoUrl: parsed.headerLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.headerLogoUrl,
-          footerLogoUrl: parsed.footerLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.footerLogoUrl,
+          customLogoUrl: effectiveLogoUrl,
+          headerLogoUrl: effectiveHeaderLogo,
+          footerLogoUrl: effectiveFooterLogo,
           logoSizeMobile: parsed.logoSizeMobile || INITIAL_WEBSITE_CMS_CONFIG.logoSizeMobile || 38,
-          logoSizeDesktop: parsed.logoSizeDesktop || INITIAL_WEBSITE_CMS_CONFIG.logoSizeDesktop || 46,
-          footerLogoSizeMobile: parsed.footerLogoSizeMobile || INITIAL_WEBSITE_CMS_CONFIG.footerLogoSizeMobile || 34,
-          footerLogoSizeDesktop: parsed.footerLogoSizeDesktop || INITIAL_WEBSITE_CMS_CONFIG.footerLogoSizeDesktop || 40,
+          logoSizeDesktop: parsed.logoSizeDesktop || INITIAL_WEBSITE_CMS_CONFIG.logoSizeDesktop || 44,
+          footerLogoSizeMobile: parsed.footerLogoSizeMobile || INITIAL_WEBSITE_CMS_CONFIG.footerLogoSizeMobile || 32,
+          footerLogoSizeDesktop: parsed.footerLogoSizeDesktop || INITIAL_WEBSITE_CMS_CONFIG.footerLogoSizeDesktop || 38,
           logoShape: parsed.logoShape || INITIAL_WEBSITE_CMS_CONFIG.logoShape || 'contain',
           googleMapShareUrl: effectiveShareUrl,
           googleMapEmbedUrl: effectiveEmbedUrl,
@@ -1141,6 +1148,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           branches: Array.isArray(parsed.branches) && parsed.branches.length > 0 ? parsed.branches : DEFAULT_CAMPUS_BRANCHES,
           ...parsed,
           instituteName: (parsed.instituteName && parsed.instituteName !== 'Unique IT Institute') ? parsed.instituteName : 'NexGen Computer Academy',
+          customLogoUrl: ((typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_LOGO_VERSION') : null) !== 'v3_brand_2026') ? '/logo.svg' : (parsed.customLogoUrl || '/logo.svg'),
           officialEmail: (parsed.officialEmail && parsed.officialEmail !== 'info@uniqueitinstitute.com') ? parsed.officialEmail : 'info@nexgenacademy.edu.bd',
           campusName: parsed.campusName || 'Farmgate Campus',
           primarySupportPhone: parsed.primarySupportPhone || '01798444444',
@@ -1152,6 +1160,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
     return {
       instituteName: 'NexGen Computer Academy',
+      customLogoUrl: '/logo.svg',
       tagline: 'Professional IT Training & Career Development Academy in Bangladesh',
       campusName: 'Farmgate Campus',
       primarySupportPhone: '01798444444',

@@ -19,6 +19,7 @@ import {
   Globe2
 } from 'lucide-react';
 import { SeminarWorkshop } from '../../types';
+import { NexgenLogo } from '../common/NexgenLogo';
 import {
   trackMetaPixelEvent,
   getCapturedUtmParams,
@@ -177,9 +178,7 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
       <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full shadow-2xl border border-slate-100 space-y-4 text-slate-800 my-auto">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-indigo-50 text-indigo-700 rounded-xl">
-              <Calendar className="w-5 h-5" />
-            </div>
+            <NexgenLogo variant="crest" size={36} className="shrink-0 drop-shadow-xs" />
             <div>
               <h3 className="font-black text-slate-900 text-base">
                 Free Seminar Registration

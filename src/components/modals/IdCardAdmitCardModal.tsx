@@ -614,7 +614,7 @@ export const IdCardAdmitCardModal: React.FC<IdCardAdmitCardModalProps> = ({
                       style={{ background: '#2563eb', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
                     >
                       <div className="flex items-center space-x-1.5">
-                        <NexgenLogo variant="crest" size={20} />
+                        <NexgenLogo variant="crest" size={20} isDarkTheme />
                         <span className="font-black text-[10px] tracking-wider uppercase text-white drop-shadow-xs">
                           {cardData.instituteName}
                         </span>

@@ -1,0 +1,19 @@
+<svg viewBox="0 0 500 500" width="500" height="500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="nexgenGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#042A56" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <g filter="url(#nexgenGlow)">
+    <!-- Red Dynamic Crescent / Swoosh on bottom right -->
+    <path d="M220 445 C310 445 425 400 450 320 C465 270 440 220 405 175 C420 225 410 280 375 330 C335 385 270 420 205 435 C190 438 198 444 220 445 Z" fill="#D41B2C" />
+
+    <!-- Main Navy Organic Pebble / Pick Body -->
+    <path d="M175 60 C265 60 380 115 415 195 C445 260 415 345 355 395 C295 445 190 440 125 385 C65 330 60 235 95 155 C120 100 145 60 175 60 Z" fill="#042A56" />
+
+    <!-- Inner Stylized White 'N' Cutout / Flow -->
+    <path d="M155 160 C155 145 168 135 182 135 C197 135 210 145 210 160 L210 330 C210 345 197 355 182 355 C168 355 155 345 155 330 Z" fill="#FFFFFF" />
+    <path d="M190 240 C210 205 245 165 290 145 C335 125 380 145 395 185 C410 225 395 275 350 320 C310 360 245 375 195 360 L195 305 C230 315 275 305 305 275 C335 245 345 215 335 195 C325 175 295 170 265 185 C235 200 210 225 190 255 Z" fill="#FFFFFF" />
+  </g>
+</svg>

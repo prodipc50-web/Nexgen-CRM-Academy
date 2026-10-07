@@ -176,9 +176,9 @@ export const NexgenHomepageSeminars: React.FC<NexgenHomepageSeminarsProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenSeminarReg(sem)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center space-x-2 active:scale-95 cursor-pointer"
+                      className="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center space-x-2 active:scale-95 cursor-pointer"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+                      <Sparkles className="w-3.5 h-3.5 text-amber-200 shrink-0" />
                       <span>ফ্রি সিট বুক করুন (Register Free)</span>
                     </button>
                   </div>
@@ -189,11 +189,11 @@ export const NexgenHomepageSeminars: React.FC<NexgenHomepageSeminarsProps> = ({
         </div>
 
         {/* View All Seminars Button */}
-        <div className="text-center pt-10">
+        <div className="text-center pt-8 sm:pt-10">
           <button
             type="button"
             onClick={onViewAllSeminars}
-            className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer active:scale-95"
+            className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center space-x-2 px-6 py-2.5 rounded-full bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer active:scale-95"
           >
             <span>সবগুলো ফ্রি সেমিনার শিডিউল দেখুন</span>
             <ArrowRight className="w-3.5 h-3.5" />

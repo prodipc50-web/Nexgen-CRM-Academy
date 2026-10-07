@@ -55,7 +55,7 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveFilter(tab.id as any)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
+                className={`min-h-[42px] px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 shrink-0 ${
                   activeFilter === tab.id
                     ? 'bg-slate-900 text-white shadow-sm ring-2 ring-slate-900/10'
                     : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
@@ -63,7 +63,7 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
+                  className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${
                     activeFilter === tab.id
                       ? 'bg-white/20 text-white'
                       : 'bg-slate-100 text-slate-500'
@@ -203,23 +203,23 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-1">
                     <button
                       type="button"
                       onClick={() => onSelectCourseForAdmission(c)}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-white text-xs font-black shadow-sm transition-all cursor-pointer text-center active:scale-95 flex items-center justify-center space-x-1"
+                      className="w-full min-h-[44px] py-2.5 px-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-white text-xs font-black shadow-sm transition-all cursor-pointer text-center active:scale-95 flex items-center justify-center space-x-1"
                       title="অনলাইনে ভর্তি আবেদন করুন"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+                      <Sparkles className="w-3.5 h-3.5 text-amber-200 shrink-0" />
                       <span>ভর্তি আবেদন</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => onSelectCourseForDetails(c)}
-                      className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold transition-all cursor-pointer text-center active:scale-95 flex items-center justify-center space-x-1"
+                      className="w-full min-h-[44px] py-2.5 px-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold transition-all cursor-pointer text-center active:scale-95 flex items-center justify-center space-x-1"
                       title="কোর্স সিলেবাস ও বিস্তারিত দেখুন"
                     >
-                      <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+                      <BookOpen className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                       <span>সিলেবাস দেখুন</span>
                     </button>
                   </div>
@@ -230,11 +230,11 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
         </div>
 
         {/* View All Course Button */}
-        <div className="text-center pt-12">
+        <div className="text-center pt-10 sm:pt-12">
           <button
             type="button"
             onClick={onViewAllCourses}
-            className="inline-flex items-center space-x-2 px-8 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer active:scale-95"
+            className="w-full sm:w-auto min-h-[46px] inline-flex items-center justify-center space-x-2 px-8 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer active:scale-95"
           >
             <span>সবগুলো কোর্স ও কারিকুলাম দেখুন</span>
             <ArrowRight className="w-4 h-4" />

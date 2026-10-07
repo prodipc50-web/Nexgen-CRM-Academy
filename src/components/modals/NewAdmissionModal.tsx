@@ -260,7 +260,7 @@ export const NewAdmissionModal: React.FC<NewAdmissionModalProps> = ({
         <div className="p-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between border-b border-indigo-900">
           <div className="flex items-center space-x-3">
             <div className="bg-white/10 p-1.5 rounded-xl border border-white/10 shrink-0">
-              <NexgenLogo variant="crest" size={36} />
+              <NexgenLogo variant="crest" size={36} isDarkTheme />
             </div>
             <div>
               <h3 className="text-base font-black tracking-tight">New Student Admission Wizard</h3>

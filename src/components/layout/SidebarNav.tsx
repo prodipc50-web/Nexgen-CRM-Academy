@@ -158,16 +158,10 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
         {/* Sidebar Brand Header */}
         <div className="p-3.5 border-b border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2.5 min-w-0">
-            <NexgenLogo variant="crest" size={38} className="bg-white/10 p-1 rounded-xl shrink-0" />
-            {!isCollapsed && (
-              <div className="min-w-0">
-                <div className="text-sm font-black text-white tracking-wide uppercase leading-tight truncate">
-                  Nexgen Academy
-                </div>
-                <div className="text-[11px] text-indigo-400 font-bold uppercase tracking-wider truncate">
-                  Internal Portal
-                </div>
-              </div>
+            {isCollapsed ? (
+              <NexgenLogo variant="crest" size={34} className="bg-white/10 p-1 rounded-xl shrink-0" isDarkTheme />
+            ) : (
+              <NexgenLogo variant="horizontal" size={32} desktopSize={36} isDarkTheme={true} className="shrink-0" />
             )}
           </div>
 

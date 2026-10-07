@@ -89,21 +89,14 @@ export const LoginView: React.FC<LoginViewProps> = ({ onBackToWebsite }) => {
           </div>
         )}
 
-        {/* Brand Crest & Header */}
+        {/* Brand Logo & Header */}
         <div className="text-center space-y-3">
           <div className="flex justify-center">
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl">
-              <NexgenLogo variant="crest" size={54} />
-            </div>
+            <NexgenLogo variant="full" size={140} isDarkTheme />
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Nexgen Computer Academy
-            </h1>
-            <p className="text-xs sm:text-sm text-indigo-200/80 font-medium mt-1">
-              Enterprise Office & Operations Management Portal
-            </p>
-          </div>
+          <p className="text-xs sm:text-sm text-indigo-200/80 font-medium">
+            Enterprise Office & Operations Management Portal
+          </p>
         </div>
 
         {/* Login Card */}

@@ -60,11 +60,11 @@ export const LogoCropResizeModal: React.FC<LogoCropResizeModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const activeLogo = currentLogoUrl || localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+      const activeLogo = currentLogoUrl || localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO') || '/logo.svg';
       if (activeLogo) {
         setImageSrc(activeLogo);
       } else {
-        setImageSrc(null);
+        setImageSrc('/logo.svg');
       }
       setZoom(1);
       setRotation(0);
@@ -277,10 +277,10 @@ export const LogoCropResizeModal: React.FC<LogoCropResizeModalProps> = ({
   };
 
   const handleReset = () => {
-    if (confirm('Are you sure you want to remove the custom uploaded logo and restore the official Nexgen Shield Emblem?')) {
+    if (confirm('Are you sure you want to remove the custom uploaded logo and restore the official NexGen Brand Logo?')) {
       localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
       window.dispatchEvent(new Event('nexgen-logo-updated'));
-      setImageSrc(null);
+      setImageSrc('/logo.svg');
       if (onResetLogo) onResetLogo();
       onClose();
     }

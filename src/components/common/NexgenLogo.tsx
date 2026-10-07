@@ -48,6 +48,38 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   });
 
   const resolveCustomLogo = () => {
+    // One-time cache migration: clear stale custom logo from old versions
+    try {
+      const logoVersion = localStorage.getItem('NEXGEN_LOGO_VERSION');
+      if (logoVersion !== 'v3_brand_2026') {
+        const storedLogo = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+        if (storedLogo && (storedLogo.length > 300 || storedLogo.includes('shield'))) {
+          localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+        }
+        const storedSettings = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings');
+        if (storedSettings) {
+          const parsed = JSON.parse(storedSettings);
+          if (parsed.customLogoUrl && parsed.customLogoUrl !== '/logo.svg') {
+            delete parsed.customLogoUrl;
+            localStorage.setItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings', JSON.stringify(parsed));
+          }
+        }
+        const storedCms = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_website_cms_config');
+        if (storedCms) {
+          const parsedCms = JSON.parse(storedCms);
+          if (parsedCms.customLogoUrl && parsedCms.customLogoUrl !== '/logo.svg') {
+            delete parsedCms.customLogoUrl;
+            delete parsedCms.headerLogoUrl;
+            delete parsedCms.footerLogoUrl;
+            localStorage.setItem('NEXGEN_OFFICE_ACADEMY_DB_V1_website_cms_config', JSON.stringify(parsedCms));
+          }
+        }
+        localStorage.setItem('NEXGEN_LOGO_VERSION', 'v3_brand_2026');
+      }
+    } catch (e) {
+      console.warn('Logo migration notice:', e);
+    }
+
     if (customLogoUrl) {
       setLogoSrc(customLogoUrl);
       setImageError(false);
@@ -134,295 +166,159 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     }
   }
 
-  // Pure SVG Emblem of the Official Nexgen Computer Academy Logo
-  const ShieldEmblem = ({ width = dimension, height = dimension }: { width?: number; height?: number }) => (
-    <svg
-      viewBox="0 0 400 320"
-      width={width}
-      height={height}
-      className="shrink-0 select-none drop-shadow-xs"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        {/* Shield Drop Shadow */}
-        <filter id="ncaShadow" x="-10%" y="-10%" width="130%" height="130%">
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodOpacity="0.15" />
-        </filter>
+  // 1. Official Vector Icon Mark of the Nexgen Computer Academy (03-icon-only / 11-app-icon)
+  const NexgenIconMark = ({
+    width = dimension,
+    height = dimension,
+    isDark = isDarkTheme
+  }: {
+    width?: number;
+    height?: number;
+    isDark?: boolean;
+  }) => {
+    const redColor = '#D81D2A';
+    const pebbleFill = isDark ? '#FFFFFF' : '#032B5F';
+    const nFill = isDark ? '#032B5F' : '#FFFFFF';
 
-        {/* Shield Clip Path for 4 Quadrants */}
-        <clipPath id="shieldInnerClip">
-          <path d="M140 40 L200 24 L260 40 C274 70 278 120 274 165 C268 205 235 235 200 252 C165 235 132 205 126 165 C122 120 126 70 140 40 Z" />
-        </clipPath>
-
-        {/* Subtle Gradients */}
-        <linearGradient id="shieldBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1E4B82" />
-          <stop offset="50%" stopColor="#163A6B" />
-          <stop offset="100%" stopColor="#0F2B52" />
-        </linearGradient>
-
-        <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#1A437C" />
-          <stop offset="100%" stopColor="#102E59" />
-        </linearGradient>
-      </defs>
-
-      {/* 1. LEFT LAUREL LEAVES (Green wreath) */}
-      <g fill="#38B283" stroke="#2D8C67" strokeWidth="0.5">
-        {/* Branch stem */}
-        <path d="M125 210 C105 180 102 120 122 65 C123 62 125 63 124 66 C106 118 109 176 128 206 Z" />
-        {/* Left leaves */}
-        <path d="M118 68 C108 55 120 40 124 55 C125 62 122 66 118 68 Z" />
-        <path d="M106 88 C94 80 98 64 112 73 C117 77 114 84 106 88 Z" />
-        <path d="M100 114 C86 110 87 93 103 98 C109 101 107 110 100 114 Z" />
-        <path d="M98 142 C84 142 82 125 99 126 C105 127 105 137 98 142 Z" />
-        <path d="M101 170 C88 174 83 158 99 154 C106 153 107 164 101 170 Z" />
-        <path d="M108 196 C96 204 88 189 104 180 C110 177 113 189 108 196 Z" />
-        <path d="M122 216 C112 227 101 213 114 202 C119 198 126 208 122 216 Z" />
-      </g>
-
-      {/* 2. RIGHT LAUREL LEAVES (Green wreath) */}
-      <g fill="#38B283" stroke="#2D8C67" strokeWidth="0.5">
-        {/* Branch stem */}
-        <path d="M275 210 C295 180 298 120 278 65 C277 62 275 63 276 66 C294 118 291 176 272 206 Z" />
-        {/* Right leaves */}
-        <path d="M282 68 C292 55 280 40 276 55 C275 62 278 66 282 68 Z" />
-        <path d="M294 88 C306 80 302 64 288 73 C283 77 286 84 294 88 Z" />
-        <path d="M300 114 C314 110 313 93 297 98 C291 101 293 110 300 114 Z" />
-        <path d="M302 142 C316 142 318 125 301 126 C295 127 295 137 302 142 Z" />
-        <path d="M299 170 C312 174 317 158 301 154 C294 153 293 164 299 170 Z" />
-        <path d="M292 196 C304 204 312 189 296 180 C290 177 287 189 292 196 Z" />
-        <path d="M278 216 C288 227 299 213 286 202 C281 198 274 208 278 216 Z" />
-      </g>
-
-      {/* 3. MAIN SHIELD OUTER BODY */}
-      <g filter="url(#ncaShadow)">
-        {/* Outer Navy Border */}
-        <path
-          d="M136 34 L200 18 L264 34 C282 66 286 122 282 170 C274 214 238 248 200 266 C162 248 126 214 118 170 C114 122 118 66 136 34 Z"
-          fill="url(#shieldBorderGrad)"
-          stroke="#0E2344"
-          strokeWidth="2"
-        />
-
-        {/* White Inner Rim */}
-        <path
-          d="M140 40 L200 25 L260 40 C276 70 280 120 276 165 C269 206 235 238 200 254 C165 238 131 206 124 165 C120 120 124 70 140 40 Z"
-          fill="#FFFFFF"
-        />
-      </g>
-
-      {/* 4. FOUR INNER QUADRANTS (Clipped inside Shield) */}
-      <g clipPath="url(#shieldInnerClip)">
-        {/* Top-Left Quadrant: Sky Blue (Open Book) */}
-        <rect x="120" y="20" width="80" height="116" fill="#34B3F1" />
-        {/* Top-Right Quadrant: Crimson Red (Globe) */}
-        <rect x="200" y="20" width="80" height="116" fill="#E52E2D" />
-        {/* Bottom-Left Quadrant: Vivid Orange (Lightbulb) */}
-        <rect x="120" y="136" width="80" height="130" fill="#F58220" />
-        {/* Bottom-Right Quadrant: Green (Pencil) */}
-        <rect x="200" y="136" width="80" height="130" fill="#2EB086" />
-
-        {/* Crisp White Cross Divider */}
-        <rect x="197" y="20" width="6" height="245" fill="#FFFFFF" />
-        <rect x="120" y="133" width="160" height="6" fill="#FFFFFF" />
-
-        {/* QUADRANT 1 ICON: OPEN BOOK (Top-Left) */}
-        <g fill="#FFFFFF" transform="translate(150, 68) scale(0.9)">
-          <path d="M22 6 C17 3 9 3 0 6 L0 30 C9 27 17 27 22 30 C27 27 35 27 44 30 L44 6 C35 3 27 3 22 6 Z" stroke="#FFFFFF" strokeWidth="2.5" strokeLinejoin="round" fill="none" />
-          <path d="M22 6 L22 30" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M6 13 C11 11 16 11 20 13 M6 18 C11 16 16 16 20 18 M6 23 C11 21 16 21 20 23" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
-          <path d="M24 13 C28 11 33 11 38 13 M24 18 C28 16 33 16 38 18 M24 23 C28 21 33 21 38 23" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
-        </g>
-
-        {/* QUADRANT 2 ICON: GLOBE (Top-Right) */}
-        <g stroke="#FFFFFF" strokeWidth="2" fill="none" transform="translate(225, 68) scale(0.95)">
-          <circle cx="16" cy="16" r="14" strokeWidth="2.5" />
-          {/* Equator & Horizontal parallels */}
-          <line x1="2" y1="16" x2="30" y2="16" />
-          <path d="M4 10 Q16 14 28 10" />
-          <path d="M4 22 Q16 18 28 22" />
-          {/* Prime Meridian & vertical ellipses */}
-          <line x1="16" y1="2" x2="16" y2="30" />
-          <ellipse cx="16" cy="16" rx="7" ry="14" />
-        </g>
-
-        {/* QUADRANT 3 ICON: LIGHTBULB (Bottom-Left) */}
-        <g fill="#FFFFFF" stroke="#FFFFFF" transform="translate(156, 148) scale(0.95)">
-          {/* Bulb Outline */}
-          <path
-            d="M15 2 C8.5 2 4 6.8 4 13 C4 17 6.5 20.5 8 23 L8 27 C8 27.5 8.5 28 9 28 L21 28 C21.5 28 22 27.5 22 27 L22 23 C23.5 20.5 26 17 26 13 C26 6.8 21.5 2 15 2 Z"
-            fill="none"
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-          />
-          {/* Filament */}
-          <path d="M11 13 L13 7 L17 7 L19 13 M13 13 L17 13" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          {/* Base screw lines */}
-          <line x1="9" y1="31" x2="21" y2="31" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="11" y1="34" x2="19" y2="34" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="15" cy="37" r="1.5" strokeWidth="0" />
-        </g>
-
-        {/* QUADRANT 4 ICON: PENCIL (Bottom-Right) */}
-        <g fill="#FFFFFF" transform="translate(225, 148) scale(0.95)">
-          {/* Angled pencil pointing bottom-left */}
-          <g transform="rotate(-45 16 16)">
-            {/* Eraser and ferrule */}
-            <rect x="13" y="1" width="6" height="4" rx="1" fill="#FFFFFF" />
-            <line x1="13" y1="7" x2="19" y2="7" stroke="#2EB086" strokeWidth="1" />
-            {/* Pencil Shaft */}
-            <path d="M13 5 L19 5 L19 22 L13 22 Z" fill="#FFFFFF" stroke="#2EB086" strokeWidth="0.5" />
-            <line x1="16" y1="5" x2="16" y2="22" stroke="#2EB086" strokeWidth="0.8" />
-            {/* Sharp Point */}
-            <path d="M13 22 L19 22 L16 29 Z" fill="#FFFFFF" />
-            {/* Graphite tip */}
-            <polygon points="15,26.5 17,26.5 16,29" fill="#153C6F" />
-          </g>
-        </g>
-      </g>
-
-      {/* 5. RIBBON / BANNER ACROSS SHIELD BOTTOM */}
-      <g filter="url(#ncaShadow)">
-        {/* Ribbon folded tails left */}
-        <path d="M96 244 L138 214 L138 246 L96 268 L114 254 Z" fill="#0F2B52" />
-        {/* Ribbon folded tails right */}
-        <path d="M304 244 L262 214 L262 246 L304 268 L286 254 Z" fill="#0F2B52" />
-
-        {/* Main Ribbon Arch */}
-        <path
-          d="M106 244 C150 226 250 226 294 244 L290 274 C246 256 154 256 110 274 Z"
-          fill="url(#ribbonGrad)"
-          stroke="#0E2344"
-          strokeWidth="1.5"
-        />
-
-        {/* Ribbon Edge Highlights */}
-        <path
-          d="M108 246 C152 229 248 229 292 246"
-          stroke="#5C93D6"
-          strokeWidth="1.2"
-          fill="none"
-        />
-
-        {/* "NEXGEN" Typography on Ribbon */}
-        <text
-          x="200"
-          y="259"
-          textAnchor="middle"
-          fill="#FFFFFF"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          fontWeight="900"
-          fontSize="24"
-          letterSpacing="4"
-          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-        >
-          NEXGEN
-        </text>
-      </g>
-
-      {/* 6. SUB-TEXT "COMPUTER ACADEMY" */}
-      <text
-        x="200"
-        y="298"
-        textAnchor="middle"
-        fill={isDarkTheme ? "#93C5FD" : "#123B70"}
-        fontFamily="system-ui, -apple-system, sans-serif"
-        fontWeight="900"
-        fontSize="14.5"
-        letterSpacing="2.5"
-        style={isDarkTheme ? { textShadow: '0 1px 3px rgba(0,0,0,0.8)' } : undefined}
+    return (
+      <svg
+        viewBox="0 0 100 100"
+        width={width}
+        height={height}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="shrink-0 select-none drop-shadow-xs"
       >
-        COMPUTER ACADEMY
-      </text>
-    </svg>
-  );
+        {/* Red Swoosh Accent (Bottom-Right) */}
+        <path
+          d="M44 85 C62 85 84 75 89 60 C92 51 87 42 80 34 C82 44 80 54 73 63 C65 74 53 80 41 83 C38 84 39 85 44 85 Z"
+          fill={redColor}
+        />
 
-  // Compact Crest without side laurels or text (ideal for avatar size)
-  const CrestOnly = ({ width = dimension, height = dimension }: { width?: number; height?: number }) => (
-    <svg
-      viewBox="100 15 200 275"
-      width={width}
-      height={height}
-      className="shrink-0 select-none drop-shadow-xs"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <clipPath id="crestInnerClip">
-          <path d="M140 40 L200 24 L260 40 C274 70 278 120 274 165 C268 205 235 235 200 252 C165 235 132 205 126 165 C122 120 126 70 140 40 Z" />
-        </clipPath>
-        <linearGradient id="crestBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1E4B82" />
-          <stop offset="100%" stopColor="#0F2B52" />
-        </linearGradient>
-      </defs>
+        {/* Main Pebble Body */}
+        <path
+          d="M35 15 C53 15 75 25 82 41 C88 54 82 70 70 80 C58 89 38 88 25 78 C13 67 12 48 19 33 C24 23 29 15 35 15 Z"
+          fill={pebbleFill}
+        />
 
-      {/* Main Outer Shield */}
-      <path
-        d="M136 34 L200 18 L264 34 C282 66 286 122 282 170 C274 214 238 248 200 266 C162 248 126 214 118 170 C114 122 118 66 136 34 Z"
-        fill="url(#crestBorderGrad)"
-      />
-      <path
-        d="M140 40 L200 25 L260 40 C276 70 280 120 276 165 C269 206 235 238 200 254 C165 238 131 206 124 165 C120 120 124 70 140 40 Z"
-        fill="#FFFFFF"
-      />
+        {/* Stylized 'N' Mark Inside */}
+        <rect x="31" y="32" width="9" height="32" rx="4.5" fill={nFill} />
+        <path
+          d="M36 50 C40 42 47 33 57 30 C66 27 74 31 77 39 C80 47 77 56 68 64 C60 71 49 74 39 71 L39 62 C46 64 53 62 59 56 C65 50 67 44 65 40 C63 36 57 35 51 38 C45 41 40 46 36 51 Z"
+          fill={nFill}
+        />
+      </svg>
+    );
+  };
 
-      {/* Quadrants */}
-      <g clipPath="url(#crestInnerClip)">
-        <rect x="120" y="20" width="80" height="116" fill="#34B3F1" />
-        <rect x="200" y="20" width="80" height="116" fill="#E52E2D" />
-        <rect x="120" y="136" width="80" height="130" fill="#F58220" />
-        <rect x="200" y="136" width="80" height="130" fill="#2EB086" />
-        <rect x="197" y="20" width="6" height="245" fill="#FFFFFF" />
-        <rect x="120" y="133" width="160" height="6" fill="#FFFFFF" />
+  // 2. Official Stacked Logo (01-primary-stacked & 05-dark-stacked)
+  const NexgenStackedVector = ({
+    width = dimension,
+    isDark = isDarkTheme
+  }: {
+    width?: number;
+    isDark?: boolean;
+  }) => {
+    const primaryColor = isDark ? '#FFFFFF' : '#032B5F';
+    const redColor = '#D81D2A';
+    const pebbleFill = isDark ? '#FFFFFF' : '#032B5F';
+    const nFill = isDark ? '#032B5F' : '#FFFFFF';
+    const calcHeight = Math.round(width * 0.75);
 
-        {/* Book */}
-        <g fill="#FFFFFF" transform="translate(150, 68) scale(0.9)">
-          <path d="M22 6 C17 3 9 3 0 6 L0 30 C9 27 17 27 22 30 C27 27 35 27 44 30 L44 6 C35 3 27 3 22 6 Z" stroke="#FFFFFF" strokeWidth="2.5" fill="none" />
-          <path d="M22 6 L22 30" stroke="#FFFFFF" strokeWidth="2.5" />
+    return (
+      <svg
+        viewBox="0 0 280 210"
+        width={width}
+        height={calcHeight}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="shrink-0 select-none drop-shadow-xs"
+      >
+        {/* Centered Icon Mark */}
+        <g transform="translate(96, 10) scale(0.88)">
+          <path d="M44 85 C62 85 84 75 89 60 C92 51 87 42 80 34 C82 44 80 54 73 63 C65 74 53 80 41 83 C38 84 39 85 44 85 Z" fill={redColor} />
+          <path d="M35 15 C53 15 75 25 82 41 C88 54 82 70 70 80 C58 89 38 88 25 78 C13 67 12 48 19 33 C24 23 29 15 35 15 Z" fill={pebbleFill} />
+          <rect x="31" y="32" width="9" height="32" rx="4.5" fill={nFill} />
+          <path d="M36 50 C40 42 47 33 57 30 C66 27 74 31 77 39 C80 47 77 56 68 64 C60 71 49 74 39 71 L39 62 C46 64 53 62 59 56 C65 50 67 44 65 40 C63 36 57 35 51 38 C45 41 40 46 36 51 Z" fill={nFill} />
         </g>
-        {/* Globe */}
-        <g stroke="#FFFFFF" strokeWidth="2" fill="none" transform="translate(225, 68) scale(0.95)">
-          <circle cx="16" cy="16" r="14" strokeWidth="2.5" />
-          <line x1="2" y1="16" x2="30" y2="16" />
-          <ellipse cx="16" cy="16" rx="7" ry="14" />
-        </g>
-        {/* Bulb */}
-        <g fill="#FFFFFF" stroke="#FFFFFF" transform="translate(156, 148) scale(0.95)">
-          <path d="M15 2 C8.5 2 4 6.8 4 13 C4 17 6.5 20.5 8 23 L8 27 L22 27 L22 23 C23.5 20.5 26 17 26 13 C26 6.8 21.5 2 15 2 Z" fill="none" strokeWidth="2.5" />
-          <line x1="9" y1="31" x2="21" y2="31" strokeWidth="2.5" strokeLinecap="round" />
-        </g>
-        {/* Pencil */}
-        <g fill="#FFFFFF" transform="translate(225, 148) scale(0.95)">
-          <g transform="rotate(-45 16 16)">
-            <rect x="13" y="1" width="6" height="4" rx="1" fill="#FFFFFF" />
-            <path d="M13 5 L19 5 L19 22 L13 22 Z" fill="#FFFFFF" stroke="#2EB086" strokeWidth="0.5" />
-            <path d="M13 22 L19 22 L16 29 Z" fill="#FFFFFF" />
-            <polygon points="15,26.5 17,26.5 16,29" fill="#153C6F" />
-          </g>
-        </g>
-      </g>
 
-      {/* Ribbon */}
-      <g>
-        <path d="M106 244 C150 226 250 226 294 244 L290 274 C246 256 154 256 110 274 Z" fill="#163A6B" />
-        <text
-          x="200"
-          y="259"
-          textAnchor="middle"
-          fill="#FFFFFF"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          fontWeight="900"
-          fontSize="24"
-          letterSpacing="4"
-        >
-          NEXGEN
+        {/* Typography: NEXGEN (Centered) */}
+        <g transform="translate(8, 110)">
+          <path d="M0 44 L0 0 L10 0 L25 28 L25 0 L35 0 L35 44 L25 44 L10 16 L10 44 Z" fill={primaryColor} />
+          <path d="M45 44 L45 0 L76 0 L76 9 L55 9 L55 17 L72 17 L72 26 L55 26 L55 35 L76 35 L76 44 Z" fill={primaryColor} />
+          <path d="M86 44 L96 44 L123 0 L113 0 Z" fill={primaryColor} />
+          <path d="M86 0 L96 0 L123 44 L113 44 Z" fill={redColor} />
+          <path d="M173 15 L164 19 C161 12 155 8 147 8 C137 8 131 16 131 26 C131 36 137 44 147 44 C156 44 162 39 164 31 L148 31 L148 23 L174 23 L174 32 C171 44 160 52 147 52 C132 52 121 41 121 26 C121 11 132 0 147 0 C159 0 169 6 173 15 Z" fill={primaryColor} transform="translate(6, -4)" />
+          <path d="M188 44 L188 0 L219 0 L219 9 L198 9 L198 17 L215 17 L215 26 L198 26 L198 35 L219 35 L219 44 Z" fill={primaryColor} />
+          <path d="M229 44 L229 0 L239 0 L254 28 L254 0 L264 0 L264 44 L254 44 L239 16 L239 44 Z" fill={primaryColor} />
+        </g>
+
+        {/* Typography: COMPUTER ACADEMY (Centered) */}
+        <text x="140" y="182" textAnchor="middle" fill={primaryColor} fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" fontWeight="800" fontSize="12" letterSpacing="4.6">
+          COMPUTER ACADEMY
         </text>
-      </g>
-    </svg>
-  );
+      </svg>
+    );
+  };
+
+  // 3. Official Horizontal Full Logo (02-horizontal & 06-dark-horizontal)
+  const NexgenHorizontalVector = ({
+    height = dimension,
+    isDark = isDarkTheme
+  }: {
+    height?: number;
+    isDark?: boolean;
+  }) => {
+    const primaryColor = isDark ? '#FFFFFF' : '#032B5F';
+    const redColor = '#D81D2A';
+    const pebbleFill = isDark ? '#FFFFFF' : '#032B5F';
+    const nFill = isDark ? '#032B5F' : '#FFFFFF';
+    const calcWidth = Math.round(height * 4.22);
+
+    return (
+      <svg
+        viewBox="0 0 380 90"
+        width={calcWidth}
+        height={height}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="shrink-0 select-none drop-shadow-xs"
+      >
+        {/* NexGen Official Icon Mark */}
+        <g transform="translate(8, 6) scale(0.78)">
+          <path d="M44 85 C62 85 84 75 89 60 C92 51 87 42 80 34 C82 44 80 54 73 63 C65 74 53 80 41 83 C38 84 39 85 44 85 Z" fill={redColor} />
+          <path d="M35 15 C53 15 75 25 82 41 C88 54 82 70 70 80 C58 89 38 88 25 78 C13 67 12 48 19 33 C24 23 29 15 35 15 Z" fill={pebbleFill} />
+          <rect x="31" y="32" width="9" height="32" rx="4.5" fill={nFill} />
+          <path d="M36 50 C40 42 47 33 57 30 C66 27 74 31 77 39 C80 47 77 56 68 64 C60 71 49 74 39 71 L39 62 C46 64 53 62 59 56 C65 50 67 44 65 40 C63 36 57 35 51 38 C45 41 40 46 36 51 Z" fill={nFill} />
+        </g>
+
+        {/* Typography: NEXGEN */}
+        <g transform="translate(96, 14)">
+          <path d="M0 44 L0 0 L10 0 L25 28 L25 0 L35 0 L35 44 L25 44 L10 16 L10 44 Z" fill={primaryColor} />
+          <path d="M45 44 L45 0 L76 0 L76 9 L55 9 L55 17 L72 17 L72 26 L55 26 L55 35 L76 35 L76 44 Z" fill={primaryColor} />
+          <path d="M86 44 L96 44 L123 0 L113 0 Z" fill={primaryColor} />
+          <path d="M86 0 L96 0 L123 44 L113 44 Z" fill={redColor} />
+          <path d="M173 15 L164 19 C161 12 155 8 147 8 C137 8 131 16 131 26 C131 36 137 44 147 44 C156 44 162 39 164 31 L148 31 L148 23 L174 23 L174 32 C171 44 160 52 147 52 C132 52 121 41 121 26 C121 11 132 0 147 0 C159 0 169 6 173 15 Z" fill={primaryColor} transform="translate(6, -4)" />
+          <path d="M188 44 L188 0 L219 0 L219 9 L198 9 L198 17 L215 17 L215 26 L198 26 L198 35 L219 35 L219 44 Z" fill={primaryColor} />
+          <path d="M229 44 L229 0 L239 0 L254 28 L254 0 L264 0 L264 44 L254 44 L239 16 L239 44 Z" fill={primaryColor} />
+        </g>
+
+        {/* Sub-Text: COMPUTER ACADEMY */}
+        <text
+          x="231"
+          y="75"
+          textAnchor="middle"
+          fill={primaryColor}
+          fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          fontWeight="800"
+          fontSize="12"
+          letterSpacing="4.6"
+        >
+          COMPUTER ACADEMY
+        </text>
+      </svg>
+    );
+  };
 
   const effectiveMobileDim = dimension;
   const effectiveDesktopDim = desktopSize || (typeof size === 'number' ? Math.round(size * 1.15) : dimension);
@@ -502,10 +398,10 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
         ) : (
           <>
             <span className="sm:hidden inline-flex items-center justify-center">
-              <CrestOnly width={effectiveMobileDim} height={effectiveMobileDim} />
+              <NexgenIconMark width={effectiveMobileDim} height={effectiveMobileDim} isDark={isDarkTheme} />
             </span>
             <span className="hidden sm:inline-flex items-center justify-center">
-              <CrestOnly width={effectiveDesktopDim} height={effectiveDesktopDim} />
+              <NexgenIconMark width={effectiveDesktopDim} height={effectiveDesktopDim} isDark={isDarkTheme} />
             </span>
           </>
         )}
@@ -514,46 +410,22 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   }
 
   if (variant === 'horizontal') {
-    const effectiveTitle = instituteName || settings.instituteName || 'NexGen Computer Academy';
-    const effectiveTagline = tagline || settings.tagline || 'Institute of Information Technology & Professional Skills';
     const isDark = isDarkTheme || className.includes('text-white') || className.includes('dark');
 
     return (
-      <div className={`inline-flex items-center space-x-2.5 sm:space-x-3.5 max-w-full ${className}`}>
+      <div className={`inline-flex items-center max-w-full ${className}`}>
         {hasCustomImg ? (
           <CustomImageLogo mobileDim={effectiveMobileDim} desktopDim={effectiveDesktopDim} />
         ) : (
-          <CrestOnly width={dimension} height={dimension} />
+          <>
+            <span className="sm:hidden inline-flex items-center">
+              <NexgenHorizontalVector height={effectiveMobileDim} isDark={isDark} />
+            </span>
+            <span className="hidden sm:inline-flex items-center">
+              <NexgenHorizontalVector height={effectiveDesktopDim} isDark={isDark} />
+            </span>
+          </>
         )}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center space-x-2 min-w-0">
-            <span
-              className={`font-black tracking-tight leading-tight uppercase text-xs sm:text-sm md:text-base whitespace-nowrap ${
-                titleClassName || (isDark ? 'text-white' : 'text-slate-900')
-              }`}
-            >
-              {effectiveTitle}
-            </span>
-            <span
-              className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 rounded-md shrink-0 border whitespace-nowrap ${
-                isDark
-                  ? 'bg-slate-800 text-indigo-300 border-slate-700'
-                  : 'bg-indigo-50 text-indigo-700 border-indigo-200/60'
-              }`}
-            >
-              EST. 2018
-            </span>
-          </div>
-          {showTagline && (
-            <p
-              className={`text-[10px] sm:text-[11px] font-medium leading-tight mt-0.5 whitespace-nowrap truncate sm:whitespace-normal ${
-                taglineClassName || (isDark ? 'text-slate-400' : 'text-slate-500')
-              }`}
-            >
-              {effectiveTagline}
-            </p>
-          )}
-        </div>
       </div>
     );
   }
@@ -563,8 +435,10 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
       {hasCustomImg ? (
         <CustomImageLogo width={dimension} height={Math.round(dimension * 0.85)} />
       ) : (
-        <ShieldEmblem width={dimension} height={Math.round(dimension * 0.8)} />
+        <NexgenStackedVector width={dimension} isDark={isDarkTheme} />
       )}
     </div>
   );
 };
+
+export { NexgenLogo as default };
