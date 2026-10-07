@@ -167,6 +167,26 @@ export function clearSecurityLogs(): void {
 }
 
 /**
+ * Converts Bengali numerals (০-৯) to standard ASCII digits (0-9)
+ * and strips international +88 prefix for standard 11-digit BD mobile format
+ */
+export function normalizeBanglaPhone(raw: string): string {
+  if (!raw) return '';
+  const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  let str = String(raw);
+  for (let i = 0; i < 10; i++) {
+    str = str.split(bnDigits[i]).join(i.toString());
+  }
+  let clean = str.replace(/[\s\-\+\(\)]/g, '').trim();
+  if (clean.startsWith('880')) {
+    clean = '0' + clean.slice(3);
+  } else if (clean.startsWith('88') && clean.length === 13) {
+    clean = clean.slice(2);
+  }
+  return clean;
+}
+
+/**
  * Master Submission Defense Validator
  * Validates honeypot, rate limits, phone formatting, and XSS sanitization in 1 step!
  */
@@ -244,10 +264,13 @@ export function validatePublicSubmission<T extends Record<string, any>>(
   // 4. Sanitize all fields
   const sanitizedPayload = sanitizePayload(payload);
 
-  // 5. Phone validation if required
-  if (requirePhone) {
-    const rawPhone = (sanitizedPayload[phoneFieldName] || '').replace(/[-+()\s]/g, '');
-    if (rawPhone.length > 0 && rawPhone.length < 10) {
+  // 5. Phone validation if required (supports Bengali digits & BD mobile formats)
+  if (requirePhone && sanitizedPayload[phoneFieldName]) {
+    const rawVal = String(sanitizedPayload[phoneFieldName]);
+    const normalized = normalizeBanglaPhone(rawVal);
+    sanitizedPayload[phoneFieldName] = normalized as any;
+
+    if (normalized.length > 0 && normalized.length < 10) {
       return {
         isSafe: false,
         errorMessage: 'সঠিক ১১ ডিজিটের মোবাইল নম্বর প্রদান করুন (যেমন: 017XXXXXXXX)।',

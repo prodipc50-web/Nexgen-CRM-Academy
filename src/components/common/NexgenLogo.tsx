@@ -48,38 +48,6 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   });
 
   const resolveCustomLogo = () => {
-    // One-time cache migration: clear stale custom logo from old versions
-    try {
-      const logoVersion = localStorage.getItem('NEXGEN_LOGO_VERSION');
-      if (logoVersion !== 'v3_brand_2026') {
-        const storedLogo = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
-        if (storedLogo && (storedLogo.length > 300 || storedLogo.includes('shield'))) {
-          localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
-        }
-        const storedSettings = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings');
-        if (storedSettings) {
-          const parsed = JSON.parse(storedSettings);
-          if (parsed.customLogoUrl && parsed.customLogoUrl !== '/logo.svg') {
-            delete parsed.customLogoUrl;
-            localStorage.setItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings', JSON.stringify(parsed));
-          }
-        }
-        const storedCms = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_website_cms_config');
-        if (storedCms) {
-          const parsedCms = JSON.parse(storedCms);
-          if (parsedCms.customLogoUrl && parsedCms.customLogoUrl !== '/logo.svg') {
-            delete parsedCms.customLogoUrl;
-            delete parsedCms.headerLogoUrl;
-            delete parsedCms.footerLogoUrl;
-            localStorage.setItem('NEXGEN_OFFICE_ACADEMY_DB_V1_website_cms_config', JSON.stringify(parsedCms));
-          }
-        }
-        localStorage.setItem('NEXGEN_LOGO_VERSION', 'v3_brand_2026');
-      }
-    } catch (e) {
-      console.warn('Logo migration notice:', e);
-    }
-
     if (customLogoUrl) {
       setLogoSrc(customLogoUrl);
       setImageError(false);

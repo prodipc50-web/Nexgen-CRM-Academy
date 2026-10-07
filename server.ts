@@ -706,7 +706,17 @@ app.post("/api/leads/submit", rateLimiter, (req, res) => {
 
     const fullName = sanitizeString(req.body.name || req.body.studentName || req.body.fullName, 120);
     const rawPhone = req.body.phone;
-    const phone = typeof rawPhone === "string" ? rawPhone.replace(/[\s\-\+\(\)]/g, "").trim() : "";
+    let phone = typeof rawPhone === "string" ? rawPhone : "";
+    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    for (let i = 0; i < 10; i++) {
+      phone = phone.split(bnDigits[i]).join(i.toString());
+    }
+    phone = phone.replace(/[\s\-\+\(\)]/g, "").trim();
+    if (phone.startsWith("880")) {
+      phone = "0" + phone.slice(3);
+    } else if (phone.startsWith("88") && phone.length === 13) {
+      phone = phone.slice(2);
+    }
     const email = sanitizeString(req.body.email, 120);
     const address = sanitizeString(req.body.address, 250);
     const education = sanitizeString(req.body.education || req.body.educationLevel, 100);

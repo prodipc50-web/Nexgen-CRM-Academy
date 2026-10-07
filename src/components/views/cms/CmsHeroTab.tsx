@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAcademy } from '../../../context/AcademyContext';
 import { HeroBannerSlide } from '../../../types';
+import { optimizeLogoImage } from '../../../utils/logoImageOptimizer';
 import {
   Save,
   Sparkles,
@@ -263,28 +264,25 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
     onSuccessToast('লোগো, সাইজ ও ব্র্যান্ডিং সফলভাবে সংরক্ষিত ও লাইভ হয়েছে!');
   };
 
-  const handleLogoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
       alert('লোগো ইমেজ ফাইলের সাইজ ৫MB এর বেশি হওয়া যাবে না।');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      setCustomLogoUrl(result);
-      localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', result);
-      window.dispatchEvent(new Event('nexgen-logo-updated'));
-      updateAcademySettings({ customLogoUrl: result });
-      updateWebsiteCmsConfig({
-        customLogoUrl: result,
-        headerLogoUrl: result,
-        footerLogoUrl: result
-      });
-      onSuccessToast('কাস্টম লোগো তাৎক্ষণিকভাবে আপলোড ও লাইভ যুক্ত হয়েছে!');
-    };
-    reader.readAsDataURL(file);
+    const result = await optimizeLogoImage(file, file.name);
+    if (!result) return;
+    setCustomLogoUrl(result);
+    localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', result);
+    window.dispatchEvent(new Event('nexgen-logo-updated'));
+    updateAcademySettings({ customLogoUrl: result });
+    updateWebsiteCmsConfig({
+      customLogoUrl: result,
+      headerLogoUrl: result,
+      footerLogoUrl: result
+    });
+    onSuccessToast('কাস্টম লোগো তাৎক্ষণিকভাবে আপলোড ও লাইভ যুক্ত হয়েছে!');
   };
 
   const handleResetLogoToEmblem = () => {

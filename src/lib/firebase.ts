@@ -7,7 +7,19 @@ import {
   signOut,
   type User
 } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot,
+  collection,
+  query,
+  limit,
+  orderBy,
+  getDocs,
+  deleteDoc
+} from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Initialize Firebase App safely
@@ -26,6 +38,12 @@ export {
   setDoc,
   getDoc,
   onSnapshot,
+  collection,
+  query,
+  limit,
+  orderBy,
+  getDocs,
+  deleteDoc,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,

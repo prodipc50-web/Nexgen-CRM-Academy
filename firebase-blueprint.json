@@ -50,9 +50,29 @@
       "properties": {
         "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
       }
+    },
+    "PublicLead": {
+      "title": "Public Incoming Lead",
+      "description": "Public admission and counseling inquiry submitted from website or landing page",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Lead identifier" },
+        "leadCode": { "type": "string", "description": "Generated lead reference code" },
+        "name": { "type": "string", "description": "Student full name" },
+        "phone": { "type": "string", "description": "Student contact phone number" },
+        "courseId": { "type": "string", "description": "Interested course identifier" },
+        "courseName": { "type": "string", "description": "Interested course name" },
+        "leadSource": { "type": "string", "description": "Source form or landing page" },
+        "status": { "type": "string", "description": "Lead status" },
+        "createdAt": { "type": "string", "description": "ISO creation timestamp" }
+      }
     }
   },
   "firestore": {
+    "/public_leads/{leadId}": {
+      "schema": "PublicLead",
+      "description": "Real-time incoming student leads submitted from public website and landing pages"
+    },
     "/academy_data/public_catalog": {
       "schema": "PublicCatalogState",
       "description": "Publicly accessible website course catalog and CMS data"

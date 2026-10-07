@@ -59,6 +59,7 @@ import { FraudAndSecuritySettings } from '../settings/FraudAndSecuritySettings';
 import { PaymentGatewaysSettings } from '../settings/PaymentGatewaysSettings';
 import { AutoBackupAndArchiveManager } from '../settings/AutoBackupAndArchiveManager';
 import { StudentTermsManager } from '../settings/StudentTermsManager';
+import { optimizeLogoImage } from '../../utils/logoImageOptimizer';
 import { IdPrefixSettingsManager } from '../settings/IdPrefixSettingsManager';
 import { ClassShiftScheduleManager } from '../settings/ClassShiftScheduleManager';
 import { GradingAndExamPolicyManager } from '../settings/GradingAndExamPolicyManager';
@@ -1632,23 +1633,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       if (file.size > 5 * 1024 * 1024) {
                         alert('লোগো সাইজ ৫MB এর বেশি হওয়া যাবে না।');
                         return;
                       }
-                      const reader = new FileReader();
-                      reader.onload = async () => {
-                        const res = reader.result as string;
-                        localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', res);
-                        window.dispatchEvent(new Event('nexgen-logo-updated'));
-                        updateAcademySettings({ customLogoUrl: res });
-                        updateWebsiteCmsConfig({ customLogoUrl: res, headerLogoUrl: res, footerLogoUrl: res });
-                        await syncToCloudNow(true);
-                      };
-                      reader.readAsDataURL(file);
+                      const optimizedUrl = await optimizeLogoImage(file, file.name);
+                      if (!optimizedUrl) return;
+                      localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', optimizedUrl);
+                      window.dispatchEvent(new Event('nexgen-logo-updated'));
+                      updateAcademySettings({ customLogoUrl: optimizedUrl });
+                      updateWebsiteCmsConfig({ customLogoUrl: optimizedUrl, headerLogoUrl: optimizedUrl, footerLogoUrl: optimizedUrl });
+                      await syncToCloudNow(true);
                     }}
                   />
                 </label>
@@ -2296,13 +2294,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
         isOpen={isLogoCropModalOpen}
         onClose={() => setIsLogoCropModalOpen(false)}
         currentLogoUrl={academySettings.customLogoUrl}
-        onSaveLogo={(dataUrl) => {
-          updateAcademySettings({ customLogoUrl: dataUrl });
+        onSaveLogo={async (dataUrl) => {
+          const optimized = await optimizeLogoImage(dataUrl, 'cropped_logo.png');
+          updateAcademySettings({ customLogoUrl: optimized });
+          updateWebsiteCmsConfig({ customLogoUrl: optimized, headerLogoUrl: optimized, footerLogoUrl: optimized });
+          localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', optimized);
+          window.dispatchEvent(new Event('nexgen-logo-updated'));
+          await syncToCloudNow(true);
           setSaveSuccess(true);
           setTimeout(() => setSaveSuccess(false), 3000);
+          setIsLogoCropModalOpen(false);
         }}
-        onResetLogo={() => {
+        onResetLogo={async () => {
           updateAcademySettings({ customLogoUrl: '' });
+          updateWebsiteCmsConfig({ customLogoUrl: '/logo.svg', headerLogoUrl: '/logo.svg', footerLogoUrl: '/logo-dark.svg' });
+          localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+          window.dispatchEvent(new Event('nexgen-logo-updated'));
+          await syncToCloudNow(true);
+          setIsLogoCropModalOpen(false);
         }}
       />
 

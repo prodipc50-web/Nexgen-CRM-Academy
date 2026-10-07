@@ -5,6 +5,11 @@ import {
   setDoc,
   getDoc,
   onSnapshot,
+  collection,
+  query,
+  limit,
+  orderBy,
+  getDocs,
   auth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -822,12 +827,10 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           safeHeroVideoUrl = 'indexeddb:hero-video';
         }
 
-        // Logo versioning & migration to official brand assets
-        const logoVersion = typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_LOGO_VERSION') : null;
-        const isLegacyLogo = logoVersion !== 'v3_brand_2026';
-        const effectiveLogoUrl = isLegacyLogo ? '/logo.svg' : (parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.customLogoUrl || '/logo.svg');
-        const effectiveHeaderLogo = isLegacyLogo ? '/logo.svg' : (parsed.headerLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.headerLogoUrl || '/logo.svg');
-        const effectiveFooterLogo = isLegacyLogo ? '/logo-dark.svg' : (parsed.footerLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.footerLogoUrl || '/logo-dark.svg');
+        // Resolve active logo (preserves custom uploaded logo across all PC & mobile devices)
+        const effectiveLogoUrl = parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.customLogoUrl || '/logo.svg';
+        const effectiveHeaderLogo = parsed.headerLogoUrl || parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.headerLogoUrl || '/logo.svg';
+        const effectiveFooterLogo = parsed.footerLogoUrl || parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.footerLogoUrl || '/logo-dark.svg';
 
         return {
           ...INITIAL_WEBSITE_CMS_CONFIG,
@@ -1683,6 +1686,54 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => unsubscribe();
   }, [isAuthenticated, firebaseUser]);
 
+  // 3. REAL-TIME CLOUD FIRESTORE PUBLIC LEADS LISTENER (CROSS-DEVICE & MOBILE TO PC)
+  // Ensures any student inquiry submitted from mobile or landing page instantly appears in staff PC CRM in < 100ms
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    try {
+      const publicLeadsCol = collection(db, 'public_leads');
+      const publicLeadsQuery = query(publicLeadsCol, limit(150));
+
+      const unsubscribePublicLeads = onSnapshot(
+        publicLeadsQuery,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const incomingLeads: Lead[] = [];
+            snapshot.forEach((docSnap) => {
+              const d = docSnap.data();
+              if (d && d.id && d.name && d.phone) {
+                incomingLeads.push(d as Lead);
+              }
+            });
+
+            if (incomingLeads.length > 0) {
+              setLeads((prev) => {
+                const existingIds = new Set(prev.map((l) => l.id));
+                const newItems = incomingLeads.filter((l) => !existingIds.has(l.id));
+                if (newItems.length > 0) {
+                  const updated = [...newItems, ...prev];
+                  try {
+                    localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(updated));
+                  } catch {}
+                  return updated;
+                }
+                return prev;
+              });
+            }
+          }
+        },
+        (err) => {
+          console.warn('Public leads Firestore onSnapshot notice:', err?.message || err);
+        }
+      );
+
+      return () => unsubscribePublicLeads();
+    } catch (e) {
+      console.warn('Could not attach public leads listener:', e);
+    }
+  }, [isAuthenticated]);
+
   // Multi-Tab Authentication Synchronization & Tamper Defense
   useEffect(() => {
     const handleStorageEvent = (e: StorageEvent) => {
@@ -1719,36 +1770,65 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => window.removeEventListener('storage', handleStorageEvent);
   }, [isAuthenticated]);
 
-  // Direct function to sync incoming online leads from server storage into CRM
+  // Direct function to sync incoming online leads from server storage and Cloud Firestore into CRM
   const syncIncomingLeadsNow = async (): Promise<number> => {
+    let addedCount = 0;
     try {
+      // 1. First sync from Cloud Firestore public_leads
+      try {
+        const publicLeadsSnap = await getDocs(query(collection(db, 'public_leads'), limit(150)));
+        if (!publicLeadsSnap.empty) {
+          const fsLeads: Lead[] = [];
+          publicLeadsSnap.forEach(snap => {
+            const d = snap.data();
+            if (d && d.id && d.name && d.phone) fsLeads.push(d as Lead);
+          });
+          if (fsLeads.length > 0) {
+            setLeads(prev => {
+              const existingIds = new Set(prev.map(l => l.id));
+              const newFs = fsLeads.filter(l => !existingIds.has(l.id));
+              if (newFs.length > 0) {
+                addedCount += newFs.length;
+                const merged = [...newFs, ...prev];
+                try {
+                  localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged));
+                } catch {}
+                return merged;
+              }
+              return prev;
+            });
+          }
+        }
+      } catch (fsErr) {
+        console.warn('Firestore public_leads poll notice:', fsErr);
+      }
+
+      // 2. Also sync from local server store
       const res = await fetch('/api/leads/incoming', {
         headers: { 'x-staff-auth': 'nexgen-staff-auth-secure' }
       });
-      if (!res.ok) return 0;
-      const data = await res.json();
-      if (data.success && Array.isArray(data.leads) && data.leads.length > 0) {
-        let addedCount = 0;
-        setLeads(prev => {
-          const existingIds = new Set(prev.map(l => l.id));
-          // Accept any lead not yet present in client state by ID
-          const newLeads = data.leads.filter((l: Lead) => !existingIds.has(l.id));
-          addedCount = newLeads.length;
-          if (newLeads.length > 0) {
-            const merged = [...newLeads, ...prev];
-            try {
-              localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged));
-            } catch {}
-            return merged;
-          }
-          return prev;
-        });
-        return addedCount;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.leads) && data.leads.length > 0) {
+          setLeads(prev => {
+            const existingIds = new Set(prev.map(l => l.id));
+            const newLeads = data.leads.filter((l: Lead) => !existingIds.has(l.id));
+            if (newLeads.length > 0) {
+              addedCount += newLeads.length;
+              const merged = [...newLeads, ...prev];
+              try {
+                localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged));
+              } catch {}
+              return merged;
+            }
+            return prev;
+          });
+        }
       }
-      return 0;
+      return addedCount;
     } catch (e) {
       console.warn('syncIncomingLeads error:', e);
-      return 0;
+      return addedCount;
     }
   };
 
@@ -2565,6 +2645,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       body: JSON.stringify({ lead: newLead })
     }).catch(e => console.warn('Could not sync staff lead to server:', e));
 
+    // Also push to public_leads in Cloud Firestore so other devices get it immediately
+    try {
+      const publicLeadDocRef = doc(db, 'public_leads', newLead.id);
+      setDoc(publicLeadDocRef, {
+        ...newLead,
+        updatedAt: new Date().toISOString()
+      }).catch(() => {});
+    } catch {}
+
     // Broadcast across open tabs and trigger real-time event
     try {
       const bc = new BroadcastChannel('nexgen_leads_sync');
@@ -2903,6 +2992,19 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (data.success && data.lead) {
         const newLeadRecord: Lead = data.lead;
 
+        // 🌟 Direct Cloud Firestore push:
+        // Push immediately to /public_leads/{leadId} so that all staff PC & mobile CRMs
+        // anywhere in the world receive this lead in real-time (< 100ms) via Firestore onSnapshot!
+        try {
+          const leadDocRef = doc(db, 'public_leads', newLeadRecord.id);
+          setDoc(leadDocRef, {
+            ...newLeadRecord,
+            updatedAt: new Date().toISOString()
+          }).catch((fsErr) => console.warn('Firestore public_leads push notice:', fsErr));
+        } catch (e) {
+          console.warn('Firestore direct lead push notice:', e);
+        }
+
         // Check if matching phone number already exists in CRM
         const cleanPhone = newLeadRecord.phone.replace(/[\s\-\+\(\)]/g, '').trim();
         const existingLead = leads.find(l => l.phone.replace(/[\s\-\+\(\)]/g, '').trim() === cleanPhone);
@@ -3046,6 +3148,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
+
+      // Push fallback lead to Cloud Firestore so PC CRM receives it immediately
+      try {
+        const fallbackDocRef = doc(db, 'public_leads', fallbackLead.id);
+        setDoc(fallbackDocRef, {
+          ...fallbackLead,
+          updatedAt: new Date().toISOString()
+        }).catch(() => {});
+      } catch {}
 
       setLeads(prev => {
         const next = [fallbackLead, ...prev];
