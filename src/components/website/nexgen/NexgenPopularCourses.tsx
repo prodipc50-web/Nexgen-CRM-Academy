@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, Users, FolderKanban, Clock, Calendar, ArrowRight, Sparkles, BookOpen, Laptop, Video, ShieldCheck } from 'lucide-react';
 import { Course } from '../../../types';
+import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface UniqueItPopularCoursesProps {
   courses: Course[];
@@ -100,20 +101,17 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
               >
                 {/* Course Banner Image */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
-                  <img
+                  <OptimizedLazyImage
                     src={thumbnail}
                     alt={c.name}
                     width={480}
                     height={300}
-                    decoding="async"
+                    aspectRatio="16/10"
+                    containerClassName="w-full h-full"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80';
-                    }}
+                    fallbackSrc="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/20" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/20 pointer-events-none" />
 
                   {/* Top Left: Live Batch Scarcity Pill */}
                   <div className="absolute top-3 left-3">

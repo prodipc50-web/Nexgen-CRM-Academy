@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Play, Sparkles, X } from 'lucide-react';
 import { StudentSuccessStory } from '../../../types';
+import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface UniqueItSuccessStoriesProps {
   stories?: StudentSuccessStory[];
@@ -80,18 +81,15 @@ export const NexgenSuccessStories: React.FC<UniqueItSuccessStoriesProps> = ({
             >
               {/* Thumbnail Container */}
               <div className="relative aspect-[4/3] overflow-hidden bg-slate-900">
-                <img
+                <OptimizedLazyImage
                   src={item.thumbnail}
                   alt={item.title}
                   width={400}
                   height={300}
-                  loading="lazy"
-                  decoding="async"
+                  aspectRatio="4/3"
+                  containerClassName="w-full h-full"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80';
-                  }}
+                  fallbackSrc="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
 

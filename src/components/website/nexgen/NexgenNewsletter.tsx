@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
 import { NewsletterCtaCmsConfig } from '../../../types';
+import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface UniqueItNewsletterProps {
   config?: NewsletterCtaCmsConfig;
@@ -76,18 +77,15 @@ export const NexgenNewsletter: React.FC<UniqueItNewsletterProps> = ({ config }) 
             {/* Right Image */}
             <div className="lg:col-span-5 flex justify-center lg:justify-end">
               <div className="relative w-full max-w-xs aspect-[4/3] rounded-2xl overflow-hidden border-4 border-slate-800 shadow-xl bg-slate-900">
-                <img
+                <OptimizedLazyImage
                   src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80"
                   alt="Student smiling with smartphone"
                   width={320}
                   height={240}
-                  loading="lazy"
-                  decoding="async"
+                  aspectRatio="4/3"
+                  containerClassName="w-full h-full"
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=500&auto=format&fit=crop&q=80';
-                  }}
+                  fallbackSrc="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=500&auto=format&fit=crop&q=80"
                 />
               </div>
             </div>

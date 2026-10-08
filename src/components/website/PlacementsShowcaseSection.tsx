@@ -14,6 +14,7 @@ import {
 import { motion } from 'motion/react';
 import { StudentPlacement } from '../../types';
 import { useAcademy } from '../../context/AcademyContext';
+import { OptimizedLazyImage } from '../common/OptimizedLazyImage';
 
 interface PlacementsShowcaseSectionProps {
   onOpenAdmission?: () => void;
@@ -131,15 +132,16 @@ export const PlacementsShowcaseSection: React.FC<PlacementsShowcaseSectionProps>
                   {/* Student Avatar, Name and Course */}
                   <div className="flex items-start space-x-3.5">
                     {placement.studentPhoto ? (
-                      <img
+                      <OptimizedLazyImage
                         src={placement.studentPhoto}
                         alt={placement.studentName}
                         width={52}
                         height={52}
-                        loading="lazy"
-                        decoding="async"
+                        aspectRatio="1/1"
+                        containerClassName="w-13 h-13 shrink-0 rounded-2xl border border-slate-200 shadow-2xs"
+                        className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
-                        className="w-13 h-13 aspect-square rounded-2xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                        fallbackSrc="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                       />
                     ) : (
                       <div className="w-13 h-13 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-black text-base flex items-center justify-center shadow-2xs shrink-0">

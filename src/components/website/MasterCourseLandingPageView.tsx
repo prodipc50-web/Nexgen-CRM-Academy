@@ -66,6 +66,7 @@ import {
 import { OnlineAdmissionModal } from './OnlineAdmissionModal';
 import { CourseLandingPageEditorModal } from '../courses/CourseLandingPageEditorModal';
 import { SyllabusDownloadModal } from '../modals/SyllabusDownloadModal';
+import { OptimizedLazyImage } from '../common/OptimizedLazyImage';
 import {
   trackMetaPixelEvent,
   trackUnifiedMarketingEvent,
@@ -2531,14 +2532,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               key={trainer.id}
               className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 shadow-2xs"
             >
-              <img
+              <OptimizedLazyImage
                 src={trainer.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'}
                 alt={trainer.name}
                 width={96}
                 height={96}
-                loading="lazy"
-                decoding="async"
-                className="w-20 h-20 sm:w-24 sm:h-24 aspect-square rounded-2xl object-cover ring-2 ring-indigo-200 shrink-0"
+                aspectRatio="1/1"
+                containerClassName="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-2xl ring-2 ring-indigo-200"
+                className="w-full h-full object-cover"
+                fallbackSrc="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
               />
               <div className="space-y-2 flex-1">
                 <div className="flex items-center justify-between">
@@ -2617,14 +2619,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <img
+                        <OptimizedLazyImage
                           src={rev.studentPhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
                           alt={rev.studentName}
                           width={44}
                           height={44}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-11 h-11 aspect-square rounded-xl object-cover ring-2 ring-amber-300 shrink-0"
+                          aspectRatio="1/1"
+                          containerClassName="w-11 h-11 shrink-0 rounded-xl ring-2 ring-amber-300"
+                          className="w-full h-full object-cover"
+                          fallbackSrc="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80"
                         />
                         <div>
                           <h4 className="font-bold text-slate-900 text-sm sm:text-base">{rev.studentName}</h4>
@@ -2844,14 +2847,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               onClick={() => setSelectedLightboxImage({ url: photo.url, title: photo.title, category: photo.category })}
               className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 aspect-[4/3] cursor-pointer shadow-2xs hover:border-indigo-400 transition-all duration-300"
             >
-              <img
+              <OptimizedLazyImage
                 src={photo.url}
                 alt={photo.title || 'Lab Photo'}
                 width={400}
                 height={300}
-                loading="lazy"
-                decoding="async"
+                aspectRatio="4/3"
+                containerClassName="w-full h-full"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                fallbackSrc="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
                 <div className="flex items-end justify-between gap-2">

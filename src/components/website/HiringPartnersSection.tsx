@@ -1,6 +1,7 @@
 import React from 'react';
 import { Building2, Award, Briefcase, ExternalLink, CheckCircle2, ArrowRight } from 'lucide-react';
 import { HiringPartnersSectionConfig } from '../../types';
+import { OptimizedLazyImage } from '../common/OptimizedLazyImage';
 
 interface HiringPartnersSectionProps {
   config?: HiringPartnersSectionConfig;
@@ -66,13 +67,13 @@ export const HiringPartnersSection: React.FC<HiringPartnersSectionProps> = ({
 
                 {/* Company Logo */}
                 <div className="w-16 h-16 sm:w-20 sm:h-20 aspect-square shrink-0 rounded-xl bg-slate-50 p-2 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform overflow-hidden">
-                  <img
+                  <OptimizedLazyImage
                     src={partner.logoUrl}
                     alt={partner.name}
                     width={80}
                     height={80}
-                    loading="lazy"
-                    decoding="async"
+                    aspectRatio="1/1"
+                    containerClassName="w-full h-full flex items-center justify-center"
                     className="w-auto h-auto max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
                     onError={e => {
                       // Fallback icon if image fails to load

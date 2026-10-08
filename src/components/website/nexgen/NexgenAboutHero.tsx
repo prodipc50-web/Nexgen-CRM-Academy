@@ -1,6 +1,7 @@
 import React from 'react';
 import { BookOpen, Laptop } from 'lucide-react';
 import { WebsiteSubPage, AboutHeroCmsConfig } from '../../../types';
+import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface NexgenAboutHeroProps {
   onNavigateSubPage: (page: WebsiteSubPage) => void;
@@ -76,21 +77,18 @@ export const NexgenAboutHero: React.FC<NexgenAboutHeroProps> = ({ onNavigateSubP
           {/* Right Image Card */}
           <div className="lg:col-span-6">
             <div className="relative w-full aspect-[16/11] rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 group">
-              <img
+              <OptimizedLazyImage
                 src={imageUrl}
                 alt="NexGen Computer Academy Classroom and Computer Lab"
                 width={800}
                 height={550}
-                loading="lazy"
-                decoding="async"
+                aspectRatio="16/11"
+                containerClassName="w-full h-full"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80';
-                }}
+                fallbackSrc="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-xl text-xs font-black text-slate-900 shadow-md">
+              <div className="absolute bottom-4 left-4 z-10 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-xl text-xs font-black text-slate-900 shadow-md">
                 {labBadgeText}
               </div>
             </div>

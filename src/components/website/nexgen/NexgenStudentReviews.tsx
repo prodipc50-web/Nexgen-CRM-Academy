@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, Quote } from 'lucide-react';
 import { WebsiteReview } from '../../../types';
+import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface UniqueItStudentReviewsProps {
   reviews?: WebsiteReview[];
@@ -94,18 +95,15 @@ export const NexgenStudentReviews: React.FC<UniqueItStudentReviewsProps> = ({ re
 
               {/* Author */}
               <div className="pt-4 border-t border-slate-100 flex items-center space-x-3">
-                <img
+                <OptimizedLazyImage
                   src={rev.avatar}
                   alt={rev.author}
                   width={40}
                   height={40}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-10 h-10 aspect-square shrink-0 rounded-full object-cover border border-purple-100"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
-                  }}
+                  aspectRatio="1/1"
+                  containerClassName="w-10 h-10 shrink-0 rounded-full border border-purple-100"
+                  className="w-full h-full object-cover"
+                  fallbackSrc="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                 />
                 <div>
                   <h5 className="font-black text-slate-900 text-xs sm:text-sm">{rev.author}</h5>

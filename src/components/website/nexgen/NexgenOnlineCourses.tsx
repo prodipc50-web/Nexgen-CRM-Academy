@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, Users, FolderKanban, Clock, Calendar, ArrowRight } from 'lucide-react';
 import { Course } from '../../../types';
+import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface UniqueItOnlineCoursesProps {
   courses: Course[];
@@ -54,20 +55,17 @@ export const NexgenOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
               >
                 {/* Banner */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-                  <img
+                  <OptimizedLazyImage
                     src={thumbnail}
                     alt={c.name}
                     width={480}
                     height={300}
-                    loading="lazy"
-                    decoding="async"
+                    aspectRatio="16/10"
+                    containerClassName="w-full h-full"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80';
-                    }}
+                    fallbackSrc="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80"
                   />
-                  <div className="absolute top-2.5 left-2.5">
+                  <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
                     <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold">
                       NexGen Academy
                     </span>

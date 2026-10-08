@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAcademy } from '../../context/AcademyContext';
 import { StudentSuccessStory, StudentSuccessVideoModal } from './StudentSuccessVideoModal';
+import { OptimizedLazyImage } from '../common/OptimizedLazyImage';
 
 interface StudentSuccessSpotlightSectionProps {
   stories?: StudentSuccessStory[];
@@ -185,17 +186,18 @@ export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSec
             >
               {/* Thumbnail / Video Play Trigger */}
               <div className="relative h-44 w-full aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
-                <img
+                <OptimizedLazyImage
                   src={story.avatarUrl}
                   alt={story.studentName}
                   width={320}
                   height={200}
-                  loading="lazy"
-                  decoding="async"
+                  aspectRatio="16/10"
+                  containerClassName="w-full h-full"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
+                  fallbackSrc="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
 
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center">

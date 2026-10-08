@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, Clock, MapPin, Sparkles, ArrowRight, Video } from 'lucide-react';
 import { SeminarWorkshop } from '../../../types';
+import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface NexgenHomepageSeminarsProps {
   seminars: SeminarWorkshop[];
@@ -105,16 +106,17 @@ export const NexgenHomepageSeminars: React.FC<NexgenHomepageSeminarsProps> = ({
               >
                 {/* Image Banner */}
                 <div className="relative aspect-[16/9] overflow-hidden bg-slate-900">
-                  <img
+                  <OptimizedLazyImage
                     src={sem.bannerUrl || 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80'}
                     alt={sem.title}
                     width={640}
                     height={360}
-                    loading="lazy"
-                    decoding="async"
+                    aspectRatio="16/9"
+                    containerClassName="w-full h-full"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                    fallbackSrc="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/30" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/30 pointer-events-none" />
 
                   {/* Mode Badge */}
                   <div className="absolute top-3 left-3 flex items-center space-x-2">

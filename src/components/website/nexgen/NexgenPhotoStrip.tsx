@@ -1,5 +1,6 @@
 import React from 'react';
 import { WebsiteGalleryItem } from '../../../types';
+import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface UniqueItPhotoStripProps {
   galleryItems?: WebsiteGalleryItem[];
@@ -42,18 +43,15 @@ export const NexgenPhotoStrip: React.FC<UniqueItPhotoStripProps> = ({ galleryIte
               key={item.id}
               className="rounded-2xl overflow-hidden shadow-2xs border border-slate-200 aspect-[16/10] bg-slate-100 group"
             >
-              <img
+              <OptimizedLazyImage
                 src={item.url}
                 alt={item.title}
                 width={480}
                 height={300}
-                loading="lazy"
-                decoding="async"
+                aspectRatio="16/10"
+                containerClassName="w-full h-full"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80';
-                }}
+                fallbackSrc="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80"
               />
             </div>
           ))}
