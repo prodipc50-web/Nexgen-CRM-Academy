@@ -21,10 +21,14 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({ isOpen, onClose, b
         onClick={e => e.stopPropagation()}
       >
         {/* Cover Image Header */}
-        <div className="relative h-64 sm:h-80 bg-slate-100 overflow-hidden">
+        <div className="relative h-64 sm:h-80 aspect-[2/1] w-full bg-slate-100 overflow-hidden">
           <img
             src={blog.coverImage || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80'}
             alt={blog.title}
+            width={800}
+            height={400}
+            loading="lazy"
+            decoding="async"
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover"
           />

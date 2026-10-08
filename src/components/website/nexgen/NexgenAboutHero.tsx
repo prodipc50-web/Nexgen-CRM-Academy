@@ -75,11 +75,15 @@ export const NexgenAboutHero: React.FC<NexgenAboutHeroProps> = ({ onNavigateSubP
 
           {/* Right Image Card */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 group">
+            <div className="relative w-full aspect-[16/11] rounded-3xl overflow-hidden shadow-xl border-4 border-white bg-slate-100 group">
               <img
                 src={imageUrl}
                 alt="NexGen Computer Academy Classroom and Computer Lab"
-                className="w-full aspect-[16/11] object-cover group-hover:scale-105 transition-transform duration-500"
+                width={800}
+                height={550}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
                     'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80';

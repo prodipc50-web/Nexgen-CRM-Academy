@@ -184,10 +184,14 @@ export const StudentSuccessSpotlightSection: React.FC<StudentSuccessSpotlightSec
               className="bg-slate-50/80 hover:bg-white rounded-3xl border border-slate-200/90 hover:border-indigo-300 p-5 flex flex-col justify-between space-y-4 shadow-2xs hover:shadow-lg transition-all cursor-pointer group hover:-translate-y-1 relative"
             >
               {/* Thumbnail / Video Play Trigger */}
-              <div className="relative h-44 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+              <div className="relative h-44 w-full aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
                 <img
                   src={story.avatarUrl}
                   alt={story.studentName}
+                  width={320}
+                  height={200}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />

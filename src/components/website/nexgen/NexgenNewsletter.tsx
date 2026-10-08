@@ -75,15 +75,21 @@ export const NexgenNewsletter: React.FC<UniqueItNewsletterProps> = ({ config }) 
 
             {/* Right Image */}
             <div className="lg:col-span-5 flex justify-center lg:justify-end">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80"
-                alt="Student smiling with smartphone"
-                className="max-h-72 w-full max-w-xs object-cover rounded-2xl border-4 border-slate-800 shadow-xl"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=500&auto=format&fit=crop&q=80';
-                }}
-              />
+              <div className="relative w-full max-w-xs aspect-[4/3] rounded-2xl overflow-hidden border-4 border-slate-800 shadow-xl bg-slate-900">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80"
+                  alt="Student smiling with smartphone"
+                  width={320}
+                  height={240}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=500&auto=format&fit=crop&q=80';
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>

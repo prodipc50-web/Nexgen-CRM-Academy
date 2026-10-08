@@ -1202,6 +1202,10 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
               <img
                 src={selectedGalleryImage.imageUrl}
                 alt={selectedGalleryImage.title}
+                width={800}
+                height={600}
+                loading="lazy"
+                decoding="async"
                 referrerPolicy="no-referrer"
                 className="max-h-[70vh] w-auto object-contain rounded-2xl shadow-md border border-slate-200"
               />

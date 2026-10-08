@@ -41,7 +41,11 @@ export const StudentSuccessVideoModal: React.FC<StudentSuccessVideoModalProps> =
             <img
               src={story.avatarUrl}
               alt={story.studentName}
-              className="w-12 h-12 rounded-2xl object-cover border border-slate-200 shadow-2xs shrink-0"
+              width={48}
+              height={48}
+              loading="lazy"
+              decoding="async"
+              className="w-12 h-12 aspect-square rounded-2xl object-cover border border-slate-200 shadow-2xs shrink-0"
               referrerPolicy="no-referrer"
             />
             <div>

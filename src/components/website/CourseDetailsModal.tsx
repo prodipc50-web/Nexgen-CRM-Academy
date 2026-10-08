@@ -404,7 +404,15 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
 
                 {course.thumbnailUrl && (
                   <div className="w-full md:w-64 aspect-video rounded-xl overflow-hidden shadow-md border border-slate-200 shrink-0 bg-white">
-                    <img src={course.thumbnailUrl} alt={course.name} className="w-full h-full object-cover" />
+                    <img
+                      src={course.thumbnailUrl}
+                      alt={course.name}
+                      width={320}
+                      height={180}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 )}
               </div>
@@ -710,7 +718,11 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                     <img
                       src={tr.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'}
                       alt={tr.name}
-                      className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-100 shrink-0"
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-16 h-16 aspect-square rounded-2xl object-cover border-2 border-indigo-100 shrink-0"
                     />
                     <div className="space-y-1 min-w-0 flex-1">
                       <div className="flex items-center space-x-1.5">
@@ -785,6 +797,10 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                     <img
                       src={img.url}
                       alt={img.title}
+                      width={320}
+                      height={180}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-2.5">

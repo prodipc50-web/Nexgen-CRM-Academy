@@ -180,15 +180,16 @@ export const NexgenHero: React.FC<NexgenHeroProps> = ({
 
           {/* Right Video / Hero Visual Card */}
           <div className="lg:col-span-5 relative">
-            <div className="relative rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-slate-900 group">
+            <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-slate-900 group">
               <img
                 src={videoThumbnailUrl}
                 alt="NexGen Computer Academy Classroom and Studio"
                 width={640}
                 height={480}
+                loading="eager"
                 fetchPriority="high"
                 decoding="async"
-                className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
                     'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1000&auto=format&fit=crop&q=80';

@@ -87,7 +87,7 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
       onMouseLeave={() => setIsPlaying(true)}
     >
       {/* 16:9 Aspect Ratio Container */}
-      <div className="relative min-h-[440px] sm:min-h-[500px] md:min-h-[540px] flex items-center">
+      <div className="relative min-h-[440px] sm:min-h-[500px] md:min-h-[540px] aspect-[16/9] w-full flex items-center">
         {/* Background Image Carousel with Ken-Burns and Cross-Fade */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -101,6 +101,11 @@ export const HeroBannerSlider: React.FC<HeroBannerSliderProps> = ({
             <img
               src={currentSlide.imageUrl || 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1280&q=80'}
               alt={currentSlide.title}
+              width={1280}
+              height={720}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-full object-cover object-center"
             />
             {/* Multi-layer Gradient Overlays for High-Contrast Readability without pitch-black gloom */}

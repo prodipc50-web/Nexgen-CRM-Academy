@@ -65,11 +65,15 @@ export const HiringPartnersSection: React.FC<HiringPartnersSectionProps> = ({
                 </div>
 
                 {/* Company Logo */}
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-slate-50 p-2 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform overflow-hidden">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 aspect-square shrink-0 rounded-xl bg-slate-50 p-2 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform overflow-hidden">
                   <img
                     src={partner.logoUrl}
                     alt={partner.name}
-                    className="max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
+                    width={80}
+                    height={80}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-auto h-auto max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all"
                     onError={e => {
                       // Fallback icon if image fails to load
                       const target = e.currentTarget;

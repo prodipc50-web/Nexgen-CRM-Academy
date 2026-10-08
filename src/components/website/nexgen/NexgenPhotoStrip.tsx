@@ -40,13 +40,16 @@ export const NexgenPhotoStrip: React.FC<UniqueItPhotoStripProps> = ({ galleryIte
           {photos.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl overflow-hidden shadow-2xs border border-slate-200 aspect-[16/10] group"
+              className="rounded-2xl overflow-hidden shadow-2xs border border-slate-200 aspect-[16/10] bg-slate-100 group"
             >
               <img
                 src={item.url}
                 alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                width={480}
+                height={300}
                 loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
                     'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80';

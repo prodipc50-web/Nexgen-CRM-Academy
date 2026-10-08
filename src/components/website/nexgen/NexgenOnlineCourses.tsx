@@ -57,8 +57,11 @@ export const NexgenOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
                   <img
                     src={thumbnail}
                     alt={c.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    width={480}
+                    height={300}
                     loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
                         'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80';

@@ -383,6 +383,10 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
                   <img
                     src={matchedCert.certificateImageUrl}
                     alt={`${matchedCert.studentName} Certificate`}
+                    width={500}
+                    height={360}
+                    loading="lazy"
+                    decoding="async"
                     className="max-h-[360px] w-auto object-contain rounded shadow-md group-hover:scale-[1.01] transition-transform"
                   />
                   <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2 pointer-events-none">
@@ -551,6 +555,10 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
                           <img
                             src={cert.certificateImageUrl}
                             alt={name}
+                            width={64}
+                            height={48}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           />
                           <div className="absolute inset-0 bg-slate-900/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -647,6 +655,10 @@ export const CertificateVerificationSection: React.FC<CertificateVerificationSec
             <img
               src={lightboxImageUrl}
               alt="High Definition Certificate"
+              width={900}
+              height={600}
+              loading="lazy"
+              decoding="async"
               className="max-h-[78vh] w-auto object-contain rounded-2xl shadow-md border border-slate-200"
             />
 

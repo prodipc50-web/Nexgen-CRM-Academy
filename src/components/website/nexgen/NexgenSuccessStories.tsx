@@ -83,6 +83,10 @@ export const NexgenSuccessStories: React.FC<UniqueItSuccessStoriesProps> = ({
                 <img
                   src={item.thumbnail}
                   alt={item.title}
+                  width={400}
+                  height={300}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src =

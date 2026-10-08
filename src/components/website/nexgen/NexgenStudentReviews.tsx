@@ -97,7 +97,11 @@ export const NexgenStudentReviews: React.FC<UniqueItStudentReviewsProps> = ({ re
                 <img
                   src={rev.avatar}
                   alt={rev.author}
-                  className="w-10 h-10 rounded-full object-cover border border-purple-100"
+                  width={40}
+                  height={40}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-10 h-10 aspect-square shrink-0 rounded-full object-cover border border-purple-100"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src =
                       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';

@@ -1392,10 +1392,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           {/* Right Column: Fast Registration Card / Banner Picture */}
           <div className="lg:col-span-5 space-y-4">
             {/* Banner Cover Image / Video Preview Card */}
-            <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-lg relative group aspect-16/10 bg-slate-100">
+            <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-lg relative group aspect-[16/10] bg-slate-100">
               <img
                 src={landingConfig.customBannerUrl || course.thumbnailUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80'}
                 alt={landingConfig.headline || course.name}
+                width={800}
+                height={500}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
 
@@ -2529,7 +2534,11 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               <img
                 src={trainer.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'}
                 alt={trainer.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-indigo-200 shrink-0"
+                width={96}
+                height={96}
+                loading="lazy"
+                decoding="async"
+                className="w-20 h-20 sm:w-24 sm:h-24 aspect-square rounded-2xl object-cover ring-2 ring-indigo-200 shrink-0"
               />
               <div className="space-y-2 flex-1">
                 <div className="flex items-center justify-between">
@@ -2611,7 +2620,11 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
                         <img
                           src={rev.studentPhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'}
                           alt={rev.studentName}
-                          className="w-11 h-11 rounded-xl object-cover ring-2 ring-amber-300"
+                          width={44}
+                          height={44}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-11 h-11 aspect-square rounded-xl object-cover ring-2 ring-amber-300 shrink-0"
                         />
                         <div>
                           <h4 className="font-bold text-slate-900 text-sm sm:text-base">{rev.studentName}</h4>
@@ -2829,11 +2842,15 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             <div
               key={photo.id || idx}
               onClick={() => setSelectedLightboxImage({ url: photo.url, title: photo.title, category: photo.category })}
-              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 aspect-4/3 cursor-pointer shadow-2xs hover:border-indigo-400 transition-all duration-300"
+              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-100 border border-slate-200 aspect-[4/3] cursor-pointer shadow-2xs hover:border-indigo-400 transition-all duration-300"
             >
               <img
                 src={photo.url}
                 alt={photo.title || 'Lab Photo'}
+                width={400}
+                height={300}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
@@ -3112,6 +3129,10 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
               <img
                 src={selectedLightboxImage.url}
                 alt={selectedLightboxImage.title || 'Lab Photo Zoom'}
+                width={900}
+                height={600}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-auto max-h-[70vh] object-contain rounded-2xl"
               />
             </div>

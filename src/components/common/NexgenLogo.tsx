@@ -310,6 +310,10 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     const isWide = shape === 'wide';
     const effectiveMob = width || mobileDim;
     const effectiveDesk = width || desktopDim;
+    const mobMaxWidth = isSquare ? effectiveMob : isWide ? Math.round(effectiveMob * 4.2) : Math.round(effectiveMob * 3.6);
+    const deskMaxWidth = isSquare ? effectiveDesk : isWide ? Math.round(effectiveDesk * 4.5) : Math.round(effectiveDesk * 3.8);
+    const mobHeight = height ? Number(height) : effectiveMob;
+    const deskHeight = height ? Number(height) : effectiveDesk;
 
     return (
       <div className="inline-flex items-center justify-center shrink-0 select-none">
@@ -317,18 +321,23 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
         <div
           className="sm:hidden inline-flex items-center justify-center"
           style={{
-            height: height ? `${height}px` : `${effectiveMob}px`,
-            maxWidth: isSquare ? `${effectiveMob}px` : isWide ? `${Math.round(effectiveMob * 4.2)}px` : `${Math.round(effectiveMob * 3.6)}px`
+            height: `${mobHeight}px`,
+            maxWidth: `${mobMaxWidth}px`
           }}
         >
           <img
             src={logoSrc!}
             alt={instituteName || 'Institute Logo'}
+            width={mobMaxWidth}
+            height={mobHeight}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             referrerPolicy="no-referrer"
             onError={() => setImageError(true)}
             style={{
-              maxHeight: height ? `${height}px` : `${effectiveMob}px`,
-              maxWidth: isSquare ? `${effectiveMob}px` : isWide ? `${Math.round(effectiveMob * 4.2)}px` : `${Math.round(effectiveMob * 3.6)}px`
+              maxHeight: `${mobHeight}px`,
+              maxWidth: `${mobMaxWidth}px`
             }}
             className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 drop-shadow-xs"
           />
@@ -338,18 +347,23 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
         <div
           className="hidden sm:inline-flex items-center justify-center"
           style={{
-            height: height ? `${height}px` : `${effectiveDesk}px`,
-            maxWidth: isSquare ? `${effectiveDesk}px` : isWide ? `${Math.round(effectiveDesk * 4.5)}px` : `${Math.round(effectiveDesk * 3.8)}px`
+            height: `${deskHeight}px`,
+            maxWidth: `${deskMaxWidth}px`
           }}
         >
           <img
             src={logoSrc!}
             alt={instituteName || 'Institute Logo'}
+            width={deskMaxWidth}
+            height={deskHeight}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             referrerPolicy="no-referrer"
             onError={() => setImageError(true)}
             style={{
-              maxHeight: height ? `${height}px` : `${effectiveDesk}px`,
-              maxWidth: isSquare ? `${effectiveDesk}px` : isWide ? `${Math.round(effectiveDesk * 4.5)}px` : `${Math.round(effectiveDesk * 3.8)}px`
+              maxHeight: `${deskHeight}px`,
+              maxWidth: `${deskMaxWidth}px`
             }}
             className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 drop-shadow-xs"
           />

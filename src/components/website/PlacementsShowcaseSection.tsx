@@ -134,8 +134,12 @@ export const PlacementsShowcaseSection: React.FC<PlacementsShowcaseSectionProps>
                       <img
                         src={placement.studentPhoto}
                         alt={placement.studentName}
+                        width={52}
+                        height={52}
+                        loading="lazy"
+                        decoding="async"
                         referrerPolicy="no-referrer"
-                        className="w-13 h-13 rounded-2xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                        className="w-13 h-13 aspect-square rounded-2xl object-cover border border-slate-200 shadow-2xs shrink-0"
                       />
                     ) : (
                       <div className="w-13 h-13 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-black text-base flex items-center justify-center shadow-2xs shrink-0">
