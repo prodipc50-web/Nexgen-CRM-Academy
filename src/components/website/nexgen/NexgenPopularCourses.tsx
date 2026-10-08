@@ -103,6 +103,9 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                   <img
                     src={thumbnail}
                     alt={c.name}
+                    width={480}
+                    height={300}
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     onError={(e) => {

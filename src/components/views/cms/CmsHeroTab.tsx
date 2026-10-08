@@ -259,6 +259,29 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       footerLogoSizeDesktop: Number(footerLogoSizeDesktop) || 40,
       logoShape: logoShape
     });
+
+    try {
+      fetch('/api/cms/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brandPrimary: brandPrimary.trim(),
+          brandAccent: brandAccent.trim(),
+          brandSubline: brandSubline.trim(),
+          headerSubtitle: brandSubline.trim() || headerSubtitle.trim(),
+          headerEstText: headerEstText.trim(),
+          customLogoUrl: customLogoUrl.trim(),
+          headerLogoUrl: customLogoUrl.trim(),
+          footerLogoUrl: customLogoUrl.trim(),
+          logoSizeMobile: Number(logoSizeMobile) || 38,
+          logoSizeDesktop: Number(logoSizeDesktop) || 46,
+          footerLogoSizeMobile: Number(footerLogoSizeMobile) || 34,
+          footerLogoSizeDesktop: Number(footerLogoSizeDesktop) || 40,
+          logoShape: logoShape
+        })
+      }).catch(() => {});
+    } catch {}
+
     setBrandSavedFeedback(true);
     setTimeout(() => setBrandSavedFeedback(false), 3000);
     onSuccessToast('লোগো, সাইজ ও ব্র্যান্ডিং সফলভাবে সংরক্ষিত ও লাইভ হয়েছে!');
@@ -282,6 +305,17 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
       headerLogoUrl: result,
       footerLogoUrl: result
     });
+    try {
+      fetch('/api/cms/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customLogoUrl: result,
+          headerLogoUrl: result,
+          footerLogoUrl: result
+        })
+      }).catch(() => {});
+    } catch {}
     onSuccessToast('কাস্টম লোগো তাৎক্ষণিকভাবে আপলোড ও লাইভ যুক্ত হয়েছে!');
   };
 
@@ -296,6 +330,17 @@ export const CmsHeroTab: React.FC<CmsHeroTabProps> = ({ onSuccessToast }) => {
         headerLogoUrl: '',
         footerLogoUrl: ''
       });
+      try {
+        fetch('/api/cms/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customLogoUrl: '/brand-logo.png',
+            headerLogoUrl: '/brand-logo.png',
+            footerLogoUrl: '/brand-logo.png'
+          })
+        }).catch(() => {});
+      } catch {}
       onSuccessToast('অফিসিয়াল NexGen শিল্ড এমব্লেম রিস্টোর হয়েছে!');
     }
   };

@@ -151,30 +151,34 @@ export const OnlineAdmissionModal: React.FC<OnlineAdmissionModalProps> = ({
         comments: `[অনলাইন সিট বুকিং] ${commentsText}`
       });
 
-      // 2. Submit to server endpoint in background
-      submitPublicLead({
-        fullName: formData.name.trim(),
-        studentName: formData.name.trim(),
-        name: formData.name.trim(),
-        phone: formData.phone.trim(),
-        phoneNumber: formData.phone.trim(),
-        email: formData.email.trim() || undefined,
-        location: formData.location.trim(),
-        address: formData.location.trim(),
-        courseName: selectedCourse?.name || formData.courseId,
-        courseId: formData.courseId,
-        learningMode: formData.learningMode,
-        leadSource: leadSourceStr,
-        comments: commentsText,
-        notes: commentsText,
-        source: 'Website Online Admission Form',
-        utmSource: utms.utmSource,
-        utmMedium: utms.utmMedium,
-        utmCampaign: utms.utmCampaign,
-        utmContent: utms.utmContent,
-        deviceType: device,
-        submittedAt: new Date().toISOString()
-      }).catch(err => console.warn('Background lead push notice:', err));
+      // 2. Submit to server endpoint and sync cross-device
+      try {
+        await submitPublicLead({
+          fullName: formData.name.trim(),
+          studentName: formData.name.trim(),
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          phoneNumber: formData.phone.trim(),
+          email: formData.email.trim() || undefined,
+          location: formData.location.trim(),
+          address: formData.location.trim(),
+          courseName: selectedCourse?.name || formData.courseId,
+          courseId: formData.courseId,
+          learningMode: formData.learningMode,
+          leadSource: leadSourceStr,
+          comments: commentsText,
+          notes: commentsText,
+          source: 'Website Online Admission Form',
+          utmSource: utms.utmSource,
+          utmMedium: utms.utmMedium,
+          utmCampaign: utms.utmCampaign,
+          utmContent: utms.utmContent,
+          deviceType: device,
+          submittedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.warn('Background lead push notice:', err);
+      }
 
       syncIncomingLeadsNow();
 

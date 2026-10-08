@@ -46,7 +46,7 @@ export const NexgenUrgencyBanner: React.FC<NexgenUrgencyBannerProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white text-xs border-b border-indigo-900/40 py-2 px-3 sm:px-4 shadow-xs overflow-x-hidden">
+    <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white text-xs border-b border-indigo-900/40 py-2 px-3 sm:px-4 shadow-xs overflow-x-hidden min-h-[38px] flex items-center">
       <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
         {/* Left Side: Badge + Urgency Message */}
         <div className="flex items-center space-x-2 min-w-0 text-center sm:text-left justify-center sm:justify-start w-full sm:w-auto">

@@ -265,10 +265,10 @@ export function validatePublicSubmission<T extends Record<string, any>>(
   const sanitizedPayload = sanitizePayload(payload);
 
   // 5. Phone validation if required (supports Bengali digits & BD mobile formats)
-  if (requirePhone && sanitizedPayload[phoneFieldName]) {
-    const rawVal = String(sanitizedPayload[phoneFieldName]);
+  if (requirePhone && (sanitizedPayload as Record<string, any>)[phoneFieldName]) {
+    const rawVal = String((sanitizedPayload as Record<string, any>)[phoneFieldName]);
     const normalized = normalizeBanglaPhone(rawVal);
-    sanitizedPayload[phoneFieldName] = normalized as any;
+    (sanitizedPayload as Record<string, any>)[phoneFieldName] = normalized;
 
     if (normalized.length > 0 && normalized.length < 10) {
       return {

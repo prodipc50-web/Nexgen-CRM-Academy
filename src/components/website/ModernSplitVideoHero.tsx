@@ -121,6 +121,10 @@ export const ModernSplitVideoHero: React.FC<ModernSplitVideoHeroProps> = ({
                   <img
                     src={videoThumbnailUrl || "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&auto=format&fit=crop&q=80"}
                     alt="Campus & Freelancing Video"
+                    width={800}
+                    height={450}
+                    fetchPriority="high"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/30 transition-colors flex items-center justify-center">

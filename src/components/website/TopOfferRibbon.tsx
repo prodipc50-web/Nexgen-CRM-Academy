@@ -57,7 +57,7 @@ export const TopOfferRibbon: React.FC<TopOfferRibbonProps> = ({
   return (
     <div
       id="top-sticky-offer-ribbon"
-      className={`relative z-40 text-white text-xs py-2 px-3 sm:px-6 shadow-md transition-all animate-in fade-in slide-in-from-top-2 duration-300 ${bgClasses}`}
+      className={`relative z-40 text-white text-xs py-2 px-3 sm:px-6 shadow-md transition-all animate-in fade-in slide-in-from-top-2 duration-300 min-h-[36px] flex items-center ${bgClasses}`}
     >
       <div className="max-w-[1720px] 2xl:max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-2">
         {/* Left / Center Message & Badge */}

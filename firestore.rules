@@ -20,16 +20,12 @@ service cloud.firestore {
     }
 
     // Public incoming leads from website and landing pages:
-    // Anyone can create an incoming lead with a valid document ID;
-    // Only authenticated staff/admin can read, update, or delete leads.
+    // Anyone can create or read incoming online leads;
+    // Only authenticated staff/admin can update or delete leads.
     match /public_leads/{leadId} {
       allow create: if isValidId(leadId);
-      allow read, update, delete: if isStaffOrAdmin();
-    }
-
-    // Default deny catch-all
-    match /{document=**} {
-      allow read, write: if false;
+      allow read: if true;
+      allow update, delete: if isStaffOrAdmin();
     }
 
     // Public Website & Course Catalog:
@@ -61,6 +57,11 @@ service cloud.firestore {
     match /test/{testId} {
       allow read, write: if isValidId(testId) && isStaffOrAdmin();
       allow delete: if false;
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

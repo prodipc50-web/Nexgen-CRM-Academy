@@ -828,9 +828,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
 
         // Resolve active logo (preserves custom uploaded logo across all PC & mobile devices)
-        const effectiveLogoUrl = parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.customLogoUrl || '/logo.svg';
-        const effectiveHeaderLogo = parsed.headerLogoUrl || parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.headerLogoUrl || '/logo.svg';
-        const effectiveFooterLogo = parsed.footerLogoUrl || parsed.customLogoUrl || INITIAL_WEBSITE_CMS_CONFIG.footerLogoUrl || '/logo-dark.svg';
+        const effectiveLogoUrl = (parsed.customLogoUrl && parsed.customLogoUrl !== '/logo.svg')
+          ? parsed.customLogoUrl
+          : (INITIAL_WEBSITE_CMS_CONFIG.customLogoUrl || '/brand-logo.png');
+        const effectiveHeaderLogo = (parsed.headerLogoUrl && parsed.headerLogoUrl !== '/logo.svg')
+          ? parsed.headerLogoUrl
+          : effectiveLogoUrl;
+        const effectiveFooterLogo = (parsed.footerLogoUrl && parsed.footerLogoUrl !== '/logo-dark.svg' && parsed.footerLogoUrl !== '/logo.svg')
+          ? parsed.footerLogoUrl
+          : effectiveLogoUrl;
 
         return {
           ...INITIAL_WEBSITE_CMS_CONFIG,
@@ -1151,7 +1157,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           branches: Array.isArray(parsed.branches) && parsed.branches.length > 0 ? parsed.branches : DEFAULT_CAMPUS_BRANCHES,
           ...parsed,
           instituteName: (parsed.instituteName && parsed.instituteName !== 'Unique IT Institute') ? parsed.instituteName : 'NexGen Computer Academy',
-          customLogoUrl: ((typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_LOGO_VERSION') : null) !== 'v3_brand_2026') ? '/logo.svg' : (parsed.customLogoUrl || '/logo.svg'),
+          customLogoUrl: (parsed.customLogoUrl && parsed.customLogoUrl !== '/logo.svg') ? parsed.customLogoUrl : '/brand-logo.png',
           officialEmail: (parsed.officialEmail && parsed.officialEmail !== 'info@uniqueitinstitute.com') ? parsed.officialEmail : 'info@nexgenacademy.edu.bd',
           campusName: parsed.campusName || 'Farmgate Campus',
           primarySupportPhone: parsed.primarySupportPhone || '01798444444',
@@ -1163,7 +1169,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
     return {
       instituteName: 'NexGen Computer Academy',
-      customLogoUrl: '/logo.svg',
+      customLogoUrl: '/brand-logo.png',
       tagline: 'Professional IT Training & Career Development Academy in Bangladesh',
       campusName: 'Farmgate Campus',
       primarySupportPhone: '01798444444',
@@ -1309,9 +1315,33 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updateAcademySettings = (updates: Partial<AcademySettings>) => {
     setAcademySettings(prev => {
       const updated = { ...prev, ...updates };
-      localStorage.setItem(`${STORAGE_KEY}_academy_settings`, JSON.stringify(updated));
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_academy_settings`, JSON.stringify(updated));
+      } catch {}
       return updated;
     });
+
+    if (updates.customLogoUrl !== undefined || updates.instituteName !== undefined) {
+      if (updates.customLogoUrl) {
+        try {
+          localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', updates.customLogoUrl);
+        } catch {}
+      } else if (updates.customLogoUrl === '') {
+        try {
+          localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+        } catch {}
+      }
+      window.dispatchEvent(new Event('nexgen-logo-updated'));
+
+      updateWebsiteCmsConfig({
+        ...(updates.customLogoUrl !== undefined ? {
+          customLogoUrl: updates.customLogoUrl,
+          headerLogoUrl: updates.customLogoUrl,
+          footerLogoUrl: updates.customLogoUrl
+        } : {})
+      });
+    }
+
     logAudit('Academy Profile Updated', 'Settings', 'profile', 'Updated institute branding, helpline numbers and contact info');
   };
 
@@ -1364,6 +1394,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const lastLocalMutationTimestamp = useRef<number>(0);
   const latestCoursesRef = useRef<Course[]>(courses);
   const latestWebsiteCmsConfigRef = useRef<WebsiteCmsConfig>(websiteCmsConfig);
+  const latestLeadsRef = useRef<Lead[]>(leads);
 
   useEffect(() => {
     latestCoursesRef.current = courses;
@@ -1372,6 +1403,10 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     latestWebsiteCmsConfigRef.current = websiteCmsConfig;
   }, [websiteCmsConfig]);
+
+  useEffect(() => {
+    latestLeadsRef.current = leads;
+  }, [leads]);
 
   // 1. PUBLIC WEBSITE CATALOG REAL-TIME LISTENER
   // Subscribes ONLY to /academy_data/public_catalog (contains NO private students, leads, payments, staff accounts, or audit logs)
@@ -1451,11 +1486,23 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .then(r => (r.ok ? r.json() : null))
       .then(cmsRes => {
         if (cmsRes && cmsRes.success && cmsRes.config && typeof cmsRes.config === 'object') {
+          const cfg = cmsRes.config;
           setWebsiteCmsConfig(prev => {
-            const merged = { ...prev, ...cmsRes.config };
+            const merged = { ...prev, ...cfg };
             latestWebsiteCmsConfigRef.current = merged;
             return merged;
           });
+          if (cfg.customLogoUrl && cfg.customLogoUrl !== '/logo.svg') {
+            setAcademySettings(prev => ({
+              ...prev,
+              customLogoUrl: cfg.customLogoUrl,
+              instituteName: cfg.brandPrimary && cfg.brandAccent ? `${cfg.brandPrimary} ${cfg.brandAccent}` : prev.instituteName
+            }));
+            try {
+              localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', cfg.customLogoUrl);
+            } catch {}
+            window.dispatchEvent(new Event('nexgen-logo-updated'));
+          }
         }
       })
       .catch(() => {});
@@ -1551,6 +1598,21 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                     : prev.heroSlides
                 };
                 latestWebsiteCmsConfigRef.current = mergedCms;
+
+                if (data.websiteCmsConfig?.customLogoUrl && data.websiteCmsConfig.customLogoUrl !== '/logo.svg') {
+                  setAcademySettings(prevSettings => ({
+                    ...prevSettings,
+                    customLogoUrl: data.websiteCmsConfig.customLogoUrl,
+                    instituteName: data.websiteCmsConfig.brandPrimary && data.websiteCmsConfig.brandAccent
+                      ? `${data.websiteCmsConfig.brandPrimary} ${data.websiteCmsConfig.brandAccent}`
+                      : prevSettings.instituteName
+                  }));
+                  try {
+                    localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', data.websiteCmsConfig.customLogoUrl);
+                  } catch {}
+                  window.dispatchEvent(new Event('nexgen-logo-updated'));
+                }
+
                 return mergedCms;
               });
             }
@@ -1614,7 +1676,18 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (Array.isArray(data.batches)) setBatches(data.batches);
             if (Array.isArray(data.rooms)) setRooms(data.rooms);
             if (Array.isArray(data.campaigns)) setCampaigns(data.campaigns);
-            if (Array.isArray(data.leads)) setLeads(data.leads);
+            if (Array.isArray(data.leads)) {
+              setLeads(prev => {
+                const remoteIds = new Set(data.leads.map((l: Lead) => l.id));
+                const localNewLeads = prev.filter(l => !remoteIds.has(l.id));
+                const merged = [...localNewLeads, ...data.leads];
+                latestLeadsRef.current = merged;
+                try {
+                  localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged));
+                } catch {}
+                return merged;
+              });
+            }
             if (Array.isArray(data.followUps)) setFollowUps(data.followUps);
             if (Array.isArray(data.students)) setStudents(data.students);
             if (Array.isArray(data.admissions)) setAdmissions(data.admissions);
@@ -1781,7 +1854,17 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
           const fsLeads: Lead[] = [];
           publicLeadsSnap.forEach(snap => {
             const d = snap.data();
-            if (d && d.id && d.name && d.phone) fsLeads.push(d as Lead);
+            if (d && d.id && (d.name || d.studentName)) {
+              fsLeads.push({
+                ...d,
+                id: d.id,
+                name: d.name || d.studentName || 'Online Inquirer',
+                phone: d.phone || d.phoneNumber || '',
+                status: d.status || 'New',
+                counselorId: d.counselorId || 'st-desk',
+                counselorName: d.counselorName || 'Admissions Desk'
+              } as Lead);
+            }
           });
           if (fsLeads.length > 0) {
             setLeads(prev => {
@@ -1790,6 +1873,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
               if (newFs.length > 0) {
                 addedCount += newFs.length;
                 const merged = [...newFs, ...prev];
+                latestLeadsRef.current = merged;
                 try {
                   localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged));
                 } catch {}
@@ -1810,15 +1894,29 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.leads) && data.leads.length > 0) {
+          const sanitizedApiLeads = data.leads.map((l: any) => ({
+            ...l,
+            id: l.id || `ld-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            name: l.name || l.studentName || 'Online Inquirer',
+            phone: l.phone || l.phoneNumber || '',
+            status: l.status || 'New',
+            counselorId: l.counselorId || 'st-desk',
+            counselorName: l.counselorName || 'Admissions Desk'
+          }));
           setLeads(prev => {
             const existingIds = new Set(prev.map(l => l.id));
-            const newLeads = data.leads.filter((l: Lead) => !existingIds.has(l.id));
+            const newLeads = sanitizedApiLeads.filter((l: Lead) => !existingIds.has(l.id));
             if (newLeads.length > 0) {
               addedCount += newLeads.length;
               const merged = [...newLeads, ...prev];
+              latestLeadsRef.current = merged;
               try {
                 localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged));
               } catch {}
+              // Automatically push to cloud so all open PC/mobile CRM staff instances receive the leads
+              setTimeout(() => {
+                syncToCloudNow(true).catch(() => {});
+              }, 100);
               return merged;
             }
             return prev;
@@ -1882,7 +1980,6 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Periodic background check to fetch new online leads into CRM (every 4 seconds)
   useEffect(() => {
-    if (!isAuthenticated) return;
     syncIncomingLeadsNow();
     const interval = setInterval(syncIncomingLeadsNow, 4000);
     return () => clearInterval(interval);
@@ -1927,6 +2024,23 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             }
             return prev;
           });
+        }
+        if (cat && cat.websiteCmsConfig && typeof cat.websiteCmsConfig === 'object') {
+          if (Date.now() - lastLocalMutationTimestamp.current >= 4000) {
+            setWebsiteCmsConfig(prev => {
+              const remoteT = new Date(cat.websiteCmsConfig.updatedAt || 0).getTime();
+              const localT = new Date(prev.updatedAt || 0).getTime();
+              if (remoteT <= localT && prev.customLogoUrl && prev.customLogoUrl !== '/logo.svg') {
+                return prev;
+              }
+              const merged = { ...prev, ...cat.websiteCmsConfig };
+              latestWebsiteCmsConfigRef.current = merged;
+              try {
+                localStorage.setItem(`${STORAGE_KEY}_website_cms_config`, JSON.stringify(merged));
+              } catch {}
+              return merged;
+            });
+          }
         }
       } catch {}
     };
@@ -2038,7 +2152,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       batches,
       rooms,
       campaigns,
-      leads,
+      leads: latestLeadsRef.current || leads,
       followUps,
       students,
       admissions,

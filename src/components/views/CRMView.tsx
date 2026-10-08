@@ -91,11 +91,11 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
   // Generate safe dynamic WhatsApp chat URL with institute name and course info
   const getLeadWhatsAppUrl = (lead: Lead) => {
-    const rawDigits = lead.phone.replace(/[^0-9]/g, '');
+    const rawDigits = (lead.phone || '').replace(/[^0-9]/g, '');
     const cleanPhone = rawDigits.startsWith('88') ? rawDigits : `88${rawDigits.slice(-11)}`;
     const instName = academySettings?.instituteName || 'Academy';
     const crs = courses.find(c => c.id === lead.interestedCourseId);
-    const text = `আসসালামু আলাইকুম ${lead.name}, ${instName} থেকে আপনার সাথে যোগাযোগ করছি।${crs ? ` আপনার পছন্দের "${crs.name}" কোর্স সম্পর্কে যেকোনো তথ্য জানতে পারেন।` : ' আপনার কোর্স বা ভর্তি সংক্রান্ত কোনো তথ্য বা সহায়তার প্রয়োজন হলে জানাতে পারেন।'}`;
+    const text = `আসসালামু আলাইকুম ${lead.name || 'শিক্ষার্থী'}, ${instName} থেকে আপনার সাথে যোগাযোগ করছি।${crs ? ` আপনার পছন্দের "${crs.name}" কোর্স সম্পর্কে যেকোনো তথ্য জানতে পারেন।` : ' আপনার কোর্স বা ভর্তি সংক্রান্ত কোনো তথ্য বা সহায়তার প্রয়োজন হলে জানাতে পারেন।'}`;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
   };
 
@@ -142,7 +142,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
   const phoneCountMap = useMemo(() => {
     const map = new Map<string, number>();
     leads.forEach(l => {
-      const clean = l.phone.replace(/[^0-9]/g, '').slice(-11);
+      const clean = (l.phone || '').replace(/[^0-9]/g, '').slice(-11);
       if (clean.length >= 10) {
         map.set(clean, (map.get(clean) || 0) + 1);
       }
@@ -152,7 +152,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
   const duplicateLeadsCount = useMemo(() => {
     return leads.filter(l => {
-      const clean = l.phone.replace(/[^0-9]/g, '').slice(-11);
+      const clean = (l.phone || '').replace(/[^0-9]/g, '').slice(-11);
       return (phoneCountMap.get(clean) || 0) > 1;
     }).length;
   }, [leads, phoneCountMap]);
@@ -214,7 +214,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
   const handleSendWhatsApp = () => {
     if (!whatsAppModalLead) return;
-    const rawDigits = whatsAppModalLead.phone.replace(/[^0-9]/g, '');
+    const rawDigits = (whatsAppModalLead.phone || '').replace(/[^0-9]/g, '');
     const cleanPhone = rawDigits.startsWith('88') ? rawDigits : `88${rawDigits.slice(-11)}`;
     const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsAppCustomText)}`;
     window.open(url, '_blank');
@@ -270,7 +270,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
     const leadA = leads.find(l => l.id === leadAId);
     const leadB = leads.find(l => l.id === leadBId);
     if (!leadA || !leadB) return;
-    if (window.confirm(`আপনি কি নিশ্চিত যে "${leadB.name}" (${leadB.leadCode || leadB.phone})-কে "${leadA.name}" (${leadA.leadCode || leadA.phone})-এর সাথে একীভূত (Merge) করতে চান? সমস্ত কমেন্ট, ট্যাগ ও ফলো-আপ হিস্ট্রি একীভূত করা হবে।`)) {
+    if (window.confirm(`আপনি কি নিশ্চিত যে "${leadB.name}" (${leadB.leadCode || leadB.phone || 'N/A'})-কে "${leadA.name}" (${leadA.leadCode || leadA.phone || 'N/A'})-এর সাথে একীভূত (Merge) করতে চান? সমস্ত কমেন্ট, ট্যাগ ও ফলো-আপ হিস্ট্রি একীভূত করা হবে।`)) {
       mergeLeads(leadAId, leadBId);
       setSelectedLeadIds([]);
       setSyncFeedback(`সফলভাবে "${leadB.name}"-কে "${leadA.name}"-এর সাথে একীভূত করা হয়েছে`);
@@ -307,6 +307,12 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
   // Real-time automatic synchronization when leads are submitted anywhere
   useEffect(() => {
+    // Immediately pull latest online leads when CRM mounts
+    syncIncomingLeadsNow().catch(() => {});
+    const pollInterval = setInterval(() => {
+      syncIncomingLeadsNow().catch(() => {});
+    }, 4000);
+
     const handleIncoming = (e: any) => {
       const addedLead = e?.detail;
       if (addedLead?.name) {
@@ -333,6 +339,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
     } catch {}
 
     return () => {
+      clearInterval(pollInterval);
       window.removeEventListener('incoming-lead-submitted', handleIncoming);
       if (bc) bc.close();
     };
@@ -429,17 +436,20 @@ export const CRMView: React.FC<CRMViewProps> = ({
 
   // Filtered Leads
   const filteredLeads = leads.filter(lead => {
+    const leadName = lead.name || lead.studentName || '';
+    const leadPhone = lead.phone || '';
+    const leadCode = lead.leadCode || lead.id || '';
     const matchesSearch =
-      lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.phone.includes(searchTerm) ||
-      lead.leadCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (lead.comments && lead.comments.toLowerCase().includes(searchTerm.toLowerCase()));
+      leadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      leadPhone.includes(searchTerm) ||
+      leadCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      Boolean(lead.comments && lead.comments.toLowerCase().includes(searchTerm.toLowerCase()));
     const normStatus = normalizeLeadStatus(lead.status);
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter || normStatus === statusFilter;
     const matchesCourse = courseFilter === 'all' || lead.interestedCourseId === courseFilter;
     const matchesCounselor = counselorFilter === 'all' || lead.counselorId === counselorFilter;
     const matchesTag = tagFilter === 'all' || (Array.isArray(lead.tags) && lead.tags.includes(tagFilter));
-    const cleanPhone = lead.phone.replace(/[^0-9]/g, '').slice(-11);
+    const cleanPhone = leadPhone.replace(/[^0-9]/g, '').slice(-11);
     const isDuplicate = (phoneCountMap.get(cleanPhone) || 0) > 1;
     const matchesDuplicates = !filterDuplicatesOnly || isDuplicate;
     const matchesFollowUp =
@@ -619,6 +629,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
           className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 font-semibold outline-none text-sm"
         >
           <option value="all">All Counselors</option>
+          <option value="st-desk">Online / Admissions Desk (অনলাইন ইনকোয়ারি)</option>
           {staffList.map(s => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -817,7 +828,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                                 {lead.name}
                               </h4>
                               <div className="text-xs font-mono text-blue-700 font-semibold mt-0.5">
-                                {lead.leadCode} • {lead.phone}
+                                {lead.leadCode || lead.id || 'LEAD'} • {lead.phone || 'No phone'}
                               </div>
                             </div>
                           </div>
@@ -937,11 +948,11 @@ export const CRMView: React.FC<CRMViewProps> = ({
                           )}
 
                           {/* Duplicate Detection Badge */}
-                          {((phoneCountMap.get(lead.phone.replace(/[^0-9]/g, '').slice(-11)) || 0) > 1 || lead.isDuplicate) && (
+                          {((phoneCountMap.get((lead.phone || '').replace(/[^0-9]/g, '').slice(-11)) || 0) > 1 || lead.isDuplicate) && (
                             <div className="pt-0.5">
                               <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black border border-amber-300">
                                 <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
-                                <span>⚠️ ডুপ্লিকেট লিড ({phoneCountMap.get(lead.phone.replace(/[^0-9]/g, '').slice(-11)) || 2})</span>
+                                <span>⚠️ ডুপ্লিকেট লিড ({phoneCountMap.get((lead.phone || '').replace(/[^0-9]/g, '').slice(-11)) || 2})</span>
                               </span>
                             </div>
                           )}
@@ -1176,11 +1187,11 @@ export const CRMView: React.FC<CRMViewProps> = ({
                             <MessageCircle className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        {((phoneCountMap.get(lead.phone.replace(/[^0-9]/g, '').slice(-11)) || 0) > 1 || lead.isDuplicate) && (
+                        {((phoneCountMap.get((lead.phone || '').replace(/[^0-9]/g, '').slice(-11)) || 0) > 1 || lead.isDuplicate) && (
                           <div className="mt-0.5">
                             <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-100 text-amber-900 border border-amber-300">
                               <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
-                              <span>ডুপ্লিকেট ({phoneCountMap.get(lead.phone.replace(/[^0-9]/g, '').slice(-11)) || 2})</span>
+                              <span>ডুপ্লিকেট ({phoneCountMap.get((lead.phone || '').replace(/[^0-9]/g, '').slice(-11)) || 2})</span>
                             </span>
                           </div>
                         )}
@@ -1373,11 +1384,11 @@ export const CRMView: React.FC<CRMViewProps> = ({
                   <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs">
                     <div className="font-bold text-slate-800 flex items-center space-x-1.5 truncate mr-2">
                       <PhoneCall className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                      <span className="truncate">{lead.phone}</span>
+                      <span className="truncate">{lead.phone || 'ফোন নম্বর নেই'}</span>
                     </div>
                     <div className="flex items-center space-x-1.5 shrink-0">
                       <a
-                        href={`tel:${lead.phone}`}
+                        href={lead.phone ? `tel:${lead.phone.replace(/[^0-9+]/g, '')}` : '#'}
                         className="px-2.5 py-1 bg-white hover:bg-slate-100 text-blue-600 border border-slate-200 rounded-lg font-bold text-[11px] flex items-center space-x-1 shadow-2xs"
                       >
                         <span>কল করুন</span>
@@ -1983,7 +1994,7 @@ export const CRMView: React.FC<CRMViewProps> = ({
                 </div>
                 <div>
                   <h3 className="font-black text-sm sm:text-base leading-tight">1-Click WhatsApp মেসেজ পাঠান</h3>
-                  <p className="text-emerald-100 text-xs font-medium">প্রাপক: {whatsAppModalLead.name} ({whatsAppModalLead.phone})</p>
+                  <p className="text-emerald-100 text-xs font-medium">প্রাপক: {whatsAppModalLead.name} ({whatsAppModalLead.phone || 'N/A'})</p>
                 </div>
               </div>
               <button

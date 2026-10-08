@@ -48,32 +48,33 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   });
 
   const resolveCustomLogo = () => {
-    if (customLogoUrl) {
+    if (customLogoUrl && customLogoUrl !== '/logo.svg') {
       setLogoSrc(customLogoUrl);
       setImageError(false);
       return;
     }
-    const stored = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO') : null;
     if (stored) {
       setLogoSrc(stored);
       setImageError(false);
       return;
     }
     try {
-      const storedSettings = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings');
+      const storedSettings = typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings') : null;
       if (storedSettings) {
         const parsed = JSON.parse(storedSettings);
-        if (parsed.customLogoUrl) {
+        if (parsed.customLogoUrl && parsed.customLogoUrl !== '/logo.svg') {
           setLogoSrc(parsed.customLogoUrl);
           setImageError(false);
           return;
         }
       }
-      const storedCms = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_website_cms_config');
+      const storedCms = typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_website_cms_config') : null;
       if (storedCms) {
         const parsedCms = JSON.parse(storedCms);
-        if (parsedCms.customLogoUrl || parsedCms.headerLogoUrl) {
-          setLogoSrc(parsedCms.customLogoUrl || parsedCms.headerLogoUrl);
+        const cand = parsedCms.customLogoUrl || parsedCms.headerLogoUrl;
+        if (cand && cand !== '/logo.svg') {
+          setLogoSrc(cand);
           setImageError(false);
           return;
         }
@@ -81,7 +82,9 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     } catch (e) {
       console.error(e);
     }
-    setLogoSrc(null);
+    // Reliable default brand logo across all mobile & desktop browsers
+    setLogoSrc('/brand-logo.png');
+    setImageError(false);
   };
 
   useEffect(() => {
@@ -315,7 +318,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
           className="sm:hidden inline-flex items-center justify-center"
           style={{
             height: height ? `${height}px` : `${effectiveMob}px`,
-            maxWidth: isSquare ? `${effectiveMob}px` : isWide ? `${Math.round(effectiveMob * 3.5)}px` : `${Math.round(effectiveMob * 2.8)}px`
+            maxWidth: isSquare ? `${effectiveMob}px` : isWide ? `${Math.round(effectiveMob * 4.2)}px` : `${Math.round(effectiveMob * 3.6)}px`
           }}
         >
           <img
@@ -325,7 +328,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
             onError={() => setImageError(true)}
             style={{
               maxHeight: height ? `${height}px` : `${effectiveMob}px`,
-              maxWidth: isSquare ? `${effectiveMob}px` : isWide ? `${Math.round(effectiveMob * 3.5)}px` : `${Math.round(effectiveMob * 2.8)}px`
+              maxWidth: isSquare ? `${effectiveMob}px` : isWide ? `${Math.round(effectiveMob * 4.2)}px` : `${Math.round(effectiveMob * 3.6)}px`
             }}
             className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 drop-shadow-xs"
           />
@@ -336,7 +339,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
           className="hidden sm:inline-flex items-center justify-center"
           style={{
             height: height ? `${height}px` : `${effectiveDesk}px`,
-            maxWidth: isSquare ? `${effectiveDesk}px` : isWide ? `${Math.round(effectiveDesk * 3.5)}px` : `${Math.round(effectiveDesk * 2.8)}px`
+            maxWidth: isSquare ? `${effectiveDesk}px` : isWide ? `${Math.round(effectiveDesk * 4.5)}px` : `${Math.round(effectiveDesk * 3.8)}px`
           }}
         >
           <img
@@ -346,7 +349,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
             onError={() => setImageError(true)}
             style={{
               maxHeight: height ? `${height}px` : `${effectiveDesk}px`,
-              maxWidth: isSquare ? `${effectiveDesk}px` : isWide ? `${Math.round(effectiveDesk * 3.5)}px` : `${Math.round(effectiveDesk * 2.8)}px`
+              maxWidth: isSquare ? `${effectiveDesk}px` : isWide ? `${Math.round(effectiveDesk * 4.5)}px` : `${Math.round(effectiveDesk * 3.8)}px`
             }}
             className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 drop-shadow-xs"
           />

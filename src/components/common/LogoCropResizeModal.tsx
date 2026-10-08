@@ -60,11 +60,11 @@ export const LogoCropResizeModal: React.FC<LogoCropResizeModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const activeLogo = currentLogoUrl || localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO') || '/logo.svg';
+      const activeLogo = currentLogoUrl || localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO') || '/brand-logo.png';
       if (activeLogo) {
         setImageSrc(activeLogo);
       } else {
-        setImageSrc('/logo.svg');
+        setImageSrc('/brand-logo.png');
       }
       setZoom(1);
       setRotation(0);

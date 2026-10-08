@@ -184,6 +184,10 @@ export const NexgenHero: React.FC<NexgenHeroProps> = ({
               <img
                 src={videoThumbnailUrl}
                 alt="NexGen Computer Academy Classroom and Studio"
+                width={640}
+                height={480}
+                fetchPriority="high"
+                decoding="async"
                 className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =

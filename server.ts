@@ -1,11 +1,48 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Modality } from "@google/genai";
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
+
+// Detect production deployment environment:
+// 1. Explicit NODE_ENV === 'production'
+// 2. Cloud Run instance (K_SERVICE is automatically provided by Cloud Run)
+// 3. dist/index.html is built and lifecycle is not 'dev'
+const isDev = process.env.npm_lifecycle_event === "dev" && process.env.NODE_ENV !== "production";
+const distPath = path.join(process.cwd(), "dist");
+const hasDist = fs.existsSync(path.join(distPath, "index.html"));
+const isProduction =
+  process.env.NODE_ENV === "production" ||
+  Boolean(process.env.K_SERVICE) ||
+  Boolean(process.env.K_REVISION) ||
+  (!isDev && hasDist);
+
+if (isProduction && process.env.NODE_ENV !== "production") {
+  process.env.NODE_ENV = "production";
+}
+
+function resolvePort(): number {
+  const cliPortIdx = process.argv.indexOf("--port");
+  if (cliPortIdx !== -1 && process.argv[cliPortIdx + 1]) {
+    const p = Number(process.argv[cliPortIdx + 1]);
+    if (!isNaN(p) && p > 0) return p;
+  }
+  const envPort = Number(process.env.PORT);
+  if (!isNaN(envPort) && envPort > 0) {
+    if (process.env.NGINX_PORT && String(envPort) === String(process.env.NGINX_PORT) && process.env.DEFAULT_APP_PORT) {
+      return Number(process.env.DEFAULT_APP_PORT) || 3000;
+    }
+    return envPort;
+  }
+  if (process.env.DEFAULT_APP_PORT) {
+    const p = Number(process.env.DEFAULT_APP_PORT);
+    if (!isNaN(p) && p > 0) return p;
+  }
+  return 3000;
+}
+
+const PORT = resolvePort();
 
 // Security & Header hardening middleware
 app.use((req, res, next) => {
@@ -122,15 +159,39 @@ let inMemoryCatalog: any = null;
 let inMemoryIncomingLeads: any[] = [];
 let inMemoryCmsConfig: any = null;
 
+// Default authoritative brand logo and CMS config
+const DEFAULT_BRAND_LOGO = "/brand-logo.png";
+const DEFAULT_CMS_CONFIG = {
+  customLogoUrl: DEFAULT_BRAND_LOGO,
+  headerLogoUrl: DEFAULT_BRAND_LOGO,
+  footerLogoUrl: DEFAULT_BRAND_LOGO,
+  logoShape: "contain",
+  logoSizeMobile: 38,
+  logoSizeDesktop: 46,
+  brandPrimary: "NexGen",
+  brandAccent: "Computer Academy",
+  brandSubline: "Institute of Information Technology & Professional Skills"
+};
+
 // Load persisted CMS config on server boot if available
 if (fs.existsSync(CMS_CONFIG_FILE)) {
   try {
     const raw = fs.readFileSync(CMS_CONFIG_FILE, "utf-8");
-    inMemoryCmsConfig = JSON.parse(raw);
+    inMemoryCmsConfig = { ...DEFAULT_CMS_CONFIG, ...JSON.parse(raw) };
+    if (!inMemoryCmsConfig.customLogoUrl || inMemoryCmsConfig.customLogoUrl === '/logo.svg') {
+      inMemoryCmsConfig.customLogoUrl = DEFAULT_BRAND_LOGO;
+      inMemoryCmsConfig.headerLogoUrl = DEFAULT_BRAND_LOGO;
+    }
     console.log("Loaded persistent CMS config from server storage.");
   } catch (e) {
     console.warn("Failed to load CMS config:", e);
+    inMemoryCmsConfig = { ...DEFAULT_CMS_CONFIG };
   }
+} else {
+  inMemoryCmsConfig = { ...DEFAULT_CMS_CONFIG };
+  try {
+    fs.writeFileSync(CMS_CONFIG_FILE, JSON.stringify(inMemoryCmsConfig, null, 2), "utf-8");
+  } catch {}
 }
 
 // Load persisted catalog on server boot if available
@@ -209,6 +270,20 @@ app.post("/api/catalog", rateLimiter, verifyStaffAuth, (req, res) => {
       console.warn("Warning: Could not write catalog to disk:", writeErr);
     }
 
+    // Simultaneously synchronize CMS config so mobile devices fetching /api/cms/config get the latest logo & settings
+    if (payload.websiteCmsConfig && typeof payload.websiteCmsConfig === "object") {
+      inMemoryCmsConfig = {
+        ...(inMemoryCmsConfig || {}),
+        ...payload.websiteCmsConfig,
+        updatedAt: payload.updatedAt || new Date().toISOString()
+      };
+      try {
+        fs.writeFileSync(CMS_CONFIG_FILE, JSON.stringify(inMemoryCmsConfig, null, 2), "utf-8");
+      } catch (writeCmsErr) {
+        console.warn("Warning: Could not sync CMS config from catalog:", writeCmsErr);
+      }
+    }
+
     return res.json({ success: true, count: inMemoryCatalog.courses?.length || 0, updatedAt: inMemoryCatalog.updatedAt });
   } catch (err: any) {
     console.error("Error saving catalog:", err);
@@ -234,6 +309,20 @@ app.post("/api/crm/backup", rateLimiter, verifyStaffAuth, (req, res) => {
   } catch (err: any) {
     return res.status(500).json({ error: "Failed to backup CRM data" });
   }
+});
+
+// GET /api/crm/backup - Retrieve server-persisted CRM data for authenticated staff
+app.get("/api/crm/backup", rateLimiter, verifyStaffAuth, (_req, res) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  if (fs.existsSync(CRM_BACKUP_FILE)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(CRM_BACKUP_FILE, "utf-8"));
+      return res.json({ success: true, data });
+    } catch (e) {
+      console.warn("Could not read CRM backup file:", e);
+    }
+  }
+  return res.json({ success: true, data: null });
 });
 
 // GET /api/cms/config - Authoritative CMS configuration synchronized across PC and mobile
@@ -271,6 +360,14 @@ app.post("/api/cms/config", rateLimiter, (req, res) => {
       fs.writeFileSync(CMS_CONFIG_FILE, JSON.stringify(inMemoryCmsConfig, null, 2), "utf-8");
     } catch (e) {
       console.warn("Could not write CMS config to disk:", e);
+    }
+
+    // Keep public catalog websiteCmsConfig in sync
+    if (inMemoryCatalog) {
+      inMemoryCatalog.websiteCmsConfig = inMemoryCmsConfig;
+      try {
+        fs.writeFileSync(CATALOG_FILE, JSON.stringify(inMemoryCatalog, null, 2), "utf-8");
+      } catch {}
     }
 
     return res.json({ success: true, updatedAt: inMemoryCmsConfig.updatedAt });
@@ -370,15 +467,31 @@ app.get("/api/media/:filename", (req, res) => {
 // GET /api/leads/incoming - Fetch online incoming leads to sync into CRM (Staff Authenticated)
 app.get("/api/leads/incoming", rateLimiter, verifyStaffAuth, (req, res) => {
   res.setHeader("Cache-Control", "no-store");
+  if ((!inMemoryIncomingLeads || inMemoryIncomingLeads.length === 0) && fs.existsSync(LEADS_FILE)) {
+    try {
+      inMemoryIncomingLeads = JSON.parse(fs.readFileSync(LEADS_FILE, "utf-8"));
+    } catch {}
+  }
   const since = req.query.since as string;
-  let leads = inMemoryIncomingLeads;
+  let leads = inMemoryIncomingLeads || [];
   if (since) {
     const sinceTime = new Date(since).getTime();
     if (!isNaN(sinceTime)) {
       leads = leads.filter(l => new Date(l.createdAt).getTime() > sinceTime);
     }
   }
-  return res.json({ success: true, count: leads.length, leads });
+  // Ensure every lead has required fields to protect frontend components
+  const sanitizedLeads = leads.map((l, idx) => ({
+    ...l,
+    id: l.id || `ld-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+    leadCode: l.leadCode || `NCA-LD-${l.id ? l.id.slice(-4) : (1001 + idx)}`,
+    name: l.name || l.studentName || 'Online Inquirer',
+    phone: l.phone || '',
+    status: l.status || 'New',
+    counselorId: l.counselorId || 'st-desk',
+    counselorName: l.counselorName || 'Admissions Desk'
+  }));
+  return res.json({ success: true, count: sanitizedLeads.length, leads: sanitizedLeads });
 });
 
 // POST /api/leads/staff-add - Add staff-created CRM lead to persistent store
@@ -856,18 +969,14 @@ app.post("/api/leads/submit", rateLimiter, (req, res) => {
 
     let initialStatus: string = "New";
     const reqStatus = req.body.status;
-    const srcLower = (source || req.body.leadSource || "").toLowerCase();
     if (requiresOtp) {
       initialStatus = "Pending OTP";
     } else if (riskScore >= 80) {
       initialStatus = "Suspicious";
     } else if (reqStatus && ["New", "Admission Pending", "Demo Scheduled", "Contacted", "Interested"].includes(reqStatus)) {
       initialStatus = reqStatus;
-    } else if (srcLower.includes("admission") || srcLower.includes("seat booking") || srcLower.includes("booking")) {
-      initialStatus = "Admission Pending";
-    } else if (srcLower.includes("seminar") || srcLower.includes("workshop")) {
-      initialStatus = "Demo Scheduled";
     } else {
+      // By default all incoming web leads land in New Inquiries pipeline
       initialStatus = "New";
     }
 
@@ -1480,22 +1589,37 @@ app.post("/api/generate-vector", rateLimiter, async (req, res) => {
 });
 
 async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
+  if (!isProduction) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (_req, res) => {
+    app.get("*", (req, res) => {
+      if (req.path.startsWith("/api/")) {
+        return res.status(404).json({ error: "API endpoint not found" });
+      }
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server listening on http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server listening on http://0.0.0.0:${PORT} (mode: ${isProduction ? "production" : "development"})`);
+  });
+
+  server.on("error", (err: any) => {
+    if (err.code === "EADDRINUSE" && PORT !== 3000) {
+      console.warn(`Port ${PORT} in use, attempting fallback to port 3000...`);
+      app.listen(3000, "0.0.0.0", () => {
+        console.log(`Server listening on fallback http://0.0.0.0:3000`);
+      });
+    } else {
+      console.error("Server listen error:", err);
+      process.exit(1);
+    }
   });
 }
 

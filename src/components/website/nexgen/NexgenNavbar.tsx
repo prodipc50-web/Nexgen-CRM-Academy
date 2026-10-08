@@ -70,7 +70,7 @@ export const NexgenNavbar: React.FC<NexgenNavbarProps> = ({
           className="flex items-center cursor-pointer select-none group shrink-0"
         >
           {/* If customized name is used and no custom logo is uploaded, show crest + custom text */}
-          {(brandPrimary !== 'NexGen' || brandAccent !== 'Computer Academy') && !customLogoUrl ? (
+          {(brandPrimary !== 'NexGen' || brandAccent !== 'Computer Academy') && (!customLogoUrl || customLogoUrl === '/brand-logo.png') ? (
             <div className="flex items-center space-x-2 sm:space-x-3">
               <NexgenLogo
                 variant="crest"

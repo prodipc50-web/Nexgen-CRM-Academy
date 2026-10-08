@@ -215,18 +215,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
   const handleSaveLogoUrl = async () => {
     const trimmed = logoUrlInput.trim();
     setLogoSaving(true);
+    const resolvedLogo = trimmed || '/brand-logo.png';
     if (trimmed) {
       localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', trimmed);
     } else {
       localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
     }
     window.dispatchEvent(new Event('nexgen-logo-updated'));
-    updateAcademySettings({ customLogoUrl: trimmed || '/logo.svg' });
+    updateAcademySettings({ customLogoUrl: resolvedLogo });
     updateWebsiteCmsConfig({
-      customLogoUrl: trimmed || '/logo.svg',
-      headerLogoUrl: trimmed || '/logo.svg',
-      footerLogoUrl: trimmed || '/logo-dark.svg'
+      customLogoUrl: resolvedLogo,
+      headerLogoUrl: resolvedLogo,
+      footerLogoUrl: resolvedLogo
     });
+    try {
+      await fetch('/api/cms/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customLogoUrl: resolvedLogo,
+          headerLogoUrl: resolvedLogo,
+          footerLogoUrl: resolvedLogo
+        })
+      });
+    } catch {}
     await syncToCloudNow(true);
     setLogoSaving(false);
     setLogoSavedFeedback(true);
@@ -1646,6 +1658,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                       window.dispatchEvent(new Event('nexgen-logo-updated'));
                       updateAcademySettings({ customLogoUrl: optimizedUrl });
                       updateWebsiteCmsConfig({ customLogoUrl: optimizedUrl, headerLogoUrl: optimizedUrl, footerLogoUrl: optimizedUrl });
+                      try {
+                        await fetch('/api/cms/config', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            customLogoUrl: optimizedUrl,
+                            headerLogoUrl: optimizedUrl,
+                            footerLogoUrl: optimizedUrl
+                          })
+                        });
+                      } catch {}
                       await syncToCloudNow(true);
                     }}
                   />
@@ -1660,15 +1683,26 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                   <span>Manual Crop & Resize (ক্রপ ও সাইজ)</span>
                 </button>
 
-                {(academySettings.customLogoUrl && academySettings.customLogoUrl !== '/logo.svg') && (
+                {(academySettings.customLogoUrl && academySettings.customLogoUrl !== '/brand-logo.png') && (
                   <button
                     type="button"
                     onClick={async () => {
                       if (confirm('Restore the official default NexGen brand logo?')) {
                         localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
                         window.dispatchEvent(new Event('nexgen-logo-updated'));
-                        updateAcademySettings({ customLogoUrl: '/logo.svg' });
-                        updateWebsiteCmsConfig({ customLogoUrl: '/logo.svg', headerLogoUrl: '/logo.svg', footerLogoUrl: '/logo-dark.svg' });
+                        updateAcademySettings({ customLogoUrl: '/brand-logo.png' });
+                        updateWebsiteCmsConfig({ customLogoUrl: '/brand-logo.png', headerLogoUrl: '/brand-logo.png', footerLogoUrl: '/brand-logo.png' });
+                        try {
+                          await fetch('/api/cms/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              customLogoUrl: '/brand-logo.png',
+                              headerLogoUrl: '/brand-logo.png',
+                              footerLogoUrl: '/brand-logo.png'
+                            })
+                          });
+                        } catch {}
                         await syncToCloudNow(true);
                       }
                     }}
@@ -2300,16 +2334,38 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
           updateWebsiteCmsConfig({ customLogoUrl: optimized, headerLogoUrl: optimized, footerLogoUrl: optimized });
           localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', optimized);
           window.dispatchEvent(new Event('nexgen-logo-updated'));
+          try {
+            await fetch('/api/cms/config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                customLogoUrl: optimized,
+                headerLogoUrl: optimized,
+                footerLogoUrl: optimized
+              })
+            });
+          } catch {}
           await syncToCloudNow(true);
           setSaveSuccess(true);
           setTimeout(() => setSaveSuccess(false), 3000);
           setIsLogoCropModalOpen(false);
         }}
         onResetLogo={async () => {
-          updateAcademySettings({ customLogoUrl: '' });
-          updateWebsiteCmsConfig({ customLogoUrl: '/logo.svg', headerLogoUrl: '/logo.svg', footerLogoUrl: '/logo-dark.svg' });
+          updateAcademySettings({ customLogoUrl: '/brand-logo.png' });
+          updateWebsiteCmsConfig({ customLogoUrl: '/brand-logo.png', headerLogoUrl: '/brand-logo.png', footerLogoUrl: '/brand-logo.png' });
           localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
           window.dispatchEvent(new Event('nexgen-logo-updated'));
+          try {
+            await fetch('/api/cms/config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                customLogoUrl: '/brand-logo.png',
+                headerLogoUrl: '/brand-logo.png',
+                footerLogoUrl: '/brand-logo.png'
+              })
+            });
+          } catch {}
           await syncToCloudNow(true);
           setIsLogoCropModalOpen(false);
         }}
