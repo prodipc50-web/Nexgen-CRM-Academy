@@ -49,6 +49,7 @@ import {
   Save
 } from 'lucide-react';
 import { trackMetaPixelEvent, DEFAULT_GA4_MEASUREMENT_ID } from '../../../utils/analyticsTracker';
+import { CmsSeoAuditSection } from './CmsSeoAuditSection';
 
 const RECOMMENDED_COURSE_KEYWORDS = [
   {
@@ -726,7 +727,7 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
           { id: 'local_seo', label: 'Local SEO & Areas', icon: Compass },
           { id: 'courses_seo', label: 'Courses SEO & 301 Redirects', icon: Layers },
           { id: 'analytics_hub', label: 'Analytics & Google Ads', icon: BarChart3 },
-          { id: 'seo_health', label: 'SEO Health Audit', icon: ShieldCheck },
+          { id: 'seo_health', label: 'Landing Page SEO Audit', icon: ShieldCheck },
           { id: 'schemas', label: 'Schema JSON-LD', icon: FileCode },
           { id: 'sitemap_robots', label: 'Sitemap & Robots', icon: RefreshCw }
         ].map(tab => {
@@ -2447,48 +2448,12 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
         </div>
       )}
 
-      {/* SUBTAB 6: SEO HEALTH AUDIT DASHBOARD */}
+      {/* SUBTAB 6: SEO HEALTH & LANDING PAGE AUDIT SCANNER */}
       {activeSubTab === 'seo_health' && (
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-            <div>
-              <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                Comprehensive SEO Health Audit
-              </h3>
-              <p className="text-xs text-slate-500">
-                Live inspection of Technical SEO, Local SEO, and Course Landing optimizations.
-              </p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="text-right">
-                <div className="text-xs text-slate-400 uppercase font-bold">Health Score</div>
-                <div className="text-xl font-black text-emerald-600">{overallSeoHealth.score}%</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {overallSeoHealth.items.map((item, idx) => (
-              <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-black text-slate-400 tracking-wider">
-                    {item.category}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-black ${
-                      item.status === 'PASS' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </div>
-                <div className="font-bold text-xs text-slate-900">{item.item}</div>
-                <div className="text-[11px] text-slate-500">{item.detail}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CmsSeoAuditSection
+          onNavigateTab={(tab) => setActiveSubTab(tab as any)}
+          onSuccessToast={onSaveToast}
+        />
       )}
 
       {/* SUBTAB 7: SCHEMA.ORG JSON-LD INSPECTOR */}
