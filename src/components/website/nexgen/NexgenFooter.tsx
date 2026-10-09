@@ -66,8 +66,24 @@ export const NexgenFooter: React.FC<NexgenFooterProps> = ({
       {/* 4 Main Columns */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-14 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
-          {/* Column 1: Head Office (4 cols) */}
+          {/* Column 1: Institute Brand & Head Office (4 cols) */}
           <div className="lg:col-span-4 space-y-4 text-left">
+            <div className="pb-1">
+              <NexgenLogo
+                variant="horizontal"
+                size={38}
+                desktopSize={46}
+                customLogoUrl={customLogoUrl}
+                shape={logoShape || 'wide'}
+                isDarkTheme={true}
+                className="shrink-0"
+              />
+              {brandSubline && (
+                <p className="text-slate-400 text-xs mt-2 max-w-sm leading-relaxed">
+                  {brandSubline}
+                </p>
+              )}
+            </div>
             <h4 className="text-white font-black text-sm uppercase tracking-wider">
               Head Office
             </h4>
@@ -365,46 +381,16 @@ export const NexgenFooter: React.FC<NexgenFooterProps> = ({
       <div className="bg-[#030d1c] pt-6 pb-24 sm:pb-6">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo & Brand text */}
-          <div className="flex items-center space-x-2.5 sm:space-x-3">
-            {(brandPrimary !== 'NexGen' || brandAccent !== 'Computer Academy') && !customLogoUrl ? (
-              <>
-                <NexgenLogo
-                  variant="crest"
-                  size={footerLogoSizeMobile || 34}
-                  desktopSize={footerLogoSizeDesktop || 40}
-                  customLogoUrl={customLogoUrl}
-                  shape={logoShape || 'contain'}
-                  className="shrink-0"
-                  isDarkTheme
-                />
-                <div className="flex flex-col justify-center min-w-0">
-                  <div className="flex flex-row items-baseline space-x-1.5 leading-none whitespace-nowrap">
-                    <span className="text-xs sm:text-sm md:text-base font-black text-white tracking-tight leading-none whitespace-nowrap">
-                      {brandPrimary}
-                    </span>
-                    <span className="text-xs sm:text-sm md:text-base font-black text-[#dc143c] tracking-tight leading-none whitespace-nowrap">
-                      {brandAccent}
-                    </span>
-                  </div>
-                  {brandSubline && (
-                    <span className="text-[7.5px] sm:text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1 truncate max-w-[200px] sm:max-w-none">
-                      {brandSubline}
-                    </span>
-                  )}
-                </div>
-              </>
-            ) : (
-              /* Official Dark Horizontal Brand Logo (matches 06-dark-horizontal.png) */
-              <NexgenLogo
-                variant="horizontal"
-                size={footerLogoSizeMobile || 32}
-                desktopSize={footerLogoSizeDesktop || 38}
-                customLogoUrl={customLogoUrl}
-                shape={logoShape || 'contain'}
-                className="shrink-0"
-                isDarkTheme
-              />
-            )}
+          <div className="flex items-center shrink-0">
+            <NexgenLogo
+              variant="horizontal"
+              size={footerLogoSizeMobile || 34}
+              desktopSize={footerLogoSizeDesktop || 42}
+              customLogoUrl={customLogoUrl}
+              shape={logoShape || 'wide'}
+              className="shrink-0 transition-opacity hover:opacity-95"
+              isDarkTheme={true}
+            />
           </div>
 
           {/* Copyright */}

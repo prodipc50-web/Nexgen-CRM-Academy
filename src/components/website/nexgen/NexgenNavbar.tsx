@@ -67,46 +67,17 @@ export const NexgenNavbar: React.FC<NexgenNavbarProps> = ({
         {/* Brand Logo */}
         <div
           onClick={() => onNavigateSubPage('home')}
-          className="flex items-center cursor-pointer select-none group shrink-0"
+          className="flex items-center cursor-pointer select-none group shrink-0 py-1"
+          title={instituteName}
         >
-          {/* If customized name is used and no custom logo is uploaded, show crest + custom text */}
-          {(brandPrimary !== 'NexGen' || brandAccent !== 'Computer Academy') && (!customLogoUrl || customLogoUrl === '/brand-logo.png') ? (
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <NexgenLogo
-                variant="crest"
-                size={logoSizeMobile || 38}
-                desktopSize={logoSizeDesktop || 46}
-                customLogoUrl={customLogoUrl}
-                shape={logoShape || 'contain'}
-                className="shrink-0 transition-transform group-hover:scale-105"
-              />
-              <div className="flex flex-col justify-center min-w-0">
-                <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-1 leading-tight sm:leading-none">
-                  <span className="text-[12px] sm:text-base md:text-xl font-black text-slate-900 tracking-tight leading-tight">
-                    {brandPrimary}
-                  </span>
-                  <span className="text-[11px] sm:text-base md:text-xl font-black text-[#dc143c] tracking-tight leading-tight">
-                    {brandAccent}
-                  </span>
-                </div>
-                {brandSubline && (
-                  <span className="text-[7.5px] sm:text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5 sm:mt-1 truncate max-w-[150px] sm:max-w-none">
-                    {brandSubline}
-                  </span>
-                )}
-              </div>
-            </div>
-          ) : (
-            /* Official Unified Brand Logo (matches 02-horizontal.png) */
-            <NexgenLogo
-              variant="horizontal"
-              size={logoSizeMobile || 38}
-              desktopSize={logoSizeDesktop || 44}
-              customLogoUrl={customLogoUrl}
-              shape={logoShape || 'contain'}
-              className="shrink-0 transition-transform group-hover:scale-102"
-            />
-          )}
+          <NexgenLogo
+            variant="horizontal"
+            size={logoSizeMobile || 42}
+            desktopSize={logoSizeDesktop || 50}
+            customLogoUrl={customLogoUrl}
+            shape={logoShape || 'wide'}
+            className="shrink-0 transition-transform duration-200 group-hover:scale-[1.02]"
+          />
         </div>
 
         {/* Desktop Nav Links */}

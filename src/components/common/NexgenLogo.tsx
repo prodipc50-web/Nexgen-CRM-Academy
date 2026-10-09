@@ -48,13 +48,18 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   });
 
   const resolveCustomLogo = () => {
-    if (customLogoUrl && customLogoUrl !== '/logo.svg') {
+    // Determine default asset according to dark theme and variant
+    const defaultFullLogo = isDarkTheme ? '/brand-logo-dark.png' : '/brand-logo.png';
+    const defaultIconLogo = isDarkTheme ? '/brand-icon-dark.png' : '/brand-icon.png';
+    const defaultAsset = (variant === 'crest' || variant === 'icon') ? defaultIconLogo : defaultFullLogo;
+
+    if (customLogoUrl && customLogoUrl !== '/logo.svg' && customLogoUrl !== '/brand-logo.png' && customLogoUrl !== '/brand-logo-dark.png') {
       setLogoSrc(customLogoUrl);
       setImageError(false);
       return;
     }
     const stored = typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO') : null;
-    if (stored) {
+    if (stored && stored !== '/brand-logo.png' && stored !== '/logo.svg' && stored !== '/brand-logo-dark.png') {
       setLogoSrc(stored);
       setImageError(false);
       return;
@@ -63,7 +68,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
       const storedSettings = typeof window !== 'undefined' ? localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings') : null;
       if (storedSettings) {
         const parsed = JSON.parse(storedSettings);
-        if (parsed.customLogoUrl && parsed.customLogoUrl !== '/logo.svg') {
+        if (parsed.customLogoUrl && parsed.customLogoUrl !== '/logo.svg' && parsed.customLogoUrl !== '/brand-logo.png' && parsed.customLogoUrl !== '/brand-logo-dark.png') {
           setLogoSrc(parsed.customLogoUrl);
           setImageError(false);
           return;
@@ -73,7 +78,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
       if (storedCms) {
         const parsedCms = JSON.parse(storedCms);
         const cand = parsedCms.customLogoUrl || parsedCms.headerLogoUrl;
-        if (cand && cand !== '/logo.svg') {
+        if (cand && cand !== '/logo.svg' && cand !== '/brand-logo.png' && cand !== '/brand-logo-dark.png') {
           setLogoSrc(cand);
           setImageError(false);
           return;
@@ -82,8 +87,8 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     } catch (e) {
       console.error(e);
     }
-    // Reliable default brand logo across all mobile & desktop browsers
-    setLogoSrc('/brand-logo.png');
+    // Reliable authentic brand logo with tight crop & transparent background
+    setLogoSrc(defaultAsset);
     setImageError(false);
   };
 
@@ -103,7 +108,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
       console.error(e);
     }
     resolveCustomLogo();
-  }, [customLogoUrl]);
+  }, [customLogoUrl, isDarkTheme, variant]);
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -306,14 +311,23 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     width?: number;
     height?: number;
   }) => {
-    const isSquare = shape === 'square';
-    const isWide = shape === 'wide';
+    const isSquare = shape === 'square' || variant === 'crest' || variant === 'icon';
+    const isWide = shape === 'wide' || variant === 'horizontal' || variant === 'full';
     const effectiveMob = width || mobileDim;
     const effectiveDesk = width || desktopDim;
-    const mobMaxWidth = isSquare ? effectiveMob : isWide ? Math.round(effectiveMob * 4.2) : Math.round(effectiveMob * 3.6);
-    const deskMaxWidth = isSquare ? effectiveDesk : isWide ? Math.round(effectiveDesk * 4.5) : Math.round(effectiveDesk * 3.8);
+    const mobMaxWidth = isSquare ? effectiveMob : isWide ? Math.round(effectiveMob * 4.6) : Math.round(effectiveMob * 4.2);
+    const deskMaxWidth = isSquare ? effectiveDesk : isWide ? Math.round(effectiveDesk * 5.0) : Math.round(effectiveDesk * 4.5);
     const mobHeight = height ? Number(height) : effectiveMob;
     const deskHeight = height ? Number(height) : effectiveDesk;
+
+    const handleImgError = () => {
+      const fallback = isDarkTheme ? '/brand-logo-dark.png' : '/brand-logo.png';
+      if (logoSrc !== fallback && logoSrc !== '/brand-icon.png' && logoSrc !== '/brand-icon-dark.png') {
+        setLogoSrc(fallback);
+      } else {
+        setImageError(true);
+      }
+    };
 
     return (
       <div className="inline-flex items-center justify-center shrink-0 select-none">
@@ -327,19 +341,19 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
         >
           <img
             src={logoSrc!}
-            alt={instituteName || 'Institute Logo'}
+            alt={instituteName || 'NexGen Computer Academy Logo'}
             width={mobMaxWidth}
             height={mobHeight}
             loading="eager"
             fetchPriority="high"
             decoding="async"
             referrerPolicy="no-referrer"
-            onError={() => setImageError(true)}
+            onError={handleImgError}
             style={{
               maxHeight: `${mobHeight}px`,
               maxWidth: `${mobMaxWidth}px`
             }}
-            className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 drop-shadow-xs"
+            className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 filter drop-shadow-xs"
           />
         </div>
 
@@ -353,19 +367,19 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
         >
           <img
             src={logoSrc!}
-            alt={instituteName || 'Institute Logo'}
+            alt={instituteName || 'NexGen Computer Academy Logo'}
             width={deskMaxWidth}
             height={deskHeight}
             loading="eager"
             fetchPriority="high"
             decoding="async"
             referrerPolicy="no-referrer"
-            onError={() => setImageError(true)}
+            onError={handleImgError}
             style={{
               maxHeight: `${deskHeight}px`,
               maxWidth: `${deskMaxWidth}px`
             }}
-            className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 drop-shadow-xs"
+            className="w-auto h-auto max-h-full max-w-full object-contain shrink-0 filter drop-shadow-xs"
           />
         </div>
       </div>
