@@ -32,12 +32,19 @@ export const AutoBackupAndArchiveManager: React.FC = () => {
     isBackupOverdue,
     daysSinceLastBackup,
     systemSnapshots,
+    serverSnapshots,
+    fetchServerSnapshots,
+    createServerSnapshot,
+    restoreServerSnapshot,
+    downloadServerSnapshot,
+    deleteServerSnapshot,
     createSafeSnapshot,
     restoreSafeSnapshot,
     deleteSafeSnapshot,
     downloadSingleSnapshotJson,
     exportAllSnapshotsJson,
     exportDatabaseJson,
+    importDatabaseJson,
     archivedItems,
     unarchiveRecord,
     deleteArchivedItem,
@@ -46,11 +53,16 @@ export const AutoBackupAndArchiveManager: React.FC = () => {
     runDatabaseOptimization,
     trashItems,
     emptyTrash,
-    leads
+    leads,
+    students,
+    payments,
+    admissions
   } = useAcademy();
 
   const [activeSubTab, setActiveSubTab] = useState<'scheduler' | 'storage' | 'archive'>('scheduler');
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isCapturingServer, setIsCapturingServer] = useState(false);
+  const [isRestoringServer, setIsRestoringServer] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [notice, setNotice] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [lastReport, setLastReport] = useState<OptimizationReport | null>(null);
@@ -88,6 +100,85 @@ export const AutoBackupAndArchiveManager: React.FC = () => {
     } finally {
       setIsCapturing(false);
     }
+  };
+
+  const handleCaptureServerSnapshot = async () => {
+    const note = prompt('Enter a label/note for this server snapshot (optional):', 'Manual Server Safe Point');
+    if (note === null) return;
+    setIsCapturingServer(true);
+    try {
+      const ok = await createServerSnapshot(note || undefined);
+      if (ok) {
+        showNotice('success', 'Server snapshot successfully created and saved on server disk!');
+      } else {
+        showNotice('error', 'Failed to create server snapshot.');
+      }
+    } catch {
+      showNotice('error', 'Error creating server snapshot.');
+    } finally {
+      setIsCapturingServer(false);
+    }
+  };
+
+  const handleRestoreServerSnapshot = async (filename: string, dateLabel: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to restore database to Server Snapshot:\n"${dateLabel}"?\n\nAn automatic safety backup copy of current data will be saved before restoring.`
+      )
+    ) {
+      return;
+    }
+    setIsRestoringServer(true);
+    try {
+      const ok = await restoreServerSnapshot(filename);
+      if (ok) {
+        showNotice('success', `Database successfully restored from server snapshot ${dateLabel}!`);
+      } else {
+        showNotice('error', 'Failed to restore server snapshot.');
+      }
+    } catch {
+      showNotice('error', 'Error restoring server snapshot.');
+    } finally {
+      setIsRestoringServer(false);
+    }
+  };
+
+  const handleImportBackupJsonFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = JSON.parse(text);
+        const stCount = Array.isArray(parsed.students) ? parsed.students.length : 0;
+        const admCount = Array.isArray(parsed.admissions) ? parsed.admissions.length : 0;
+        const payCount = Array.isArray(parsed.payments) ? parsed.payments.length : 0;
+        const ldCount = Array.isArray(parsed.leads) ? parsed.leads.length : 0;
+
+        if (
+          !confirm(
+            `Confirm database restore from file:\n"${file.name}"\n\nDetected records:\n- Students: ${stCount}\n- Admissions: ${admCount}\n- Payments: ${payCount}\n- Leads: ${ldCount}\n\nCurrent active records will be safely restored.`
+          )
+        ) {
+          e.target.value = '';
+          return;
+        }
+
+        const ok = importDatabaseJson(text);
+        if (ok) {
+          showNotice('success', `Database successfully restored from ${file.name}! (${stCount} students loaded)`);
+        } else {
+          showNotice('error', 'Failed to parse database backup file.');
+        }
+      } catch (err) {
+        showNotice('error', 'Invalid JSON backup file. Please select a valid backup.');
+      } finally {
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleRunOptimization = () => {
@@ -292,6 +383,55 @@ export const AutoBackupAndArchiveManager: React.FC = () => {
       {/* SUB-TAB 1: AUTOMATED BACKUP SCHEDULER */}
       {activeSubTab === 'scheduler' && (
         <div className="space-y-6">
+          {/* Quick Actions Hero Card */}
+          <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-md border border-indigo-500/20">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-xl">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 bg-indigo-500/20 border border-indigo-400/30 rounded-full text-indigo-300 text-xs font-bold">
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Enterprise Data Protection & Zero Loss Guarantee</span>
+                </div>
+                <h3 className="text-lg font-black tracking-tight text-white">
+                  সম্পূর্ণ ডেটাবেস ওয়ান-ক্লিক ব্যাকআপ ও রিকভারি হাব
+                </h3>
+                <p className="text-xs text-indigo-200/80 leading-relaxed">
+                  আপনার সকল শিক্ষার্থী ({students.length}), ভর্তি ({admissions.length}), পেমেন্ট ({payments.length}), লিড ({leads.length}), কোর্স, ব্যাচ এবং ওয়েবসাইট কনফিগ এক ক্লিকে ডাউনলোড করুন অথবা ব্যাকআপ ফাইল থেকে রিস্টোর করুন।
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={exportDatabaseJson}
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-2xl shadow-sm transition-all flex items-center space-x-2"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>ডাউনলোড ব্যাকআপ (.json)</span>
+                </button>
+
+                <label className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-2xl border border-white/20 transition-all flex items-center space-x-2 cursor-pointer">
+                  <Upload className="w-4 h-4 text-emerald-400" />
+                  <span>ফাইল থেকে রিস্টোর</span>
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImportBackupJsonFile}
+                    className="hidden"
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  disabled={isCapturingServer}
+                  onClick={handleCaptureServerSnapshot}
+                  className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold rounded-2xl shadow-sm transition-all flex items-center space-x-2"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isCapturingServer ? 'animate-spin' : ''}`} />
+                  <span>{isCapturingServer ? 'তৈরি হচ্ছে...' : 'সার্ভার স্ন্যাপশট নিন'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
           {/* Policy & Schedule Configuration Card */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -421,6 +561,150 @@ export const AutoBackupAndArchiveManager: React.FC = () => {
                 <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
               </label>
             </div>
+          </div>
+
+          {/* Server Disk Rolling Snapshots List */}
+          <div className="bg-white p-6 rounded-3xl border border-emerald-200/80 shadow-2xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                    <Database className="w-4 h-4 text-emerald-600" />
+                    <span>সার্ভার ক্লাউড রোলিং স্ন্যাপশট টাইমলাইন (Server Disk Safe Points)</span>
+                  </h3>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                    {serverSnapshots.length} টি স্ন্যাপশট সংরক্ষিত
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  সার্ভারের স্থায়ী স্টোরেজে সংরক্ষিত হিস্টোরিক্যাল পয়েন্ট। ব্রাউজারের ক্যাশ ডিলিট হলেও এখান থেকে ১০০% ডেটা রিকভার করা সম্ভব।
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => fetchServerSnapshots()}
+                  className="p-2 hover:bg-slate-100 text-slate-600 rounded-xl transition-colors"
+                  title="রিফ্রেশ স্ন্যাপশট লিস্ট"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  disabled={isCapturingServer}
+                  onClick={handleCaptureServerSnapshot}
+                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center space-x-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isCapturingServer ? 'animate-spin' : ''}`} />
+                  <span>{isCapturingServer ? 'তৈরি হচ্ছে...' : '+ নতুন সার্ভার স্ন্যাপশট'}</span>
+                </button>
+              </div>
+            </div>
+
+            {serverSnapshots.length === 0 ? (
+              <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <Database className="w-8 h-8 text-slate-400 mx-auto mb-2 opacity-60" />
+                <p className="text-xs font-bold text-slate-700">এখনো কোনো সার্ভার স্ন্যাপশট তৈরি হয়নি</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  প্রতি ১৫ মিনিটে স্বয়ংক্রিয়ভাবে স্ন্যাপশট জমা হবে অথবা "+ নতুন সার্ভার স্ন্যাপশট" এ ক্লিক করুন।
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden text-xs max-h-96 overflow-y-auto">
+                {serverSnapshots.map((snap, idx) => (
+                  <div
+                    key={snap.id || snap.filename}
+                    className="p-4 bg-white hover:bg-slate-50/80 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            snap.type === 'prerestore'
+                              ? 'bg-amber-100 text-amber-800'
+                              : snap.type === 'auto' || snap.type === 'auto_daily'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-emerald-100 text-emerald-800'
+                          }`}
+                        >
+                          {snap.type === 'prerestore'
+                            ? 'রিস্টোর পূর্ব রোলব্যাক'
+                            : snap.type === 'auto' || snap.type === 'auto_daily'
+                            ? 'অটো সার্ভার ব্যাকআপ'
+                            : 'ম্যানুয়াল স্ন্যাপশট'}
+                        </span>
+                        <span className="font-bold text-slate-900 text-xs">{snap.dateLabel}</span>
+                        {idx === 0 && (
+                          <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded">
+                            লেটেস্ট ভার্সন
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-600 font-medium">
+                        {snap.note || 'Full Server System Snapshot'}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-600 font-medium">
+                        <span>
+                          শিক্ষার্থী: <strong className="text-slate-900">{snap.studentCount}</strong>
+                        </span>
+                        <span>•</span>
+                        <span>
+                          ভর্তি: <strong className="text-slate-900">{snap.admissionCount}</strong>
+                        </span>
+                        <span>•</span>
+                        <span>
+                          পেমেন্ট: <strong className="text-slate-900">{snap.paymentCount}</strong>
+                        </span>
+                        <span>•</span>
+                        <span>
+                          লিড: <strong className="text-slate-900">{snap.leadCount}</strong>
+                        </span>
+                        <span>•</span>
+                        <span>
+                          সাইজ: <strong className="text-slate-900">{snap.sizeKb} KB</strong>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <button
+                        type="button"
+                        disabled={isRestoringServer}
+                        onClick={() => handleRestoreServerSnapshot(snap.filename || snap.id, snap.dateLabel)}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center space-x-1.5"
+                      >
+                        <RefreshCw className={`w-3 h-3 ${isRestoringServer ? 'animate-spin' : ''}`} />
+                        <span>১-ক্লিকে রিস্টোর</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => downloadServerSnapshot(snap.filename || snap.id)}
+                        className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors flex items-center space-x-1"
+                        title="স্ন্যাপশট ফাইল ডাউনলোড করুন"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>ডাউনলোড JSON</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete this server snapshot file?')) {
+                            deleteServerSnapshot(snap.filename || snap.id);
+                          }
+                        }}
+                        className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl transition-colors"
+                        title="ডিলিট"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Point-in-Time Safe Snapshots List */}

@@ -16,10 +16,12 @@ import {
   Clock,
   Laptop,
   CheckCircle2,
-  Users
+  Users,
+  MessageCircle
 } from 'lucide-react';
 import { Course, Batch } from '../../../types';
 import { SubPageBanner } from './SubPageBanner';
+import { shareOnWhatsApp } from '../../../utils/shareHelper';
 
 interface CoursesSubPageProps {
   courses: Course[];
@@ -289,19 +291,32 @@ export const CoursesSubPage: React.FC<CoursesSubPageProps> = ({
                       </span>
                     </div>
 
-                    {/* Dedicated Landing Page Link */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenCourseLanding(c);
-                      }}
-                      className="absolute top-3 left-3 flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-white/95 hover:bg-white text-slate-900 hover:text-indigo-600 backdrop-blur-xs border border-slate-200 shadow-md transition-all cursor-pointer z-10"
-                      title="View Dedicated Course Page"
-                    >
-                      <ExternalLink className="w-3 h-3 text-indigo-600" />
-                      <span>Course Page</span>
-                    </button>
+                    {/* Dedicated Landing Page Link & Quick Share */}
+                    <div className="absolute top-3 left-3 flex items-center space-x-1.5 z-10">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenCourseLanding(c);
+                        }}
+                        className="flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-white/95 hover:bg-white text-slate-900 hover:text-indigo-600 backdrop-blur-xs border border-slate-200 shadow-md transition-all cursor-pointer"
+                        title="View Dedicated Course Page"
+                      >
+                        <ExternalLink className="w-3 h-3 text-indigo-600" />
+                        <span>Course Page</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          shareOnWhatsApp(c);
+                        }}
+                        className="flex items-center justify-center p-1 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-md transition-all cursor-pointer"
+                        title="WhatsApp এ শেয়ার করুন"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Card Body */}

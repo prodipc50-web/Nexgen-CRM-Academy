@@ -6,17 +6,13 @@ import { GoogleGenAI, Modality } from "@google/genai";
 const app = express();
 
 // Detect production deployment environment:
-// 1. Explicit NODE_ENV === 'production'
-// 2. Cloud Run instance (K_SERVICE is automatically provided by Cloud Run)
-// 3. dist/index.html is built and lifecycle is not 'dev'
-const isDev = process.env.npm_lifecycle_event === "dev" && process.env.NODE_ENV !== "production";
+// Only use production static file serving if dist/index.html actually exists on disk!
+// Otherwise, seamlessly fall back to Vite middlewares so no ENOENT crashes can ever occur.
+const isDev = process.env.npm_lifecycle_event === "dev" || process.env.NODE_ENV === "development";
 const distPath = path.join(process.cwd(), "dist");
-const hasDist = fs.existsSync(path.join(distPath, "index.html"));
-const isProduction =
-  process.env.NODE_ENV === "production" ||
-  Boolean(process.env.K_SERVICE) ||
-  Boolean(process.env.K_REVISION) ||
-  (!isDev && hasDist);
+const distIndexPath = path.join(distPath, "index.html");
+const hasDist = fs.existsSync(distIndexPath);
+const isProduction = Boolean(hasDist && !isDev);
 
 if (isProduction && process.env.NODE_ENV !== "production") {
   process.env.NODE_ENV = "production";
@@ -146,6 +142,15 @@ const CRM_BACKUP_FILE = path.join(DATA_DIR, "crm_private_data.json");
 const LEADS_FILE = path.join(DATA_DIR, "incoming_leads.json");
 const CMS_CONFIG_FILE = path.join(DATA_DIR, "cms_config.json");
 const MEDIA_DIR = path.join(DATA_DIR, "media");
+const SNAPSHOTS_DIR = path.join(DATA_DIR, "snapshots");
+
+if (!fs.existsSync(SNAPSHOTS_DIR)) {
+  try {
+    fs.mkdirSync(SNAPSHOTS_DIR, { recursive: true });
+  } catch (e) {
+    console.warn("Could not create snapshots directory:", e);
+  }
+}
 
 if (!fs.existsSync(MEDIA_DIR)) {
   try {
@@ -158,6 +163,7 @@ if (!fs.existsSync(MEDIA_DIR)) {
 let inMemoryCatalog: any = null;
 let inMemoryIncomingLeads: any[] = [];
 let inMemoryCmsConfig: any = null;
+let inMemoryCrmData: any = null;
 
 // Default authoritative brand logo and CMS config
 const DEFAULT_BRAND_LOGO = "/brand-logo.png";
@@ -213,6 +219,17 @@ if (fs.existsSync(LEADS_FILE)) {
     console.log("Loaded", inMemoryIncomingLeads.length, "incoming leads from server storage.");
   } catch (e) {
     inMemoryIncomingLeads = [];
+  }
+}
+
+// Load persisted CRM private data on server boot if available
+if (fs.existsSync(CRM_BACKUP_FILE)) {
+  try {
+    const raw = fs.readFileSync(CRM_BACKUP_FILE, "utf-8");
+    inMemoryCrmData = JSON.parse(raw);
+    console.log("Loaded persistent CRM backup from server storage with", inMemoryCrmData?.students?.length || 0, "students.");
+  } catch (e) {
+    console.warn("Failed to load CRM backup from storage:", e);
   }
 }
 
@@ -291,7 +308,41 @@ app.post("/api/catalog", rateLimiter, verifyStaffAuth, (req, res) => {
   }
 });
 
-// POST /api/crm/backup - Secure local backup of CRM private data (Rate limited, Authenticated & Validated)
+// Helper to safely merge CRM collections by unique identifier without data loss
+function mergeCrmArrayById(existingList: any[] = [], incomingList: any[] = []): any[] {
+  if (!Array.isArray(existingList) || existingList.length === 0) return Array.isArray(incomingList) ? incomingList : [];
+  if (!Array.isArray(incomingList) || incomingList.length === 0) return existingList;
+
+  const map = new Map<string, any>();
+  // 1. Seed with existing records
+  for (const item of existingList) {
+    if (item && typeof item === 'object') {
+      const key = String(item.id || item.code || item.phone || JSON.stringify(item));
+      map.set(key, item);
+    }
+  }
+  // 2. Overlay incoming records with latest timestamp or non-destructive merge
+  for (const item of incomingList) {
+    if (item && typeof item === 'object') {
+      const key = String(item.id || item.code || item.phone || JSON.stringify(item));
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, item);
+      } else {
+        const incomingTime = new Date(item.updatedAt || item.timestamp || item.lastLogin || 0).getTime();
+        const existingTime = new Date(existing.updatedAt || existing.timestamp || existing.lastLogin || 0).getTime();
+        if (incomingTime >= existingTime) {
+          map.set(key, { ...existing, ...item });
+        } else {
+          map.set(key, { ...item, ...existing });
+        }
+      }
+    }
+  }
+  return Array.from(map.values());
+}
+
+// POST /api/crm/backup - Secure local backup of CRM private data (Rate limited, Authenticated, Smart Merged & Protected)
 app.post("/api/crm/backup", rateLimiter, verifyStaffAuth, (req, res) => {
   try {
     const payload = req.body;
@@ -299,25 +350,299 @@ app.post("/api/crm/backup", rateLimiter, verifyStaffAuth, (req, res) => {
       return res.status(400).json({ error: "Invalid CRM payload" });
     }
 
+    const existing = inMemoryCrmData || (fs.existsSync(CRM_BACKUP_FILE) ? (() => {
+      try { return JSON.parse(fs.readFileSync(CRM_BACKUP_FILE, "utf-8")); } catch { return null; }
+    })() : null);
+
+    let mergedPayload: any = { ...payload };
+
+    if (existing && typeof existing === 'object') {
+      // Create safe snapshot backup before writing
+      try {
+        fs.writeFileSync(CRM_BACKUP_FILE + ".bak", JSON.stringify(existing, null, 2), "utf-8");
+      } catch {}
+
+      // Preserve all business records via non-destructive delta merge
+      mergedPayload = {
+        ...existing,
+        ...payload,
+        students: mergeCrmArrayById(existing.students, payload.students),
+        leads: mergeCrmArrayById(existing.leads, payload.leads),
+        admissions: mergeCrmArrayById(existing.admissions, payload.admissions),
+        payments: mergeCrmArrayById(existing.payments, payload.payments),
+        expenses: mergeCrmArrayById(existing.expenses, payload.expenses),
+        batches: mergeCrmArrayById(existing.batches, payload.batches),
+        rooms: mergeCrmArrayById(existing.rooms, payload.rooms),
+        staffList: mergeCrmArrayById(existing.staffList, payload.staffList),
+        attendance: mergeCrmArrayById(existing.attendance, payload.attendance),
+        schedules: mergeCrmArrayById(existing.schedules, payload.schedules),
+        exams: mergeCrmArrayById(existing.exams, payload.exams),
+        examResults: mergeCrmArrayById(existing.examResults, payload.examResults),
+        certificates: mergeCrmArrayById(existing.certificates, payload.certificates),
+        assets: mergeCrmArrayById(existing.assets, payload.assets),
+        campaigns: mergeCrmArrayById(existing.campaigns, payload.campaigns),
+        followUps: mergeCrmArrayById(existing.followUps, payload.followUps),
+        placements: mergeCrmArrayById(existing.placements, payload.placements),
+        assignments: mergeCrmArrayById(existing.assignments, payload.assignments),
+        assignmentSubmissions: mergeCrmArrayById(existing.assignmentSubmissions, payload.assignmentSubmissions),
+        seminars: mergeCrmArrayById(existing.seminars, payload.seminars),
+        trashItems: mergeCrmArrayById(existing.trashItems, payload.trashItems),
+        archivedItems: mergeCrmArrayById(existing.archivedItems, payload.archivedItems),
+        academySettings: { ...(existing.academySettings || {}), ...(payload.academySettings || {}) },
+        crmSettings: { ...(existing.crmSettings || {}), ...(payload.crmSettings || {}) },
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    inMemoryCrmData = mergedPayload;
+
     try {
-      fs.writeFileSync(CRM_BACKUP_FILE, JSON.stringify(payload, null, 2), "utf-8");
+      fs.writeFileSync(CRM_BACKUP_FILE, JSON.stringify(mergedPayload, null, 2), "utf-8");
     } catch (writeErr) {
       console.warn("Warning: Could not write CRM backup to disk:", writeErr);
     }
 
-    return res.json({ success: true, timestamp: new Date().toISOString() });
+    // Auto-create server snapshot if 15 minutes passed since last auto snapshot
+    if (Date.now() - lastServerSnapshotTime > 15 * 60 * 1000) {
+      try {
+        saveServerSnapshot(mergedPayload, "Auto-rolling scheduled snapshot", "auto");
+        lastServerSnapshotTime = Date.now();
+      } catch (snapErr) {
+        console.warn("Could not save auto server snapshot:", snapErr);
+      }
+    }
+
+    return res.json({
+      success: true,
+      timestamp: mergedPayload.updatedAt || new Date().toISOString(),
+      studentCount: mergedPayload.students?.length || 0,
+      leadCount: mergedPayload.leads?.length || 0
+    });
   } catch (err: any) {
     return res.status(500).json({ error: "Failed to backup CRM data" });
+  }
+});
+
+let lastServerSnapshotTime = 0;
+
+// Helper to save server-side snapshot with rotation (max 25 copies)
+function saveServerSnapshot(data: any, note = "Server Snapshot", type: "auto" | "manual" | "prerestore" = "auto") {
+  if (!data || typeof data !== "object") return null;
+  const now = new Date();
+  const safeTimestamp = now.toISOString().replace(/[:.]/g, "-");
+  const filename = `snapshot_${safeTimestamp}_${type}.json`;
+  const filePath = path.join(SNAPSHOTS_DIR, filename);
+
+  const studentCount = Array.isArray(data.students) ? data.students.length : 0;
+  const leadCount = Array.isArray(data.leads) ? data.leads.length : 0;
+  const paymentCount = Array.isArray(data.payments) ? data.payments.length : 0;
+  const admissionCount = Array.isArray(data.admissions) ? data.admissions.length : 0;
+
+  const snapshotObject = {
+    metadata: {
+      id: filename,
+      filename,
+      timestamp: now.toISOString(),
+      dateLabel: now.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
+      type,
+      note,
+      studentCount,
+      leadCount,
+      paymentCount,
+      admissionCount,
+      sizeKb: 0
+    },
+    data
+  };
+
+  const jsonStr = JSON.stringify(snapshotObject, null, 2);
+  snapshotObject.metadata.sizeKb = Math.max(1, Math.round(Buffer.byteLength(jsonStr, "utf-8") / 1024));
+
+  // Re-serialize with calculated sizeKb
+  fs.writeFileSync(filePath, JSON.stringify(snapshotObject, null, 2), "utf-8");
+
+  // Snapshot rotation: keep the newest 25 files
+  try {
+    const files = fs.readdirSync(SNAPSHOTS_DIR).filter(f => f.startsWith("snapshot_") && f.endsWith(".json"));
+    if (files.length > 25) {
+      const sorted = files.sort().reverse();
+      const filesToDelete = sorted.slice(25);
+      for (const oldFile of filesToDelete) {
+        try {
+          fs.unlinkSync(path.join(SNAPSHOTS_DIR, oldFile));
+        } catch {}
+      }
+    }
+  } catch {}
+
+  return snapshotObject.metadata;
+}
+
+// GET /api/crm/snapshots - List all available server snapshots
+app.get("/api/crm/snapshots", rateLimiter, verifyStaffAuth, (_req, res) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  try {
+    if (!fs.existsSync(SNAPSHOTS_DIR)) {
+      return res.json({ success: true, snapshots: [] });
+    }
+    const files = fs.readdirSync(SNAPSHOTS_DIR).filter(f => f.startsWith("snapshot_") && f.endsWith(".json"));
+    const snapshotsList: any[] = [];
+
+    // Sort descending by filename which starts with snapshot_YYYY-MM-DD...
+    const sortedFiles = files.sort().reverse();
+
+    for (const f of sortedFiles) {
+      try {
+        const fullPath = path.join(SNAPSHOTS_DIR, f);
+        const stats = fs.statSync(fullPath);
+        // Fast read of first 2KB to extract metadata if available
+        const raw = fs.readFileSync(fullPath, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (parsed.metadata) {
+          snapshotsList.push({
+            ...parsed.metadata,
+            filename: f,
+            fileSizeKb: Math.max(1, Math.round(stats.size / 1024))
+          });
+        } else {
+          // Fallback legacy raw snapshot
+          snapshotsList.push({
+            id: f,
+            filename: f,
+            timestamp: stats.mtime.toISOString(),
+            dateLabel: stats.mtime.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
+            type: "auto",
+            note: "Historical Snapshot",
+            studentCount: Array.isArray(parsed.students) ? parsed.students.length : 0,
+            leadCount: Array.isArray(parsed.leads) ? parsed.leads.length : 0,
+            paymentCount: Array.isArray(parsed.payments) ? parsed.payments.length : 0,
+            admissionCount: Array.isArray(parsed.admissions) ? parsed.admissions.length : 0,
+            sizeKb: Math.max(1, Math.round(stats.size / 1024))
+          });
+        }
+      } catch (readErr) {
+        console.warn(`Could not read snapshot file ${f}:`, readErr);
+      }
+    }
+
+    return res.json({ success: true, snapshots: snapshotsList });
+  } catch (err: any) {
+    console.error("Error reading snapshots:", err);
+    return res.status(500).json({ error: "Failed to read server snapshots" });
+  }
+});
+
+// POST /api/crm/snapshots/create - Create an instant manual server snapshot
+app.post("/api/crm/snapshots/create", rateLimiter, verifyStaffAuth, (req, res) => {
+  try {
+    const { note, data } = req.body || {};
+    const sourceData = data || inMemoryCrmData || (fs.existsSync(CRM_BACKUP_FILE) ? (() => {
+      try { return JSON.parse(fs.readFileSync(CRM_BACKUP_FILE, "utf-8")); } catch { return null; }
+    })() : null) || { students: [], admissions: [], payments: [], leads: [], batches: [], createdAt: new Date().toISOString() };
+
+    const metadata = saveServerSnapshot(sourceData, note || "Manual Admin Server Snapshot", "manual");
+    lastServerSnapshotTime = Date.now();
+    return res.json({ success: true, snapshot: metadata });
+  } catch (err: any) {
+    console.error("Error creating server snapshot:", err);
+    return res.status(500).json({ error: "Failed to create server snapshot" });
+  }
+});
+
+// POST /api/crm/snapshots/restore - Restore server CRM data to a selected snapshot
+app.post("/api/crm/snapshots/restore", rateLimiter, verifyStaffAuth, (req, res) => {
+  try {
+    const { filename } = req.body || {};
+    if (!filename || typeof filename !== "string" || !filename.endsWith(".json")) {
+      return res.status(400).json({ error: "Invalid snapshot filename" });
+    }
+
+    // Prevent directory traversal
+    const safeName = path.basename(filename);
+    const targetPath = path.join(SNAPSHOTS_DIR, safeName);
+
+    if (!fs.existsSync(targetPath)) {
+      return res.status(404).json({ error: "Snapshot file not found" });
+    }
+
+    const raw = fs.readFileSync(targetPath, "utf-8");
+    const parsed = JSON.parse(raw);
+    const restoredData = parsed.data || parsed; // Handle both wrapped and raw formats
+
+    if (!restoredData || typeof restoredData !== "object") {
+      return res.status(400).json({ error: "Snapshot file has invalid format" });
+    }
+
+    // Step 1: Create automatic safety pre-restore snapshot of current database
+    if (inMemoryCrmData) {
+      try {
+        saveServerSnapshot(inMemoryCrmData, `Auto-saved before restoring ${safeName}`, "prerestore");
+      } catch (preErr) {
+        console.warn("Warning: Could not create pre-restore snapshot:", preErr);
+      }
+    }
+
+    // Step 2: Update inMemoryCrmData and write to disk
+    inMemoryCrmData = restoredData;
+    fs.writeFileSync(CRM_BACKUP_FILE, JSON.stringify(restoredData, null, 2), "utf-8");
+
+    return res.json({
+      success: true,
+      message: `Database successfully restored from ${safeName}`,
+      restoredAt: new Date().toISOString(),
+      studentCount: restoredData.students?.length || 0,
+      leadCount: restoredData.leads?.length || 0,
+      paymentCount: restoredData.payments?.length || 0,
+      data: restoredData
+    });
+  } catch (err: any) {
+    console.error("Error restoring server snapshot:", err);
+    return res.status(500).json({ error: "Failed to restore server snapshot" });
+  }
+});
+
+// GET /api/crm/snapshots/download/:filename - Download snapshot file
+app.get("/api/crm/snapshots/download/:filename", rateLimiter, verifyStaffAuth, (req, res) => {
+  try {
+    const safeName = path.basename(req.params.filename);
+    if (!safeName.endsWith(".json")) {
+      return res.status(400).send("Invalid snapshot filename");
+    }
+    const targetPath = path.join(SNAPSHOTS_DIR, safeName);
+    if (!fs.existsSync(targetPath)) {
+      return res.status(404).send("Snapshot file not found");
+    }
+    res.download(targetPath, safeName);
+  } catch (err: any) {
+    res.status(500).send("Error downloading snapshot");
+  }
+});
+
+// DELETE /api/crm/snapshots/:filename - Delete a specific snapshot
+app.delete("/api/crm/snapshots/:filename", rateLimiter, verifyStaffAuth, (req, res) => {
+  try {
+    const safeName = path.basename(req.params.filename);
+    const targetPath = path.join(SNAPSHOTS_DIR, safeName);
+    if (fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+      return res.json({ success: true });
+    }
+    return res.status(404).json({ error: "Snapshot not found" });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to delete snapshot" });
   }
 });
 
 // GET /api/crm/backup - Retrieve server-persisted CRM data for authenticated staff
 app.get("/api/crm/backup", rateLimiter, verifyStaffAuth, (_req, res) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  if (inMemoryCrmData) {
+    return res.json({ success: true, data: inMemoryCrmData });
+  }
   if (fs.existsSync(CRM_BACKUP_FILE)) {
     try {
-      const data = JSON.parse(fs.readFileSync(CRM_BACKUP_FILE, "utf-8"));
-      return res.json({ success: true, data });
+      inMemoryCrmData = JSON.parse(fs.readFileSync(CRM_BACKUP_FILE, "utf-8"));
+      return res.json({ success: true, data: inMemoryCrmData });
     } catch (e) {
       console.warn("Could not read CRM backup file:", e);
     }
@@ -1589,7 +1914,9 @@ app.post("/api/generate-vector", rateLimiter, async (req, res) => {
 });
 
 async function startServer() {
-  if (!isProduction) {
+  const canServeStatic = isProduction && fs.existsSync(distIndexPath);
+
+  if (!canServeStatic) {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -1598,11 +1925,19 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*", (req, res, next) => {
       if (req.path.startsWith("/api/")) {
         return res.status(404).json({ error: "API endpoint not found" });
       }
-      res.sendFile(path.join(distPath, "index.html"));
+      if (fs.existsSync(distIndexPath)) {
+        res.sendFile(distIndexPath, (err) => {
+          if (err && !res.headersSent) {
+            next(err);
+          }
+        });
+      } else {
+        res.status(503).send("Application build updating. Please refresh shortly.");
+      }
     });
   }
 

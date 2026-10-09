@@ -81,6 +81,9 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
 
   // Website Performance Metrics & Badges
   const [badgeText, setBadgeText] = useState('');
+  const [cardUrgencyText, setCardUrgencyText] = useState('');
+  const [remainingSeats, setRemainingSeats] = useState<number | ''>('');
+  const [cardDiscountBadge, setCardDiscountBadge] = useState('');
   const [rating, setRating] = useState<number>(4.9);
   const [reviewsCount, setReviewsCount] = useState<number>(431);
   const [projectsCount, setProjectsCount] = useState<number>(10);
@@ -201,6 +204,9 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       setThumbnailUrl(initialCourse.thumbnailUrl || '');
       setStatus(initialCourse.status || 'Active');
       setBadgeText(initialCourse.badgeText || '');
+      setCardUrgencyText(initialCourse.cardUrgencyText || initialCourse.landingConfig?.nextBatchStartDate || '');
+      setRemainingSeats(initialCourse.remainingSeats !== undefined ? initialCourse.remainingSeats : (initialCourse.landingConfig?.remainingSeats ?? ''));
+      setCardDiscountBadge(initialCourse.cardDiscountBadge || initialCourse.landingConfig?.customDiscountBadge || '');
       setRating(initialCourse.rating ?? 4.9);
       setReviewsCount(initialCourse.reviewsCount ?? 431);
       setProjectsCount(initialCourse.projectsCount ?? 10);
@@ -246,6 +252,14 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       setDescription('');
       setThumbnailUrl(PRESET_THUMBNAILS[0].url);
       setStatus('Active');
+      setBadgeText('');
+      setCardUrgencyText('');
+      setRemainingSeats('');
+      setCardDiscountBadge('');
+      setRating(4.9);
+      setReviewsCount(431);
+      setProjectsCount(10);
+      setStudentsJoined(450);
       setCurriculumFileUrl('');
       setCurriculumFileName('');
       setCurriculumFileType('pdf');
@@ -519,6 +533,9 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
       thumbnailUrl: thumbnailUrl.trim() || undefined,
       status,
       badgeText: badgeText.trim() || undefined,
+      cardUrgencyText: cardUrgencyText.trim() || undefined,
+      remainingSeats: remainingSeats !== '' ? Number(remainingSeats) : undefined,
+      cardDiscountBadge: cardDiscountBadge.trim() || undefined,
       rating: Number(rating) || 4.9,
       reviewsCount: Number(reviewsCount) || 0,
       projectsCount: Number(projectsCount) || 0,
@@ -918,7 +935,51 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
                       onChange={e => setBadgeText(e.target.value)}
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:border-indigo-600 outline-none"
                     />
-                    <p className="text-[10px] text-slate-500 mt-1">Displayed as the top pill on public cards</p>
+                    <p className="text-[10px] text-slate-500 mt-1">কার্ডের ওপরের ক্যাটাগরি পিল</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold text-xs mb-1">
+                      লাইভ ব্যাচ নোটিশ / তারিখ (Live Batch Notice)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. নতুন ব্যাচ: শুক্রবার বা ১৫ মে, ২০২৬"
+                      value={cardUrgencyText}
+                      onChange={e => setCardUrgencyText(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:border-indigo-600 outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">কার্ডের ওপর লাইভ পালসিং ব্যাচ নোটিশ</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold text-xs mb-1">
+                      অবশিষ্ট সিট সংখ্যা (Remaining Seats)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      placeholder="e.g. 4"
+                      value={remainingSeats}
+                      onChange={e => setRemainingSeats(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:border-indigo-600 outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">কার্ডে '৪টি সিট বাকি' প্রদর্শন করবে</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold text-xs mb-1">
+                      ডিসকাউন্ট / স্কলারশিপ ব্যাজ (Discount Badge)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. ৪০% স্কলারশিপ ছাড় বা ঈদ স্পেশাল"
+                      value={cardDiscountBadge}
+                      onChange={e => setCardDiscountBadge(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:border-indigo-600 outline-none"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">কার্ড থাম্বনেইলের নিচে লাল অফার ব্যাজ</p>
                   </div>
 
                   <div>
@@ -981,6 +1042,73 @@ export const CourseFormModal: React.FC<CourseFormModalProps> = ({
                       className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:border-indigo-600 outline-none"
                     />
                     <p className="text-[10px] text-slate-500 mt-1">e.g. 450+ Enrolled</p>
+                  </div>
+                </div>
+
+                {/* Live Card Preview Box */}
+                <div className="mt-4 pt-4 border-t border-indigo-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-black text-slate-800 flex items-center space-x-1.5">
+                      <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>ওয়েবসাইট কোর্স কার্ড লাইভ প্রিভিউ (Live Card Simulation)</span>
+                    </span>
+                    <span className="text-[10px] text-slate-500">হোমপেজে যেভাবে দেখা যাবে</span>
+                  </div>
+
+                  <div className="max-w-sm mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="relative aspect-[16/10] bg-slate-900">
+                      <img
+                        src={thumbnailUrl || PRESET_THUMBNAILS[0].url}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 left-2 z-10 flex items-center space-x-1">
+                        <span className="px-2 py-0.5 rounded-full bg-slate-950/85 text-amber-300 text-[9px] font-bold flex items-center space-x-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                          <span>ব্যাচ: {cardUrgencyText || 'নতুন ব্যাচে ভর্তি চলছে'}</span>
+                        </span>
+                        {remainingSeats && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-bold">
+                            {remainingSeats} সিট বাকি
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute top-2 right-2 z-10">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-black uppercase">
+                          Offline
+                        </span>
+                      </div>
+                      {(cardDiscountBadge || scholarshipAvailable) && (
+                        <div className="absolute bottom-2 left-2 z-10">
+                          <span className="px-2 py-0.5 rounded-md bg-rose-600 text-white font-black text-[9px]">
+                            {cardDiscountBadge || '৪০% স্কলারশিপ ছাড়'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3.5 space-y-2">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
+                          {category}
+                        </span>
+                        <span className="text-amber-500 font-bold">
+                          ★ {rating} ({reviewsCount})
+                        </span>
+                      </div>
+                      <h5 className="font-black text-slate-900 text-xs truncate">
+                        {name || 'কোর্সের নাম লিখুন'}
+                      </h5>
+                      <div className="flex items-baseline space-x-2 text-xs">
+                        <span className="font-black text-rose-600">
+                          ৳ {offerFee ? offerFee.toLocaleString() : '১২,০০০'}
+                        </span>
+                        {regularFee > offerFee && (
+                          <span className="text-slate-400 line-through text-[10px]">
+                            ৳ {regularFee.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

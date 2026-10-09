@@ -32,6 +32,12 @@ export default defineConfig(() => {
               if (id.includes('react-markdown')) {
                 return 'vendor-markdown';
               }
+              if (id.includes('qrcode')) {
+                return 'vendor-qrcode';
+              }
+              if (id.includes('@google/genai')) {
+                return 'vendor-genai';
+              }
             }
           },
         },

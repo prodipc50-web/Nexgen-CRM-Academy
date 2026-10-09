@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAcademy } from '../../context/AcademyContext';
 import { Lead, FollowUpMethod, FollowUpResult, LeadStatus } from '../../types';
+import { triggerCrmDataSaved } from '../../utils/crmFeedbackHelper';
 import { X, Calendar, PhoneCall, MessageSquare, UserCheck, CheckCircle2, History, Clock, ArrowRight, Tag } from 'lucide-react';
 
 interface FollowUpModalProps {
@@ -40,6 +41,7 @@ export const FollowUpModal: React.FC<FollowUpModalProps> = ({ isOpen, onClose, l
       newLeadStatus: targetStatus !== 'auto' ? (targetStatus as LeadStatus) : undefined,
       nextFollowUpDate: result !== 'Admitted' && result !== 'Not Interested' ? nextFollowUpDate : undefined
     });
+    triggerCrmDataSaved('ফলো-আপ হিস্ট্রি সংরক্ষিত', `লিড ${lead.name}-এর জন্য ${method} লগ সফলভাবে ডেটাবেসে সেভ হয়েছে`, 'save');
     onClose();
   };
 

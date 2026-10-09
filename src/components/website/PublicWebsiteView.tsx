@@ -1,41 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { motion } from 'motion/react';
 import { useAcademy } from '../../context/AcademyContext';
 import { NexgenLogo } from '../common/NexgenLogo';
-import { CertificateVerificationSection } from './CertificateVerificationSection';
-import { OnlineAdmissionModal } from './OnlineAdmissionModal';
-import { SeminarRegistrationModal } from './SeminarRegistrationModal';
-import { CourseDetailsModal } from './CourseDetailsModal';
-import { BlogPostModal } from './BlogPostModal';
-import { PolicyViewerModal } from './PolicyViewerModal';
 import { MobileNavDrawer } from './MobileNavDrawer';
 import { TopOfferRibbon } from './TopOfferRibbon';
-import { LeadCapturePopupModal } from './LeadCapturePopupModal';
-import { HiringPartnersSection } from './HiringPartnersSection';
 import { FloatingActionWidget } from './FloatingActionWidget';
-import { SyllabusDownloadModal } from './SyllabusDownloadModal';
-import { CampusTourModal } from './CampusTourModal';
 import { SocialProofTicker } from './SocialProofTicker';
-import { PlacementsShowcaseSection } from './PlacementsShowcaseSection';
 import { CampusLocationMapBox } from './CampusLocationMapBox';
-import { GeoLocalGuideSection } from './GeoLocalGuideSection';
-import { CourseCareerComparisonSection } from './CourseCareerComparisonSection';
-import { CareerPathFinderWizard } from './CareerPathFinderWizard';
-import { AccreditationTrustStrip } from './AccreditationTrustStrip';
 import { FreeCounselingLeadBanner } from './FreeCounselingLeadBanner';
-import { CourseFeeInstallmentCalculatorModal } from './CourseFeeInstallmentCalculatorModal';
-import { StudentSuccessSpotlightSection } from './StudentSuccessSpotlightSection';
-import { ModernSplitVideoHero } from './ModernSplitVideoHero';
-import { InstituteBenefitsGrid } from './InstituteBenefitsGrid';
-import { CoursesSubPage } from './subpages/CoursesSubPage';
-import { SeminarsSubPage } from './subpages/SeminarsSubPage';
-import { SuccessStorySubPage } from './subpages/SuccessStorySubPage';
-import { MentorsSubPage } from './subpages/MentorsSubPage';
-import { GallerySubPage } from './subpages/GallerySubPage';
-import { AboutUsSubPage } from './subpages/AboutUsSubPage';
-import { ContactUsSubPage } from './subpages/ContactUsSubPage';
-import { VerifyCertificateSubPage } from './subpages/VerifyCertificateSubPage';
-import { BlogSubPage } from './subpages/BlogSubPage';
+import { AccreditationTrustStrip } from './AccreditationTrustStrip';
+
+// Lazy-loaded SubPages (Code Splitting: loaded on-demand when user clicks subpage)
+const CoursesSubPage = lazy(() => import('./subpages/CoursesSubPage').then(m => ({ default: m.CoursesSubPage })));
+const SeminarsSubPage = lazy(() => import('./subpages/SeminarsSubPage').then(m => ({ default: m.SeminarsSubPage })));
+const SuccessStorySubPage = lazy(() => import('./subpages/SuccessStorySubPage').then(m => ({ default: m.SuccessStorySubPage })));
+const MentorsSubPage = lazy(() => import('./subpages/MentorsSubPage').then(m => ({ default: m.MentorsSubPage })));
+const GallerySubPage = lazy(() => import('./subpages/GallerySubPage').then(m => ({ default: m.GallerySubPage })));
+const AboutUsSubPage = lazy(() => import('./subpages/AboutUsSubPage').then(m => ({ default: m.AboutUsSubPage })));
+const ContactUsSubPage = lazy(() => import('./subpages/ContactUsSubPage').then(m => ({ default: m.ContactUsSubPage })));
+const VerifyCertificateSubPage = lazy(() => import('./subpages/VerifyCertificateSubPage').then(m => ({ default: m.VerifyCertificateSubPage })));
+const BlogSubPage = lazy(() => import('./subpages/BlogSubPage').then(m => ({ default: m.BlogSubPage })));
+
+// Lazy-loaded Heavy Modals (loaded on-demand only when opened)
+const OnlineAdmissionModal = lazy(() => import('./OnlineAdmissionModal').then(m => ({ default: m.OnlineAdmissionModal })));
+const SeminarRegistrationModal = lazy(() => import('./SeminarRegistrationModal').then(m => ({ default: m.SeminarRegistrationModal })));
+const CourseDetailsModal = lazy(() => import('./CourseDetailsModal').then(m => ({ default: m.CourseDetailsModal })));
+const BlogPostModal = lazy(() => import('./BlogPostModal').then(m => ({ default: m.BlogPostModal })));
+const PolicyViewerModal = lazy(() => import('./PolicyViewerModal').then(m => ({ default: m.PolicyViewerModal })));
+const LeadCapturePopupModal = lazy(() => import('./LeadCapturePopupModal').then(m => ({ default: m.LeadCapturePopupModal })));
+const SyllabusDownloadModal = lazy(() => import('./SyllabusDownloadModal').then(m => ({ default: m.SyllabusDownloadModal })));
+const CampusTourModal = lazy(() => import('./CampusTourModal').then(m => ({ default: m.CampusTourModal })));
+const CourseFeeInstallmentCalculatorModal = lazy(() => import('./CourseFeeInstallmentCalculatorModal').then(m => ({ default: m.CourseFeeInstallmentCalculatorModal })));
+const TopNoticeTickerModal = lazy(() => import('./TopNoticeTickerModal').then(m => ({ default: m.TopNoticeTickerModal })));
 import { UniqueItTopBar } from './nexgen/NexgenTopBar';
 import { UniqueItNavbar } from './nexgen/NexgenNavbar';
 import { UniqueItHero } from './nexgen/NexgenHero';
@@ -119,7 +115,6 @@ import {
 } from 'lucide-react';
 import { Course, SeminarWorkshop, WebsiteGalleryItem, WebsiteBlogPost, AppLanguage, WebsiteSectionVisibility, WebsiteSubPage } from '../../types';
 import { HeroBannerSlider } from './HeroBannerSlider';
-import { TopNoticeTickerModal } from './TopNoticeTickerModal';
 import { getTranslation } from '../../utils/translations';
 import {
   trackMetaPixelEvent,
@@ -673,81 +668,92 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       />
 
       {/* RENDER DEDICATED SUBPAGES OR FULL HOMEPAGE */}
-      {activeSubPage === 'courses' ? (
-        <CoursesSubPage
-          courses={courses}
-          categories={categories}
-          batches={batches}
-          onOpenEnroll={handleOpenEnroll}
-          onOpenSyllabus={(c) => setSelectedCourseForSyllabus(c)}
-          onOpenInstallment={(c) => {
-            setSelectedCourseForInstallment(c);
-            setIsInstallmentModalOpen(true);
-          }}
-          onOpenCourseLanding={(c) => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }))}
-          onBackToHome={() => navigateSubPage('home')}
-        />
-      ) : activeSubPage === 'seminars' ? (
-        <SeminarsSubPage
-          seminars={seminars}
-          onOpenSeminarReg={handleOpenSeminar}
-          onBackToHome={() => navigateSubPage('home')}
-        />
-      ) : activeSubPage === 'success-stories' ? (
-        <SuccessStorySubPage
-          stories={websiteCmsConfig.studentSuccessConfig?.stories}
-          reviews={websiteReviews}
-          onOpenAdmission={() => {
-            setSelectedCourseForAdmission(null);
-            setIsAdmissionOpen(true);
-          }}
-          onBackToHome={() => navigateSubPage('home')}
-        />
-      ) : activeSubPage === 'mentors' ? (
-        <MentorsSubPage
-          trainers={trainersList}
-          onOpenCounseling={() => {
-            setSelectedCourseForAdmission(null);
-            setIsAdmissionOpen(true);
-          }}
-          onBackToHome={() => navigateSubPage('home')}
-        />
-      ) : activeSubPage === 'gallery' ? (
-        <GallerySubPage
-          galleryItems={websiteGallery}
-          instituteName={academySettings.instituteName}
-          onBackToHome={() => navigateSubPage('home')}
-        />
-      ) : activeSubPage === 'about' ? (
-        <AboutUsSubPage
-          aboutUs={websiteCmsConfig.aboutUs}
-          academySettings={academySettings}
-          websiteCmsConfig={websiteCmsConfig}
-          onOpenAdmission={() => {
-            setSelectedCourseForAdmission(null);
-            setIsAdmissionOpen(true);
-          }}
-          onBackToHome={() => navigateSubPage('home')}
-        />
-      ) : activeSubPage === 'contact' ? (
-        <ContactUsSubPage
-          academySettings={academySettings}
-          websiteCmsConfig={websiteCmsConfig}
-          courses={courses}
-          onSubmitInquiry={handleSubmitInquiry}
-          onBackToHome={() => navigateSubPage('home')}
-        />
-      ) : activeSubPage === 'verify-certificate' ? (
-        <VerifyCertificateSubPage
-          onOpenStaffLogin={onOpenStaffLogin}
-          onBackToHome={() => navigateSubPage('home')}
-        />
-      ) : activeSubPage === 'blog' ? (
-        <BlogSubPage
-          blogs={websiteBlogs || []}
-          onSelectBlog={(b) => setSelectedBlogForReading(b)}
-          onBackToHome={() => navigateSubPage('home')}
-        />
+      {activeSubPage !== 'home' ? (
+        <Suspense
+          fallback={
+            <div className="min-h-[50vh] flex flex-col items-center justify-center py-20 text-slate-500">
+              <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+              <p className="text-xs font-semibold">পেজ লোড হচ্ছে...</p>
+            </div>
+          }
+        >
+          {activeSubPage === 'courses' ? (
+            <CoursesSubPage
+              courses={courses}
+              categories={categories}
+              batches={batches}
+              onOpenEnroll={handleOpenEnroll}
+              onOpenSyllabus={(c) => setSelectedCourseForSyllabus(c)}
+              onOpenInstallment={(c) => {
+                setSelectedCourseForInstallment(c);
+                setIsInstallmentModalOpen(true);
+              }}
+              onOpenCourseLanding={(c) => window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }))}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : activeSubPage === 'seminars' ? (
+            <SeminarsSubPage
+              seminars={seminars}
+              onOpenSeminarReg={handleOpenSeminar}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : activeSubPage === 'success-stories' ? (
+            <SuccessStorySubPage
+              stories={websiteCmsConfig.studentSuccessConfig?.stories}
+              reviews={websiteReviews}
+              onOpenAdmission={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : activeSubPage === 'mentors' ? (
+            <MentorsSubPage
+              trainers={trainersList}
+              onOpenCounseling={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : activeSubPage === 'gallery' ? (
+            <GallerySubPage
+              galleryItems={websiteGallery}
+              instituteName={academySettings.instituteName}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : activeSubPage === 'about' ? (
+            <AboutUsSubPage
+              aboutUs={websiteCmsConfig.aboutUs}
+              academySettings={academySettings}
+              websiteCmsConfig={websiteCmsConfig}
+              onOpenAdmission={() => {
+                setSelectedCourseForAdmission(null);
+                setIsAdmissionOpen(true);
+              }}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : activeSubPage === 'contact' ? (
+            <ContactUsSubPage
+              academySettings={academySettings}
+              websiteCmsConfig={websiteCmsConfig}
+              courses={courses}
+              onSubmitInquiry={handleSubmitInquiry}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : activeSubPage === 'verify-certificate' ? (
+            <VerifyCertificateSubPage
+              onOpenStaffLogin={onOpenStaffLogin}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : activeSubPage === 'blog' ? (
+            <BlogSubPage
+              blogs={websiteBlogs || []}
+              onSelectBlog={(b) => setSelectedBlogForReading(b)}
+              onBackToHome={() => navigateSubPage('home')}
+            />
+          ) : null}
+        </Suspense>
       ) : (
         <>
           {/* 1. HERO SECTION */}
@@ -806,12 +812,16 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
           {(websiteCmsConfig?.newSectionVisibility?.popularCourses ?? true) && (
             <UniqueItPopularCourses
               courses={courses}
+              batches={batches}
               onSelectCourseForAdmission={(c) => {
                 setSelectedCourseForAdmission(c);
                 setIsAdmissionOpen(true);
               }}
               onSelectCourseForDetails={(c) => {
                 setSelectedCourseForDetails(c);
+              }}
+              onOpenCourseLanding={(c) => {
+                window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }));
               }}
               onViewAllCourses={() => navigateSubPage("courses")}
             />
@@ -1152,41 +1162,43 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* POPUP MODALS */}
-      <OnlineAdmissionModal
-        isOpen={isAdmissionOpen}
-        onClose={() => setIsAdmissionOpen(false)}
-        preselectedCourse={selectedCourseForAdmission}
-      />
+      <Suspense fallback={null}>
+        <OnlineAdmissionModal
+          isOpen={isAdmissionOpen}
+          onClose={() => setIsAdmissionOpen(false)}
+          preselectedCourse={selectedCourseForAdmission}
+        />
 
-      <SeminarRegistrationModal
-        isOpen={!!activeSeminarForReg}
-        onClose={() => setActiveSeminarForReg(null)}
-        seminar={activeSeminarForReg}
-      />
+        <SeminarRegistrationModal
+          isOpen={!!activeSeminarForReg}
+          onClose={() => setActiveSeminarForReg(null)}
+          seminar={activeSeminarForReg}
+        />
 
-      <CourseDetailsModal
-        isOpen={!!selectedCourseForDetails}
-        onClose={() => setSelectedCourseForDetails(null)}
-        course={selectedCourseForDetails}
-        onOpenEnroll={(c) => {
-          setSelectedCourseForAdmission(c);
-          setIsAdmissionOpen(true);
-        }}
-      />
+        <CourseDetailsModal
+          isOpen={!!selectedCourseForDetails}
+          onClose={() => setSelectedCourseForDetails(null)}
+          course={selectedCourseForDetails}
+          onOpenEnroll={(c) => {
+            setSelectedCourseForAdmission(c);
+            setIsAdmissionOpen(true);
+          }}
+        />
 
-      <BlogPostModal
-        isOpen={!!selectedBlogForReading}
-        onClose={() => setSelectedBlogForReading(null)}
-        blog={selectedBlogForReading}
-      />
+        <BlogPostModal
+          isOpen={!!selectedBlogForReading}
+          onClose={() => setSelectedBlogForReading(null)}
+          blog={selectedBlogForReading}
+        />
 
-      <PolicyViewerModal
-        isOpen={!!activePolicyModal}
-        onClose={() => setActivePolicyModal(null)}
-        initialType={activePolicyModal || 'terms'}
-        policies={websiteCmsConfig.policies}
-        instituteName={academySettings.instituteName}
-      />
+        <PolicyViewerModal
+          isOpen={!!activePolicyModal}
+          onClose={() => setActivePolicyModal(null)}
+          initialType={activePolicyModal || 'terms'}
+          policies={websiteCmsConfig.policies}
+          instituteName={academySettings.instituteName}
+        />
+      </Suspense>
 
       {/* Lightbox for Gallery Photo */}
       {selectedGalleryImage && (
@@ -1301,55 +1313,93 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
       )}
 
       {/* 100% DYNAMIC LEAD CAPTURE & SCHOLARSHIP POPUP (CMS CONTROLLED) */}
-      <LeadCapturePopupModal
-        config={websiteCmsConfig.leadCapturePopup}
-        courses={courses}
-        onSubmitLead={async (payload) => {
-          const leadSourceStr = payload.source || 'Website Popup Voucher';
-          const selectedCourseObj = courses.find(c => c.id === payload.courseId);
-          const todayDate = new Date().toISOString().split('T')[0];
+      <Suspense fallback={null}>
+        <LeadCapturePopupModal
+          config={websiteCmsConfig.leadCapturePopup}
+          courses={courses}
+          onSubmitLead={async (payload) => {
+            const leadSourceStr = payload.source || 'Website Popup Voucher';
+            const selectedCourseObj = courses.find(c => c.id === payload.courseId);
+            const todayDate = new Date().toISOString().split('T')[0];
 
-          // Dynamic counselor resolution
-          const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
-            staffList.find(s => s.role === 'COUNSELOR') ||
-            staffList.find(s => s.status === 'Active') ||
-            staffList[0];
-          const counselorId = activeCounselor?.id || 'st-desk';
-          const counselorName = activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk';
+            // Dynamic counselor resolution
+            const activeCounselor = staffList.find(s => s.role === 'COUNSELOR' && s.status === 'Active') ||
+              staffList.find(s => s.role === 'COUNSELOR') ||
+              staffList.find(s => s.status === 'Active') ||
+              staffList[0];
+            const counselorId = activeCounselor?.id || 'st-desk';
+            const counselorName = activeCounselor ? `${activeCounselor.name} (${activeCounselor.designation || 'Admissions Desk'})` : 'Admissions Desk';
 
-          const newLeadData = {
-            fullName: payload.fullName,
-            studentName: payload.fullName,
-            name: payload.fullName,
-            phone: payload.phone,
-            email: payload.email || '',
-            courseId: payload.courseId || (courses[0]?.id || ''),
-            courseName: selectedCourseObj?.name || payload.courseId || '',
-            interestedCourseId: payload.courseId || (courses[0]?.id || ''),
-            learningMode: payload.learningMode || 'Offline',
-            preferredLearningMode: payload.learningMode || 'Offline',
-            address: payload.location || '',
-            location: payload.location || '',
-            locationCity: payload.location || '',
-            source: leadSourceStr,
-            leadSource: leadSourceStr,
-            notes: payload.notes || `[Website Popup] Promo Voucher Claimed`,
-            status: 'New' as const,
-            counselorId,
-            counselorName,
-            occupation: 'Student / Professional',
-            educationLevel: 'HSC / Graduate',
-            visitDate: todayDate,
-            firstContactDate: todayDate,
-            comments: `[Popup Voucher] ${payload.notes || ''}`
-          };
-          addLead(newLeadData);
-          if (submitPublicLead) {
-            submitPublicLead(newLeadData).catch(err => console.warn('Background lead sync notice:', err));
-          }
-          return true;
-        }}
-      />
+            const newLeadData = {
+              fullName: payload.fullName,
+              studentName: payload.fullName,
+              name: payload.fullName,
+              phone: payload.phone,
+              email: payload.email || '',
+              courseId: payload.courseId || (courses[0]?.id || ''),
+              courseName: selectedCourseObj?.name || payload.courseId || '',
+              interestedCourseId: payload.courseId || (courses[0]?.id || ''),
+              learningMode: payload.learningMode || 'Offline',
+              preferredLearningMode: payload.learningMode || 'Offline',
+              address: payload.location || '',
+              location: payload.location || '',
+              locationCity: payload.location || '',
+              source: leadSourceStr,
+              leadSource: leadSourceStr,
+              notes: payload.notes || `[Website Popup] Promo Voucher Claimed`,
+              status: 'New' as const,
+              counselorId,
+              counselorName,
+              occupation: 'Student / Professional',
+              educationLevel: 'HSC / Graduate',
+              visitDate: todayDate,
+              firstContactDate: todayDate,
+              comments: `[Popup Voucher] ${payload.notes || ''}`
+            };
+            addLead(newLeadData);
+            if (submitPublicLead) {
+              submitPublicLead(newLeadData).catch(err => console.warn('Background lead sync notice:', err));
+            }
+            return true;
+          }}
+        />
+
+        {/* TOP NOTICE & PROMO BANNER CMS EDIT MODAL */}
+        <TopNoticeTickerModal
+          isOpen={isTopNoticeModalOpen}
+          onClose={() => setIsTopNoticeModalOpen(false)}
+        />
+
+        {/* DYNAMIC SYLLABUS DOWNLOAD LEAD MAGNET MODAL */}
+        <SyllabusDownloadModal
+          isOpen={!!selectedCourseForSyllabus}
+          onClose={() => setSelectedCourseForSyllabus(null)}
+          course={selectedCourseForSyllabus}
+          onOpenAdmission={(c) => {
+            setSelectedCourseForAdmission(c);
+            setIsAdmissionOpen(true);
+          }}
+        />
+
+        {/* FREE CAMPUS TOUR & PHYSICAL LAB COUNSELING BOOKING MODAL */}
+        <CampusTourModal
+          isOpen={isCampusTourOpen}
+          onClose={() => setIsCampusTourOpen(false)}
+          courses={courses}
+        />
+
+        {/* 0% EASY INSTALLMENT & FEE BREAKDOWN CALCULATOR MODAL */}
+        <CourseFeeInstallmentCalculatorModal
+          isOpen={isInstallmentModalOpen}
+          onClose={() => setIsInstallmentModalOpen(false)}
+          courses={courses}
+          initialCourse={selectedCourseForInstallment}
+          onProceedAdmission={(course, planText) => {
+            setSelectedCourseForAdmission(course);
+            setIsAdmissionOpen(true);
+          }}
+        />
+      </Suspense>
 
       {/* FLOATING ACTION & MULTI-CHANNEL QUICK CONNECT WIDGET (CMS CONTROLLED) */}
       <FloatingActionWidget
@@ -1364,44 +1414,8 @@ export const PublicWebsiteView: React.FC<PublicWebsiteViewProps> = ({
         instituteName={academySettings.instituteName}
       />
 
-      {/* TOP NOTICE & PROMO BANNER CMS EDIT MODAL */}
-      <TopNoticeTickerModal
-        isOpen={isTopNoticeModalOpen}
-        onClose={() => setIsTopNoticeModalOpen(false)}
-      />
-
       {/* SOCIAL PROOF REAL-TIME ADMISSIONS & INQUIRY TICKER */}
       <SocialProofTicker />
-
-      {/* DYNAMIC SYLLABUS DOWNLOAD LEAD MAGNET MODAL */}
-      <SyllabusDownloadModal
-        isOpen={!!selectedCourseForSyllabus}
-        onClose={() => setSelectedCourseForSyllabus(null)}
-        course={selectedCourseForSyllabus}
-        onOpenAdmission={(c) => {
-          setSelectedCourseForAdmission(c);
-          setIsAdmissionOpen(true);
-        }}
-      />
-
-      {/* FREE CAMPUS TOUR & PHYSICAL LAB COUNSELING BOOKING MODAL */}
-      <CampusTourModal
-        isOpen={isCampusTourOpen}
-        onClose={() => setIsCampusTourOpen(false)}
-        courses={courses}
-      />
-
-      {/* 0% EASY INSTALLMENT & FEE BREAKDOWN CALCULATOR MODAL */}
-      <CourseFeeInstallmentCalculatorModal
-        isOpen={isInstallmentModalOpen}
-        onClose={() => setIsInstallmentModalOpen(false)}
-        courses={courses}
-        initialCourse={selectedCourseForInstallment}
-        onProceedAdmission={(course, planText) => {
-          setSelectedCourseForAdmission(course);
-          setIsAdmissionOpen(true);
-        }}
-      />
     </div>
   );
 };

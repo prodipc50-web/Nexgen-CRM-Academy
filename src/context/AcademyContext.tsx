@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   db,
   doc,
@@ -121,6 +121,7 @@ import {
   initTikTokPixel,
   setActiveMarketingConfig
 } from '../utils/analyticsTracker';
+import { triggerCrmDataSaved } from '../utils/crmFeedbackHelper';
 
 interface AcademyContextType {
   currentUser: UserProfile;
@@ -501,6 +502,12 @@ interface AcademyContextType {
   exportDatabaseJson: () => void;
   importDatabaseJson: (jsonString: string) => boolean;
   systemSnapshots: SystemSnapshotMetadata[];
+  serverSnapshots: SystemSnapshotMetadata[];
+  fetchServerSnapshots: () => Promise<void>;
+  createServerSnapshot: (note?: string) => Promise<boolean>;
+  restoreServerSnapshot: (filename: string) => Promise<boolean>;
+  downloadServerSnapshot: (filename: string) => void;
+  deleteServerSnapshot: (filename: string) => Promise<boolean>;
   createSafeSnapshot: (type?: 'auto_daily' | 'manual', note?: string) => SystemSnapshotMetadata;
   restoreSafeSnapshot: (snapshotId: string) => boolean;
   deleteSafeSnapshot: (snapshotId: string) => void;
@@ -639,6 +646,40 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
     return INITIAL_STAFF;
   });
+
+  // Non-destructive smart merge helper for resilient offline and online updates
+  const smartMergeEntities = <T extends { id?: string; code?: string; updatedAt?: string; timestamp?: string }>(
+    remoteList: T[] | undefined,
+    localList: T[]
+  ): T[] => {
+    if (!Array.isArray(remoteList) || remoteList.length === 0) return localList;
+    if (!Array.isArray(localList) || localList.length === 0) return remoteList;
+
+    const map = new Map<string, T>();
+    for (const item of localList) {
+      if (item && typeof item === 'object') {
+        const key = String(item.id || item.code || JSON.stringify(item));
+        map.set(key, item);
+      }
+    }
+    for (const rItem of remoteList) {
+      if (!rItem || typeof rItem !== 'object') continue;
+      const key = String(rItem.id || rItem.code || JSON.stringify(rItem));
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, rItem);
+      } else {
+        const rTime = new Date(rItem.updatedAt || rItem.timestamp || 0).getTime();
+        const lTime = new Date(existing.updatedAt || existing.timestamp || 0).getTime();
+        if (rTime >= lTime) {
+          map.set(key, { ...existing, ...rItem });
+        } else {
+          map.set(key, { ...rItem, ...existing });
+        }
+      }
+    }
+    return Array.from(map.values());
+  };
 
   const safeParseLocalStorage = <T,>(key: string, fallback: T): T => {
     try {
@@ -1395,6 +1436,128 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const latestCoursesRef = useRef<Course[]>(courses);
   const latestWebsiteCmsConfigRef = useRef<WebsiteCmsConfig>(websiteCmsConfig);
   const latestLeadsRef = useRef<Lead[]>(leads);
+  const isCrmHydratedRef = useRef<boolean>(
+    typeof window !== 'undefined' && Boolean(localStorage.getItem(`${STORAGE_KEY}_students`))
+  );
+
+  // Resilient CRM data hydration from server storage with ID-based non-destructive merge
+  const hydrateCrmDataFromServer = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/crm/backup', {
+        headers: {
+          'x-staff-auth': 'nexgen-staff-auth-secure'
+        },
+        cache: 'no-store'
+      });
+      if (!res.ok) return false;
+      const json = await res.json();
+      if (!json || !json.success || !json.data) return false;
+      const data = json.data;
+
+      isRemoteUpdate.current = true;
+      if (Array.isArray(data.students) && data.students.length > 0) {
+        setStudents(prev => {
+          const merged = smartMergeEntities(data.students, prev);
+          try { localStorage.setItem(`${STORAGE_KEY}_students`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.leads) && data.leads.length > 0) {
+        setLeads(prev => {
+          const merged = smartMergeEntities(data.leads, prev);
+          latestLeadsRef.current = merged;
+          try { localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.admissions) && data.admissions.length > 0) {
+        setAdmissions(prev => {
+          const merged = smartMergeEntities(data.admissions, prev);
+          try { localStorage.setItem(`${STORAGE_KEY}_admissions`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.payments) && data.payments.length > 0) {
+        setPayments(prev => {
+          const merged = smartMergeEntities(data.payments, prev);
+          try { localStorage.setItem(`${STORAGE_KEY}_payments`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.expenses) && data.expenses.length > 0) {
+        setExpenses(prev => {
+          const merged = smartMergeEntities(data.expenses, prev);
+          try { localStorage.setItem(`${STORAGE_KEY}_expenses`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.batches) && data.batches.length > 0) {
+        setBatches(prev => {
+          const merged = smartMergeEntities(data.batches, prev);
+          try { localStorage.setItem(`${STORAGE_KEY}_batches`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+        setRooms(prev => {
+          const merged = smartMergeEntities(data.rooms, prev);
+          try { localStorage.setItem(`${STORAGE_KEY}_rooms`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.followUps) && data.followUps.length > 0) {
+        setFollowUps(prev => {
+          const merged = smartMergeEntities(data.followUps, prev);
+          try { localStorage.setItem(`${STORAGE_KEY}_followups`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.staffList) && data.staffList.length > 0) {
+        setStaffList(prev => {
+          const merged = smartMergeEntities(data.staffList, prev);
+          try { localStorage.setItem(`${STORAGE_KEY}_staff`, JSON.stringify(merged)); } catch {}
+          return merged;
+        });
+      }
+      if (Array.isArray(data.attendance)) setAttendance(prev => smartMergeEntities(data.attendance, prev));
+      if (Array.isArray(data.schedules)) setSchedules(prev => smartMergeEntities(data.schedules, prev));
+      if (Array.isArray(data.exams)) setExams(prev => smartMergeEntities(data.exams, prev));
+      if (Array.isArray(data.examResults)) setExamResults(prev => smartMergeEntities(data.examResults, prev));
+      if (Array.isArray(data.certificates)) setCertificates(prev => smartMergeEntities(data.certificates, prev));
+      if (Array.isArray(data.assets)) setAssets(prev => smartMergeEntities(data.assets, prev));
+      if (Array.isArray(data.campaigns)) setCampaigns(prev => smartMergeEntities(data.campaigns, prev));
+      if (Array.isArray(data.placements)) setPlacements(prev => smartMergeEntities(data.placements, prev));
+      if (Array.isArray(data.assignments)) setAssignments(prev => smartMergeEntities(data.assignments, prev));
+      if (Array.isArray(data.assignmentSubmissions)) setAssignmentSubmissions(prev => smartMergeEntities(data.assignmentSubmissions, prev));
+      if (Array.isArray(data.seminars)) setSeminars(prev => smartMergeEntities(data.seminars, prev));
+      if (data.academySettings && typeof data.academySettings === 'object') {
+        setAcademySettings(prev => ({ ...prev, ...data.academySettings }));
+      }
+      if (data.crmSettings && typeof data.crmSettings === 'object') {
+        setCrmSettings(prev => ({ ...prev, ...data.crmSettings }));
+      }
+
+      isCrmHydratedRef.current = true;
+      return true;
+    } catch (e) {
+      console.warn('[AcademyContext] Server CRM hydration notice:', e);
+      return false;
+    }
+  }, []);
+
+  // Proactive hydration on mount
+  useEffect(() => {
+    hydrateCrmDataFromServer().then(hydrated => {
+      if (hydrated) {
+        isCrmHydratedRef.current = true;
+      } else {
+        const hasStored = typeof window !== 'undefined' && Boolean(localStorage.getItem(`${STORAGE_KEY}_students`));
+        if (hasStored) {
+          isCrmHydratedRef.current = true;
+        }
+      }
+    });
+  }, [hydrateCrmDataFromServer]);
 
   useEffect(() => {
     latestCoursesRef.current = courses;
@@ -1424,8 +1587,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 if (!localC) return remoteC;
                 const remoteT = new Date(remoteC.updatedAt || cat.updatedAt || 0).getTime();
                 const localT = new Date(localC.updatedAt || 0).getTime();
-                const isLocalRecent = (Date.now() - lastLocalMutationTimestamp.current) < 15000;
-                return (isLocalRecent && localT > remoteT) ? localC : remoteC;
+                return (localT > remoteT) ? localC : remoteC;
               });
               for (const lc of prev) {
                 if (!merged.some(m => m.id === lc.id || m.code === lc.code)) {
@@ -1441,10 +1603,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (Array.isArray(cat.categories) && cat.categories.length > 0) setCategories(cat.categories);
             if (cat.websiteCmsConfig && typeof cat.websiteCmsConfig === 'object') {
               setWebsiteCmsConfig(prev => {
-                const isLocalRecent = (Date.now() - lastLocalMutationTimestamp.current) < 15000;
                 const localT = new Date(prev.updatedAt || 0).getTime();
                 const remoteT = new Date(cat.updatedAt || cat.websiteCmsConfig.updatedAt || 0).getTime();
-                if (isLocalRecent && localT >= remoteT) {
+                if (localT >= remoteT) {
                   return prev;
                 }
                 const mergedCms: WebsiteCmsConfig = {
@@ -1548,8 +1709,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                   if (!localC) return remoteC;
                   const remoteT = new Date(remoteC.updatedAt || data.updatedAt || 0).getTime();
                   const localT = new Date(localC.updatedAt || 0).getTime();
-                  const isLocalRecent = (Date.now() - lastLocalMutationTimestamp.current) < 15000;
-                  return (isLocalRecent && localT > remoteT) ? localC : remoteC;
+                  return (localT > remoteT) ? localC : remoteC;
                 });
                 for (const lc of prev) {
                   if (!merged.some(m => m.id === lc.id || m.code === lc.code)) {
@@ -1572,10 +1732,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                   : remoteMarketing.googleAnalyticsId
               };
               setWebsiteCmsConfig(prev => {
-                const isLocalRecent = (Date.now() - lastLocalMutationTimestamp.current) < 15000;
                 const localT = new Date(prev.updatedAt || 0).getTime();
                 const remoteT = new Date(data.updatedAt || data.websiteCmsConfig.updatedAt || 0).getTime();
-                if (isLocalRecent && localT >= remoteT) {
+                if (localT >= remoteT) {
                   return prev;
                 }
                 const mergedCms: WebsiteCmsConfig = {
@@ -1672,15 +1831,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             }
 
             isRemoteUpdate.current = true;
-            if (Array.isArray(data.staffList) && data.staffList.length > 0) setStaffList(data.staffList);
-            if (Array.isArray(data.batches)) setBatches(data.batches);
-            if (Array.isArray(data.rooms)) setRooms(data.rooms);
-            if (Array.isArray(data.campaigns)) setCampaigns(data.campaigns);
+            if (Array.isArray(data.staffList) && data.staffList.length > 0) setStaffList(prev => smartMergeEntities(data.staffList, prev));
+            if (Array.isArray(data.batches)) setBatches(prev => smartMergeEntities(data.batches, prev));
+            if (Array.isArray(data.rooms)) setRooms(prev => smartMergeEntities(data.rooms, prev));
+            if (Array.isArray(data.campaigns)) setCampaigns(prev => smartMergeEntities(data.campaigns, prev));
             if (Array.isArray(data.leads)) {
               setLeads(prev => {
-                const remoteIds = new Set(data.leads.map((l: Lead) => l.id));
-                const localNewLeads = prev.filter(l => !remoteIds.has(l.id));
-                const merged = [...localNewLeads, ...data.leads];
+                const merged = smartMergeEntities(data.leads, prev);
                 latestLeadsRef.current = merged;
                 try {
                   localStorage.setItem(`${STORAGE_KEY}_leads`, JSON.stringify(merged));
@@ -1688,22 +1845,28 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 return merged;
               });
             }
-            if (Array.isArray(data.followUps)) setFollowUps(data.followUps);
-            if (Array.isArray(data.students)) setStudents(data.students);
-            if (Array.isArray(data.admissions)) setAdmissions(data.admissions);
-            if (Array.isArray(data.payments)) setPayments(data.payments);
-            if (Array.isArray(data.attendance)) setAttendance(data.attendance);
-            if (Array.isArray(data.schedules)) setSchedules(data.schedules);
-            if (Array.isArray(data.exams)) setExams(data.exams);
-            if (Array.isArray(data.examResults)) setExamResults(data.examResults);
-            if (Array.isArray(data.certificates)) setCertificates(data.certificates);
-            if (Array.isArray(data.expenses)) setExpenses(data.expenses);
-            if (Array.isArray(data.assets)) setAssets(data.assets);
-            if (Array.isArray(data.auditLogs)) setAuditLogs(data.auditLogs);
-            if (Array.isArray(data.placements)) setPlacements(data.placements);
-            if (Array.isArray(data.assignments)) setAssignments(data.assignments);
-            if (Array.isArray(data.assignmentSubmissions)) setAssignmentSubmissions(data.assignmentSubmissions);
-            if (Array.isArray(data.seminars)) setSeminars(data.seminars);
+            if (Array.isArray(data.followUps)) setFollowUps(prev => smartMergeEntities(data.followUps, prev));
+            if (Array.isArray(data.students)) {
+              setStudents(prev => {
+                const merged = smartMergeEntities(data.students, prev);
+                try { localStorage.setItem(`${STORAGE_KEY}_students`, JSON.stringify(merged)); } catch {}
+                return merged;
+              });
+            }
+            if (Array.isArray(data.admissions)) setAdmissions(prev => smartMergeEntities(data.admissions, prev));
+            if (Array.isArray(data.payments)) setPayments(prev => smartMergeEntities(data.payments, prev));
+            if (Array.isArray(data.attendance)) setAttendance(prev => smartMergeEntities(data.attendance, prev));
+            if (Array.isArray(data.schedules)) setSchedules(prev => smartMergeEntities(data.schedules, prev));
+            if (Array.isArray(data.exams)) setExams(prev => smartMergeEntities(data.exams, prev));
+            if (Array.isArray(data.examResults)) setExamResults(prev => smartMergeEntities(data.examResults, prev));
+            if (Array.isArray(data.certificates)) setCertificates(prev => smartMergeEntities(data.certificates, prev));
+            if (Array.isArray(data.expenses)) setExpenses(prev => smartMergeEntities(data.expenses, prev));
+            if (Array.isArray(data.assets)) setAssets(prev => smartMergeEntities(data.assets, prev));
+            if (Array.isArray(data.auditLogs)) setAuditLogs(prev => smartMergeEntities(data.auditLogs, prev));
+            if (Array.isArray(data.placements)) setPlacements(prev => smartMergeEntities(data.placements, prev));
+            if (Array.isArray(data.assignments)) setAssignments(prev => smartMergeEntities(data.assignments, prev));
+            if (Array.isArray(data.assignmentSubmissions)) setAssignmentSubmissions(prev => smartMergeEntities(data.assignmentSubmissions, prev));
+            if (Array.isArray(data.seminars)) setSeminars(prev => smartMergeEntities(data.seminars, prev));
             if (data.academySettings && typeof data.academySettings === 'object') {
               setAcademySettings(prev => ({ ...prev, ...data.academySettings }));
             }
@@ -1720,6 +1883,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
               setCrmSettings(prev => ({ ...prev, ...data.crmSettings }));
             }
             if (Array.isArray(data.archivedItems)) setArchivedItems(data.archivedItems);
+            isCrmHydratedRef.current = true;
           }
           setLastCloudSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
           setCloudSyncStatus('synced');
@@ -2208,9 +2372,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         })
       );
 
-      // Write private CRM data to Cloud Firestore when staff session is active
+      // Write private CRM data to Cloud Firestore only when staff session is active AND CRM data is safely hydrated
       const hasFirebaseAuth = Boolean(firebaseUser || auth.currentUser);
-      if (hasFirebaseAuth && isAuthenticated) {
+      if (hasFirebaseAuth && isAuthenticated && isCrmHydratedRef.current) {
         writePromises.push(
           setDoc(doc(db, 'academy_data', 'crm_private_data'), cleanCrmPayload, { merge: true })
         );
@@ -2227,7 +2391,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }).catch(e => console.warn('Catalog local server sync notice:', e));
       writePromises.push(serverSyncPromise);
 
-      if (isAuthenticated) {
+      if (isAuthenticated && isCrmHydratedRef.current) {
         fetch('/api/crm/backup', {
           method: 'POST',
           headers: {
@@ -2247,8 +2411,12 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       await Promise.race([syncPromise, timeoutPromise]);
 
       lastSavedPayloadString.current = combinedStr;
-      setLastCloudSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      const syncFormattedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setLastCloudSyncTime(syncFormattedTime);
       setCloudSyncStatus('synced');
+      if (forceImmediate) {
+        triggerCrmDataSaved('ক্লাউড ডেটাবেস সিঙ্ক সম্পন্ন', 'সমস্ত তথ্য ক্লাউড ডেটাবেসে সফলভাবে সংরক্ষিত হয়েছে', 'sync');
+      }
       return true;
     } catch (err: any) {
       lastSavedPayloadString.current = ''; // Reset so that subsequent retry or manual sync is not blocked!
@@ -2576,6 +2744,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     logAudit('User Login', 'Security / Auth', matchedStaff.id || 'admin', `User ${matchedStaff.name} (${matchedStaff.role}) logged in successfully`);
 
+    // Hydrate latest CRM business records from server storage immediately upon login
+    hydrateCrmDataFromServer().catch(() => {});
+
     return { success: true, message: `Login successful! Welcome to ${academySettings?.instituteName || 'Academy'} ERP.`, user: updatedUser };
   };
 
@@ -2591,35 +2762,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setFirebaseUser(null);
     setIsAuthenticated(false);
     
-    // Purge session tokens and all private CRM items from client storage
-    const privateStorageKeys = [
+    // Purge only session security tokens; preserve cached business data so offline / re-login retains data
+    const sessionSecurityKeys = [
       `${STORAGE_KEY}_is_authenticated`,
       `${STORAGE_KEY}_current_user`,
-      `${STORAGE_KEY}_staff`,
-      `${STORAGE_KEY}_batches`,
-      `${STORAGE_KEY}_rooms`,
-      `${STORAGE_KEY}_campaigns`,
-      `${STORAGE_KEY}_leads`,
-      `${STORAGE_KEY}_followups`,
-      `${STORAGE_KEY}_students`,
-      `${STORAGE_KEY}_admissions`,
-      `${STORAGE_KEY}_payments`,
-      `${STORAGE_KEY}_attendance`,
-      `${STORAGE_KEY}_schedules`,
-      `${STORAGE_KEY}_exams`,
-      `${STORAGE_KEY}_exam_results`,
-      `${STORAGE_KEY}_certificates`,
-      `${STORAGE_KEY}_expenses`,
-      `${STORAGE_KEY}_assets`,
-      `${STORAGE_KEY}_audit`,
-      `${STORAGE_KEY}_trash`,
-      `${STORAGE_KEY}_placements`,
-      `${STORAGE_KEY}_assignments`,
-      `${STORAGE_KEY}_submissions`,
-      `${STORAGE_KEY}_seminars`
+      `${STORAGE_KEY}_session_locked`
     ];
 
-    privateStorageKeys.forEach(k => {
+    sessionSecurityKeys.forEach(k => {
       try {
         localStorage.removeItem(k);
         sessionStorage.removeItem(k);
@@ -2777,10 +2927,18 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     window.dispatchEvent(new CustomEvent('incoming-lead-submitted', { detail: newLead }));
 
     logAudit('Lead Created', 'CRM', id, `Added new lead "${newLead.name}" (${newLead.phone})`);
+    triggerCrmDataSaved(
+      'নতুন লিড যুক্ত ও সংরক্ষিত',
+      `লিড: ${newLead.name} (${newLead.phone}) ডেটাবেসে সংরক্ষিত হয়েছে`,
+      'create'
+    );
     return newLead;
   };
 
   const updateLead = (id: string, updates: Partial<Lead>) => {
+    const targetLead = leads.find(l => l.id === id);
+    const leadDisplayName = updates.name || targetLead?.name || 'লিড';
+
     setLeads(prev => {
       const next = prev.map(l => (l.id === id ? { ...l, ...updates, updatedAt: new Date().toISOString() } : l));
       try {
@@ -2789,6 +2947,16 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return next;
     });
     logAudit('Lead Updated', 'CRM', id, `Updated details for lead ID: ${id}`);
+
+    triggerCrmDataSaved(
+      'ডেটাবেসে সংরক্ষিত হয়েছে',
+      updates.status
+        ? `স্ট্যাটাস "${updates.status}"-এ সংরক্ষিত (${leadDisplayName})`
+        : updates.counselorName
+        ? `কাউন্সেলর "${updates.counselorName}" নির্ধারিত হয়েছে`
+        : `${leadDisplayName}-এর তথ্য ডেটাবেসে সংরক্ষিত হয়েছে`,
+      'update'
+    );
   };
 
   const deleteLead = (id: string) => {
@@ -2814,6 +2982,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return next;
     });
     logAudit('Lead Moved to Trash', 'CRM', id, `Moved lead "${target.name}" to trash`);
+    triggerCrmDataSaved('লিড ট্র্যাশে সরানো হয়েছে', `"${target.name}" সফলভাবে ট্র্যাশে স্থানান্তরিত হয়েছে`, 'delete');
   };
 
   const mergeLeads = (primaryId: string, secondaryId: string) => {
@@ -2867,6 +3036,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
 
     logAudit('Leads Merged', 'CRM', primaryId, `Merged lead "${secondary.name}" (${secondary.leadCode}) into "${primary.name}" (${primary.leadCode})`);
+    triggerCrmDataSaved('লিড একীভূত ও সংরক্ষিত', `"${secondary.name}"-কে "${primary.name}"-এর সাথে সফলভাবে মার্জ করা হয়েছে`, 'save');
   };
 
   const updateCrmSettings = (patch: Partial<CrmSettingsConfig>) => {
@@ -2986,6 +3156,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       } catch {}
       return updated;
     });
+    triggerCrmDataSaved('ট্যাগ আপডেট সংরক্ষিত', `লিডের ট্যাগ "${tagName}" আপডেট করা হয়েছে`, 'update');
   };
 
   const updateLeadCustomFields = (leadId: string, values: Record<string, any>) => {
@@ -3003,6 +3174,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       } catch {}
       return updated;
     });
+    triggerCrmDataSaved('কাস্টম ফিল্ড সংরক্ষিত', 'লিডের কাস্টম ফিল্ড ভ্যালু সফলভাবে ডেটাবেসে সেভ হয়েছে', 'update');
   };
 
   // Submit Lead from Public Website / Landing Page with Server Fraud Check & OTP
@@ -3489,7 +3661,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     // 4. Update Lead if linked
     if (existingLeadId) {
-      updateLead(existingLeadId, { status: 'Admitted' });
+      updateLead(existingLeadId, {
+        status: 'Admitted',
+        convertedStudentId: createdStudent.id,
+        convertedAdmissionId: admissionId
+      });
     }
 
     logAudit('Admission Completed', 'Admissions', admissionId, `Enrolled ${createdStudent.name} (${createdStudent.studentCode}) in ${batches.find(b => b.id === batchId)?.batchNumber}`);
@@ -5719,6 +5895,118 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  // --- SERVER-SIDE SNAPSHOTS ENGINE ---
+  const [serverSnapshots, setServerSnapshots] = useState<SystemSnapshotMetadata[]>([]);
+
+  const fetchServerSnapshots = async () => {
+    try {
+      const res = await fetch('/api/crm/snapshots', {
+        headers: { 'x-staff-auth': 'nexgen-staff-auth-secure' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.snapshots)) {
+          setServerSnapshots(json.snapshots);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not fetch server snapshots:', err);
+    }
+  };
+
+  const createServerSnapshot = async (note?: string): Promise<boolean> => {
+    try {
+      await syncToCloudNow(true);
+      const res = await fetch('/api/crm/snapshots/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-staff-auth': 'nexgen-staff-auth-secure'
+        },
+        body: JSON.stringify({ note: note || 'Manual Server Snapshot' })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          await fetchServerSnapshots();
+          logAudit('Server Snapshot Created', 'Backup / Restore', data.snapshot?.id || 'snap', `Created server snapshot: ${note || 'Manual'}`);
+          return true;
+        }
+      }
+      return false;
+    } catch (err) {
+      console.error('Failed to create server snapshot:', err);
+      return false;
+    }
+  };
+
+  const restoreServerSnapshot = async (filename: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/crm/snapshots/restore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-staff-auth': 'nexgen-staff-auth-secure'
+        },
+        body: JSON.stringify({ filename })
+      });
+      if (res.ok) {
+        const result = await res.json();
+        if (result.success && result.data) {
+          importDatabaseJson(JSON.stringify(result.data));
+          await fetchServerSnapshots();
+          logAudit('Server Snapshot Restored', 'Backup / Restore', filename, `Restored database from server snapshot: ${filename}`);
+          return true;
+        }
+      }
+      return false;
+    } catch (err) {
+      console.error('Failed to restore server snapshot:', err);
+      return false;
+    }
+  };
+
+  const downloadServerSnapshot = (filename: string) => {
+    try {
+      const safeName = encodeURIComponent(filename);
+      const a = document.createElement('a');
+      a.href = `/api/crm/snapshots/download/${safeName}`;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      logAudit('Server Snapshot Downloaded', 'Backup / Restore', filename, `Downloaded snapshot ${filename}`);
+    } catch (err) {
+      console.error('Failed to download server snapshot:', err);
+    }
+  };
+
+  const deleteServerSnapshot = async (filename: string): Promise<boolean> => {
+    try {
+      const safeName = encodeURIComponent(filename);
+      const res = await fetch(`/api/crm/snapshots/${safeName}`, {
+        method: 'DELETE',
+        headers: { 'x-staff-auth': 'nexgen-staff-auth-secure' }
+      });
+      if (res.ok) {
+        setServerSnapshots(prev => prev.filter(s => s.filename !== filename && s.id !== filename));
+        logAudit('Server Snapshot Deleted', 'Backup / Restore', filename, `Deleted server snapshot ${filename}`);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Failed to delete server snapshot:', err);
+      return false;
+    }
+  };
+
+  // Auto-fetch server snapshots on auth
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchServerSnapshots();
+    }
+  }, [isAuthenticated]);
+
   // --- ARCHIVE VAULT & STORAGE OPTIMIZATION ENGINE ---
   const ARCHIVE_STORAGE_KEY = 'NEXGEN_ARCHIVED_VAULT_V1';
 
@@ -6430,6 +6718,12 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         exportDatabaseJson,
         importDatabaseJson,
         systemSnapshots,
+        serverSnapshots,
+        fetchServerSnapshots,
+        createServerSnapshot,
+        restoreServerSnapshot,
+        downloadServerSnapshot,
+        deleteServerSnapshot,
         createSafeSnapshot,
         restoreSafeSnapshot,
         deleteSafeSnapshot,

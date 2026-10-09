@@ -83,6 +83,7 @@ import { evaluateFormSubmission } from '../../utils/fraudProtectionEngine';
 import { requestNewOtp, verifyOtpSubmission } from '../../utils/otpVerificationEngine';
 import { copyToClipboardSafe } from '../../utils/clipboardHelper';
 import { getCourseSeoMetadata, applySeoMetadata } from '../../utils/seoHelper';
+import { shareOnWhatsApp, shareOnFacebook, shareCourseNative } from '../../utils/shareHelper';
 
 interface MasterCourseLandingPageViewProps {
   course: Course;
@@ -929,15 +930,22 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
 
   const handleShareClick = async () => {
     try {
-      const url = typeof window !== 'undefined' ? window.location.href : '';
-      const success = await copyToClipboardSafe(url);
-      if (success) {
+      const res = await shareCourseNative(course);
+      if (res.method === 'clipboard' && res.success) {
         setCopiedUrl(true);
         setTimeout(() => setCopiedUrl(false), 2500);
       }
     } catch (e) {
       console.warn('Share copy error:', e);
     }
+  };
+
+  const handleWhatsAppShare = () => {
+    shareOnWhatsApp(course);
+  };
+
+  const handleFacebookShare = () => {
+    shareOnFacebook();
   };
 
   // Process Lead Submission
@@ -1202,7 +1210,23 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1.5 sm:space-x-2">
+            <button
+              onClick={handleWhatsAppShare}
+              className="px-2 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg flex items-center space-x-1 transition-colors cursor-pointer border border-emerald-200"
+              title="Share on WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="text-[11px] font-bold hidden sm:inline">WhatsApp</span>
+            </button>
+            <button
+              onClick={handleFacebookShare}
+              className="px-2 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg flex items-center space-x-1 transition-colors cursor-pointer border border-blue-200"
+              title="Share on Facebook"
+            >
+              <span className="text-xs font-black text-blue-600">f</span>
+              <span className="text-[11px] font-bold hidden sm:inline">Facebook</span>
+            </button>
             <button
               onClick={handleShareClick}
               className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg flex items-center space-x-1 transition-colors cursor-pointer border border-slate-200"

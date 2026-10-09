@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "id": "snapshot_2026-10-09T10-07-50-659Z_manual.json",
+    "filename": "snapshot_2026-10-09T10-07-50-659Z_manual.json",
+    "timestamp": "2026-10-09T10:07:50.659Z",
+    "dateLabel": "9 Oct 2026, 10:07",
+    "type": "manual",
+    "note": "Initial System Test Snapshot",
+    "studentCount": 0,
+    "leadCount": 0,
+    "paymentCount": 0,
+    "admissionCount": 0,
+    "sizeKb": 1
+  },
+  "data": {
+    "students": [],
+    "admissions": [],
+    "payments": [],
+    "leads": [],
+    "batches": [],
+    "createdAt": "2026-10-09T10:07:50.659Z"
+  }
+}

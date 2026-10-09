@@ -5,6 +5,7 @@ import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
 
 interface UniqueItOnlineCoursesProps {
   courses: Course[];
+  batches?: any[];
   onSelectCourseForAdmission: (course: Course) => void;
   onSelectCourseForDetails: (course: Course) => void;
   onViewAllCourses: () => void;
@@ -12,6 +13,7 @@ interface UniqueItOnlineCoursesProps {
 
 export const NexgenOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
   courses,
+  batches = [],
   onSelectCourseForAdmission,
   onSelectCourseForDetails,
   onViewAllCourses
@@ -132,16 +134,16 @@ export const NexgenOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
                     <button
                       type="button"
                       onClick={() => onSelectCourseForAdmission(c)}
-                      className="w-full py-2 rounded-xl bg-gradient-to-r from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-black shadow-2xs transition-all cursor-pointer text-center active:scale-95"
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-black shadow-2xs transition-all cursor-pointer text-center active:scale-95"
                     >
-                      Enroll Now
+                      ভর্তি আবেদন
                     </button>
                     <button
                       type="button"
                       onClick={() => onSelectCourseForDetails(c)}
-                      className="w-full py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer text-center active:scale-95"
+                      className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer text-center active:scale-95"
                     >
-                      View Details
+                      সিলেবাস দেখুন
                     </button>
                   </div>
                 </div>
@@ -157,7 +159,7 @@ export const NexgenOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
             onClick={onViewAllCourses}
             className="inline-flex items-center space-x-2 px-7 py-3 rounded-full bg-gradient-to-r from-[#ea580c] to-[#f97316] hover:from-[#c2410c] hover:to-[#ea580c] text-white font-black text-xs sm:text-sm shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95"
           >
-            <span>View All Course</span>
+            <span>সবগুলো অনলাইন কোর্স দেখুন</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

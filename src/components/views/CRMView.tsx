@@ -3,6 +3,8 @@ import { useAcademy } from '../../context/AcademyContext';
 import { Lead, LeadStatus, FollowUpMethod } from '../../types';
 import { exportLeadsSpreadsheet } from '../../utils/spreadsheetExport';
 import { CrmFieldsAndTagsModal } from '../modals/CrmFieldsAndTagsModal';
+import { CrmLiveSavePulseBadge } from '../crm/CrmDataSavedIndicator';
+import { triggerCrmDataSaved } from '../../utils/crmFeedbackHelper';
 import {
   Users,
   PlusCircle,
@@ -82,7 +84,10 @@ export const CRMView: React.FC<CRMViewProps> = ({
     academySettings,
     crmSettings,
     toggleLeadTag,
-    updateLeadCustomFields
+    updateLeadCustomFields,
+    cloudSyncStatus,
+    lastCloudSyncTime,
+    syncToCloudNow
   } = useAcademy();
 
   const [isFieldsTagsModalOpen, setIsFieldsTagsModalOpen] = useState(false);
@@ -294,8 +299,10 @@ export const CRMView: React.FC<CRMViewProps> = ({
       const added = await syncIncomingLeadsNow();
       if (added > 0) {
         setSyncFeedback(`সফলভাবে ${added}টি নতুন অনলাইন লিড পাওয়া গেছে!`);
+        triggerCrmDataSaved('অনলাইন লিড সিঙ্ক সম্পন্ন', `${added}টি নতুন অনলাইন লিড ডেটাবেসে যুক্ত হয়েছে`, 'sync');
       } else {
         setSyncFeedback('সকল অনলাইন লিড ইতিমধ্যে আপ-টু-ডেট আছে।');
+        triggerCrmDataSaved('লিড সিঙ্ক সম্পন্ন', 'সকল লিড ডেটাবেসে আপ-টু-ডেট আছে', 'sync');
       }
     } catch {
       setSyncFeedback('সিঙ্ক করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
@@ -486,13 +493,18 @@ export const CRMView: React.FC<CRMViewProps> = ({
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center flex-wrap gap-2">
             <h2 className="text-xl font-black text-slate-900 tracking-tight">
               Admission CRM & Visitor Pipeline
             </h2>
             <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
               {leads.length} Leads
             </span>
+            <CrmLiveSavePulseBadge
+              lastSyncTime={lastCloudSyncTime || undefined}
+              isSyncing={cloudSyncStatus === 'syncing' || isSyncing}
+              onManualSync={() => syncToCloudNow(true)}
+            />
           </div>
           <p className="text-xs text-slate-500">
             Track prospective student inquiries, follow-up calls, demo classes, and conversion to admission

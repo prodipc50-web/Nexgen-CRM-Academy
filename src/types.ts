@@ -391,6 +391,8 @@ export interface Lead {
   tags?: string[];
   priority?: 'Low' | 'Medium' | 'High' | 'Urgent';
   customFieldValues?: Record<string, any>;
+  convertedStudentId?: string;
+  convertedAdmissionId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -977,6 +979,9 @@ export interface Course {
   rating?: number;
   reviewsCount?: number;
   badgeText?: string;
+  cardUrgencyText?: string;
+  remainingSeats?: number;
+  cardDiscountBadge?: string;
   status: CourseStatus;
   deliveryMode?: 'Offline' | 'Online Live' | 'Hybrid';
   livePlatform?: string;
@@ -2420,16 +2425,17 @@ export interface ExpatTrustBannerConfig {
 
 export interface SystemSnapshotMetadata {
   id: string;
+  filename?: string;
   timestamp: string;
   dateLabel: string;
-  type: 'auto_daily' | 'manual';
+  type: 'auto_daily' | 'manual' | 'auto' | 'prerestore';
   note?: string;
   studentCount: number;
   admissionCount: number;
   paymentCount: number;
   leadCount: number;
-  courseCount: number;
-  batchCount: number;
+  courseCount?: number;
+  batchCount?: number;
   sizeKb: number;
 }
 

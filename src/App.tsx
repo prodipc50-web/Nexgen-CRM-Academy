@@ -14,12 +14,15 @@ import { HeaderNavbar } from './components/layout/HeaderNavbar';
 import { SidebarNav } from './components/layout/SidebarNav';
 import { RoleAccessGuard } from './components/common/RoleAccessGuard';
 
-// Public & Auth Views (Fast Direct Load)
+// Public Fast Direct Load View
 import { PublicWebsiteView } from './components/website/PublicWebsiteView';
-import { MasterCourseLandingPageView } from './components/website/MasterCourseLandingPageView';
-import { LoginView } from './components/auth/LoginView';
 import { PWAInstallPrompt } from './components/common/PWAInstallPrompt';
 import { OfflineSyncStatusBar } from './components/common/OfflineSyncStatusBar';
+import { CrmDataSavedToast } from './components/crm/CrmDataSavedIndicator';
+
+// Lazy-loaded Standalone & Portal Views for minimal initial bundle
+const MasterCourseLandingPageView = lazy(() => import('./components/website/MasterCourseLandingPageView').then(m => ({ default: m.MasterCourseLandingPageView })));
+const LoginView = lazy(() => import('./components/auth/LoginView').then(m => ({ default: m.LoginView })));
 
 // Lazy-loaded CRM / ERP Internal Views
 const DashboardView = lazy(() => import('./components/views/DashboardView').then(m => ({ default: m.DashboardView })));
@@ -300,17 +303,26 @@ const AcademyAppContent: React.FC = () => {
   if (viewMode === 'course_landing') {
     if (matchedCourse) {
       return (
-        <MasterCourseLandingPageView
-          course={matchedCourse}
-          onBackToFullWebsite={() => {
-            setViewMode('website');
-            setCurrentCourseSlug('');
-            setLandingCourse(null);
-            if (typeof window !== 'undefined') {
-              window.history.pushState(null, '', '/');
-            }
-          }}
-        />
+        <Suspense
+          fallback={
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300">
+              <Loader2 className="w-10 h-10 text-indigo-400 animate-spin mb-4" />
+              <p className="text-sm font-semibold">কোর্স পেজ লোড হচ্ছে...</p>
+            </div>
+          }
+        >
+          <MasterCourseLandingPageView
+            course={matchedCourse}
+            onBackToFullWebsite={() => {
+              setViewMode('website');
+              setCurrentCourseSlug('');
+              setLandingCourse(null);
+              if (typeof window !== 'undefined') {
+                window.history.pushState(null, '', '/');
+              }
+            }}
+          />
+        </Suspense>
       );
     }
     
@@ -384,14 +396,23 @@ const AcademyAppContent: React.FC = () => {
   // 4. ERP / CRM Portal Mode — If in ERP mode and not authenticated, present the secure login portal
   if (!isAuthenticated) {
     return (
-      <LoginView
-        onBackToWebsite={() => {
-          if (typeof window !== 'undefined') {
-            window.history.pushState(null, '', '/');
-          }
-          setViewMode('website');
-        }}
-      />
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300">
+            <Loader2 className="w-10 h-10 text-indigo-400 animate-spin mb-4" />
+            <p className="text-sm font-semibold">লগইন পোর্টাল লোড হচ্ছে...</p>
+          </div>
+        }
+      >
+        <LoginView
+          onBackToWebsite={() => {
+            if (typeof window !== 'undefined') {
+              window.history.pushState(null, '', '/');
+            }
+            setViewMode('website');
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -711,6 +732,9 @@ const AcademyAppContent: React.FC = () => {
           <span className="text-[10px]">Menu</span>
         </button>
       </nav>
+
+      {/* CRM Live Data Saved Visual Confirmation Toast */}
+      <CrmDataSavedToast />
 
       {/* Progressive Web App (PWA) Mobile Install Prompt */}
       <PWAInstallPrompt />

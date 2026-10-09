@@ -27,7 +27,8 @@ import {
   Target,
   Gift,
   FileText,
-  Download
+  Download,
+  Share2
 } from 'lucide-react';
 import { Course, CoursePreferredScheduleOption, Lead } from '../../types';
 import { useAcademy } from '../../context/AcademyContext';
@@ -35,6 +36,7 @@ import { getWhatsAppDirectUrl } from '../../utils/whatsappHelper';
 import { trackMetaPixelEvent, getCapturedUtmParams } from '../../utils/analyticsTracker';
 import { LeadForm } from '../LeadForm';
 import { SyllabusDownloadModal } from './SyllabusDownloadModal';
+import { shareOnWhatsApp, shareOnFacebook, shareCourseNative } from '../../utils/shareHelper';
 
 interface CourseDetailsModalProps {
   isOpen: boolean;
@@ -64,6 +66,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
   const [leadMessage, setLeadMessage] = useState('');
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [leadSubmittedSuccess, setLeadSubmittedSuccess] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   if (!isOpen || !course) return null;
 
@@ -176,6 +179,22 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
     window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course } }));
   };
 
+  const handleShareWhatsApp = () => {
+    shareOnWhatsApp(course);
+  };
+
+  const handleShareFacebook = () => {
+    shareOnFacebook();
+  };
+
+  const handleShareLink = async () => {
+    const res = await shareCourseNative(course);
+    if (res.method === 'clipboard' && res.success) {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
+
   const handleLeadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!leadPhone.trim() || !leadName.trim()) return;
@@ -258,7 +277,25 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleShareWhatsApp}
+              className="hidden sm:inline-flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-200 transition-colors cursor-pointer"
+              title="Share on WhatsApp"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+              <span>WhatsApp</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleShareLink}
+              className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors cursor-pointer"
+              title="Share or Copy Link"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{copiedLink ? 'Copied!' : 'Share'}</span>
+            </button>
             <button
               type="button"
               onClick={handleOpenLandingPageDirect}

@@ -1,20 +1,40 @@
 import React, { useState } from 'react';
-import { Star, Users, FolderKanban, Clock, Calendar, ArrowRight, Sparkles, BookOpen, Laptop, Video, ShieldCheck } from 'lucide-react';
-import { Course } from '../../../types';
+import {
+  Star,
+  Users,
+  FolderKanban,
+  Clock,
+  Calendar,
+  ArrowRight,
+  Sparkles,
+  BookOpen,
+  Laptop,
+  Video,
+  ShieldCheck,
+  ExternalLink,
+  MessageCircle,
+  Flame
+} from 'lucide-react';
+import { Course, Batch } from '../../../types';
 import { OptimizedLazyImage } from '../../common/OptimizedLazyImage';
+import { shareOnWhatsApp } from '../../../utils/shareHelper';
 
 interface UniqueItPopularCoursesProps {
   courses: Course[];
+  batches?: Batch[];
   onSelectCourseForAdmission: (course: Course) => void;
   onSelectCourseForDetails: (course: Course) => void;
   onViewAllCourses: () => void;
+  onOpenCourseLanding?: (course: Course) => void;
 }
 
 export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
   courses,
+  batches = [],
   onSelectCourseForAdmission,
   onSelectCourseForDetails,
-  onViewAllCourses
+  onViewAllCourses,
+  onOpenCourseLanding
 }) => {
   const [activeFilter, setActiveFilter] = useState<'All' | 'Online' | 'Offline' | 'Pre Recorded'>('All');
 
@@ -87,12 +107,17 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
             const savings = regularPrice - price;
             const rating = c.rating || 4.9;
             const reviewsCount = c.reviewsCount || 1221;
-            const duration = c.durationMonths ? `${c.durationMonths} মাস` : '৩ মাস';
+            const duration = c.durationMonths ? `${c.durationMonths} মাস` : (c.duration || '৩ মাস');
             const projects = c.projectsCount || 10;
             const students = c.studentsJoined || 820;
             const thumbnail =
               c.thumbnailUrl ||
               'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&auto=format&fit=crop&q=80';
+
+            const upcomingBatch = (batches || []).find(b => (b.courseId === c.id || b.courseId === c.code) && b.status === 'Upcoming');
+            const batchNotice = c.cardUrgencyText || c.landingConfig?.nextBatchStartDate || upcomingBatch?.startDate || 'নতুন ব্যাচে ভর্তি চলছে';
+            const remainingSeats = c.remainingSeats || (c.landingConfig?.remainingSeats ?? (upcomingBatch ? Math.max(2, (upcomingBatch.seatCapacity || upcomingBatch.maxStudents || 25) - (upcomingBatch.enrolledStudents || 0)) : 4));
+            const discountBadgeText = c.cardDiscountBadge || c.landingConfig?.customDiscountBadge || (savings > 0 ? (c.scholarshipAvailable ? '৪০% স্কলারশিপ ছাড়' : `সেভ ৳ ${savings.toLocaleString()}`) : null);
 
             return (
               <div
@@ -114,15 +139,32 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/20 pointer-events-none" />
 
                   {/* Top Left: Live Batch Scarcity Pill */}
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-amber-300 text-[10px] font-bold flex items-center space-x-1.5 border border-white/10 shadow-sm">
+                  <div className="absolute top-3 left-3 z-10 flex items-center space-x-1.5">
+                    <span className="px-2.5 py-1 rounded-full bg-slate-950/85 backdrop-blur-md text-amber-300 text-[10px] font-bold flex items-center space-x-1.5 border border-white/10 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-                      <span>নতুন ব্যাচ: শুক্রবার</span>
+                      <span className="truncate max-w-[120px] sm:max-w-none">ব্যাচ: {batchNotice}</span>
                     </span>
+                    {remainingSeats > 0 && (
+                      <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-rose-600/90 text-white text-[9px] font-black border border-white/10 shadow-sm">
+                        <Flame className="w-2.5 h-2.5 text-amber-200" />
+                        <span>{remainingSeats} সিট বাকি</span>
+                      </span>
+                    )}
                   </div>
 
-                  {/* Top Right: Delivery Mode Badge */}
-                  <div className="absolute top-3 right-3">
+                  {/* Top Right: WhatsApp Inquiry & Delivery Mode Badge */}
+                  <div className="absolute top-3 right-3 z-10 flex items-center space-x-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        shareOnWhatsApp(c);
+                      }}
+                      className="p-1.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-md transition-all cursor-pointer"
+                      title="হোয়াটসঅ্যাপে দ্রুত ইনকোয়ারি করুন"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                    </button>
                     <span
                       className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm flex items-center space-x-1 ${
                         isOnline
@@ -136,13 +178,33 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                   </div>
 
                   {/* Bottom Left: Discount Pill on Image */}
-                  {savings > 0 && (
-                    <div className="absolute bottom-3 left-3">
+                  {discountBadgeText && (
+                    <div className="absolute bottom-3 left-3 z-10">
                       <span className="px-2.5 py-0.5 rounded-md bg-rose-600 text-white font-black text-[10px] tracking-wide uppercase shadow-sm">
-                        ৪০% স্কলারশিপ ছাড়
+                        {discountBadgeText}
                       </span>
                     </div>
                   )}
+
+                  {/* Bottom Right: Dedicated Course Page Button */}
+                  <div className="absolute bottom-3 right-3 z-10">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onOpenCourseLanding) {
+                          onOpenCourseLanding(c);
+                        } else {
+                          window.dispatchEvent(new CustomEvent('open-course-landing', { detail: { course: c } }));
+                        }
+                      }}
+                      className="px-2 py-0.5 rounded-md bg-slate-900/80 hover:bg-slate-900 text-white font-bold text-[10px] backdrop-blur-xs border border-white/20 shadow-sm flex items-center space-x-1 transition-all cursor-pointer"
+                      title="কোর্সের পূর্ণাঙ্গ পেজ দেখুন"
+                    >
+                      <ExternalLink className="w-2.5 h-2.5 text-indigo-300" />
+                      <span>ফুল পেজ</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Card Body */}
@@ -160,7 +222,14 @@ export const NexgenPopularCourses: React.FC<UniqueItPopularCoursesProps> = ({
                   </div>
 
                   {/* Course Title */}
-                  <h3 className="font-black text-slate-900 text-base leading-snug line-clamp-2 group-hover:text-purple-600 transition-colors">
+                  <h3
+                    onClick={() => {
+                      if (onOpenCourseLanding) onOpenCourseLanding(c);
+                      else onSelectCourseForDetails(c);
+                    }}
+                    className="font-black text-slate-900 text-base leading-snug line-clamp-2 group-hover:text-purple-600 transition-colors cursor-pointer"
+                    title="কোর্সের বিস্তারিত দেখুন"
+                  >
                     {c.name}
                   </h3>
 
