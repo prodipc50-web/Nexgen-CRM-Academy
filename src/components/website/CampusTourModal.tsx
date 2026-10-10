@@ -48,12 +48,6 @@ export const CampusTourModal: React.FC<CampusTourModalProps> = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  if (!isOpen) return null;
-
-  const config = websiteCmsConfig?.campusTourConfig;
-  const campusAddress = websiteCmsConfig?.officeAddress || academySettings?.officialAddress || '14/B Garden Road, Farmgate, Dhaka-1215';
-  const hotline = websiteCmsConfig?.multiplePhones?.[0]?.number || academySettings?.primarySupportPhone || '01798444444';
-
   const availableBranches = (academySettings?.branches && academySettings.branches.length > 0)
     ? academySettings.branches.filter(b => b.isActive !== false)
     : [
@@ -61,8 +55,8 @@ export const CampusTourModal: React.FC<CampusTourModalProps> = ({
           id: 'branch-farmgate',
           name: 'ফার্মগেট মেইন ক্যাম্পাস (Farmgate Main Campus)',
           shortCode: 'FGT',
-          address: campusAddress,
-          phone: hotline,
+          address: websiteCmsConfig?.officeAddress || academySettings?.officialAddress || '14/B Garden Road, Farmgate, Dhaka-1215',
+          phone: websiteCmsConfig?.multiplePhones?.[0]?.number || academySettings?.primarySupportPhone || '01798444444',
           mapUrl: websiteCmsConfig?.googleMapShareUrl || 'https://share.google/9W8K1XZHLbZxFpF8G',
           isMainBranch: true,
           isActive: true
@@ -73,6 +67,12 @@ export const CampusTourModal: React.FC<CampusTourModalProps> = ({
     const main = availableBranches.find(b => b.isMainBranch);
     return main?.id || availableBranches[0]?.id || 'branch-farmgate';
   });
+
+  if (!isOpen) return null;
+
+  const config = websiteCmsConfig?.campusTourConfig;
+  const campusAddress = websiteCmsConfig?.officeAddress || academySettings?.officialAddress || '14/B Garden Road, Farmgate, Dhaka-1215';
+  const hotline = websiteCmsConfig?.multiplePhones?.[0]?.number || academySettings?.primarySupportPhone || '01798444444';
 
   const activeBranch = availableBranches.find(b => b.id === selectedBranchId) || availableBranches[0];
   const activeCampusAddress = activeBranch?.address || campusAddress;

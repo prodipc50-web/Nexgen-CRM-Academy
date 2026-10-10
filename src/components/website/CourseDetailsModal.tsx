@@ -67,6 +67,17 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [leadSubmittedSuccess, setLeadSubmittedSuccess] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [selectedLightboxPhoto, setSelectedLightboxPhoto] = useState<{ url: string; title: string } | null>(null);
+  const tabScrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (isOpen && tabScrollRef.current) {
+      const activeBtn = tabScrollRef.current.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement;
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }, [isOpen, activeTab]);
 
   if (!isOpen || !course) return null;
 
@@ -256,18 +267,6 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
     setIsSubmittingLead(false);
     setLeadSubmittedSuccess(true);
   };
-
-  const [selectedLightboxPhoto, setSelectedLightboxPhoto] = useState<{ url: string; title: string } | null>(null);
-  const tabScrollRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (tabScrollRef.current) {
-      const activeBtn = tabScrollRef.current.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement;
-      if (activeBtn) {
-        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }
-    }
-  }, [activeTab]);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 overflow-y-auto animate-in fade-in duration-150">

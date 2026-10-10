@@ -975,35 +975,29 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return INITIAL_WEBSITE_CMS_CONFIG;
   });
 
-  const [websiteReviews, setWebsiteReviews] = useState<WebsiteReview[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_website_reviews`);
-    return saved ? JSON.parse(saved) : INITIAL_WEBSITE_REVIEWS;
-  });
+  const [websiteReviews, setWebsiteReviews] = useState<WebsiteReview[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_website_reviews`, INITIAL_WEBSITE_REVIEWS)
+  );
 
-  const [websiteGallery, setWebsiteGallery] = useState<WebsiteGalleryItem[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_website_gallery`);
-    return saved ? JSON.parse(saved) : INITIAL_WEBSITE_GALLERY;
-  });
+  const [websiteGallery, setWebsiteGallery] = useState<WebsiteGalleryItem[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_website_gallery`, INITIAL_WEBSITE_GALLERY)
+  );
 
-  const [websiteNotices, setWebsiteNotices] = useState<WebsiteNotice[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_website_notices`);
-    return saved ? JSON.parse(saved) : INITIAL_WEBSITE_NOTICES;
-  });
+  const [websiteNotices, setWebsiteNotices] = useState<WebsiteNotice[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_website_notices`, INITIAL_WEBSITE_NOTICES)
+  );
 
-  const [websiteFaqs, setWebsiteFaqs] = useState<WebsiteFaqItem[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_website_faqs`);
-    return saved ? JSON.parse(saved) : INITIAL_WEBSITE_FAQS;
-  });
+  const [websiteFaqs, setWebsiteFaqs] = useState<WebsiteFaqItem[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_website_faqs`, INITIAL_WEBSITE_FAQS)
+  );
 
-  const [websiteBlogs, setWebsiteBlogs] = useState<WebsiteBlogPost[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_website_blogs`);
-    return saved ? JSON.parse(saved) : INITIAL_WEBSITE_BLOGS;
-  });
+  const [websiteBlogs, setWebsiteBlogs] = useState<WebsiteBlogPost[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_website_blogs`, INITIAL_WEBSITE_BLOGS)
+  );
 
   // Master Dropdowns State
-  const [leadSources, setLeadSources] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_lead_sources`);
-    return saved ? JSON.parse(saved) : [
+  const [leadSources, setLeadSources] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_lead_sources`, [
       'Facebook Ads',
       'Walk-in / Campus Visit',
       'Website Inquiry',
@@ -1014,8 +1008,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       'Leaflet / Newspaper',
       'Phone Call / Direct Inquiry',
       'Other'
-    ];
-  });
+    ])
+  );
 
   // CRM Settings: Dynamic Tags, Custom Fields, Lead Sources & Lost Reasons
   const [crmSettings, setCrmSettings] = useState<CrmSettingsConfig>(() => {
@@ -1036,9 +1030,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return INITIAL_CRM_SETTINGS;
   });
 
-  const [expenseCategoriesList, setExpenseCategoriesList] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_expense_categories`);
-    return saved ? JSON.parse(saved) : [
+  const [expenseCategoriesList, setExpenseCategoriesList] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_expense_categories`, [
       'Office Rent',
       'Trainer Remuneration',
       'Staff Salary',
@@ -1051,17 +1044,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       'Printing & Stationery',
       'Office Cleaning & Sanitation',
       'Other'
-    ];
-  });
+    ])
+  );
 
-  const [paymentMethodsList, setPaymentMethodsList] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_payment_methods`);
-    return saved ? JSON.parse(saved) : ['Cash', 'bKash', 'Nagad', 'Bank', 'Card', 'Rocket', 'Upay'];
-  });
+  const [paymentMethodsList, setPaymentMethodsList] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_payment_methods`, ['Cash', 'bKash', 'Nagad', 'Bank', 'Card', 'Rocket', 'Upay'])
+  );
 
-  const [occupationsList, setOccupationsList] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_occupations`);
-    return saved ? JSON.parse(saved) : [
+  const [occupationsList, setOccupationsList] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_occupations`, [
       'Student (School / College / University)',
       'Job Holder / Employee',
       'Freelancer / Independent Contractor',
@@ -1069,12 +1060,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       'Job Seeker / Fresh Graduate',
       'Homemaker',
       'Other'
-    ];
-  });
+    ])
+  );
 
-  const [educationLevelsList, setEducationLevelsList] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_education_levels`);
-    return saved ? JSON.parse(saved) : [
+  const [educationLevelsList, setEducationLevelsList] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_education_levels`, [
       'SSC / Secondary (Class 10)',
       'HSC / Higher Secondary (Class 12)',
       'Diploma in Engineering / Poly',
@@ -1082,12 +1072,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       'Master Degree (M.Sc / MBA / MA)',
       'Post Graduate / Doctorate',
       'Self Taught / Other'
-    ];
-  });
+    ])
+  );
 
-  const [studentGoalsList, setStudentGoalsList] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_student_goals`);
-    return saved ? JSON.parse(saved) : [
+  const [studentGoalsList, setStudentGoalsList] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_student_goals`, [
       'Job / Corporate Placement',
       'Freelancing (Upwork/Fiverr)',
       'Own Business / Agency',
@@ -1095,23 +1084,21 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       'Personal Skill Development',
       'Career Transition',
       'Other'
-    ];
-  });
+    ])
+  );
 
-  const [studentStatusesList, setStudentStatusesList] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_student_statuses`);
-    return saved ? JSON.parse(saved) : [
+  const [studentStatusesList, setStudentStatusesList] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_student_statuses`, [
       'Active',
       'Completed',
       'Alumni',
       'On Hold',
       'Dropped'
-    ];
-  });
+    ])
+  );
 
-  const [bloodGroupsList, setBloodGroupsList] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_blood_groups`);
-    return saved ? JSON.parse(saved) : [
+  const [bloodGroupsList, setBloodGroupsList] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_blood_groups`, [
       'A+',
       'A-',
       'B+',
@@ -1120,12 +1107,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       'O-',
       'AB+',
       'AB-'
-    ];
-  });
+    ])
+  );
 
-  const [discountTypesList, setDiscountTypesList] = useState<string[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_discount_types`);
-    return saved ? JSON.parse(saved) : [
+  const [discountTypesList, setDiscountTypesList] = useState<string[]>(() =>
+    safeParseLocalStorage(`${STORAGE_KEY}_discount_types`, [
       'Merit Scholarship',
       'Need-based Financial Waiver',
       'Early Bird Promo',
@@ -1133,8 +1119,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       'Seasonal Fest Offer',
       'Alumni Referral Privilege',
       'Special Discretion Waiver'
-    ];
-  });
+    ])
+  );
 
   const DEFAULT_CAMPUS_BRANCHES: CampusBranch[] = [
   {

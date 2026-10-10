@@ -46,11 +46,11 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  if (!isOpen) return null;
+  if (!isOpen || !course) return null;
 
   const syllabusConfig = config || landingConfig?.syllabusDownloadConfig;
   const rawFileUrl = syllabusConfig?.fileUrl || (course as any).syllabusPdfUrl || (course as any).curriculumFileUrl || '';
-  const fileName = syllabusConfig?.fileName || `${course.name.replace(/\s+/g, '_')}_Syllabus.pdf`;
+  const fileName = syllabusConfig?.fileName || `${(course?.name || 'Course').replace(/\s+/g, '_')}_Syllabus.pdf`;
 
   // Fallback printable syllabus HTML if no file uploaded
   const handleGeneratePrintableSyllabus = () => {
@@ -314,7 +314,7 @@ export const SyllabusDownloadModal: React.FC<SyllabusDownloadModalProps> = ({
   )}`;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 print:hidden">
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 print:hidden">
       <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800">
         {/* Header Ribbon */}
         <div className="relative bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-600 p-5 sm:p-6 text-white">
