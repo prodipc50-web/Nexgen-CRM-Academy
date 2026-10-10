@@ -33,7 +33,43 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
   taglineClassName,
   shape = 'contain'
 }) => {
-  const [logoSrc, setLogoSrc] = useState<string | null>(customLogoUrl || null);
+  const getInitialLogo = (): string => {
+    const defaultFullLogo = isDarkTheme ? '/brand-logo-dark.png' : '/brand-logo.png';
+    const defaultIconLogo = isDarkTheme ? '/brand-icon-dark.png' : '/brand-icon.png';
+    const defaultAsset = (variant === 'crest' || variant === 'icon') ? defaultIconLogo : defaultFullLogo;
+
+    if (customLogoUrl && customLogoUrl !== '/logo.svg' && customLogoUrl !== '/brand-logo.png' && customLogoUrl !== '/brand-logo-dark.png') {
+      return customLogoUrl;
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
+        if (stored && stored !== '/brand-logo.png' && stored !== '/logo.svg' && stored !== '/brand-logo-dark.png') {
+          return stored;
+        }
+        const storedSettings = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_academy_settings');
+        if (storedSettings) {
+          const parsed = JSON.parse(storedSettings);
+          if (parsed.customLogoUrl && parsed.customLogoUrl !== '/logo.svg' && parsed.customLogoUrl !== '/brand-logo.png' && parsed.customLogoUrl !== '/brand-logo-dark.png') {
+            return parsed.customLogoUrl;
+          }
+        }
+        const storedCms = localStorage.getItem('NEXGEN_OFFICE_ACADEMY_DB_V1_website_cms_config');
+        if (storedCms) {
+          const parsedCms = JSON.parse(storedCms);
+          const cand = parsedCms.customLogoUrl || parsedCms.headerLogoUrl;
+          if (cand && cand !== '/logo.svg' && cand !== '/brand-logo.png' && cand !== '/brand-logo-dark.png') {
+            return cand;
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    return defaultAsset;
+  };
+
+  const [logoSrc, setLogoSrc] = useState<string>(getInitialLogo);
   const [imageError, setImageError] = useState(false);
   const [settings, setSettings] = useState<{
     instituteName: string;
@@ -142,7 +178,7 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     }
   }
 
-  // 1. Official Vector Icon Mark of the Nexgen Computer Academy (03-icon-only / 11-app-icon)
+  // 1. Official Icon Mark of the Nexgen Computer Academy
   const NexgenIconMark = ({
     width = dimension,
     height = dimension,
@@ -152,42 +188,22 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     height?: number;
     isDark?: boolean;
   }) => {
-    const redColor = '#D81D2A';
-    const pebbleFill = isDark ? '#FFFFFF' : '#032B5F';
-    const nFill = isDark ? '#032B5F' : '#FFFFFF';
-
+    const src = isDark ? '/brand-icon-dark.png' : '/brand-icon.png';
     return (
-      <svg
-        viewBox="0 0 100 100"
+      <img
+        src={src}
+        alt={instituteName || 'NexGen'}
         width={width}
         height={height}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="shrink-0 select-none drop-shadow-xs"
-      >
-        {/* Red Swoosh Accent (Bottom-Right) */}
-        <path
-          d="M44 85 C62 85 84 75 89 60 C92 51 87 42 80 34 C82 44 80 54 73 63 C65 74 53 80 41 83 C38 84 39 85 44 85 Z"
-          fill={redColor}
-        />
-
-        {/* Main Pebble Body */}
-        <path
-          d="M35 15 C53 15 75 25 82 41 C88 54 82 70 70 80 C58 89 38 88 25 78 C13 67 12 48 19 33 C24 23 29 15 35 15 Z"
-          fill={pebbleFill}
-        />
-
-        {/* Stylized 'N' Mark Inside */}
-        <rect x="31" y="32" width="9" height="32" rx="4.5" fill={nFill} />
-        <path
-          d="M36 50 C40 42 47 33 57 30 C66 27 74 31 77 39 C80 47 77 56 68 64 C60 71 49 74 39 71 L39 62 C46 64 53 62 59 56 C65 50 67 44 65 40 C63 36 57 35 51 38 C45 41 40 46 36 51 Z"
-          fill={nFill}
-        />
-      </svg>
+        loading="eager"
+        fetchPriority="high"
+        className="shrink-0 select-none drop-shadow-xs object-contain"
+        style={{ width: `${width}px`, height: `${height}px` }}
+      />
     );
   };
 
-  // 2. Official Stacked Logo (01-primary-stacked & 05-dark-stacked)
+  // 2. Official Stacked / Primary Logo
   const NexgenStackedVector = ({
     width = dimension,
     isDark = isDarkTheme
@@ -195,49 +211,21 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     width?: number;
     isDark?: boolean;
   }) => {
-    const primaryColor = isDark ? '#FFFFFF' : '#032B5F';
-    const redColor = '#D81D2A';
-    const pebbleFill = isDark ? '#FFFFFF' : '#032B5F';
-    const nFill = isDark ? '#032B5F' : '#FFFFFF';
-    const calcHeight = Math.round(width * 0.75);
-
+    const src = isDark ? '/brand-logo-dark.png' : '/brand-logo.png';
     return (
-      <svg
-        viewBox="0 0 280 210"
+      <img
+        src={src}
+        alt={instituteName || 'NexGen Computer Academy'}
         width={width}
-        height={calcHeight}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="shrink-0 select-none drop-shadow-xs"
-      >
-        {/* Centered Icon Mark */}
-        <g transform="translate(96, 10) scale(0.88)">
-          <path d="M44 85 C62 85 84 75 89 60 C92 51 87 42 80 34 C82 44 80 54 73 63 C65 74 53 80 41 83 C38 84 39 85 44 85 Z" fill={redColor} />
-          <path d="M35 15 C53 15 75 25 82 41 C88 54 82 70 70 80 C58 89 38 88 25 78 C13 67 12 48 19 33 C24 23 29 15 35 15 Z" fill={pebbleFill} />
-          <rect x="31" y="32" width="9" height="32" rx="4.5" fill={nFill} />
-          <path d="M36 50 C40 42 47 33 57 30 C66 27 74 31 77 39 C80 47 77 56 68 64 C60 71 49 74 39 71 L39 62 C46 64 53 62 59 56 C65 50 67 44 65 40 C63 36 57 35 51 38 C45 41 40 46 36 51 Z" fill={nFill} />
-        </g>
-
-        {/* Typography: NEXGEN (Centered) */}
-        <g transform="translate(8, 110)">
-          <path d="M0 44 L0 0 L10 0 L25 28 L25 0 L35 0 L35 44 L25 44 L10 16 L10 44 Z" fill={primaryColor} />
-          <path d="M45 44 L45 0 L76 0 L76 9 L55 9 L55 17 L72 17 L72 26 L55 26 L55 35 L76 35 L76 44 Z" fill={primaryColor} />
-          <path d="M86 44 L96 44 L123 0 L113 0 Z" fill={primaryColor} />
-          <path d="M86 0 L96 0 L123 44 L113 44 Z" fill={redColor} />
-          <path d="M173 15 L164 19 C161 12 155 8 147 8 C137 8 131 16 131 26 C131 36 137 44 147 44 C156 44 162 39 164 31 L148 31 L148 23 L174 23 L174 32 C171 44 160 52 147 52 C132 52 121 41 121 26 C121 11 132 0 147 0 C159 0 169 6 173 15 Z" fill={primaryColor} transform="translate(6, -4)" />
-          <path d="M188 44 L188 0 L219 0 L219 9 L198 9 L198 17 L215 17 L215 26 L198 26 L198 35 L219 35 L219 44 Z" fill={primaryColor} />
-          <path d="M229 44 L229 0 L239 0 L254 28 L254 0 L264 0 L264 44 L254 44 L239 16 L239 44 Z" fill={primaryColor} />
-        </g>
-
-        {/* Typography: COMPUTER ACADEMY (Centered) */}
-        <text x="140" y="182" textAnchor="middle" fill={primaryColor} fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" fontWeight="800" fontSize="12" letterSpacing="4.6">
-          COMPUTER ACADEMY
-        </text>
-      </svg>
+        loading="eager"
+        fetchPriority="high"
+        className="shrink-0 select-none drop-shadow-xs object-contain"
+        style={{ width: `${width}px`, height: 'auto', maxHeight: `${Math.round(width * 0.4)}px` }}
+      />
     );
   };
 
-  // 3. Official Horizontal Full Logo (02-horizontal & 06-dark-horizontal)
+  // 3. Official Horizontal Full Logo
   const NexgenHorizontalVector = ({
     height = dimension,
     isDark = isDarkTheme
@@ -245,54 +233,17 @@ export const NexgenLogo: React.FC<NexgenLogoProps> = ({
     height?: number;
     isDark?: boolean;
   }) => {
-    const primaryColor = isDark ? '#FFFFFF' : '#032B5F';
-    const redColor = '#D81D2A';
-    const pebbleFill = isDark ? '#FFFFFF' : '#032B5F';
-    const nFill = isDark ? '#032B5F' : '#FFFFFF';
-    const calcWidth = Math.round(height * 4.22);
-
+    const src = isDark ? '/brand-logo-dark.png' : '/brand-logo.png';
     return (
-      <svg
-        viewBox="0 0 380 90"
-        width={calcWidth}
+      <img
+        src={src}
+        alt={instituteName || 'NexGen Computer Academy'}
         height={height}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="shrink-0 select-none drop-shadow-xs"
-      >
-        {/* NexGen Official Icon Mark */}
-        <g transform="translate(8, 6) scale(0.78)">
-          <path d="M44 85 C62 85 84 75 89 60 C92 51 87 42 80 34 C82 44 80 54 73 63 C65 74 53 80 41 83 C38 84 39 85 44 85 Z" fill={redColor} />
-          <path d="M35 15 C53 15 75 25 82 41 C88 54 82 70 70 80 C58 89 38 88 25 78 C13 67 12 48 19 33 C24 23 29 15 35 15 Z" fill={pebbleFill} />
-          <rect x="31" y="32" width="9" height="32" rx="4.5" fill={nFill} />
-          <path d="M36 50 C40 42 47 33 57 30 C66 27 74 31 77 39 C80 47 77 56 68 64 C60 71 49 74 39 71 L39 62 C46 64 53 62 59 56 C65 50 67 44 65 40 C63 36 57 35 51 38 C45 41 40 46 36 51 Z" fill={nFill} />
-        </g>
-
-        {/* Typography: NEXGEN */}
-        <g transform="translate(96, 14)">
-          <path d="M0 44 L0 0 L10 0 L25 28 L25 0 L35 0 L35 44 L25 44 L10 16 L10 44 Z" fill={primaryColor} />
-          <path d="M45 44 L45 0 L76 0 L76 9 L55 9 L55 17 L72 17 L72 26 L55 26 L55 35 L76 35 L76 44 Z" fill={primaryColor} />
-          <path d="M86 44 L96 44 L123 0 L113 0 Z" fill={primaryColor} />
-          <path d="M86 0 L96 0 L123 44 L113 44 Z" fill={redColor} />
-          <path d="M173 15 L164 19 C161 12 155 8 147 8 C137 8 131 16 131 26 C131 36 137 44 147 44 C156 44 162 39 164 31 L148 31 L148 23 L174 23 L174 32 C171 44 160 52 147 52 C132 52 121 41 121 26 C121 11 132 0 147 0 C159 0 169 6 173 15 Z" fill={primaryColor} transform="translate(6, -4)" />
-          <path d="M188 44 L188 0 L219 0 L219 9 L198 9 L198 17 L215 17 L215 26 L198 26 L198 35 L219 35 L219 44 Z" fill={primaryColor} />
-          <path d="M229 44 L229 0 L239 0 L254 28 L254 0 L264 0 L264 44 L254 44 L239 16 L239 44 Z" fill={primaryColor} />
-        </g>
-
-        {/* Sub-Text: COMPUTER ACADEMY */}
-        <text
-          x="231"
-          y="75"
-          textAnchor="middle"
-          fill={primaryColor}
-          fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-          fontWeight="800"
-          fontSize="12"
-          letterSpacing="4.6"
-        >
-          COMPUTER ACADEMY
-        </text>
-      </svg>
+        loading="eager"
+        fetchPriority="high"
+        className="shrink-0 select-none drop-shadow-xs object-contain"
+        style={{ height: `${height}px`, width: 'auto', maxWidth: `${Math.round(height * 4.6)}px` }}
+      />
     );
   };
 

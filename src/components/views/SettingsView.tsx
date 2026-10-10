@@ -223,10 +223,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
     }
     window.dispatchEvent(new Event('nexgen-logo-updated'));
     updateAcademySettings({ customLogoUrl: resolvedLogo });
+    const currentSeo = websiteCmsConfig.seo;
+    const shouldSyncSeo = !currentSeo || currentSeo.autoSyncWithBranding !== false;
+    const updatedSeo = shouldSyncSeo && currentSeo ? {
+      ...currentSeo,
+      ogImageUrl: resolvedLogo,
+      twitterImage: resolvedLogo
+    } : currentSeo;
     updateWebsiteCmsConfig({
       customLogoUrl: resolvedLogo,
       headerLogoUrl: resolvedLogo,
-      footerLogoUrl: resolvedLogo
+      footerLogoUrl: resolvedLogo,
+      ...(updatedSeo ? { seo: updatedSeo } : {})
     });
     try {
       await fetch('/api/cms/config', {
@@ -1657,7 +1665,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                       localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', optimizedUrl);
                       window.dispatchEvent(new Event('nexgen-logo-updated'));
                       updateAcademySettings({ customLogoUrl: optimizedUrl });
-                      updateWebsiteCmsConfig({ customLogoUrl: optimizedUrl, headerLogoUrl: optimizedUrl, footerLogoUrl: optimizedUrl });
+                      const currentSeo = websiteCmsConfig.seo;
+                      const shouldSyncSeo = !currentSeo || currentSeo.autoSyncWithBranding !== false;
+                      const updatedSeo = shouldSyncSeo && currentSeo ? {
+                        ...currentSeo,
+                        ogImageUrl: optimizedUrl,
+                        twitterImage: optimizedUrl
+                      } : currentSeo;
+                      updateWebsiteCmsConfig({
+                        customLogoUrl: optimizedUrl,
+                        headerLogoUrl: optimizedUrl,
+                        footerLogoUrl: optimizedUrl,
+                        ...(updatedSeo ? { seo: updatedSeo } : {})
+                      });
                       try {
                         await fetch('/api/cms/config', {
                           method: 'POST',
@@ -1691,7 +1711,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
                         localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
                         window.dispatchEvent(new Event('nexgen-logo-updated'));
                         updateAcademySettings({ customLogoUrl: '/brand-logo.png' });
-                        updateWebsiteCmsConfig({ customLogoUrl: '/brand-logo.png', headerLogoUrl: '/brand-logo.png', footerLogoUrl: '/brand-logo.png' });
+                        const currentSeo = websiteCmsConfig.seo;
+                        const shouldSyncSeo = !currentSeo || currentSeo.autoSyncWithBranding !== false;
+                        const updatedSeo = shouldSyncSeo && currentSeo ? {
+                          ...currentSeo,
+                          ogImageUrl: '/brand-logo.png',
+                          twitterImage: '/brand-logo.png'
+                        } : currentSeo;
+                        updateWebsiteCmsConfig({
+                          customLogoUrl: '/brand-logo.png',
+                          headerLogoUrl: '/brand-logo.png',
+                          footerLogoUrl: '/brand-logo.png',
+                          ...(updatedSeo ? { seo: updatedSeo } : {})
+                        });
                         try {
                           await fetch('/api/cms/config', {
                             method: 'POST',
@@ -2331,7 +2363,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
         onSaveLogo={async (dataUrl) => {
           const optimized = await optimizeLogoImage(dataUrl, 'cropped_logo.png');
           updateAcademySettings({ customLogoUrl: optimized });
-          updateWebsiteCmsConfig({ customLogoUrl: optimized, headerLogoUrl: optimized, footerLogoUrl: optimized });
+          const currentSeo = websiteCmsConfig.seo;
+          const shouldSyncSeo = !currentSeo || currentSeo.autoSyncWithBranding !== false;
+          const updatedSeo = shouldSyncSeo && currentSeo ? {
+            ...currentSeo,
+            ogImageUrl: optimized,
+            twitterImage: optimized
+          } : currentSeo;
+          updateWebsiteCmsConfig({
+            customLogoUrl: optimized,
+            headerLogoUrl: optimized,
+            footerLogoUrl: optimized,
+            ...(updatedSeo ? { seo: updatedSeo } : {})
+          });
           localStorage.setItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO', optimized);
           window.dispatchEvent(new Event('nexgen-logo-updated'));
           try {
@@ -2352,7 +2396,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onViewPublicWebsite 
         }}
         onResetLogo={async () => {
           updateAcademySettings({ customLogoUrl: '/brand-logo.png' });
-          updateWebsiteCmsConfig({ customLogoUrl: '/brand-logo.png', headerLogoUrl: '/brand-logo.png', footerLogoUrl: '/brand-logo.png' });
+          const currentSeo = websiteCmsConfig.seo;
+          const shouldSyncSeo = !currentSeo || currentSeo.autoSyncWithBranding !== false;
+          const updatedSeo = shouldSyncSeo && currentSeo ? {
+            ...currentSeo,
+            ogImageUrl: '/brand-logo.png',
+            twitterImage: '/brand-logo.png'
+          } : currentSeo;
+          updateWebsiteCmsConfig({
+            customLogoUrl: '/brand-logo.png',
+            headerLogoUrl: '/brand-logo.png',
+            footerLogoUrl: '/brand-logo.png',
+            ...(updatedSeo ? { seo: updatedSeo } : {})
+          });
           localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
           window.dispatchEvent(new Event('nexgen-logo-updated'));
           try {

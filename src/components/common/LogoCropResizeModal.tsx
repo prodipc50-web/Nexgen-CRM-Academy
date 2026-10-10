@@ -280,7 +280,7 @@ export const LogoCropResizeModal: React.FC<LogoCropResizeModalProps> = ({
     if (confirm('Are you sure you want to remove the custom uploaded logo and restore the official NexGen Brand Logo?')) {
       localStorage.removeItem('NEXGEN_OFFICE_ACADEMY_CUSTOM_LOGO');
       window.dispatchEvent(new Event('nexgen-logo-updated'));
-      setImageSrc('/logo.svg');
+      setImageSrc('/brand-logo.png');
       if (onResetLogo) onResetLogo();
       onClose();
     }

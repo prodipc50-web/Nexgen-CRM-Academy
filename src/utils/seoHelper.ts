@@ -19,7 +19,13 @@ export interface SeoMetadataPayload {
   ogDescription?: string;
   ogImage?: string;
   ogType?: string;
+  ogLocale?: string;
   twitterCard?: 'summary' | 'summary_large_image';
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
+  twitterSite?: string;
+  twitterCreator?: string;
   noIndex?: boolean;
   googleSiteVerification?: string;
   bingSiteVerification?: string;
@@ -121,9 +127,27 @@ export function getHomepageSeoMetadata(
   const keywords = seo?.keywords && seo.keywords.length > 0 ? seo.keywords : defaultKeywords;
 
   const canonicalUrl = `${baseUrl.replace(/\/+$/, '')}/`;
-  const ogTitle = seo?.ogTitle || title;
+  
+  // Resolve branding logo dynamically
+  const resolvedBrandLogo = cmsConfig.customLogoUrl || academySettings.customLogoUrl || '/brand-logo.png';
+  const shouldAutoSync = seo?.autoSyncWithBranding !== false;
+
+  // Dynamic OpenGraph metadata with branding fallback
+  const ogTitle = seo?.ogTitle || (shouldAutoSync ? `${instituteName} – Institute of IT & Freelancing Skills` : title);
   const ogDescription = seo?.ogDescription || metaDescription;
-  const ogImage = seo?.ogImageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200';
+  const ogImage = (shouldAutoSync && !seo?.ogImageUrl) 
+    ? (resolvedBrandLogo.startsWith('http') || resolvedBrandLogo.startsWith('data:') ? resolvedBrandLogo : `${baseUrl.replace(/\/+$/, '')}${resolvedBrandLogo.startsWith('/') ? '' : '/'}${resolvedBrandLogo}`)
+    : (seo?.ogImageUrl || resolvedBrandLogo);
+  const ogType = seo?.ogType || 'website';
+  const ogLocale = seo?.ogLocale || 'bn_BD';
+  const siteName = seo?.ogSiteName || instituteName;
+
+  // Dynamic Twitter / X Card metadata
+  const twitterCard = seo?.twitterCard || 'summary_large_image';
+  const twitterTitle = seo?.twitterTitle || ogTitle;
+  const twitterDescription = seo?.twitterDescription || ogDescription;
+  const twitterImage = seo?.twitterImage || ogImage;
+  const twitterSite = seo?.twitterHandle || '@nexgenacademybd';
 
   // Build JSON-LD Schemas
   const schemas: object[] = [];
@@ -171,14 +195,20 @@ export function getHomepageSeoMetadata(
     ogTitle,
     ogDescription,
     ogImage,
-    ogType: 'website',
-    twitterCard: 'summary_large_image',
+    ogType,
+    ogLocale,
+    twitterCard,
+    twitterTitle,
+    twitterDescription,
+    twitterImage,
+    twitterSite,
+    twitterCreator: twitterSite,
     noIndex: false,
     googleSiteVerification: seo?.googleSiteVerification || undefined,
     bingSiteVerification: seo?.bingSiteVerification || undefined,
     jsonLdSchemas: schemas,
     author: instituteName,
-    siteName: instituteName
+    siteName
   };
 }
 
@@ -283,7 +313,7 @@ export function getLocalBusinessSchema(
     alternateName: 'NCA Farmgate',
     url: baseUrl,
     hasMap: gbpUrl,
-    logo: `${baseUrl}/logo.svg`,
+    logo: `${baseUrl}/brand-logo.png`,
     image: cmsConfig.seo?.ogImageUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200',
     description: cmsConfig.seo?.metaDescription || 'Govt recognized premier IT & computer training center in Farmgate, Dhaka with 100% practical lab training.',
     telephone: phone,
@@ -598,20 +628,32 @@ export function applySeoMetadata(meta: SeoMetadataPayload): void {
   setMetaTag('name', 'geo.position', '23.7570;90.3887');
   setMetaTag('name', 'ICBM', '23.7570, 90.3887');
 
-  // Open Graph
+  // Open Graph (Facebook, WhatsApp, LinkedIn, Discord, Slack)
   if (meta.ogTitle || meta.title) setMetaTag('property', 'og:title', meta.ogTitle || meta.title);
   if (meta.ogDescription || meta.metaDescription) setMetaTag('property', 'og:description', meta.ogDescription || meta.metaDescription);
   if (meta.ogImage) setMetaTag('property', 'og:image', meta.ogImage);
   if (meta.canonicalUrl) setMetaTag('property', 'og:url', meta.canonicalUrl);
   setMetaTag('property', 'og:type', meta.ogType || 'website');
-  setMetaTag('property', 'og:locale', 'en_US');
+  setMetaTag('property', 'og:locale', meta.ogLocale || 'bn_BD');
   setMetaTag('property', 'og:site_name', meta.siteName || 'Academy');
 
-  // Twitter
+  // Twitter / X Social Cards
   setMetaTag('name', 'twitter:card', meta.twitterCard || 'summary_large_image');
-  if (meta.ogTitle || meta.title) setMetaTag('name', 'twitter:title', meta.ogTitle || meta.title);
-  if (meta.ogDescription || meta.metaDescription) setMetaTag('name', 'twitter:description', meta.ogDescription || meta.metaDescription);
-  if (meta.ogImage) setMetaTag('name', 'twitter:image', meta.ogImage);
+  if (meta.twitterTitle || meta.ogTitle || meta.title) {
+    setMetaTag('name', 'twitter:title', meta.twitterTitle || meta.ogTitle || meta.title);
+  }
+  if (meta.twitterDescription || meta.ogDescription || meta.metaDescription) {
+    setMetaTag('name', 'twitter:description', meta.twitterDescription || meta.ogDescription || meta.metaDescription);
+  }
+  if (meta.twitterImage || meta.ogImage) {
+    setMetaTag('name', 'twitter:image', meta.twitterImage || meta.ogImage || '');
+  }
+  if (meta.twitterSite) {
+    setMetaTag('name', 'twitter:site', meta.twitterSite);
+  }
+  if (meta.twitterCreator) {
+    setMetaTag('name', 'twitter:creator', meta.twitterCreator);
+  }
 
   // Canonical
   if (meta.canonicalUrl) {

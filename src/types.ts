@@ -1739,7 +1739,15 @@ export interface GlobalSeoConfig {
   ogTitle: string;
   ogDescription: string;
   ogImageUrl: string;
-  twitterHandle?: string;
+  ogType?: string; // "website" | "article" | "profile"
+  ogSiteName?: string; // e.g. "Nexgen Computer Academy"
+  ogLocale?: string; // "bn_BD" | "en_US"
+  twitterHandle?: string; // e.g. "@nexgenacademybd"
+  twitterCard?: 'summary' | 'summary_large_image';
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
+  autoSyncWithBranding?: boolean; // When true, social cards automatically synchronize when brand logo/name updates
   geoRegion?: string; // "BD-13" (Dhaka)
   geoPlacename?: string; // "Farmgate, Dhaka"
   geoPosition?: string; // "23.7527;90.3887"

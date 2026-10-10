@@ -147,6 +147,17 @@ export const CmsSocialTab: React.FC<CmsSocialTabProps> = ({ onSuccessToast }) =>
           </button>
         </div>
       </div>
+
+      {/* Banner linking to OpenGraph and Twitter Cards Studio */}
+      <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 border border-indigo-100 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center space-x-2.5 text-indigo-950">
+          <Share2 className="w-4 h-4 text-indigo-600 shrink-0" />
+          <span>
+            <strong>সোশ্যাল শেয়ার কার্ড প্রিভিউ নিয়ন্ত্রণ করতে চান?</strong> ফেসবুক, হোয়াটসঅ্যাপ ও এক্স/টুইটারে লিংক শেয়ার করার কার্ড এবং প্রিভিউ ইমেজ পরিবর্তন করতে <strong>SEO & Local Search Hub &rarr; OpenGraph & Twitter Cards</strong> সেকশন ব্যবহার করুন।
+          </span>
+        </div>
+      </div>
+
       {/* Facebook Ecosystem */}
       <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-2xs space-y-4">
         <div className="flex items-center space-x-2 text-blue-900 font-black text-sm pb-2 border-b border-blue-50">

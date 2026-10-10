@@ -6,7 +6,8 @@ import {
   getHomepageSeoMetadata,
   getLocalBusinessSchema,
   generateSitemapXml,
-  generateRobotsTxt
+  generateRobotsTxt,
+  applySeoMetadata
 } from '../../../utils/seoHelper';
 import {
   Search,
@@ -46,10 +47,13 @@ import {
   Link as LinkIcon,
   Play,
   Zap,
-  Save
+  Save,
+  Share2,
+  Upload
 } from 'lucide-react';
 import { trackMetaPixelEvent, DEFAULT_GA4_MEASUREMENT_ID } from '../../../utils/analyticsTracker';
 import { CmsSeoAuditSection } from './CmsSeoAuditSection';
+import { CmsSocialCardsSection } from './CmsSocialCardsSection';
 
 const RECOMMENDED_COURSE_KEYWORDS = [
   {
@@ -211,7 +215,7 @@ interface CmsSeoTabProps {
 }
 
 export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseEditor }) => {
-  const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings, courses, updateCourse } = useAcademy();
+  const { websiteCmsConfig, updateWebsiteCmsConfig, academySettings, courses, updateCourse, syncToCloudNow } = useAcademy();
 
   const currentSeo: GlobalSeoConfig = useMemo(() => {
     return (
@@ -320,7 +324,7 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
 
   const [saveFeedback, setSaveFeedback] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<
-    'gbp_nap' | 'ai_geo_seo' | 'serp_meta' | 'local_seo' | 'courses_seo' | 'analytics_hub' | 'seo_health' | 'schemas' | 'sitemap_robots'
+    'gbp_nap' | 'ai_geo_seo' | 'social_cards' | 'serp_meta' | 'local_seo' | 'courses_seo' | 'analytics_hub' | 'seo_health' | 'schemas' | 'sitemap_robots'
   >('gbp_nap');
 
   const [serpPreviewMode, setSerpPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
@@ -356,14 +360,32 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
     setTimeout(() => setCopiedSection(null), 2500);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     hasUserEditedRef.current = false;
     updateWebsiteCmsConfig({
       seo: formData
     });
+
+    // Dynamically apply to active document head right away
+    try {
+      const freshPayload = getHomepageSeoMetadata(academySettings, {
+        ...websiteCmsConfig,
+        seo: formData
+      });
+      applySeoMetadata(freshPayload);
+    } catch (err) {
+      console.warn('Failed to apply live metadata:', err);
+    }
+
+    if (syncToCloudNow) {
+      try {
+        await syncToCloudNow(true);
+      } catch {}
+    }
+
     setSaveFeedback(true);
     setTimeout(() => setSaveFeedback(false), 3000);
-    if (onSaveToast) onSaveToast('SEO & Google Business Profile Settings saved to database!');
+    if (onSaveToast) onSaveToast('SEO, OpenGraph & Twitter Settings saved & applied to live website!');
   };
 
   // NAP Data Computation
@@ -723,6 +745,7 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
         {[
           { id: 'gbp_nap', label: 'Google Business Profile & NAP', icon: MapPin },
           { id: 'ai_geo_seo', label: 'AI Search, GEO & llms.txt', icon: Sparkles },
+          { id: 'social_cards', label: 'OpenGraph & Twitter Cards', icon: Share2 },
           { id: 'serp_meta', label: 'Search Console & Meta', icon: Globe },
           { id: 'local_seo', label: 'Local SEO & Areas', icon: Compass },
           { id: 'courses_seo', label: 'Courses SEO & 301 Redirects', icon: Layers },
@@ -1328,6 +1351,16 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
         </div>
       )}
 
+      {/* SUBTAB: OPENGRAPH & TWITTER SOCIAL CARDS */}
+      {activeSubTab === 'social_cards' && (
+        <CmsSocialCardsSection
+          formData={formData}
+          setFormData={setFormData}
+          onSuccessToast={onSaveToast}
+          onSave={handleSave}
+        />
+      )}
+
       {/* SUBTAB 2: GOOGLE SEARCH CONSOLE & META TAGS */}
       {activeSubTab === 'serp_meta' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -1432,8 +1465,16 @@ export const CmsSeoTab: React.FC<CmsSeoTabProps> = ({ onSaveToast, onOpenCourseE
 
               {/* Social Share Card (OpenGraph / WhatsApp Link Preview) */}
               <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 space-y-3">
-                <div className="flex items-center space-x-2 text-indigo-900">
+                <div className="flex items-center justify-between text-indigo-900">
                   <span className="text-xs font-black uppercase tracking-wider">Social Share Card (WhatsApp & Facebook Link Preview)</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSubTab('social_cards')}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1 underline"
+                  >
+                    <span>Full Social Cards & Twitter Studio</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
