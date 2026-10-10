@@ -257,14 +257,74 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
     setLeadSubmittedSuccess(true);
   };
 
+  const [selectedLightboxPhoto, setSelectedLightboxPhoto] = useState<{ url: string; title: string } | null>(null);
+  const tabScrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (tabScrollRef.current) {
+      const activeBtn = tabScrollRef.current.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement;
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }, [activeTab]);
+
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 overflow-y-auto animate-in fade-in duration-150">
       <div
-        className="bg-white rounded-3xl max-w-5xl w-full shadow-2xl border border-slate-200 text-slate-800 my-auto max-h-[94vh] flex flex-col overflow-hidden"
+        className="bg-white rounded-none sm:rounded-3xl max-w-5xl w-full shadow-2xl border-0 sm:border sm:border-slate-200 text-slate-800 h-full sm:h-auto sm:max-h-[94vh] flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        {/* 1. Modal Top Bar */}
-        <div className="px-6 py-4 bg-white text-slate-900 flex items-center justify-between shrink-0 border-b border-slate-200">
+        {/* 1. Modal Top Bar - Fully Responsive Mobile-First Layout */}
+        {/* Mobile Header (< sm screens): Two-tier layout so title NEVER gets squeezed or truncated */}
+        <div className="sm:hidden px-4 py-3 bg-white text-slate-900 border-b border-slate-200 shrink-0 space-y-1.5 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 min-w-0">
+              <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200/80 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0">
+                {course.category || 'Professional Course'}
+              </span>
+              {course.code && (
+                <span className="text-[10px] text-slate-500 font-mono truncate">
+                  #{course.code}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center space-x-1 shrink-0">
+              <button
+                type="button"
+                onClick={handleShareLink}
+                className="min-w-[36px] min-h-[36px] p-2 bg-slate-100 active:bg-slate-200 text-slate-700 rounded-xl border border-slate-200 transition-colors flex items-center justify-center cursor-pointer"
+                title="Share or Copy Link"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenLandingPageDirect}
+                className="min-w-[36px] min-h-[36px] p-2 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-xl shadow-xs flex items-center justify-center cursor-pointer"
+                title="Open full dedicated landing page"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="min-w-[36px] min-h-[36px] p-2 text-slate-500 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          <h3 className="font-black text-sm text-slate-900 leading-snug break-words">
+            {course.name}
+          </h3>
+        </div>
+
+        {/* Desktop Header (>= sm screens) */}
+        <div className="hidden sm:flex px-6 py-4 bg-white text-slate-900 items-center justify-between shrink-0 border-b border-slate-200">
           <div className="flex items-center space-x-3 min-w-0">
             <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200/80 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0">
               {course.category || 'Professional Course'}
@@ -272,16 +332,16 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
             <h3 className="font-black text-base sm:text-lg text-slate-900 truncate">
               {course.name}
             </h3>
-            <span className="hidden sm:inline-block text-[11px] text-slate-500 font-mono">
+            <span className="text-[11px] text-slate-500 font-mono shrink-0">
               Code: {course.code}
             </span>
           </div>
 
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+          <div className="flex items-center space-x-2 shrink-0">
             <button
               type="button"
               onClick={handleShareWhatsApp}
-              className="hidden sm:inline-flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-200 transition-colors cursor-pointer"
+              className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-200 transition-colors cursor-pointer"
               title="Share on WhatsApp"
             >
               <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
@@ -294,12 +354,12 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
               title="Share or Copy Link"
             >
               <Share2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{copiedLink ? 'Copied!' : 'Share'}</span>
+              <span>{copiedLink ? 'Copied!' : 'Share'}</span>
             </button>
             <button
               type="button"
               onClick={handleOpenLandingPageDirect}
-              className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white text-xs font-black rounded-xl shadow-md transition-all active:scale-95"
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white text-xs font-black rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
               title="Open full dedicated landing page"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -316,90 +376,101 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
         </div>
 
         {/* 2. Key Metrics Bar */}
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-3 shrink-0 grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
-          <div className="space-y-0.5">
-            <span className="text-slate-400 text-[10px] uppercase font-bold block flex items-center space-x-1">
-              <Clock className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Duration</span>
-            </span>
-            <span className="font-black text-slate-900 text-sm">{course.duration}</span>
-          </div>
+        <div className="bg-slate-50/90 border-b border-slate-200 px-3.5 sm:px-6 py-2.5 sm:py-3 shrink-0">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 text-xs">
+            <div className="space-y-0.5 bg-white sm:bg-transparent p-2 sm:p-0 rounded-xl sm:rounded-none border sm:border-0 border-slate-200/80 shadow-2xs sm:shadow-none">
+              <span className="text-slate-400 text-[10px] uppercase font-bold flex items-center space-x-1">
+                <Clock className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                <span>Duration</span>
+              </span>
+              <span className="font-black text-slate-900 text-xs sm:text-sm block truncate">{course.duration}</span>
+            </div>
 
-          <div className="space-y-0.5">
-            <span className="text-slate-400 text-[10px] uppercase font-bold block flex items-center space-x-1">
-              <BookOpen className="w-3.5 h-3.5 text-amber-600" />
-              <span>Total Classes</span>
-            </span>
-            <span className="font-black text-slate-900 text-sm">{course.totalClasses || 36} Sessions</span>
-          </div>
+            <div className="space-y-0.5 bg-white sm:bg-transparent p-2 sm:p-0 rounded-xl sm:rounded-none border sm:border-0 border-slate-200/80 shadow-2xs sm:shadow-none">
+              <span className="text-slate-400 text-[10px] uppercase font-bold flex items-center space-x-1">
+                <BookOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span>Total Classes</span>
+              </span>
+              <span className="font-black text-slate-900 text-xs sm:text-sm block truncate">{course.totalClasses || 36} Sessions</span>
+            </div>
 
-          <div className="space-y-0.5">
-            <span className="text-slate-400 text-[10px] uppercase font-bold block flex items-center space-x-1">
-              <Award className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Certificate</span>
-            </span>
-            <span className="font-black text-emerald-700 text-sm">
-              {(landingConfig as any).certificateBadge || 'Govt. Verified'}
-            </span>
-          </div>
+            <div className="space-y-0.5 bg-white sm:bg-transparent p-2 sm:p-0 rounded-xl sm:rounded-none border sm:border-0 border-slate-200/80 shadow-2xs sm:shadow-none">
+              <span className="text-slate-400 text-[10px] uppercase font-bold flex items-center space-x-1">
+                <Award className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Certificate</span>
+              </span>
+              <span className="font-black text-emerald-700 text-xs sm:text-sm block truncate">
+                {(landingConfig as any).certificateBadge || 'Govt. Verified'}
+              </span>
+            </div>
 
-          <div className="space-y-0.5">
-            <span className="text-slate-400 text-[10px] uppercase font-bold block flex items-center space-x-1">
-              <Laptop className="w-3.5 h-3.5 text-cyan-600" />
-              <span>Learning Mode</span>
-            </span>
-            <span className="font-black text-cyan-700 text-sm">
-              {course.courseType || course.deliveryMode || 'Offline & Live'}
-            </span>
-          </div>
+            <div className="space-y-0.5 bg-white sm:bg-transparent p-2 sm:p-0 rounded-xl sm:rounded-none border sm:border-0 border-slate-200/80 shadow-2xs sm:shadow-none">
+              <span className="text-slate-400 text-[10px] uppercase font-bold flex items-center space-x-1">
+                <Laptop className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                <span>Learning Mode</span>
+              </span>
+              <span className="font-black text-cyan-700 text-xs sm:text-sm block truncate">
+                {course.courseType || course.deliveryMode || 'Offline & Live'}
+              </span>
+            </div>
 
-          <div className="col-span-2 sm:col-span-1 space-y-0.5">
-            <span className="text-slate-400 text-[10px] uppercase font-bold block flex items-center space-x-1">
-              <GraduationCap className="w-3.5 h-3.5 text-rose-600" />
-              <span>Course Fee</span>
-            </span>
-            <div className="flex items-baseline space-x-1.5">
-              <span className="font-black text-indigo-700 text-base">৳{offerFee.toLocaleString()}</span>
-              {discountAmount > 0 && (
-                <span className="text-[11px] text-slate-400 line-through">৳{regularFee.toLocaleString()}</span>
-              )}
+            <div className="col-span-2 sm:col-span-1 space-y-0.5 bg-indigo-50/70 sm:bg-transparent p-2 sm:p-0 rounded-xl sm:rounded-none border sm:border-0 border-indigo-200/70 flex sm:block items-center justify-between shadow-2xs sm:shadow-none">
+              <span className="text-indigo-900 sm:text-slate-400 text-[10px] uppercase font-bold flex items-center space-x-1">
+                <GraduationCap className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                <span>Course Fee</span>
+              </span>
+              <div className="flex items-baseline space-x-1.5">
+                <span className="font-black text-indigo-700 text-xs sm:text-base">৳{offerFee.toLocaleString()}</span>
+                {discountAmount > 0 && (
+                  <span className="text-[10px] sm:text-[11px] text-slate-400 line-through">৳{regularFee.toLocaleString()}</span>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 3. Navigation Tabs */}
-        <div className="flex items-center space-x-1 px-6 border-b border-slate-200 bg-white overflow-x-auto shrink-0 scrollbar-none py-1">
-          {[
-            { id: 'overview', label: 'Overview & Highlights', icon: BookOpen },
-            { id: 'curriculum', label: `Curriculum (${displayModules.length} Modules)`, icon: Layers },
-            { id: 'schedules', label: 'Preferred Schedules', icon: Calendar },
-            { id: 'trainers', label: `Mentors (${effectiveTrainers.length})`, icon: Users },
-            { id: 'reviews', label: `Reviews (${displayReviews.length})`, icon: Star },
-            { id: 'gallery', label: 'Lab & Campus Gallery', icon: ImageIcon },
-            { id: 'faqs', label: 'FAQs', icon: HelpCircle }
-          ].map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-1.5 px-3 py-2.5 text-xs font-bold whitespace-nowrap transition-all border-b-2 ${
-                  isActive
-                    ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50 rounded-t-xl'
-                    : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-t-xl'
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
+        {/* 3. Navigation Tabs with Scroll Snap & Indicator */}
+        <div className="relative border-b border-slate-200 bg-white shrink-0">
+          <div
+            ref={tabScrollRef}
+            className="flex items-center space-x-1 px-3 sm:px-6 overflow-x-auto scrollbar-none py-1.5 scroll-smooth"
+          >
+            {[
+              { id: 'overview', shortLabel: 'Overview', label: 'Overview & Highlights', icon: BookOpen },
+              { id: 'curriculum', shortLabel: `Curriculum (${displayModules.length})`, label: `Curriculum (${displayModules.length} Modules)`, icon: Layers },
+              { id: 'schedules', shortLabel: 'Schedules', label: 'Preferred Schedules', icon: Calendar },
+              { id: 'trainers', shortLabel: `Mentors (${effectiveTrainers.length})`, label: `Mentors (${effectiveTrainers.length})`, icon: Users },
+              { id: 'reviews', shortLabel: `Reviews (${displayReviews.length})`, label: `Reviews (${displayReviews.length})`, icon: Star },
+              { id: 'gallery', shortLabel: 'Campus Lab', label: 'Lab & Campus Gallery', icon: ImageIcon },
+              { id: 'faqs', shortLabel: 'FAQs', label: 'FAQs', icon: HelpCircle }
+            ].map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  data-tab={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center space-x-1.5 px-3 py-2 text-xs font-bold whitespace-nowrap transition-all border-b-2 shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'border-indigo-600 text-indigo-600 bg-indigo-50/70 rounded-t-xl font-black'
+                      : 'border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-t-xl'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          {/* Subtle scroll indicator fade on mobile right edge */}
+          <div className="sm:hidden absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none" />
         </div>
 
         {/* 4. Modal Scrollable Content */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6 text-slate-700 text-xs">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6 text-slate-700 text-xs">
           {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
@@ -539,16 +610,16 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
               </div>
 
               {/* DYNAMIC CURRICULUM & SYLLABUS DOWNLOAD BANNER (CMS DRIVEN) */}
-              <div className="p-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+              <div className="p-3.5 sm:p-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs">
                 <div className="flex items-center space-x-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs uppercase">
                     {course.curriculumFileType || 'PDF'}
                   </div>
-                  <div className="min-w-0">
-                    <h5 className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                  <div className="min-w-0 flex-1">
+                    <h5 className="font-bold text-slate-900 text-xs sm:text-sm leading-snug">
                       {course.curriculumFileName || `${course.name} অফিসিয়াল কারিকুলাম ও সিলেবাস`}
                     </h5>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 leading-normal mt-0.5">
                       {websiteCmsConfig?.syllabusDownloadConfig?.modalSubtitle || 'সম্পূর্ণ কারিকুলাম, ক্লাস শিডিউল ও প্রজেক্টের তালিকা ডাউনলোড করতে ক্লিক করুন'}
                     </p>
                   </div>
@@ -556,7 +627,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsSyllabusModalOpen(true)}
-                  className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-black rounded-xl shadow-xs transition-colors flex items-center space-x-1.5 shrink-0 self-stretch sm:self-auto justify-center cursor-pointer active:scale-98"
+                  className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-black rounded-xl shadow-xs transition-colors flex items-center space-x-1.5 shrink-0 justify-center cursor-pointer active:scale-98"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>সিলেবাস ডাউনলোড করুন</span>
@@ -576,32 +647,32 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setExpandedModuleIndex(isExpanded ? null : idx)}
-                        className="w-full p-4 text-left flex items-center justify-between gap-4"
+                        className="w-full p-3.5 sm:p-4 text-left flex items-start sm:items-center justify-between gap-3"
                       >
-                        <div className="flex items-center space-x-3 min-w-0">
-                          <span className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0">
+                        <div className="flex items-start sm:items-center space-x-3 min-w-0 flex-1">
+                          <span className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5 sm:mt-0">
                             {idx + 1}
                           </span>
-                          <div className="min-w-0">
-                            <h5 className="font-black text-slate-900 text-xs sm:text-sm truncate">
+                          <div className="min-w-0 flex-1">
+                            <h5 className="font-black text-slate-900 text-xs sm:text-sm leading-snug break-words">
                               {mod.moduleName}
                             </h5>
                             {mod.subtitle && (
-                              <p className="text-[11px] text-slate-500 truncate">{mod.subtitle}</p>
+                              <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5 break-words">{mod.subtitle}</p>
                             )}
                           </div>
                         </div>
 
-                        <div className="flex items-center space-x-3 shrink-0">
+                        <div className="flex items-center space-x-2 sm:space-x-3 shrink-0 pt-0.5 sm:pt-0">
                           {mod.estimatedClasses && (
-                            <span className="px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-mono font-bold">
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-mono font-bold whitespace-nowrap">
                               {mod.estimatedClasses}
                             </span>
                           )}
                           {isExpanded ? (
-                            <ChevronUp className="w-4 h-4 text-slate-400" />
+                            <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
                           ) : (
-                            <ChevronDown className="w-4 h-4 text-slate-400" />
+                            <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
                           )}
                         </div>
                       </button>
@@ -825,12 +896,16 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
             <div className="space-y-4">
               <div>
                 <h4 className="font-black text-slate-900 text-sm">ক্যাম্পাস ও আধুনিক কম্পিউটার ল্যাব</h4>
-                <p className="text-[11px] text-slate-500">শীতাতপ নিয়ন্ত্রিত আধুনিক ল্যাবে ডেডিকেটেড পিসি ও প্র্যাকটিক্যাল পরিবেশ</p>
+                <p className="text-[11px] text-slate-500">শীতাতপ নিয়ন্ত্রিত আধুনিক ল্যাবে ডেডিকেটেড পিসি ও প্র্যাকটিক্যাল পরিবেশ (ছবি বড় করে দেখতে ট্যাপ করুন)</p>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {displayGallery.map((img, idx) => (
-                  <div key={img.id || idx} className="group relative rounded-2xl overflow-hidden aspect-video bg-slate-100 border border-slate-200">
+                  <div
+                    key={img.id || idx}
+                    onClick={() => setSelectedLightboxPhoto({ url: img.url, title: img.title })}
+                    className="group relative rounded-2xl overflow-hidden aspect-video bg-slate-100 border border-slate-200 cursor-pointer active:scale-98 transition-transform"
+                  >
                     <img
                       src={img.url}
                       alt={img.title}
@@ -892,14 +967,75 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
           )}
         </div>
 
-        {/* 5. Modal Footer Action Bar */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center space-x-2 text-xs text-slate-600">
-            <Phone className="w-4 h-4 text-indigo-600" />
-            <span>ভর্তি হেল্পলাইন: <strong>{landingConfig.campusPhone || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || (websiteCmsConfig as any)?.contactInfo?.phone || (websiteCmsConfig as any)?.contactPhone || '০১৭৯৮-৪৪৪৪৪৪'}</strong></span>
+        {/* 5. Modal Footer Action Bar - Fully Optimized for Mobile & Desktop */}
+        {/* Mobile View (< sm screens): High converting sticky bottom action bar with visible price, 1-tap call, 1-tap WhatsApp, 1-tap Enroll */}
+        <div className="sm:hidden px-3.5 py-2.5 bg-white border-t border-slate-200/90 shrink-0 shadow-lg space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            {/* Price Preview */}
+            <div className="min-w-0 pr-1">
+              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wide leading-none">ভর্তি ফি</span>
+              <div className="flex items-baseline space-x-1.5 mt-0.5">
+                <span className="font-black text-indigo-700 text-base leading-tight">৳{offerFee.toLocaleString()}</span>
+                {discountAmount > 0 && (
+                  <span className="text-[10px] text-slate-400 line-through">৳{regularFee.toLocaleString()}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Action CTAs */}
+            <div className="flex items-center space-x-1.5 shrink-0 flex-1 justify-end">
+              <a
+                href={`tel:${(landingConfig.campusPhone || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01798444444').replace(/[^0-9]/g, '')}`}
+                className="min-w-[40px] min-h-[40px] p-2 bg-amber-500 active:bg-amber-600 text-white rounded-xl shadow-2xs flex items-center justify-center transition-colors"
+                title="সরাসরি কল করুন"
+              >
+                <Phone className="w-4 h-4" />
+              </a>
+
+              <a
+                href={getWhatsAppDirectUrl(
+                  landingConfig.customWhatsAppNumber || websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01798444444',
+                  landingConfig.customWhatsAppMessage || `Hello ${academySettings?.instituteName || 'Academy'}! I want to enroll in "${course.name}".`
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="min-w-[40px] min-h-[40px] p-2 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl shadow-2xs flex items-center justify-center transition-colors"
+                title="WhatsApp এ কথা বলুন"
+              >
+                <MessageCircle className="w-4 h-4" />
+              </a>
+
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenEnroll(course);
+                }}
+                className="flex-1 min-h-[40px] py-2 px-3 bg-gradient-to-r from-indigo-600 to-indigo-700 active:from-indigo-700 active:to-indigo-800 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center space-x-1 whitespace-nowrap cursor-pointer"
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                <span>ভর্তি আবেদন</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop View (>= sm screens) */}
+        <div className="hidden sm:flex px-6 py-3.5 bg-slate-50 border-t border-slate-200 items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center space-x-2 text-xs text-slate-600 w-auto justify-start">
+            <Phone className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+            <span className="text-xs">
+              ভর্তি হেল্পলাইন:{' '}
+              <a
+                href={`tel:${(landingConfig.campusPhone || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01798444444').replace(/[^0-9]/g, '')}`}
+                className="text-slate-900 font-bold hover:text-indigo-600 transition-colors"
+              >
+                {landingConfig.campusPhone || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || (websiteCmsConfig as any)?.contactInfo?.phone || (websiteCmsConfig as any)?.contactPhone || '০১৭৯৮-৪৪৪৪৪৪'}
+              </a>
+            </span>
           </div>
 
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="flex items-center space-x-2 w-auto">
             <a
               href={getWhatsAppDirectUrl(
                 landingConfig.customWhatsAppNumber || websiteCmsConfig?.marketing?.floatingWhatsAppNumber || academySettings?.primarySupportPhone || academySettings?.helplines?.[0] || '01798444444',
@@ -907,7 +1043,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-1.5"
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center space-x-1.5"
             >
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp</span>
@@ -919,7 +1055,7 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
                 onClose();
                 onOpenEnroll(course);
               }}
-              className="flex-1 sm:flex-initial px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center space-x-1.5"
+              className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-black text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center space-x-1.5 cursor-pointer"
             >
               <Zap className="w-4 h-4 text-amber-300" />
               <span>এখনই ভর্তি হোন</span>
@@ -927,6 +1063,37 @@ export const CourseDetailsModal: React.FC<CourseDetailsModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Gallery Lightbox Zoom Modal */}
+      {selectedLightboxPhoto && (
+        <div
+          onClick={() => setSelectedLightboxPhoto(null)}
+          className="fixed inset-0 z-60 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="relative max-w-3xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl p-3 sm:p-4 space-y-3"
+          >
+            <div className="flex items-center justify-between px-2 pt-1">
+              <h5 className="font-black text-slate-900 text-sm">{selectedLightboxPhoto.title}</h5>
+              <button
+                type="button"
+                onClick={() => setSelectedLightboxPhoto(null)}
+                className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="rounded-2xl overflow-hidden bg-slate-100 max-h-[75vh] flex items-center justify-center">
+              <img
+                src={selectedLightboxPhoto.url}
+                alt={selectedLightboxPhoto.title}
+                className="w-full h-auto max-h-[75vh] object-contain rounded-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Dynamic Syllabus Download Lead Magnet Modal */}
       <SyllabusDownloadModal

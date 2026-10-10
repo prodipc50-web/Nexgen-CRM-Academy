@@ -3017,7 +3017,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             target="_blank"
             rel="noreferrer"
             onClick={handleWhatsAppClick}
-            className="min-h-[40px] py-1.5 px-1 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-2xs flex items-center justify-center space-x-1 text-[11px] font-bold whitespace-nowrap"
+            className="min-h-[44px] py-2 px-1 bg-emerald-600 active:bg-emerald-700 text-white rounded-xl active:scale-95 shadow-2xs flex items-center justify-center space-x-1 text-[11px] font-bold whitespace-nowrap"
           >
             <MessageCircle className="w-3.5 h-3.5 fill-white shrink-0" />
             <span>WhatsApp</span>
@@ -3029,7 +3029,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
             target="_blank"
             rel="noreferrer"
             onClick={handleMessengerClick}
-            className="min-h-[40px] py-1.5 px-1 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-2xs flex items-center justify-center space-x-1 text-[11px] font-bold whitespace-nowrap"
+            className="min-h-[44px] py-2 px-1 bg-blue-600 active:bg-blue-700 text-white rounded-xl active:scale-95 shadow-2xs flex items-center justify-center space-x-1 text-[11px] font-bold whitespace-nowrap"
           >
             <Smartphone className="w-3.5 h-3.5 shrink-0" />
             <span>Messenger</span>
@@ -3038,7 +3038,7 @@ export const MasterCourseLandingPageView: React.FC<MasterCourseLandingPageViewPr
           {/* Mobile Admission */}
           <button
             onClick={() => setIsAdmissionOpen(true)}
-            className="min-h-[40px] py-1.5 px-1 bg-indigo-600 active:bg-indigo-700 text-white font-bold text-[11px] rounded-xl shadow-2xs active:scale-95 flex items-center justify-center space-x-1 cursor-pointer whitespace-nowrap"
+            className="min-h-[44px] py-2 px-1 bg-indigo-600 active:bg-indigo-700 text-white font-bold text-[11px] rounded-xl shadow-2xs active:scale-95 flex items-center justify-center space-x-1 cursor-pointer whitespace-nowrap"
           >
             <GraduationCap className="w-3.5 h-3.5 shrink-0" />
             <span>ভর্তি আবেদন</span>

@@ -134,14 +134,14 @@ export const NexgenOnlineCourses: React.FC<UniqueItOnlineCoursesProps> = ({
                     <button
                       type="button"
                       onClick={() => onSelectCourseForAdmission(c)}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-black shadow-2xs transition-all cursor-pointer text-center active:scale-95"
+                      className="w-full min-h-[44px] py-2.5 rounded-xl bg-gradient-to-r from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white text-xs font-black shadow-2xs transition-all cursor-pointer text-center active:scale-95 flex items-center justify-center"
                     >
                       ভর্তি আবেদন
                     </button>
                     <button
                       type="button"
                       onClick={() => onSelectCourseForDetails(c)}
-                      className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer text-center active:scale-95"
+                      className="w-full min-h-[44px] py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer text-center active:scale-95 flex items-center justify-center"
                     >
                       সিলেবাস দেখুন
                     </button>

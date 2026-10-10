@@ -76,21 +76,21 @@ export const CourseFeeInstallmentCalculatorModal: React.FC<CourseFeeInstallmentC
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-xl text-slate-800 shadow-2xl overflow-hidden relative my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl w-full max-w-xl text-slate-800 shadow-2xl overflow-hidden relative my-auto max-h-[96vh] flex flex-col">
         
         {/* Header */}
-        <div className="p-5 sm:p-6 bg-white border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-200/80">
-              <Calculator className="w-5 h-5" />
+        <div className="p-4 sm:p-6 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
+          <div className="flex items-center space-x-3 min-w-0 pr-2">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-200/80 shrink-0">
+              <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-lg font-black text-slate-900 leading-snug truncate sm:whitespace-normal">
                 সহজ কিস্তি ও ফি ক্যালকুলেটর (Easy EMI)
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                বিকাশ, নগদ ও ব্যাংকে ০% সুদে সুবিধাজনক কিস্তিতে ভর্তির হিসাব
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium truncate sm:whitespace-normal">
+                বিকাশ, নগদ ও ব্যাংকে ০% সুদে সুবিধাজনক কিস্তির হিসাব
               </p>
             </div>
           </div>
@@ -98,14 +98,14 @@ export const CourseFeeInstallmentCalculatorModal: React.FC<CourseFeeInstallmentC
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer"
+            className="min-w-[36px] min-h-[36px] p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 sm:p-6 space-y-5">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
           {/* Select Course Dropdown */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700">
@@ -268,11 +268,11 @@ export const CourseFeeInstallmentCalculatorModal: React.FC<CourseFeeInstallmentC
         </div>
 
         {/* Footer Actions */}
-        <div className="p-5 sm:p-6 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-colors cursor-pointer text-center"
           >
             বাতিল করুন
           </button>
@@ -280,11 +280,11 @@ export const CourseFeeInstallmentCalculatorModal: React.FC<CourseFeeInstallmentC
           <button
             type="button"
             onClick={handleApply}
-            className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-98"
+            className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-98 text-center"
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 shrink-0" />
             <span>এই কিস্তিতে অনলাইন ভর্তি ফরম পূরণ করুন</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
 

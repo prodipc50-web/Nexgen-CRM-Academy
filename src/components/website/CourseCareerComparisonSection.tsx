@@ -118,13 +118,13 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
             </div>
 
             {/* Selectors */}
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <div className="flex items-center space-x-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
-                <span className="text-xs font-bold text-indigo-700">কোর্স ১:</span>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+              <div className="flex items-center space-x-1.5 bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-2xs flex-1 sm:flex-initial">
+                <span className="text-xs font-bold text-indigo-700 shrink-0">কোর্স ১:</span>
                 <select
                   value={courseAId}
                   onChange={e => setCourseAId(e.target.value)}
-                  className="bg-transparent text-xs text-slate-800 font-semibold outline-none cursor-pointer max-w-[170px] truncate"
+                  className="bg-transparent text-xs text-slate-800 font-semibold outline-none cursor-pointer w-full sm:max-w-[180px] truncate"
                 >
                   {activeCourses.map(c => (
                     <option key={c.id} value={c.id} className="bg-white text-slate-900">
@@ -134,14 +134,14 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                 </select>
               </div>
 
-              <span className="text-xs font-black text-slate-400">VS</span>
+              <span className="text-xs font-black text-slate-400 text-center sm:text-left my-auto">VS</span>
 
-              <div className="flex items-center space-x-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
-                <span className="text-xs font-bold text-amber-700">কোর্স ২:</span>
+              <div className="flex items-center space-x-1.5 bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-2xs flex-1 sm:flex-initial">
+                <span className="text-xs font-bold text-amber-700 shrink-0">কোর্স ২:</span>
                 <select
                   value={courseBId}
                   onChange={e => setCourseBId(e.target.value)}
-                  className="bg-transparent text-xs text-slate-800 font-semibold outline-none cursor-pointer max-w-[170px] truncate"
+                  className="bg-transparent text-xs text-slate-800 font-semibold outline-none cursor-pointer w-full sm:max-w-[180px] truncate"
                 >
                   {activeCourses.map(c => (
                     <option key={c.id} value={c.id} className="bg-white text-slate-900">
@@ -177,34 +177,34 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                   </p>
 
                   <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">মেয়াদ ও মোট ক্লাস:</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">মেয়াদ ও মোট ক্লাস:</span>
                       <span className="font-bold text-slate-900 text-right">{courseA.duration} ({courseA.totalClasses || 24} Classes)</span>
                     </div>
 
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">শেখানো সফটওয়্যার / টুলস:</span>
-                      <span className="font-bold text-indigo-600 text-right max-w-[200px] truncate">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">শেখানো সফটওয়্যার / টুলস:</span>
+                      <span className="font-bold text-indigo-600 text-right max-w-[65%] leading-tight">
                         {(courseA as any).toolsCovered?.join(', ') || courseA.curriculumHighlights?.slice(0, 3).join(', ') || 'Practical Lab Tools'}
                       </span>
                     </div>
 
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">যেসব পদে চাকরি / ক্যারিয়ার:</span>
-                      <span className="font-bold text-emerald-700 text-right max-w-[200px] truncate">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">যেসব পদে চাকরি / ক্যারিয়ার:</span>
+                      <span className="font-bold text-emerald-700 text-right max-w-[65%] leading-tight">
                         {(courseA as any).careerRoles?.join(', ') || 'Corporate / Freelance Role'}
                       </span>
                     </div>
 
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">মার্কেট স্যালারি রেঞ্জ:</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">মার্কেট স্যালারি রেঞ্জ:</span>
                       <span className="font-bold text-slate-900 text-right font-mono">
                         {(courseA as any).estimatedSalaryRange || '৳২৫,০০০ - ৳৬৫,০০০ / মাস'}
                       </span>
                     </div>
 
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">সনদপত্রের মান:</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">সনদপত্রের মান:</span>
                       <span className="font-bold text-slate-800 text-right">
                         {(courseA as any).certificationType || 'Govt Verifiable QR Certificate'}
                       </span>
@@ -217,7 +217,7 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                     <button
                       type="button"
                       onClick={() => onExploreCourseDetails(courseA)}
-                      className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition cursor-pointer"
+                      className="flex-1 min-h-[42px] py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs border border-slate-200 transition cursor-pointer"
                     >
                       সিলেবাস দেখুন
                     </button>
@@ -226,7 +226,7 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                     <button
                       type="button"
                       onClick={() => onSelectCourseForAdmission(courseA)}
-                      className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-xs cursor-pointer"
+                      className="flex-1 min-h-[42px] py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs transition shadow-xs cursor-pointer"
                     >
                       ভর্তি আবেদন
                     </button>
@@ -254,34 +254,34 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                   </p>
 
                   <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">মেয়াদ ও মোট ক্লাস:</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">মেয়াদ ও মোট ক্লাস:</span>
                       <span className="font-bold text-slate-900 text-right">{courseB.duration} ({courseB.totalClasses || 24} Classes)</span>
                     </div>
 
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">শেখানো সফটওয়্যার / টুলস:</span>
-                      <span className="font-bold text-indigo-600 text-right max-w-[200px] truncate">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">শেখানো সফটওয়্যার / টুলস:</span>
+                      <span className="font-bold text-indigo-600 text-right max-w-[65%] leading-tight">
                         {(courseB as any).toolsCovered?.join(', ') || courseB.curriculumHighlights?.slice(0, 3).join(', ') || 'Practical Lab Tools'}
                       </span>
                     </div>
 
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">যেসব পদে চাকরি / ক্যারিয়ার:</span>
-                      <span className="font-bold text-emerald-700 text-right max-w-[200px] truncate">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">যেসব পদে চাকরি / ক্যারিয়ার:</span>
+                      <span className="font-bold text-emerald-700 text-right max-w-[65%] leading-tight">
                         {(courseB as any).careerRoles?.join(', ') || 'Corporate / Freelance Role'}
                       </span>
                     </div>
 
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">মার্কেট স্যালারি রেঞ্জ:</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">মার্কেট স্যালারি রেঞ্জ:</span>
                       <span className="font-bold text-slate-900 text-right font-mono">
                         {(courseB as any).estimatedSalaryRange || '৳২৫,০০০ - ৳৬৫,০০০ / মাস'}
                       </span>
                     </div>
 
-                    <div className="flex items-start justify-between">
-                      <span className="text-slate-500">সনদপত্রের মান:</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-slate-500 shrink-0">সনদপত্রের মান:</span>
                       <span className="font-bold text-slate-800 text-right">
                         {(courseB as any).certificationType || 'Govt Verifiable QR Certificate'}
                       </span>
@@ -294,7 +294,7 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                     <button
                       type="button"
                       onClick={() => onExploreCourseDetails(courseB)}
-                      className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition cursor-pointer"
+                      className="flex-1 min-h-[42px] py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs border border-slate-200 transition cursor-pointer"
                     >
                       সিলেবাস দেখুন
                     </button>
@@ -303,7 +303,7 @@ export const CourseCareerComparisonSection: React.FC<CourseCareerComparisonSecti
                     <button
                       type="button"
                       onClick={() => onSelectCourseForAdmission(courseB)}
-                      className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-xs cursor-pointer"
+                      className="flex-1 min-h-[42px] py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs transition shadow-xs cursor-pointer"
                     >
                       ভর্তি আবেদন
                     </button>

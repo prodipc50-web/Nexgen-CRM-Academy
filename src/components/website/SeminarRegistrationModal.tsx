@@ -176,20 +176,20 @@ export const SeminarRegistrationModal: React.FC<SeminarRegistrationModalProps> =
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150 overflow-y-auto">
       <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full shadow-2xl border border-slate-100 space-y-4 text-slate-800 my-auto">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div className="flex items-center space-x-2.5">
-            <NexgenLogo variant="crest" size={36} className="shrink-0 drop-shadow-xs" />
-            <div>
-              <h3 className="font-black text-slate-900 text-base">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
+          <div className="flex items-center space-x-2.5 min-w-0">
+            <NexgenLogo variant="crest" size={34} className="shrink-0 drop-shadow-xs" />
+            <div className="min-w-0">
+              <h3 className="font-black text-slate-900 text-sm sm:text-base leading-snug">
                 Free Seminar Registration
               </h3>
-              <p className="text-xs text-slate-500">Book your seat & get free entry pass</p>
+              <p className="text-[11px] sm:text-xs text-slate-500 leading-normal">Book your seat & get free entry pass</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100"
+            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 shrink-0 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
